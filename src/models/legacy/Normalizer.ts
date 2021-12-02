@@ -99,8 +99,8 @@ export class Normalizer {
       return body;
     }
     const typed = body as LegacyTransformedPayload;
-    if (typed.type === 'ArrayBuffer' || (typed.type === 'Buffer' || typeof Buffer === 'undefined')) {
-      const { buffer } = new Uint16Array(typed.data);
+    if (typed.type === 'ArrayBuffer' || (typed.type === 'Buffer' && !hasBuffer)) {
+      const { buffer } = new Uint8Array(typed.data);
       return buffer;
     }
     if (hasBuffer && typed.type === 'Buffer') {

@@ -6,6 +6,8 @@ import { Response as LegacyResponse } from './legacy/request/ArcResponse';
 import { PayloadSerializer } from '../lib/transformers/PayloadSerializer';
 import { Normalizer } from './legacy/Normalizer';
 
+export { Kind };
+
 /**
  * An HTTP response object.
  */
@@ -146,5 +148,16 @@ export class ArcResponse extends HttpResponse {
       return true;
     }
     return false;
+  }
+
+  /**
+   * Creates the RequestTime object from the passed object.
+   */
+  setTimings(timings: IRequestTime): void {
+    this.timings = new RequestTime(timings);
+  }
+
+  setAuth(auth: IResponseAuthorization): void {
+    this.auth = new ResponseAuthorization(auth);
   }
 }

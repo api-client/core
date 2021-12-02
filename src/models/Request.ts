@@ -16,6 +16,9 @@ import { PayloadSerializer } from '../lib/transformers/PayloadSerializer';
 import { Normalizer } from './legacy/Normalizer';
 
 export const Kind = 'ARC#Request';
+export const createdSymbol = Symbol('created');
+export const updatedSymbol = Symbol('updated');
+export const midnightSymbol = Symbol('midnight');
 
 /**
  * The definition of a request object that functions inside ARC
@@ -72,7 +75,10 @@ export interface IRequest {
 }
 
 export class Request {
-  kind = '';
+  [createdSymbol]: number;
+  [updatedSymbol]: number;
+  [midnightSymbol]: number;
+  kind = Kind;
   /**
    * The basic information about the project.
    */
@@ -85,18 +91,6 @@ export class Request {
    * The execution log of the last HTTP request with a response.
    */
   log?: RequestLog;
-  /**
-   * Timestamp when the request was last updated.
-   */
-  updated?: number;
-  /**
-   * Timestamp when the request was created.
-   */
-  created?: number;
-  /**
-   * A timestamp of the midnight when the request object was updated
-   */
-  midnight?: number;
   /**
    * Request processing configuration.
    */
@@ -271,6 +265,66 @@ export class Request {
     return new Request(init);
   }
 
+  /**
+   * @param value The timestamp when the request was created.
+   */
+  set created(value: number | undefined) {
+    if (!value) {
+      this[createdSymbol] = Date.now();
+    } else {
+      this[createdSymbol] = value;
+    }
+  }
+
+  /**
+   * @returns The timestamp when the request was created.
+   */
+  get created(): number {
+    return this[createdSymbol] || Date.now();
+  }
+
+  /**
+   * @param value The timestamp when the request was last updated.
+   */
+  set updated(value: number | undefined) {
+    if (!value) {
+      this[updatedSymbol] = this.created;
+    } else {
+      this[updatedSymbol] = value;
+    }
+    const d = new Date(this[updatedSymbol]);
+    d.setHours(0, 0, 0, 0)
+    this[midnightSymbol] = d.getTime();
+  }
+
+  /**
+   * @returns The timestamp when the request was last updated.
+   */
+  get updated(): number {
+    return this[updatedSymbol] || this.created;
+  }
+
+  /**
+   * @param value The timestamp of the midnight when the request object was updated
+   */
+  set midnight(value: number | undefined) {
+    if (!value) {
+      this[midnightSymbol] = this.defaultMidnight();
+    } else {
+      this[midnightSymbol] = value;
+    }
+  }
+
+  /**
+   * @returns The timestamp of the midnight when the request object was updated
+   */
+  get midnight(): number {
+    if (this[midnightSymbol]) {
+      return this[midnightSymbol];
+    }
+    return this.defaultMidnight();
+  }
+
   constructor(input?: string|IRequest) {
     let init: IRequest;
     if (typeof input === 'string') {
@@ -324,22 +378,12 @@ export class Request {
     } else {
       this.authorization = undefined;
     }
-    if (created) {
-      this.created = created;
-    } else {
-      this.created = Date.now();
-    }
+    this.created = created;
     if (updated) {
       this.updated = updated;
-    } else {
-      this.updated = this.created;
     }
     if (midnight) {
       this.midnight = midnight;
-    } else {
-      const d = new Date(this.updated);
-      d.setHours(0, 0, 0, 0)
-      this.midnight = d.getTime();
     }
     if (ui) {
       this.ui = new RequestUiMeta(ui);
@@ -363,6 +407,9 @@ export class Request {
       kind: Kind,
       expects: this.expects.toJSON(),
       info: this.info.toJSON(),
+      created: this.created,
+      updated: this.updated,
+      midnight: this.midnight,
     };
     if (this.log) {
       result.log = this.log.toJSON();
@@ -372,15 +419,6 @@ export class Request {
     }
     if (Array.isArray(this.authorization)) {
       result.authorization = this.authorization.map(i => i.toJSON());
-    }
-    if (this.updated) {
-      result.updated = this.updated;
-    }
-    if (this.created) {
-      result.created = this.created;
-    }
-    if (this.midnight) {
-      result.midnight = this.midnight;
     }
     if (this.ui) {
       result.ui = this.ui.toJSON();
@@ -410,5 +448,14 @@ export class Request {
       this.expects = new HttpRequest();
     }
     return this.expects;
+  }
+
+  /**
+   * @returns The default value for the midnight when the request was last updated.
+   */
+  defaultMidnight(): number {
+    const d = new Date(this.updated);
+    d.setHours(0, 0, 0, 0);
+    return d.getTime();
   }
 }

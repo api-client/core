@@ -7,7 +7,6 @@ export interface ICertificate {
   /**
    * The certificate to use.
    * The `p12` type certificate must be a Buffer.
-   * The model's `get()` method always returns original data type.
    */
   data: string|ArrayBuffer|Buffer|Uint8Array;
   /**

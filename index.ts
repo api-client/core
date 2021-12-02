@@ -3,15 +3,18 @@
 //
 // Models
 //
-export { ArcResponse, IArcResponse } from './src/models/ArcResponse';
+export { ArcResponse, IArcResponse, Kind as ArcResponseKind } from './src/models/ArcResponse';
 export { AuthorizationSettingsUnion, IApiKeyAuthorization, IAuthorizationParams, IBasicAuthorization, IBearerAuthorization, ICCAuthorization, IDigestAuthorization, INtlmAuthorization, IOAuth1Authorization, IOAuth2Authorization, IOAuth2AuthorizationRequestCustomData, IOAuth2CustomData, IOAuth2CustomParameter, IOAuth2TokenRequestCustomData, IOauth2GrantType, IOauth2ResponseType, IOidcAuthorization, IOidcTokenError, IOidcTokenInfo, IPassThroughAuthorization, IRamlCustomAuthorization, ITokenError, ITokenInfo, ITokenRemoveOptions, OAuth2DeliveryMethod } from './src/models/Authorization';
+export { AuthorizationData, IAuthorizationData } from './src/models/AuthorizationData';
 export { CertificateType, ICertificate, ICertificateIndex, IClientCertificate, IRequestCertificate } from './src/models/ClientCertificate';
 export { Environment, IEnvironment, Kind as EnvironmentKind } from './src/models/Environment';
 export { ErrorResponse, IErrorResponse } from './src/models/ErrorResponse';
+export { HistoryIndex, IHistoryIndex } from './src/models/HistoryIndex';
+export { HistoryRequest, Kind as HistoryRequestKind } from './src/models/HistoryRequest';
 export { IHostRule, HostRule, Kind as HostRuleKind } from './src/models/HostRule';
 export { HttpProject, IHttpProject, Kind as HttpProjectKind, IFolderCreateOptions, IFolderDeleteOptions, IFolderSearchOptions, IProjectMoveOptions, IRequestAddOptions, IRequestDeleteOptions, IRequestSearchOptions } from './src/models/HttpProject';
 export { IHttpRequest, HttpRequest } from './src/models/HttpRequest';
-export { HttpResponse, IHttpResponse } from './src/models/HttpResponse';
+export { HttpResponse, IHttpResponse, Kind as HttpResponseKind } from './src/models/HttpResponse';
 export { License, ILicense, Kind as LicenseKind } from './src/models/License';
 export { IProjectFolder, ProjectFolder, Kind as ProjectFolderKind, DefaultFolderName } from './src/models/ProjectFolder';
 export { ProjectItem, IProjectItem } from './src/models/ProjectItem';
@@ -34,11 +37,13 @@ export { SerializablePayload } from './src/models/SerializablePayload';
 export { Server, IServer, Kind as ServerKind } from './src/models/Server';
 export { Thing, IThing, Kind as ThingKind } from './src/models/Thing';
 export { Url, IUrl } from './src/models/Url';
+export { WebApi, IWebApi, ILegacyRestApi } from './src/models/WebApi';
+export { WebApiIndex, IWebApiIndex, ILegacyWebApiIndex } from './src/models/WebApiIndex';
 
 //
 // Libs
 //
-export { PayloadSerializer, ISafePayload as SafePayload, IMultipartBody as MultipartBody, Payload, DeserializedPayload } from './src/lib/transformers/PayloadSerializer';
+export { PayloadSerializer, ISafePayload, IMultipartBody, Payload, DeserializedPayload } from './src/lib/transformers/PayloadSerializer';
 export { ILogger, Logger } from './src/lib/logging/Logger';
 export { DummyLogger } from './src/lib/logging/DummyLogger';
 export { Headers } from './src/lib/headers/Headers';
