@@ -1,0 +1,414 @@
+import { IRequestConfig, RequestConfig } from './RequestConfig';
+import { Thing, IThing, Kind as ThingKind } from './Thing';
+import { IRequestUiMeta, RequestUiMeta } from './RequestUiMeta';
+import { IRequestActions, RequestActions } from './RequestActions';
+import { IRequestCertificate } from './ClientCertificate';
+import { IRequestAuthorization, RequestAuthorization } from './RequestAuthorization';
+import { IRequestLog, RequestLog } from './RequestLog';
+import { SentRequest } from './SentRequest';
+import { ErrorResponse } from './ErrorResponse';
+import { ArcResponse } from './ArcResponse';
+import { RequestsSize } from './RequestsSize';
+import { IHttpRequest, HttpRequest, Kind as HttpRequestKind } from './HttpRequest';
+import { ARCSavedRequest } from './legacy/request/ArcRequest';
+import { ErrorResponse as LegacyErrorResponse, Response as LegacyResponse } from './legacy/request/ArcResponse';
+import { PayloadSerializer } from '../lib/transformers/PayloadSerializer';
+import { Normalizer } from './legacy/Normalizer';
+
+export const Kind = 'ARC#Request';
+
+/**
+ * The definition of a request object that functions inside ARC
+ * with the full configuration.
+ */
+export interface IRequest {
+  kind: string;
+  /**
+   * The basic information about the project.
+   */
+  info: IThing;
+  /**
+   * The HTTP definition of the request.
+   */
+  expects: IHttpRequest;
+  /**
+   * The execution log of the last HTTP request with a response.
+   */
+  log?: IRequestLog;
+  /**
+   * Timestamp when the request was last updated.
+   */
+  updated?: number;
+  /**
+   * Timestamp when the request was created.
+   */
+  created?: number;
+  /**
+   * A timestamp of the midnight when the request object was updated
+   */
+  midnight?: number;
+  /**
+   * Request processing configuration.
+   */
+  config?: IRequestConfig;
+  /**
+   * Request authorization configuration
+   */
+  authorization?: IRequestAuthorization[];
+  /**
+   * The UI configuration for the request.
+   * Each part of the UI has its own default state so this is optional and 
+   * always updated when the UI change.
+   */
+  ui?: IRequestUiMeta;
+  /**
+   * Actions to be performed when the request is executed.
+   */
+  actions?: IRequestActions;
+  /**
+   * The list of certificates to use with the request.
+   */
+  clientCertificate?: IRequestCertificate;
+}
+
+export class Request {
+  kind = '';
+  /**
+   * The basic information about the project.
+   */
+  info: Thing = new Thing();
+  /**
+   * The HTTP definition of the request.
+   */
+  expects: HttpRequest = new HttpRequest();
+  /**
+   * The execution log of the last HTTP request with a response.
+   */
+  log?: RequestLog;
+  /**
+   * Timestamp when the request was last updated.
+   */
+  updated?: number;
+  /**
+   * Timestamp when the request was created.
+   */
+  created?: number;
+  /**
+   * A timestamp of the midnight when the request object was updated
+   */
+  midnight?: number;
+  /**
+   * Request processing configuration.
+   */
+  config?: RequestConfig;
+  /**
+   * Request authorization configuration
+   */
+  authorization?: RequestAuthorization[];
+  /**
+   * The UI configuration for the request.
+   * Each part of the UI has its own default state so this is optional and 
+   * always updated when the UI change.
+   */
+  ui?: RequestUiMeta;
+  /**
+   * Actions to be performed when the request is executed.
+   */
+  actions?: RequestActions;
+  /**
+   * The list of certificates to use with the request.
+   */
+  clientCertificate?: IRequestCertificate;
+
+  /**
+   * Creates a request from an URL.
+   * 
+   * @param url The Request URL.
+   */
+  static fromUrl(url: string): Request {
+    const now:number = Date.now();
+    const request = new Request({
+      kind: Kind,
+      created: now,
+      updated: now,
+      expects: {
+        kind: HttpRequestKind,
+        method: 'GET',
+        url,
+      },
+      info: {
+        kind: ThingKind,
+        name: url,
+      },
+    });
+    return request;
+  }
+
+  /**
+   * Creates a request from a name.
+   * 
+   * @param name The Request name.
+   */
+  static fromName(name: string): Request {
+    const now:number = Date.now();
+    const request = new Request({
+      kind: Kind,
+      created: now,
+      updated: now,
+      expects: {
+        kind: HttpRequestKind,
+        method: 'GET',
+        url: '',
+      },
+      info: {
+        kind: ThingKind,
+        name,
+      },
+    });
+    return request;
+  }
+
+  /**
+   * Creates a request from an HttpRequest definition.
+   * 
+   * @param info The request data.
+   */
+  static fromHttpRequest(info: IHttpRequest): Request {
+    const now:number = Date.now();
+    const request = new Request({
+      kind: Kind,
+      created: now,
+      updated: now,
+      expects: {
+        kind: HttpRequestKind,
+        method: info.method,
+        url: info.url,
+        headers: info.headers,
+        payload: info.payload,
+      },
+      info: {
+        kind: ThingKind,
+        name: info.url,
+      },
+    });
+    return request;
+  }
+
+  static async fromLegacy(request: ARCSavedRequest): Promise<Request> {
+    const normalized = Normalizer.normalizeRequest(request) as ARCSavedRequest;
+    if (!normalized) {
+      throw new Error(`Unknown object.`);
+    }
+    const init:IRequest = {
+      kind: Kind,
+      expects: {
+        kind: HttpRequestKind,
+        method: normalized.method || 'GET',
+        url: normalized.url || '',
+        headers: normalized.headers,
+      },
+      info: {
+        kind: ThingKind,
+        name: normalized.name || '',
+      },
+    };
+    if (normalized.created) {
+      init.created = normalized.created;
+    } else {
+      init.created = Date.now();
+    }
+    if (normalized.updated) {
+      init.updated = normalized.updated;
+    } else {
+      init.updated = init.created;
+    }
+    if (normalized.actions) {
+      init.actions = RequestActions.fromLegacy(normalized.actions).toJSON();
+    }
+    if (Array.isArray(normalized.authorization) && normalized.authorization.length) {
+      init.authorization = normalized.authorization.map((i) => RequestAuthorization.fromLegacy(i).toJSON());
+    }
+    if (normalized.ui) {
+      init.ui = RequestUiMeta.fromLegacy(normalized.ui).toJSON();
+    }
+    if (normalized.config) {
+      init.config = RequestConfig.fromLegacy(normalized.config).toJSON();
+    }
+    if (normalized.payload) {
+      init.expects.payload = await PayloadSerializer.serialize(normalized.payload);
+    } else if (normalized.blob) {
+      init.expects.payload = {
+        type: 'blob',
+        data: normalized.blob,
+      };
+    } else if (normalized.multipart) {
+      init.expects.payload = {
+        type: 'formdata',
+        data: normalized.multipart,
+      };
+    }
+    const log = new RequestLog();
+    if (normalized.transportRequest) {
+      const sent = await SentRequest.fromLegacy(normalized.transportRequest);
+      log.request = sent;
+    }
+    if (normalized.response) {
+      const typedError = normalized.response as LegacyErrorResponse;
+      if (typedError.error) {
+        log.response = await ErrorResponse.fromLegacy(typedError);
+      } else {
+        const typedResponse = normalized.response as LegacyResponse;
+        log.response = await ArcResponse.fromLegacy(typedResponse);
+        if (Array.isArray(typedResponse.redirects) && typedResponse.redirects.length) {
+          const promises = typedResponse.redirects.map((redirect) => log.addLegacyRedirect(redirect));
+          await Promise.allSettled(promises);
+        }
+        if (typedResponse.size) {
+          log.size = new RequestsSize(typedResponse.size);
+        }
+      }
+    }
+    return new Request(init);
+  }
+
+  constructor(input?: string|IRequest) {
+    let init: IRequest;
+    if (typeof input === 'string') {
+      init = JSON.parse(input);
+    } else if (typeof input === 'object') {
+      init = input;
+    } else {
+      const now:number = Date.now();
+      init = {
+        kind: Kind,
+        created: now,
+        updated: now,
+        expects: {
+          kind: HttpRequestKind,
+          method: 'GET',
+          url: '',
+        },
+        info: {
+          kind: ThingKind,
+          name: '',
+        },
+      };
+    }
+    this.new(init);
+  }
+
+  new(init: IRequest): void {
+    const { expects, log, updated, created, midnight, config, authorization, ui, actions, clientCertificate, info } = init;
+    if (expects) {
+      this.expects = new HttpRequest(expects);
+    } else {
+      this.expects = new HttpRequest();
+    }
+    if (info) {
+      this.info = new Thing(info);
+    } else {
+      this.info = new Thing({ kind: ThingKind, name: '' });
+    }
+    if (log) {
+      this.log = new RequestLog(log);
+    } else {
+      this.log = undefined;
+    }
+    if (config) {
+      this.config = new RequestConfig(config);
+    } else {
+      this.config = undefined;
+    }
+    if (Array.isArray(authorization)) {
+      this.authorization = authorization.map(i => new RequestAuthorization(i));
+    } else {
+      this.authorization = undefined;
+    }
+    if (created) {
+      this.created = created;
+    } else {
+      this.created = Date.now();
+    }
+    if (updated) {
+      this.updated = updated;
+    } else {
+      this.updated = this.created;
+    }
+    if (midnight) {
+      this.midnight = midnight;
+    } else {
+      const d = new Date(this.updated);
+      d.setHours(0, 0, 0, 0)
+      this.midnight = d.getTime();
+    }
+    if (ui) {
+      this.ui = new RequestUiMeta(ui);
+    } else {
+      this.ui = undefined;
+    }
+    if (actions) {
+      this.actions = new RequestActions(actions);
+    } else {
+      this.actions = undefined;
+    }
+    if (clientCertificate) {
+      this.clientCertificate = clientCertificate;
+    } else {
+      this.clientCertificate = undefined;
+    }
+  }
+
+  toJSON(): IRequest {
+    const result: IRequest = {
+      kind: Kind,
+      expects: this.expects.toJSON(),
+      info: this.info.toJSON(),
+    };
+    if (this.log) {
+      result.log = this.log.toJSON();
+    }
+    if (this.config) {
+      result.config = this.config.toJSON();
+    }
+    if (Array.isArray(this.authorization)) {
+      result.authorization = this.authorization.map(i => i.toJSON());
+    }
+    if (this.updated) {
+      result.updated = this.updated;
+    }
+    if (this.created) {
+      result.created = this.created;
+    }
+    if (this.midnight) {
+      result.midnight = this.midnight;
+    }
+    if (this.ui) {
+      result.ui = this.ui.toJSON();
+    }
+    if (this.actions) {
+      result.actions = this.actions.toJSON();
+    }
+    if (this.clientCertificate) {
+      result.clientCertificate = this.clientCertificate;
+    }
+    return result;
+  }
+
+  /**
+   * Sets the basic information about a project.
+   */
+  setInfo(info: IThing): void {
+    this.info = new Thing(info);
+  }
+
+  /**
+   * If the info object does not exist it is being created.
+   * @return The instance of an HTTP request information.
+   */
+  getExpects(): HttpRequest {
+    if (!this.expects) {
+      this.expects = new HttpRequest();
+    }
+    return this.expects;
+  }
+}

@@ -1,0 +1,83 @@
+#%Http Project 1.0
+
+kind: ARC#HttpProject # It is optional when using YAML definition (this value is assumed by default) but is required when manipulating JS objects.
+
+license: # Optional license information.
+  url: https://license.org
+  name: GPL
+
+info: # At least name is required.
+  name: An HTTP project
+  description: |
+    This is an HTTP project which is a part of an API project definition.
+    It is a small subset of an API project that allows to build tools 
+    that help API developers to capture a sequence of HTTP requests to the API
+    and present them in an organized structure (project, folder). Postman calls this 
+    a collection.
+  version: 0.1.0
+
+provider: # Who has created this project. Optional.
+  url: https://my-org.com
+  name: My org, Inc.
+
+environments:
+  # Defines execution environments for the project.
+  # When a server is defined for the environment, the requests defined in this project can have relative URIs.
+  # Additionally an environment can define variables that are included in the project. However, these most likely are applied 
+  # by the runtime from secrets or some other mechanism. This spec does not specify a way of encoding and decoding encrypted data.
+  - key: abc1234
+    info:
+      name: Production
+    server:
+      uri: https://api.comain.com/v1
+      description: The main production server.
+    variables:
+      - kind: ARC#Property
+        name: API_KEY
+        value: test key
+      - kind: ARC#Property
+        name: API_TOKEN
+        value: "*******"
+
+schemas: # A helper objects that allow to reuse a schema definition between HTTP requests and tests.
+  - name: Schema 1
+    mime: application/json
+    # This schema is a JSON schema defined in JSON content. No transformations are applied to this content.
+    content: |
+      {
+        "property": "value"
+      }
+  - # This schema, however, is constructed on-the-fly by the request engine when executing the request giving the request content type.
+    # This is where variables can be applied to the properties. If the value is not defined (after applying the variables) the property is ignored.
+    name: Person
+    properties:
+      - name: fullName
+        value: John Doe
+      - name: age
+        value: 21
+        type: number
+      - name: zip
+
+definitions: # These are the definitions of all objects (folders, requests) that are in this projects. The structure for the UI is created in the `items` section.
+  - kind: ARC#ProjectFolder # The `kind` is used to distinguish between different types
+    key: unique key 1 # creates a relationship between the object (the folder) and it's location in the project defined in the `items` of the project or a folder.
+    info:
+      name: Authentication # The name of the folder.
+    items:  # This folder has only one item that is a request (ARC#ProjectRequest) and references the definition via the `key` property.
+      - kind: ARC#ProjectRequest
+        key: a-request-unique-key-1
+  - kind: ARC#ProjectFolder
+    key: unique key 2
+    info:
+      name: Create objects
+    items:
+      - kind: ARC#ProjectRequest
+        key: a-request-unique-key-2
+  - !include ./LoginRequest.yaml # See the corresponding files for more information
+  - !include ./CreateRequest.yaml
+
+items: # The project contains two folders (because `ARC#ProjectFolder`) and the `key` property maps them to the definition.
+  - kind: ARC#ProjectFolder
+    key: unique key 1
+  - kind: ARC#ProjectFolder
+    key: unique key 2

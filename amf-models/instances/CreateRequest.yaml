@@ -1,0 +1,17 @@
+#%Http Project Request 1.0
+
+kind: ARC#ProjectRequest
+key: a-request-unique-key-2 # uuid, unique string in the project.
+info:
+  name: Create an object  # Give the request a name
+expects: # The HTTP request definition.
+  url: /object
+  method: POST
+  payload: |
+    {
+      "property": "value"
+    }
+authorization:
+  - type: bearer
+    config:
+      token: "{AUTH_SID}" # This is set by the action defined in the `LoginRequest.yaml`

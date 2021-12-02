@@ -1,0 +1,31 @@
+#%Http Project Request 1.0
+
+kind: ARC#ProjectRequest
+key: a-request-unique-key-1 # uuid, unique string in the project.
+info:
+  name: Basic auth # Give the request a name
+expects: # The HTTP request definition.
+  url: https://my-org.com/auth
+  method: POST
+  payload: "username={AUTH_USERNAME}&password={AUTH_PASSWORD}" # these are not defined in the environment. It expects to be provided in the runtime via environment variables.
+  # payload can be a string (the above) or a serialized data according to the HTTP project structure.
+  # For example it can be a Buffer (from a file, for example) which has the `type`  property set to `buffer` and `data` which is UInt8Array view of the buffer.
+  # The PayloadSerializer class defines all possible serialization options for various inputs.
+actions: # Actions are a helper logic that is executed before the request and after the response.
+  response: # Actions executed when the response is ready.
+    - condition: # condition is required. May be set to "alwaysPass"
+        type: response # type for the condition only. It means it reads the data from the response.
+        source: status # data source for the condition. Here, it is the response status code.
+        operator: equal
+        value: 200
+      actions: # The actions to be executed when the condition pass.
+        - type: response # type for this action only. It means it reads the data from the response.
+          name: Set the auth variable from a cookie
+          failOnError: true # Stops the execution of the logic chain (other actions, tests) when this action fail.
+          config: # The specifics of a particular action.
+            kind: ARC#SetVariableAction # This is how the system recognizes action type. Here, it is the set variable action.
+            name: AUTH_SID # The name of the variable to set.
+            source: # Data source configuration.
+              type: response # the data is read from the response
+              source: headers # the data is read from the headers of the passed object.
+              path: set-cookie.SID # The value is read from the "set-cookie" header, from the `SID` cookie
