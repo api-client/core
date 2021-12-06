@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { assert } from 'chai';
+import { assert } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { clear } from '../../src/lib/runtime/variables/Cache.js';
-import { VariablesProcessor, Property } from '../../index.js';
+import { VariablesProcessor } from '../../src/lib/runtime/variables/VariablesProcessor.js';
+import { Property } from '../../src/models/Property.js';
 import { EvalFunctions } from '../../src/lib/runtime/variables/EvalFunctions.js';
 
 describe('Runtime', () => {

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Jexl } from 'jexl';
 import { Property } from '../../../models/Property.js';
 import { IRequest } from '../../../models/Request.js';
 import { mapRunnables } from '../actions/RunnableCondition.js';
@@ -11,7 +10,7 @@ import { Action, IAction } from '../../../models/actions/Action.js';
 
 export interface RequestProcessOptions {
   /**
-   * Whether to run jexl to evaluate variables. Default to true.
+   * Whether to evaluate variables. Default to true.
    * @default true
    */
   evaluateVariables?: boolean;
@@ -24,7 +23,7 @@ export interface RequestProcessOptions {
 
 export interface ResponseProcessOptions {
   /**
-   * Whether to run jexl to evaluate variables. Default to true.
+   * Whether to evaluate variables. Default to true.
    * @default true
    */
   evaluateVariables?: boolean;
@@ -41,11 +40,9 @@ export interface ResponseProcessOptions {
  * !!! THIS IS TODO !!!
  */
 export class ActionsRunner {
-  jexl: any;
   variables: Property[];
 
   constructor(variables: Property[]=[]) {
-    this.jexl = new Jexl();
     this.variables = variables;
   }
 
@@ -85,7 +82,7 @@ export class ActionsRunner {
       } else {
         systemVariables = undefined;
       }
-      processor = new VariablesProcessor(this.jexl, this.variables);
+      processor = new VariablesProcessor(this.variables);
     } else {
       processor = undefined;
       systemVariables = undefined;
@@ -166,7 +163,7 @@ export class ActionsRunner {
       } else {
         systemVariables = undefined;
       }
-      processor = new VariablesProcessor(this.jexl, this.variables);
+      processor = new VariablesProcessor(this.variables);
     } else {
       processor = undefined;
       systemVariables = undefined;

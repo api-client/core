@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Jexl } from '@pawel-up/jexl';
 import { Property } from '../../../models/Property.js';
 import { VariablesTokenizer } from './VariablesTokenizer.js';
 import { EvalFunctions } from './EvalFunctions.js';
@@ -37,16 +38,14 @@ export const functionRegex = /(?:\$?{)?([.a-zA-Z0-9_-]+)\(([^)]*)?\)(?:})?/gm;
 export const varValueRe = /^[a-zA-Z0-9_]+$/;
 
 export class VariablesProcessor {
-  jexl: any;
+  jexl = new Jexl();
   variables: Property[];
   context?: Record<string, string>;
 
   /**
-   * @param jexl A reference to the Jexl instance.
    * @param variables List of application variables
    */
-  constructor(jexl: any, variables: Property[]) {
-    this.jexl = jexl;
+  constructor(variables: Property[]) {
     this.variables = variables;
   }
 

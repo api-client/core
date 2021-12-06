@@ -1,4 +1,3 @@
-import { Jexl } from 'jexl';
 import { HttpProject } from '../../../models/HttpProject.js';
 import { ProjectRequest, IProjectRequest } from '../../../models/ProjectRequest.js';
 import { ProjectFolder, Kind as ProjectFolderKind } from '../../../models/ProjectFolder.js';
@@ -35,8 +34,6 @@ export interface RunResult {
  * It allows to select a specific folder and run the requests one-by-one using ARC's HTTP runtime.
  */
 export class ProjectRunner {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  jexl: any;
   project: HttpProject;
   protected queue: ProjectRequest[] = [];
   protected executed: RunResult[] = [];
@@ -63,7 +60,6 @@ export class ProjectRunner {
    * When this is set then the environment option from the `run()` function is ignored.
    */
   constructor(project: HttpProject, environment?: Environment) {
-    this.jexl = new Jexl();
     this.project = project;
     this.masterEnvironment = environment;
   }
@@ -253,9 +249,9 @@ export class ProjectRunner {
     const project = request.project;
     const serialized = request.toJSON();
     
-    const { systemVariables, variables, jexl } = this;
+    const { systemVariables, variables } = this;
     const config = request.getConfig().toJSON();
-    const processor = new VariablesProcessor(jexl, variables);
+    const processor = new VariablesProcessor(variables);
     const evalOptions: EvaluateOptions = {
       override: systemVariables,
     };

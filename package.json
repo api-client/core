@@ -78,9 +78,7 @@
   },
   "dependencies": {
     "@pawel-up/jexl": "^3.0.0",
-    "@types/jexl": "^2.3.0",
     "@xmldom/xmldom": "^0.7.5",
-    "form-data": "^4.0.0",
-    "jexl": "^2.3.0"
+    "form-data": "^4.0.0"
   }
 }
