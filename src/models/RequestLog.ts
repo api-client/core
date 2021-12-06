@@ -1,9 +1,9 @@
-import { IResponseRedirect, ResponseRedirect  } from './ResponseRedirect';
-import { ISentRequest, SentRequest } from './SentRequest';
-import { IErrorResponse, ErrorResponse } from './ErrorResponse';
-import { IArcResponse, ArcResponse } from './ArcResponse';
-import { IRequestsSize, RequestsSize } from './RequestsSize';
-import { ResponseRedirect as LegacyRedirect } from './legacy/request/ArcResponse'
+import { IResponseRedirect, ResponseRedirect  } from './ResponseRedirect.js';
+import { ISentRequest, SentRequest } from './SentRequest.js';
+import { IErrorResponse, ErrorResponse } from './ErrorResponse.js';
+import { IArcResponse, ArcResponse } from './ArcResponse.js';
+import { IRequestsSize, RequestsSize } from './RequestsSize.js';
+import { ResponseRedirect as LegacyRedirect } from './legacy/request/ArcResponse.js';
 
 export const Kind = 'ARC#ResponseLog';
 

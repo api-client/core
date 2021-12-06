@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ApiType } from "../models/ApiTypes";
+import { ApiType } from "../models/ApiTypes.js";
 
 /**
  * @deprecated

@@ -1,11 +1,11 @@
-import { ProjectDefinitionProperty, IProjectDefinitionProperty } from './ProjectDefinitionProperty';
-import { Environment, IEnvironment } from './Environment';
-import { ProjectItem, IProjectItem } from './ProjectItem';
-import { ProjectRequest, Kind as ProjectRequestKind, IProjectRequest } from './ProjectRequest';
-import { HttpProject } from './HttpProject';
-import { IThing, Thing, Kind as ThingKind } from './Thing';
-import v4 from '../lib/uuid';
-import * as PatchUtils from './PatchUtils';
+import { ProjectDefinitionProperty, IProjectDefinitionProperty } from './ProjectDefinitionProperty.js';
+import { Environment, IEnvironment } from './Environment.js';
+import { ProjectItem, IProjectItem } from './ProjectItem.js';
+import { ProjectRequest, Kind as ProjectRequestKind, IProjectRequest } from './ProjectRequest.js';
+import { HttpProject } from './HttpProject.js';
+import { IThing, Thing, Kind as ThingKind } from './Thing.js';
+import v4 from '../lib/uuid.js';
+import * as PatchUtils from './PatchUtils.js';
 
 export const Kind = 'ARC#ProjectFolder';
 export const DefaultFolderName = 'New folder';
@@ -84,8 +84,8 @@ export class ProjectFolder implements ProjectDefinitionProperty {
    * Timestamp when the folder was created.
    */
   created = 0;
-  
-  constructor(project: HttpProject, input?: string|IProjectFolder) {
+
+  constructor(project: HttpProject, input?: string | IProjectFolder) {
     this.project = project;
     let init: IProjectFolder;
     if (typeof input === 'string') {
@@ -93,7 +93,7 @@ export class ProjectFolder implements ProjectDefinitionProperty {
     } else if (typeof input === 'object') {
       init = input;
     } else {
-      const now:number = Date.now();
+      const now: number = Date.now();
       init = {
         kind: Kind,
         info: {
@@ -118,7 +118,7 @@ export class ProjectFolder implements ProjectDefinitionProperty {
     if (!ProjectFolder.isProjectFolder(init)) {
       throw new Error(`Not an ARC project folder.`);
     }
-    const { key=v4(), created=Date.now(), updated=Date.now(), items, environments, info } = init;
+    const { key = v4(), created = Date.now(), updated = Date.now(), items, environments, info } = init;
     this.kind = Kind;
     this.key = key;
     this.created = created;
@@ -175,7 +175,7 @@ export class ProjectFolder implements ProjectDefinitionProperty {
    * @param project The top-most project.
    * @param name The name to set.
    */
-  static fromName(project: HttpProject, name=DefaultFolderName): ProjectFolder {
+  static fromName(project: HttpProject, name = DefaultFolderName): ProjectFolder {
     const now = Date.now();
     const key = v4();
     const info = new Thing({ kind: ThingKind, name });
@@ -214,7 +214,7 @@ export class ProjectFolder implements ProjectDefinitionProperty {
    * Lists items (not the actual definitions!) that are folders.
    */
   listFolderItems(): ProjectItem[] {
-    const { items=[] } = this;
+    const { items = [] } = this;
     return items.filter(i => i.kind === Kind);
   }
 
@@ -222,7 +222,7 @@ export class ProjectFolder implements ProjectDefinitionProperty {
    * Lists items (not the actual definitions!) that are requests.
    */
   listRequestItems(): ProjectItem[] {
-    const { items=[] } = this;
+    const { items = [] } = this;
     return items.filter(i => i.kind === ProjectRequestKind);
   }
 
@@ -296,7 +296,7 @@ export class ProjectFolder implements ProjectDefinitionProperty {
         throw new Error(PatchUtils.TXT_use_command_instead);
       case 'kind':
         throw new Error(PatchUtils.TXT_delete_kind);
-      case 'info': 
+      case 'info':
         // the "info" has it's own validator.
         break;
       case 'key':
@@ -327,7 +327,7 @@ export class ProjectFolder implements ProjectDefinitionProperty {
   /**
    * @returns The instance of the HttpProject or a ProjectFolder that is a closes parent of this instance.
    */
-  getParent(): ProjectFolder|HttpProject|undefined {
+  getParent(): ProjectFolder | HttpProject | undefined {
     const { project, key } = this;
     return project.findParent(key);
   }

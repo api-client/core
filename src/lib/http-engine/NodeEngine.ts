@@ -4,14 +4,14 @@ import { URL, UrlWithStringQuery } from 'url';
 import http from 'http';
 import https from 'https';
 import net from 'net';
-import { HttpEngine, HttpEngineOptions, ResponseErrorInit, HeadersReceivedDetail } from './HttpEngine';
-import { IHttpRequest } from '../../models/HttpRequest';
-import { ArcResponse } from '../../models/ArcResponse';
-import { IRequestLog } from '../../models/RequestLog';
-import { Headers } from '../headers/Headers';
-import { PayloadSupport } from './PayloadSupport';
-import { addContentLength, getPort } from './RequestUtils';
-import { NetError } from './Errors';
+import { HttpEngine, HttpEngineOptions, ResponseErrorInit, HeadersReceivedDetail } from './HttpEngine.js';
+import { IHttpRequest } from '../../models/HttpRequest.js';
+import { ArcResponse } from '../../models/ArcResponse.js';
+import { IRequestLog } from '../../models/RequestLog.js';
+import { Headers } from '../headers/Headers.js';
+import { PayloadSupport } from './PayloadSupport.js';
+import { addContentLength, getPort } from './RequestUtils.js';
+import { NetError } from './Errors.js';
 
 export class NodeEngine extends HttpEngine {
   responseReported = false;

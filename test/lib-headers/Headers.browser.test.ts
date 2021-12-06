@@ -1,5 +1,5 @@
 import { assert } from '@esm-bundle/chai';
-import { Headers } from '../../src/lib/headers/Headers';
+import { Headers } from '../../src/lib/headers/Headers.js';
 
 describe('Headers', () => {
   describe(`string input`, () => {

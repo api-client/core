@@ -1,4 +1,4 @@
-import { RequestTime } from "./ArcResponse";
+import { RequestTime } from "./ArcResponse.js";
 
 /**
  * @deprecated This is no longer used in ARC except for internal processing of the data model

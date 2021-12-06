@@ -1,6 +1,6 @@
-import { IProperty, Property } from './Property';
-import { IMultipartBody } from '../lib/transformers/PayloadSerializer';
-import { RequestUiMeta as LegacyRequestUiMeta } from './legacy/request/ArcRequest';
+import { IProperty, Property } from './Property.js';
+import { IMultipartBody } from '../lib/transformers/PayloadSerializer.js';
+import { RequestUiMeta as LegacyRequestUiMeta } from './legacy/request/ArcRequest.js';
 
 export const Kind = 'ARC#RequestUiMeta';
 

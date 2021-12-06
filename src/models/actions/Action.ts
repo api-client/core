@@ -1,11 +1,11 @@
-import { ActionTypeEnum } from './Enums';
-import { IActions } from './runnable/index';
-import { IActionView, ActionView } from './ActionView';
-import { Runnable, IRunnable } from './runnable/Runnable';
-import { Kind as DeleteCookieKind, DeleteCookieAction, IDeleteCookieAction } from './runnable/DeleteCookieAction'
-import { Kind as SetCookieKind, SetCookieAction, ISetCookieAction } from './runnable/SetCookieAction'
-import { Kind as SetVariableKind, SetVariableAction, ISetVariableAction } from './runnable/SetVariableAction'
-import { Action as LegacyAction } from '../legacy/actions/Actions'
+import { ActionTypeEnum, ResponseDataSourceEnum, RequestDataSourceEnum } from './Enums.js';
+import { IActions } from './runnable/index.js';
+import { IActionView, ActionView } from './ActionView.js';
+import { Runnable, IRunnable } from './runnable/Runnable.js';
+import { Kind as DeleteCookieKind, DeleteCookieAction, IDeleteCookieAction } from './runnable/DeleteCookieAction.js';
+import { Kind as SetCookieKind, SetCookieAction, ISetCookieAction } from './runnable/SetCookieAction.js';
+import { Kind as SetVariableKind, SetVariableAction, ISetVariableAction } from './runnable/SetVariableAction.js';
+import { Action as LegacyAction } from '../legacy/actions/Actions.js';
 
 export const Kind = 'ARC#Action';
 
@@ -107,6 +107,30 @@ export class Action {
     return new Action(init);
   }
 
+  /**
+   * Creates a default configuration of an action
+   * @param type The type of the action.
+   */
+  static defaultAction(type=ActionTypeEnum.response): Action {
+    const init: IAction = {
+      type,
+      name: 'New action',
+      config: {
+        source: {
+          type,
+          source: type === ActionTypeEnum.response ? ResponseDataSourceEnum.body : RequestDataSourceEnum.body,
+        },
+        name: '',
+      },
+      failOnError: false,
+      priority: 0,
+      sync: false,
+      view: {},
+      enabled: true,
+    };
+    return new Action(init);
+  }
+
   constructor(input?: string | IAction) {
     let init: IAction;
     if (typeof input === 'string') {
@@ -199,5 +223,20 @@ export class Action {
       case SetCookieKind: this.config = new SetCookieAction(config as ISetCookieAction); break;
       case SetVariableKind: this.config = new SetVariableAction(config as ISetVariableAction); break;
     }
+  }
+
+  /**
+   * The sort function for actions to sort them for the execution order.
+   */
+  static sortActions(a: Action, b: Action): number {
+    const { priority: p1=0 } = a;
+    const { priority: p2=0 } = b;
+    if (p1 > p2) {
+      return 1;
+    }
+    if (p2 > p1) {
+      return -1;
+    }
+    return 0;
   }
 }

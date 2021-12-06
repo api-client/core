@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { assert } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { Kind as HttpProjectKind, HttpProject, IHttpProject } from '../../src/models/HttpProject';
-import { Kind as ProjectFolderKind, ProjectFolder } from '../../src/models/ProjectFolder';
-import { ProjectRequest } from '../../src/models/ProjectRequest';
-import { Kind as ThingKind } from '../../src/models/Thing';
-import { Kind as ProviderKind } from '../../src/models/Provider';
-import { Kind as LicenseKind } from '../../src/models/License';
-import { Kind as EnvironmentKind, Environment } from '../../src/models/Environment';
-import * as PatchUtils from '../../src/models/PatchUtils';
-// import { HttpProject, ProjectFolderKind, ProjectFolder, ThingKind, IHttpProject, HttpProjectKind } from '../../browser';
+import { Kind as HttpProjectKind, HttpProject, IHttpProject } from '../../src/models/HttpProject.js';
+import { Kind as ProjectFolderKind, ProjectFolder } from '../../src/models/ProjectFolder.js';
+import { ProjectRequest } from '../../src/models/ProjectRequest.js';
+import { Kind as ThingKind } from '../../src/models/Thing.js';
+import { Kind as ProviderKind } from '../../src/models/Provider.js';
+import { Kind as LicenseKind } from '../../src/models/License.js';
+import { Kind as EnvironmentKind, Environment } from '../../src/models/Environment.js';
+import * as PatchUtils from '../../src/models/PatchUtils.js';
+// import { HttpProject, ProjectFolderKind, ProjectFolder, ThingKind, IHttpProject, HttpProjectKind } from '../../browser.js';
 
 describe('Models', () => {
   describe('HttpProject', () => {

@@ -1,16 +1,16 @@
-import express from 'express';
-import testsRoute from './TestsApi';
-import queryPramsRoute from './QueryParamsApi';
-import headersRoute from './HeadersApi';
-import getRoute from './GetApi';
-import postRoute from './PostApi';
-import redirectRoute from './RedirectsApi';
-import imageRoute from './ImagesApi';
-import responsesRoute from './ResponsesApi';
-import compressionRoute from './CompressApi';
-import delayRoute from './DelayRoute';
+import { Router } from 'express';
+import testsRoute from './TestsApi.js';
+import queryPramsRoute from './QueryParamsApi.js';
+import headersRoute from './HeadersApi.js';
+import getRoute from './GetApi.js';
+import postRoute from './PostApi.js';
+import redirectRoute from './RedirectsApi.js';
+import imageRoute from './ImagesApi.js';
+import responsesRoute from './ResponsesApi.js';
+import compressionRoute from './CompressApi.js';
+import delayRoute from './DelayRoute.js';
 
-const router = express.Router();
+const router = Router();
 export default router;
 
 router.use('/tests', testsRoute);

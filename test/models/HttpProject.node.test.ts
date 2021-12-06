@@ -4,7 +4,7 @@ import {
   HttpProjectKind, 
   IHttpProject,
   ThingKind,
-} from '../../index';
+} from '../../index.js';
 
 //
 // Note, the actual unit tests are located in the `HttpProject.browser.test.ts` file.

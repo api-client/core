@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { assert } from 'chai';
-import { HttpResponse, Headers, ResponseRedirect, IHttpRequest } from '../../index';
-import * as RequestUtils from '../../src/lib/http-engine/RequestUtils';
+import { HttpResponse, Headers, ResponseRedirect, IHttpRequest } from '../../index.js';
+import * as RequestUtils from '../../src/lib/http-engine/RequestUtils.js';
 
 describe('http-engine', () => {
   describe('RequestUtils', () => {

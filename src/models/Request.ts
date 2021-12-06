@@ -1,19 +1,19 @@
-import { IRequestConfig, RequestConfig } from './RequestConfig';
-import { Thing, IThing, Kind as ThingKind } from './Thing';
-import { IRequestUiMeta, RequestUiMeta } from './RequestUiMeta';
-import { IRequestActions, RequestActions } from './RequestActions';
-import { IRequestCertificate } from './ClientCertificate';
-import { IRequestAuthorization, RequestAuthorization } from './RequestAuthorization';
-import { IRequestLog, RequestLog } from './RequestLog';
-import { SentRequest } from './SentRequest';
-import { ErrorResponse } from './ErrorResponse';
-import { ArcResponse } from './ArcResponse';
-import { RequestsSize } from './RequestsSize';
-import { IHttpRequest, HttpRequest, Kind as HttpRequestKind } from './HttpRequest';
-import { ARCSavedRequest } from './legacy/request/ArcRequest';
-import { ErrorResponse as LegacyErrorResponse, Response as LegacyResponse } from './legacy/request/ArcResponse';
-import { PayloadSerializer } from '../lib/transformers/PayloadSerializer';
-import { Normalizer } from './legacy/Normalizer';
+import { IRequestConfig, RequestConfig } from './RequestConfig.js';
+import { Thing, IThing, Kind as ThingKind } from './Thing.js';
+import { IRequestUiMeta, RequestUiMeta } from './RequestUiMeta.js';
+import { IRequestActions, RequestActions } from './RequestActions.js';
+import { IRequestCertificate } from './ClientCertificate.js';
+import { IRequestAuthorization, RequestAuthorization } from './RequestAuthorization.js';
+import { IRequestLog, RequestLog, Kind as LogKind } from './RequestLog.js';
+import { SentRequest } from './SentRequest.js';
+import { ErrorResponse } from './ErrorResponse.js';
+import { ArcResponse } from './ArcResponse.js';
+import { RequestsSize } from './RequestsSize.js';
+import { IHttpRequest, HttpRequest, Kind as HttpRequestKind } from './HttpRequest.js';
+import { ARCSavedRequest } from './legacy/request/ArcRequest.js';
+import { ErrorResponse as LegacyErrorResponse, Response as LegacyResponse } from './legacy/request/ArcResponse.js';
+import { PayloadSerializer } from '../lib/transformers/PayloadSerializer.js';
+import { Normalizer } from './legacy/Normalizer.js';
 
 export const Kind = 'ARC#Request';
 export const createdSymbol = Symbol('created');
@@ -437,6 +437,7 @@ export class Request {
    */
   setInfo(info: IThing): void {
     this.info = new Thing(info);
+    this.updated = Date.now();
   }
 
   /**
@@ -457,5 +458,21 @@ export class Request {
     const d = new Date(this.updated);
     d.setHours(0, 0, 0, 0);
     return d.getTime();
+  }
+
+  /**
+   * Reads the config from the request. If the config object does not exists it creates one.
+   */
+  getConfig(): RequestConfig {
+    if (!this.config) {
+      this.config = new RequestConfig();
+    }
+    return this.config;
+  }
+
+  setLog(log: IRequestLog): void {
+    const info: IRequestLog = { ...log, kind: LogKind };
+    this.log = new RequestLog(info);
+    this.updated = Date.now();
   }
 }

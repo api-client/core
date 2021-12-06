@@ -1,7 +1,7 @@
-import { IHttpResponse, HttpResponse, Kind } from './HttpResponse';
-import { ErrorResponse as LegacyErrorResponse } from './legacy/request/ArcResponse';
-import { PayloadSerializer } from '../lib/transformers/PayloadSerializer';
-import { Normalizer } from './legacy/Normalizer';
+import { IHttpResponse, HttpResponse, Kind } from './HttpResponse.js';
+import { ErrorResponse as LegacyErrorResponse } from './legacy/request/ArcResponse.js';
+import { PayloadSerializer } from '../lib/transformers/PayloadSerializer.js';
+import { Normalizer } from './legacy/Normalizer.js';
 
 export interface IErrorResponse extends IHttpResponse {
   /**

@@ -1,10 +1,10 @@
-import { Cookie, CookieOptions } from './Cookie';
+import { Cookie, CookieOptions } from './Cookie.js';
 import {
   getPath,
   matchesDomain,
   matchesPath,
   fillCookieAttributes,
-} from './Utils';
+} from './Utils.js';
 
 export const urlSymbol = Symbol('url');
 

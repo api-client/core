@@ -1,4 +1,4 @@
-import { blobToDataUrl } from './Utils';
+import { blobToDataUrl } from './Utils.js';
 
 export type PayloadTypes = 'string' | 'file' | 'blob' | 'buffer' | 'arraybuffer' | 'formdata' | 'x-www-form-urlencoded';
 export type DeserializedPayload = string | Blob | File | FormData | Buffer | ArrayBuffer | undefined;

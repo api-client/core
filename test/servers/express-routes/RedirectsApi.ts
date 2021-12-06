@@ -1,9 +1,9 @@
-import express, { Request, Response } from 'express';
+import { Router, Request, Response } from 'express';
 import cors from 'cors';
 import { URLSearchParams } from 'url';
-import { BaseApi } from './BaseApi';
+import { BaseApi } from './BaseApi.js';
 
-const router = express.Router();
+const router = Router();
 export default router;
 
 class RedirectsApiRoute extends BaseApi {

@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { Headers } from '../../index';
+import { Headers } from '../../index.js';
 
 describe('Headers', () => {
   describe(`string input`, () => {

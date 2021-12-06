@@ -1,36 +1,36 @@
-import express, { Request, Response } from 'express';
+import { Router, Request, Response } from 'express';
 import cors from 'cors';
-import fs from 'fs-extra';
-import { BaseApi } from './BaseApi';
+import { readFile } from 'fs/promises';
+import { BaseApi } from './BaseApi.js';
 
-const router = express.Router();
+const router = Router();
 export default router;
 
 class ImagesApiRoute extends BaseApi {
   async jpeg(req: Request, res: Response): Promise<void> {
     const resource = this.getResourcePath('jpeg.jpg');
-    const buff = await fs.readFile(resource);
+    const buff = await readFile(resource);
     res.setHeader('content-type', 'image/jpeg');
     res.send(buff);
   }
 
   async png(req: Request, res: Response): Promise<void> {
     const resource = this.getResourcePath('png.png');
-    const buff = await fs.readFile(resource);
+    const buff = await readFile(resource);
     res.setHeader('content-type', 'image/png');
     res.send(buff);
   }
 
   async svg(req: Request, res: Response): Promise<void> {
     const resource = this.getResourcePath('svg.svg');
-    const buff = await fs.readFile(resource);
+    const buff = await readFile(resource);
     res.setHeader('content-type', 'image/svg+xml');
     res.send(buff);
   }
 
   async webp(req: Request, res: Response): Promise<void> {
     const resource = this.getResourcePath('webp.webp');
-    const buff = await fs.readFile(resource);
+    const buff = await readFile(resource);
     res.setHeader('content-type', 'image/webp');
     res.send(buff);
   }

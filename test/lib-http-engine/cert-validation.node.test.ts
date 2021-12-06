@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { assert } from 'chai';
-import { NodeEngine, ErrorResponse, NetError } from '../../index';
+import { NodeEngine, ErrorResponse, NetError } from '../../index.js';
 
 describe('http-engine', () => {
   describe('NodeEngine', () => {

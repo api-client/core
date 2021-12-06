@@ -1,7 +1,7 @@
-import { Kind as FolderKind, ProjectFolder } from './ProjectFolder';
-import { Kind as ProjectRequestKind } from './ProjectRequest';
-import { ProjectRequest } from './ProjectRequest';
-import { HttpProject } from './HttpProject';
+import { Kind as FolderKind, ProjectFolder } from './ProjectFolder.js';
+import { Kind as ProjectRequestKind } from './ProjectRequest.js';
+import { ProjectRequest } from './ProjectRequest.js';
+import { HttpProject } from './HttpProject.js';
 
 export interface IProjectItem {
   /**

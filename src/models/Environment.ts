@@ -1,8 +1,8 @@
-import { Property, IProperty } from './Property';
-import { Server, IServer } from './Server';
-import { IThing, Thing, Kind as ThingKind } from './Thing';
-import v4 from '../lib/uuid';
-import { ARCVariable } from './legacy/models/Variable';
+import { Property, IProperty } from './Property.js';
+import { Server, IServer } from './Server.js';
+import { IThing, Thing, Kind as ThingKind } from './Thing.js';
+import v4 from '../lib/uuid.js';
+import { ARCVariable } from './legacy/models/Variable.js';
 
 /**
  * A project environment definition.

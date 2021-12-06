@@ -1,5 +1,5 @@
-import { SerializablePayload } from './SerializablePayload';
-import { Payload } from '../lib/transformers/PayloadSerializer';
+import { SerializablePayload } from './SerializablePayload.js';
+import { Payload } from '../lib/transformers/PayloadSerializer.js';
 
 export const Kind = 'ARC#HttpRequest';
 

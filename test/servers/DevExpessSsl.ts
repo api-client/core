@@ -1,4 +1,4 @@
-import { ExpressServer } from './ExpressServer';
+import { ExpressServer } from './ExpressServer.js';
 
 (async (): Promise<void> => {
   const srv = new ExpressServer();

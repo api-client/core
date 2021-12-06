@@ -1,5 +1,5 @@
 import { assert } from '@esm-bundle/chai';
-import v4 from '../../src/lib/uuid';
+import v4 from '../../src/lib/uuid.js';
 
 describe('lib', () => {
   describe('uuid', () => {

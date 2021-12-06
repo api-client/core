@@ -1,6 +1,6 @@
 import { assert } from '@esm-bundle/chai';
-import { Kind as HttpRequestKind, HttpRequest, IHttpRequest } from '../../src/models/HttpRequest';
-import { PayloadSerializer, ISafePayload } from '../../src/lib/transformers/PayloadSerializer';
+import { Kind as HttpRequestKind, HttpRequest, IHttpRequest } from '../../src/models/HttpRequest.js';
+import { PayloadSerializer, ISafePayload } from '../../src/lib/transformers/PayloadSerializer.js';
 
 describe('Models', () => {
   describe('HttpRequest', () => {

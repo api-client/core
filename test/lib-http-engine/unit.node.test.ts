@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { assert } from 'chai';
-import { NodeEngine, Headers, IHttpRequest, HttpEngineOptions, HostRule } from '../../index';
+import { NodeEngine, Headers, IHttpRequest, HttpEngineOptions, HostRule } from '../../index.js';
 
 describe('http-engine', () => {
   describe('Unit tests', () => {

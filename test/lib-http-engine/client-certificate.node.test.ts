@@ -1,8 +1,8 @@
 import { assert } from 'chai';
 import fs from 'fs';
-import getPort from '../helpers/getPort';
-import { NodeEngine, IRequestCertificate, IArcResponse, ArcResponse } from '../../index';
-import * as Server from './cert-auth-server/index';
+import getPort from '../helpers/getPort.js';
+import { NodeEngine, IRequestCertificate, IArcResponse, ArcResponse } from '../../index.js';
+import * as Server from './cert-auth-server/index.js';
 
 describe('http-engine', () => {
   describe('NodeEngine', () => {
@@ -10,7 +10,7 @@ describe('http-engine', () => {
     let aliceP12: IRequestCertificate;
     let alicePassword: IRequestCertificate;
     let bobP12: IRequestCertificate;
-    beforeAll(async () => {
+    before(async () => {
       alicePem = {
         cert: {
           data: fs.readFileSync('./test/lib-http-engine/cert-auth-server/alice_cert.pem', 'utf8'),
@@ -46,12 +46,12 @@ describe('http-engine', () => {
     describe('Client certificate', () => {
       let port: number;
 
-      beforeAll(async () => {
+      before(async () => {
         port = await getPort();
         await Server.startServer(port);
       });
 
-      afterAll(async () => {
+      after(async () => {
         await Server.stopServer();
       });
 

@@ -1,5 +1,5 @@
-import { HttpProject } from './HttpProject';
-import { ProjectFolder } from './ProjectFolder';
+import { HttpProject } from './HttpProject.js';
+import { ProjectFolder } from './ProjectFolder.js';
 
 export interface IProjectDefinitionProperty {
   kind: unknown;

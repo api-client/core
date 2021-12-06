@@ -2,8 +2,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { assert } from 'chai';
 import net from 'net';
-import { NodeEngine, DummyLogger, HttpEngineOptions } from '../../index';
-import { ExpressServer } from '../servers/ExpressServer';
+import { NodeEngine, DummyLogger, HttpEngineOptions } from '../../index.js';
+import { ExpressServer } from '../servers/ExpressServer.js';
 
 const logger = new DummyLogger();
 
@@ -16,12 +16,12 @@ describe('http-engine', () => {
     const server = new ExpressServer();
     let port:number;
 
-    beforeAll(async () => {
+    before(async () => {
       await server.start();
       port = server.httpPort as number;
     });
 
-    afterAll(async () => {
+    after(async () => {
       await server.stop();
     });
 

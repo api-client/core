@@ -1,6 +1,6 @@
 import { assert } from '@esm-bundle/chai';
-import { Kind as ArcResponseKind, ArcResponse, IArcResponse } from '../../src/models/ArcResponse';
-import { ISafePayload } from '../../src/lib/transformers/PayloadSerializer';
+import { Kind as ArcResponseKind, ArcResponse, IArcResponse } from '../../src/models/ArcResponse.js';
+import { ISafePayload } from '../../src/lib/transformers/PayloadSerializer.js';
 
 describe('Models', () => {
   describe('ArcResponse', () => {

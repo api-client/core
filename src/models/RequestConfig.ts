@@ -1,6 +1,6 @@
-import { IHostRule, HostRule } from './HostRule';
-import { IProperty, Property } from './Property';
-import { RequestConfig as LegacyConfig } from './legacy/request/ArcRequest';
+import { IHostRule, HostRule } from './HostRule.js';
+import { IProperty, Property } from './Property.js';
+import { RequestConfig as LegacyConfig } from './legacy/request/ArcRequest.js';
 
 export const Kind = 'ARC#RequestConfig';
 

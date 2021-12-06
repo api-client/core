@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 interface RawValue {
   name: string;
   value: string;

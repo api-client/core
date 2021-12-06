@@ -1,5 +1,5 @@
 import { assert } from '@esm-bundle/chai';
-import { Cookies } from '../../src/lib/cookies/Cookies';
+import { Cookies } from '../../src/lib/cookies/Cookies.js';
 
 describe('Parse cookies', () => {
   let httpStr = 'rememberme=1; domain=foo.com;';

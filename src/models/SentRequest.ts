@@ -1,6 +1,6 @@
-import { IHttpRequest, HttpRequest, Kind, IBaseHttpRequest } from './HttpRequest';
-import { TransportRequest as LegacyTransportRequest } from './legacy/request/ArcRequest';
-import { PayloadSerializer } from '../lib/transformers/PayloadSerializer';
+import { IHttpRequest, HttpRequest, Kind, IBaseHttpRequest } from './HttpRequest.js';
+import { TransportRequest as LegacyTransportRequest } from './legacy/request/ArcRequest.js';
+import { PayloadSerializer } from '../lib/transformers/PayloadSerializer.js';
 
 export interface IBaseSentRequest extends IBaseHttpRequest {
   /**

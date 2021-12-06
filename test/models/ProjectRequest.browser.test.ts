@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { assert } from '@esm-bundle/chai';
-import { Kind as ProjectRequestKind, ProjectRequest, IProjectRequest } from '../../src/models/ProjectRequest';
-import { HttpProject } from '../../src/models/HttpProject';
-import { Kind as ThingKind } from '../../src/models/Thing';
-import { Kind as HttpRequestKind } from '../../src/models/HttpRequest';
-import { Kind as RequestLogKind, RequestLog } from '../../src/models/RequestLog';
-import { SentRequest } from '../../src/models/SentRequest';
-import { RequestConfig } from '../../src/models/RequestConfig';
-import { RequestAuthorization } from '../../src/models/RequestAuthorization';
-import { IRequestUiMeta } from '../../src/models/RequestUiMeta';
+import { Kind as ProjectRequestKind, ProjectRequest, IProjectRequest } from '../../src/models/ProjectRequest.js';
+import { HttpProject } from '../../src/models/HttpProject.js';
+import { Kind as ThingKind } from '../../src/models/Thing.js';
+import { Kind as HttpRequestKind } from '../../src/models/HttpRequest.js';
+import { Kind as RequestLogKind, RequestLog } from '../../src/models/RequestLog.js';
+import { SentRequest } from '../../src/models/SentRequest.js';
+import { RequestConfig } from '../../src/models/RequestConfig.js';
+import { RequestAuthorization } from '../../src/models/RequestAuthorization.js';
+import { IRequestUiMeta } from '../../src/models/RequestUiMeta.js';
 
 describe('Models', () => {
   describe('ProjectRequest', () => {

@@ -1,5 +1,5 @@
-import net from 'node:net';
-import os from 'node:os';
+import net from 'net';
+import os from 'os';
 
 export interface Options extends Omit<net.ListenOptions, 'port'> {
 	/**

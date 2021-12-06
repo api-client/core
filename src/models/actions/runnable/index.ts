@@ -1,6 +1,6 @@
-import { ISetVariableAction } from './SetVariableAction';
-import { ISetCookieAction } from './SetCookieAction';
-import { IDeleteCookieAction } from './DeleteCookieAction';
+import { ISetVariableAction } from './SetVariableAction.js';
+import { ISetCookieAction } from './SetCookieAction.js';
+import { IDeleteCookieAction } from './DeleteCookieAction.js';
 /**
  * Convenience type that gathers all configurations in one type.
  */

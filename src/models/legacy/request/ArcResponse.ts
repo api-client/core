@@ -1,4 +1,4 @@
-import { MultipartBody } from "./RequestBody";
+import { MultipartBody } from "./RequestBody.js";
 
 /**
  * Schema definition for ARC request timings. This is mostly consistent with HAR timings.

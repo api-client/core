@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { assert } from 'chai';
-import { Headers, NodeEngine, DummyLogger, HttpEngineOptions, ArcResponse, ResponseRedirect } from '../../index';
+import { Headers, NodeEngine, DummyLogger, HttpEngineOptions, ArcResponse, ResponseRedirect } from '../../index.js';
 
 const logger = new DummyLogger();
 

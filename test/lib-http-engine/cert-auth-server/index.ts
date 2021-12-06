@@ -84,7 +84,7 @@ function startHttpServer(httpPort: number): Promise<void> {
 
 export async function startServer(port: number): Promise<void> {
   await startHttpServer(port);
-};
+}
 
 export async function stopServer(): Promise<void> {
   const keys = Object.keys(socketMap) as string[];
@@ -97,4 +97,4 @@ export async function stopServer(): Promise<void> {
   return new Promise((resolve) => {
     runningServer.close(() => resolve());
   });
-};
+}

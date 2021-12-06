@@ -1,6 +1,6 @@
-import { Runnable, IRunnable } from './Runnable';
-import { IDataSourceConfiguration } from '../Condition';
-import { RequestDataSourceEnum } from '../Enums';
+import { Runnable, IRunnable } from './Runnable.js';
+import { IDataSourceConfiguration } from '../Condition.js';
+import { RequestDataSourceEnum } from '../Enums.js';
 
 export const Kind = 'ARC#SetCookieAction';
 

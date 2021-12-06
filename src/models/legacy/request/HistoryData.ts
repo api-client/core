@@ -1,6 +1,6 @@
-import { Entity } from '../models/base';
-import { MultipartTransformer } from "./ArcRequest";
-import { RequestTime, TransformedPayload } from "./ArcResponse";
+import { Entity } from '../models/base.js';
+import { MultipartTransformer } from "./ArcRequest.js";
+import { RequestTime, TransformedPayload } from "./ArcResponse.js";
 
 export interface HistoryData extends Entity {
   timings: RequestTime;

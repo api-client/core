@@ -1,4 +1,4 @@
-import { Entity } from './base';
+import { Entity } from './base.js';
 
 /**
  * ARC host rule definition.

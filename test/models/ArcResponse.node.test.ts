@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { ArcResponseKind, ArcResponse, IArcResponse, RequestTime, IRequestTime, ResponseAuthorization, IResponseAuthorization } from '../../index';
+import { ArcResponseKind, ArcResponse, IArcResponse, RequestTime, IRequestTime, ResponseAuthorization, IResponseAuthorization } from '../../index.js';
 
 //
 // Note, the actual unit tests are located in the `ArcResponse.browser.test.ts` file.

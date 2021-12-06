@@ -4,9 +4,9 @@ import https from 'https';
 import path from 'path';
 import net from 'net';
 import { Duplex } from 'stream';
-import fs from 'fs-extra';
-import getPort, { portNumbers } from '../helpers/getPort';
-import apiRouter from './express-routes/index';
+import { readFile } from 'fs/promises';
+import getPort, { portNumbers } from '../helpers/getPort.js';
+import apiRouter from './express-routes/index.js';
 
 export class ExpressServer {
   httpServer?: http.Server;
@@ -75,9 +75,9 @@ export class ExpressServer {
   async startHttps(port?: number): Promise<number> {
     const assignedPort = port || await getPort({port: portNumbers(8000, 8100)});
     this.httpsPort = assignedPort;
-    const key = await fs.readFile(path.join('test', 'lib-http-engine', 'certs', 'privkey.pem'));
-    const cert = await fs.readFile(path.join('test', 'lib-http-engine', 'certs', 'fullchain.pem'));
-    const options = {
+    const key = await readFile(path.join('test', 'lib-http-engine', 'certs', 'privkey.pem'));
+    const cert = await readFile(path.join('test', 'lib-http-engine', 'certs', 'fullchain.pem'));
+    const options: https.ServerOptions = {
       key,
       cert,
     };

@@ -1,5 +1,5 @@
-import { IRunnableAction, RunnableAction } from './actions/RunnableAction';
-import { RequestActions as LegacyRequestActions } from './legacy/request/ArcRequest';
+import { IRunnableAction, RunnableAction, Kind as RunnableActionKind } from './actions/RunnableAction.js';
+import { RequestActions as LegacyRequestActions } from './legacy/request/ArcRequest.js';
 
 export interface IRequestActions {
   /**
@@ -32,6 +32,23 @@ export class RequestActions {
       init.response = response.map(i => RunnableAction.fromLegacy(i).toJSON());
     }
     return new RequestActions(init);
+  }
+
+  static isLegacy(input: unknown): boolean {
+    const { request=[], response=[] } = input as RequestActions;
+    if (request[0]) {
+      const r = request[0];
+      if (r.kind === RunnableActionKind) {
+        return true;
+      }
+    }
+    if (response[0]) {
+      const r = response[0];
+      if (r.kind === RunnableActionKind) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

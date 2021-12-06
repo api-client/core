@@ -1,4 +1,4 @@
-import * as PatchUtils from './PatchUtils';
+import * as PatchUtils from './PatchUtils.js';
 
 export const Kind = 'ARC#License';
 

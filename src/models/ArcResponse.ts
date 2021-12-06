@@ -1,10 +1,10 @@
-import { IHttpResponse, HttpResponse, Kind } from './HttpResponse';
-import { IRequestTime, RequestTime } from './RequestTime';
-import { IResponseAuthorization, ResponseAuthorization } from './ResponseAuthorization';
-import { IErrorResponse } from './ErrorResponse';
-import { Response as LegacyResponse } from './legacy/request/ArcResponse';
-import { PayloadSerializer } from '../lib/transformers/PayloadSerializer';
-import { Normalizer } from './legacy/Normalizer';
+import { IHttpResponse, HttpResponse, Kind } from './HttpResponse.js';
+import { IRequestTime, RequestTime } from './RequestTime.js';
+import { IResponseAuthorization, ResponseAuthorization } from './ResponseAuthorization.js';
+import { IErrorResponse } from './ErrorResponse.js';
+import { Response as LegacyResponse } from './legacy/request/ArcResponse.js';
+import { PayloadSerializer } from '../lib/transformers/PayloadSerializer.js';
+import { Normalizer } from './legacy/Normalizer.js';
 
 export { Kind };
 

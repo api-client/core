@@ -1,8 +1,8 @@
-import { SerializablePayload } from './SerializablePayload';
-import { Payload } from '../lib/transformers/PayloadSerializer';
-import { HTTPResponse as LegacyHttpResponse } from './legacy/request/ArcResponse';
-import { PayloadSerializer } from '../lib/transformers/PayloadSerializer';
-import { Normalizer } from './legacy/Normalizer';
+import { SerializablePayload } from './SerializablePayload.js';
+import { Payload } from '../lib/transformers/PayloadSerializer.js';
+import { HTTPResponse as LegacyHttpResponse } from './legacy/request/ArcResponse.js';
+import { PayloadSerializer } from '../lib/transformers/PayloadSerializer.js';
+import { Normalizer } from './legacy/Normalizer.js';
 
 export const Kind = 'ARC#HttpResponse';
 

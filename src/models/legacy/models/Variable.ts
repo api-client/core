@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
-import { ApiType } from './ApiTypes';
-import { Entity } from './base';
+import { ApiType } from './ApiTypes.js';
+import { Entity } from './base.js';
 
 /**
  * @deprecated

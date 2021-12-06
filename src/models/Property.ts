@@ -1,4 +1,4 @@
-import { ApiType } from './legacy/models/ApiTypes';
+import { ApiType } from './legacy/models/ApiTypes.js';
 
 export type PropertyType = 'string' | 'integer' | 'float' | 'nil' | 'boolean' | 'date' | 'datetime' | 'time' | 'enum';
 
@@ -58,43 +58,43 @@ export class Property {
     return ['string', 'integer', 'float', 'nil', 'boolean', 'date', 'datetime', 'time', 'enum'];
   }
 
-  static String(name = ''): Property {
+  static String(name = '', value?: string, enabled = true): Property {
     return new Property({
       kind: Kind,
       name,
-      value: '',
+      value: value || '',
       type: 'string',
-      enabled: true,
+      enabled,
     });
   }
 
-  static Integer(name = ''): Property {
+  static Integer(name = '', value?: number, enabled = true): Property {
     return new Property({
       kind: Kind,
       name,
-      value: 0,
+      value: value || 0,
       type: 'integer',
-      enabled: true,
+      enabled,
     });
   }
 
-  static Float(name = ''): Property {
+  static Float(name = '', value?: number, enabled = true): Property {
     return new Property({
       kind: Kind,
       name,
-      value: 0.0,
+      value: value || 0.0,
       type: 'float',
-      enabled: true,
+      enabled,
     });
   }
 
-  static Boolean(name = ''): Property {
+  static Boolean(name = '', value = false, enabled = true): Property {
     return new Property({
       kind: Kind,
       name,
-      value: false,
+      value: value,
       type: 'boolean',
-      enabled: true,
+      enabled,
     });
   }
 

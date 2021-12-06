@@ -1,4 +1,4 @@
-import { IRequest, Request } from './Request';
+import { IRequest, Request } from './Request.js';
 
 export const Kind = 'ARC#HistoryRequest';
 

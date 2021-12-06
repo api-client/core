@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import getPort, { portNumbers } from '../helpers/getPort';
+import getPort, { portNumbers } from '../helpers/getPort.js';
 import http from 'http';
 import https from 'https';
 import path from 'path';
 import net from 'net';
-import fs from 'fs-extra';
+import { readFile } from 'fs/promises';
 import { URL } from 'url';
 
 /** @typedef {import('net').Socket} Socket */
@@ -74,8 +74,8 @@ export class ProxyServer {
     const assignedPort = await getPort({port: portNumbers(8000, 8100)});
     this.httpsPort = assignedPort
     
-    const key = await fs.readFile(path.join('test', 'lib-http-engine', 'certs', 'privkey.pem'));
-    const cert = await fs.readFile(path.join('test', 'lib-http-engine', 'certs', 'fullchain.pem'));
+    const key = await readFile(path.join('test', 'lib-http-engine', 'certs', 'privkey.pem'));
+    const cert = await readFile(path.join('test', 'lib-http-engine', 'certs', 'fullchain.pem'));
     
     return new Promise((resolve) => {
       const options = {

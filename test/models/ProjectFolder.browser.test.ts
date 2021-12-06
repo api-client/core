@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { assert } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { HttpProject } from '../../src/models/HttpProject';
-import { Kind as ProjectFolderKind, ProjectFolder, DefaultFolderName, IProjectFolder } from '../../src/models/ProjectFolder';
-import { Kind as ThingKind } from '../../src/models/Thing';
-import { ProjectItem } from '../../src/models/ProjectItem';
-import { Environment } from '../../src/models/Environment';
-import { ProjectRequest } from '../../src/models/ProjectRequest';
-import * as PatchUtils from '../../src/models/PatchUtils';
+import { HttpProject } from '../../src/models/HttpProject.js';
+import { Kind as ProjectFolderKind, ProjectFolder, DefaultFolderName, IProjectFolder } from '../../src/models/ProjectFolder.js';
+import { Kind as ThingKind } from '../../src/models/Thing.js';
+import { ProjectItem } from '../../src/models/ProjectItem.js';
+import { Environment } from '../../src/models/Environment.js';
+import { ProjectRequest } from '../../src/models/ProjectRequest.js';
+import * as PatchUtils from '../../src/models/PatchUtils.js';
 
 describe('Models', () => {
   describe('ProjectFolder', () => {

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { assert } from '@esm-bundle/chai';
-import { Kind as LicenseKind, License, ILicense } from '../../src/models/License';
-import * as PatchUtils from '../../src/models/PatchUtils';
+import { Kind as LicenseKind, License, ILicense } from '../../src/models/License.js';
+import * as PatchUtils from '../../src/models/PatchUtils.js';
 
 describe('Models', () => {
   describe('License', () => {

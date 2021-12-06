@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { Cookies, Cookie } from '../../index';
+import { Cookies, Cookie } from '../../index.js';
 
 describe('Cookies', () => {
   let httpStr = 'rememberme=1; domain=foo.com;';

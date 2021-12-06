@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { assert } from 'chai';
-import { Cookie } from '../../index';
+import { Cookie } from '../../index.js';
 
 describe('Cookie', () => {
   describe('Basics', () => {

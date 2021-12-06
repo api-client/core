@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { HostRuleKind, HostRule, IHostRule } from '../../index';
+import { HostRuleKind, HostRule, IHostRule } from '../../index.js';
 
 //
 // Note, the actual unit tests are located in the `HostRule.browser.test.ts` file.

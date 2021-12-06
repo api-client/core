@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { LicenseKind, License, ILicense } from '../../index';
+import { LicenseKind, License, ILicense } from '../../index.js';
 
 //
 // Note, the actual unit tests are located in the `License.browser.test.ts` file.

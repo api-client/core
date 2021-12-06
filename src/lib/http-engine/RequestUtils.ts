@@ -1,5 +1,5 @@
-import { Headers } from '../headers/Headers';
-import { ResponseRedirect } from '../../models/ResponseRedirect';
+import { Headers } from '../headers/Headers.js';
+import { ResponseRedirect } from '../../models/ResponseRedirect.js';
 
 /**
  * Reads a port number for a connection.

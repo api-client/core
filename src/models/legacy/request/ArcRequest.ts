@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
-import { AuthorizationSettingsUnion } from '../authorization/Authorization';
-import { HostRule } from '../models/HostRule';
-import { Entity } from '../models/base';
-import { ErrorResponse, Response } from './ArcResponse';
-import { LegacyResponse, LegacyResponseMeta } from './Legacy';
-import { ApiType } from '../models/ApiTypes';
-import { BodyMeta, MultipartBody } from './RequestBody';
-import { RunnableAction } from '../actions/Actions';
-import { Variable } from '../models/Variable';
-import { RequestCertificate } from '../models/ClientCertificate';
+import { AuthorizationSettingsUnion } from '../authorization/Authorization.js';
+import { HostRule } from '../models/HostRule.js';
+import { Entity } from '../models/base.js';
+import { ErrorResponse, Response } from './ArcResponse.js';
+import { LegacyResponse, LegacyResponseMeta } from './Legacy.js';
+import { ApiType } from '../models/ApiTypes.js';
+import { BodyMeta, MultipartBody } from './RequestBody.js';
+import { RunnableAction } from '../actions/Actions.js';
+import { Variable } from '../models/Variable.js';
+import { RequestCertificate } from '../models/ClientCertificate.js';
 
 /**
  * This interface was used in a few components, this is left for compatibility

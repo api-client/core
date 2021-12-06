@@ -1,4 +1,4 @@
-import { Runnable, IRunnable } from './Runnable';
+import { Runnable, IRunnable } from './Runnable.js';
 
 export const Kind = 'ARC#DeleteCookieAction';
 

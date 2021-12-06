@@ -28,12 +28,11 @@
     "@types/chai": "^4.2.22",
     "@types/cors": "^2.8.12",
     "@types/fs-extra": "^9.0.13",
-    "@types/jest": "^27.0.3",
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.11.7",
     "@types/sinon": "^10.0.6",
     "@typescript-eslint/eslint-plugin": "^5.3.1",
-    "@typescript-eslint/parser": "^5.3.1",
+    "@typescript-eslint/parser": "^5.6.0",
     "@web/dev-server-esbuild": "^0.2.16",
     "@web/test-runner": "^0.13.21",
     "@web/test-runner-playwright": "^0.8.8",
@@ -42,13 +41,14 @@
     "cors": "^2.8.5",
     "eslint": "^8.2.0",
     "eslint-config-prettier": "^8.3.0",
+    "eslint-import-resolver-typescript": "^2.5.0",
+    "eslint-plugin-import": "^2.25.3",
     "express": "^4.17.1",
     "husky": "^7.0.4",
-    "jest": "^27.3.1",
     "lint-staged": "^11.2.6",
+    "mocha": "^9.1.3",
     "shrink-ray-current": "^4.1.3",
     "sinon": "^12.0.1",
-    "ts-jest": "^27.0.7",
     "ts-node": "^10.4.0",
     "typescript": "^4.4.4"
   },
@@ -60,9 +60,11 @@
     "tsc:watch": "tsc --watch",
     "test:browser": "wtr --playwright --browsers chromium firefox webkit --coverage",
     "test:browser:watch": "wtr --watch --playwright --browsers chromium",
-    "test:node": "jest",
-    "test:node:watch": "jest --watch",
-    "test": "npm run test:node && npm run test:browser"
+    "test:mocha": "mocha",
+    "test:mocha:watch": "mocha --watch",
+    "test:mocha:watch2": "node scripts/test-node-watch.js",
+    "test:mocha:watch3": "mocha --require ts-node/register --extensions ts,tsx --watch --watch-files src 'test/**/*.node.test.ts'",
+    "test": "npm run test:mocha && npm run test:browser"
   },
   "husky": {
     "hooks": {
@@ -73,5 +75,12 @@
     "*.js": [
       "eslint --fix"
     ]
+  },
+  "dependencies": {
+    "@pawel-up/jexl": "^3.0.0",
+    "@types/jexl": "^2.3.0",
+    "@xmldom/xmldom": "^0.7.5",
+    "form-data": "^4.0.0",
+    "jexl": "^2.3.0"
   }
 }

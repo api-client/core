@@ -1,6 +1,6 @@
 import { assert } from 'chai';
-import { Kind as HttpRequestKind, HttpRequest, IHttpRequest } from '../../src/models/HttpRequest';
-import { PayloadSerializer, ISafePayload } from '../../src/lib/transformers/PayloadSerializer';
+import { Kind as HttpRequestKind, HttpRequest, IHttpRequest } from '../../src/models/HttpRequest.js';
+import { PayloadSerializer, ISafePayload } from '../../src/lib/transformers/PayloadSerializer.js';
 
 //
 // Note, the actual unit tests are located in the `HttpRequest.browser.test.ts` file.

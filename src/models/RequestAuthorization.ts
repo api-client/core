@@ -1,5 +1,5 @@
-import { AuthorizationSettingsUnion } from './Authorization';
-import { RequestAuthorization as LegacyAuthorization } from './legacy/request/ArcRequest'
+import { AuthorizationSettingsUnion } from './Authorization.js';
+import { RequestAuthorization as LegacyAuthorization } from './legacy/request/ArcRequest.js';
 
 export const Kind = 'ARC#RequestAuthorization';
 

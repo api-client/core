@@ -1,7 +1,7 @@
-import { ActionTypeEnum, RequestDataSourceEnum, ResponseDataSourceEnum, OperatorEnum } from './Enums';
-import { IActionIterator, ActionIterator } from './ActionIterator';
-import { IConditionView, ConditionView } from './ConditionView';
-import { Condition as LegacyCondition } from '../legacy/actions/Actions';
+import { ActionTypeEnum, RequestDataSourceEnum, ResponseDataSourceEnum, OperatorEnum } from './Enums.js';
+import { IActionIterator, ActionIterator } from './ActionIterator.js';
+import { IConditionView, ConditionView } from './ConditionView.js';
+import { Condition as LegacyCondition } from '../legacy/actions/Actions.js';
 
 export const Kind = 'ARC#Condition';
 
@@ -114,6 +114,22 @@ export class Condition {
    * Options related to the UI state in the application.
    */
   view?: ConditionView;
+
+  static defaultCondition(type=ActionTypeEnum.response): Condition {
+    const init: ICondition = {
+      kind: Kind,
+      type,
+      source: RequestDataSourceEnum.url,
+      operator: OperatorEnum.equal,
+      path: '',
+      predictedValue: '',
+      alwaysPass: false,
+      view: {
+        opened: true,
+      },
+    };
+    return new Condition(init);
+  }
 
   static fromLegacy(runnable: LegacyCondition): Condition {
     const { source, alwaysPass, iterator, iteratorEnabled, operator, path, predictedValue, type, value, view } = runnable;

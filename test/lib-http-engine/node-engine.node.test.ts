@@ -2,8 +2,8 @@
 import { assert } from 'chai';
 import { URL } from 'url';
 import { OutgoingHttpHeaders } from 'http';
-import { NodeEngine, IArcResponse, ArcResponse, HttpEngineOptions, IHttpRequest } from '../../index';
-import { ExpressServer } from '../servers/ExpressServer';
+import { NodeEngine, IArcResponse, ArcResponse, HttpEngineOptions, IHttpRequest } from '../../index.js';
+import { ExpressServer } from '../servers/ExpressServer.js';
 
 describe('http-engine', () => {
   describe('NodeEngine', () => {
@@ -12,11 +12,11 @@ describe('http-engine', () => {
 
     const jsonBody = JSON.stringify({ test: true, body: 'some value' });
 
-    beforeAll(async () => {
+    before(async () => {
       httpPort = await server.startHttp();
     });
 
-    afterAll(async () => {
+    after(async () => {
       await server.stopHttp();
     });
 
@@ -33,7 +33,7 @@ describe('http-engine', () => {
 
       describe('_connect()', () => {
         let request: NodeEngine;
-        beforeAll(() => {
+        before(() => {
           const info = {
             url: `http://localhost:${httpPort}/v1/get`,
             method: 'GET',
@@ -107,7 +107,7 @@ describe('http-engine', () => {
 
       describe('_connectHttp()', () => {
         let request: NodeEngine;
-        beforeAll(() => {
+        before(() => {
           const info = {
             url: `http://localhost:${httpPort}/v1/get`,
             method: 'GET',
@@ -211,7 +211,7 @@ describe('http-engine', () => {
       describe('_createGenericOptions()', () => {
         let request: NodeEngine;
         let url: string;
-        beforeAll(() => {
+        before(() => {
           url = 'https://api.com:5123/path?qp1=v1&qp2=v2#test'
           const info: IHttpRequest = {
             url,
@@ -289,7 +289,7 @@ describe('http-engine', () => {
       describe('_addSslOptions()', () => {
         let request: NodeEngine;
         let options: any;
-        beforeAll(() => {
+        before(() => {
           const info: IHttpRequest = {
             url: 'https://api.com:5123/path?qp1=v1&qp2=v2#test',
             method: 'POST',
@@ -321,7 +321,7 @@ describe('http-engine', () => {
 
       describe('Timings setting', () => {
         let request: NodeEngine;
-        beforeAll(() => {
+        before(() => {
           const info: IHttpRequest = {
             url: 'https://api.com:5123/path?qp1=v1&qp2=v2#test',
             method: 'POST',

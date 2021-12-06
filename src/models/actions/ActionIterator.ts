@@ -1,5 +1,5 @@
-import { OperatorEnum } from './Enums';
-import { IteratorConfiguration as LegacyIterator } from '../legacy/actions/Actions';
+import { OperatorEnum } from './Enums.js';
+import { IteratorConfiguration as LegacyIterator } from '../legacy/actions/Actions.js';
 
 export interface IActionIterator {
   /**

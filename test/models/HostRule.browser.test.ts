@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { assert } from '@esm-bundle/chai';
-import { Kind as HostRuleKind, HostRule, IHostRule } from '../../src/models/HostRule';
+import { Kind as HostRuleKind, HostRule, IHostRule } from '../../src/models/HostRule.js';
 
 describe('Models', () => {
   describe('HostRule', () => {

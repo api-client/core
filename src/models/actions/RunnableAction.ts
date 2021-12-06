@@ -1,7 +1,9 @@
-import { ICondition, Condition } from './Condition';
-import { ActionTypeEnum } from './Enums';
-import { IAction, Action } from './Action';
-import { RunnableAction as LegacyRunnable } from '../legacy/actions/Actions'
+import { ICondition, Condition } from './Condition.js';
+import { ActionTypeEnum } from './Enums.js';
+import { IAction, Action } from './Action.js';
+import { RunnableAction as LegacyRunnable } from '../legacy/actions/Actions.js';
+
+export const Kind = 'ARC#RunnableAction';
 
 /**
  * An interface representing a runnable set of action in a condition.
@@ -9,6 +11,7 @@ import { RunnableAction as LegacyRunnable } from '../legacy/actions/Actions'
  * The condition can be configured to always pass by setting the `alwaysPass` property.
  */
 export interface IRunnableAction {
+  kind?: typeof Kind;
   /**
    * The condition to be checked when executing the runnable,
    */
@@ -29,6 +32,7 @@ export interface IRunnableAction {
 }
 
 export class RunnableAction {
+  kind = Kind;
   /**
    * The condition to be checked when executing the runnable,
    */
@@ -69,13 +73,18 @@ export class RunnableAction {
       init = input;
     } else {
       init = {
+        kind: Kind,
         condition: new Condition().toJSON(),
         type: ActionTypeEnum.response,
         actions: [],
         enabled: false,
       };
     }
-    this.new(init);
+    if (init.kind === Kind) {
+      this.new(init);
+    } else {
+      this.fromLegacy(init as LegacyRunnable);
+    }
   }
 
   new(init: IRunnableAction): void {
@@ -100,7 +109,24 @@ export class RunnableAction {
       type: this.type,
       condition: this.condition.toJSON(),
       actions: this.actions.map(i => i.toJSON()),
+      kind: Kind,
     };
     return result;
+  }
+
+  fromLegacy(runnable: LegacyRunnable): void {
+    const { actions, condition, enabled, type=ActionTypeEnum.response, } = runnable;
+    this.enabled = enabled;
+    this.type = type as ActionTypeEnum;
+    if (condition) {
+      this.condition = Condition.fromLegacy(condition);
+    } else {
+      this.condition = new Condition();
+    }
+    if (Array.isArray(actions) && actions.length) {
+      this.actions = actions.map(i => Action.fromLegacy(i));
+    } else {
+      this.actions = [];
+    }
   }
 }

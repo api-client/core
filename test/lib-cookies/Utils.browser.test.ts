@@ -1,5 +1,5 @@
 import { assert } from '@esm-bundle/chai';
-import { matchesDomain, matchesPath, getPath } from '../../src/lib/cookies/Utils';
+import { matchesDomain, matchesPath, getPath } from '../../src/lib/cookies/Utils.js';
 
 describe('Utils', () => {
   const baseUrl = 'http://bar.com/';

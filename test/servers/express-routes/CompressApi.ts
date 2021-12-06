@@ -1,10 +1,10 @@
-import express, { Request, Response } from 'express';
+import { Router, Request, Response } from 'express';
 import cors from 'cors';
-import fs from 'fs-extra';
+import { readFile } from 'fs/promises';
 import shrinkRay from 'shrink-ray-current';
-import { BaseApi } from './BaseApi';
+import { BaseApi } from './BaseApi.js';
 
-const router = express.Router();
+const router = Router();
 export default router;
 
 router.use(shrinkRay());
@@ -12,21 +12,21 @@ router.use(shrinkRay());
 class CompressApiRoute extends BaseApi {
   async brotli(req: Request, res: Response): Promise<void> {
     const resource = this.getResourcePath('json.json');
-    const buff = await fs.readFile(resource);
+    const buff = await readFile(resource);
     res.setHeader('content-type', 'application/json');
     res.send(buff);
   }
 
   async deflate(req: Request, res: Response): Promise<void> {
     const resource = this.getResourcePath('json.json');
-    const buff = await fs.readFile(resource);
+    const buff = await readFile(resource);
     res.setHeader('content-type', 'application/json');
     res.send(buff);
   }
 
   async gzip(req: Request, res: Response): Promise<void> {
     const resource = this.getResourcePath('json.json');
-    const buff = await fs.readFile(resource);
+    const buff = await readFile(resource);
     res.setHeader('content-type', 'application/json');
     res.send(buff);
   }

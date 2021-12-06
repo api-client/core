@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { HttpResponseKind, HttpResponse, IHttpResponse, PayloadSerializer, ISafePayload } from '../../index';
+import { HttpResponseKind, HttpResponse, IHttpResponse, PayloadSerializer, ISafePayload } from '../../index.js';
 
 //
 // Note, the actual unit tests are located in the `HttpResponse.browser.test.ts` file.

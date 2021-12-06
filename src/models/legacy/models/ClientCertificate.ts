@@ -1,4 +1,4 @@
-import { Entity } from './base';
+import { Entity } from './base.js';
 
 /**
  * Represents a single certificate object (cert/key)

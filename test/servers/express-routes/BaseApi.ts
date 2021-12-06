@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import cors, { CorsOptions } from 'cors';
 import { Request, Response, Router } from 'express';

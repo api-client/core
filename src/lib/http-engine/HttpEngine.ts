@@ -1,35 +1,37 @@
+/* eslint-disable no-redeclare */
+/* eslint-disable no-unused-vars */
 import { URL } from 'url';
 import zlib from 'zlib';
 import tls from 'tls';
 import net from 'net';
 import http from 'http';
 import { EventEmitter } from 'events';
-import { IHttpRequest, HttpRequest } from '../../models/HttpRequest';
-import { IRequestAuthorization } from '../../models/RequestAuthorization';
-import { IHostRule, HostRule } from '../../models/HostRule';
-import { IRequestCertificate } from '../../models/ClientCertificate';
-import { SentRequest } from '../../models/SentRequest';
-import { ArcResponse } from '../../models/ArcResponse';
-import { ErrorResponse } from '../../models/ErrorResponse';
-import { RequestsSize } from '../../models/RequestsSize';
-import { HttpResponse } from '../../models/HttpResponse';
-import { ResponseRedirect } from '../../models/ResponseRedirect';
-import { RequestLog, IRequestLog } from '../../models/RequestLog';
-import { RequestTime } from '../../models/RequestTime';
-import { ResponseAuthorization } from '../../models/ResponseAuthorization';
-import { DefaultLogger } from '../logging/DefaultLogger';
-import { ILogger, Logger } from '../logging/Logger';
-import { Headers } from '../headers/Headers';
-import * as RequestUtils from './RequestUtils';
-import { Cookies } from '../cookies/Cookies';
-import { HttpErrorCodes } from './HttpErrorCodes';
-import { NetError } from './Errors';
+import { IHttpRequest, HttpRequest } from '../../models/HttpRequest.js';
+import { IRequestAuthorization } from '../../models/RequestAuthorization.js';
+import { IHostRule, HostRule } from '../../models/HostRule.js';
+import { IRequestCertificate } from '../../models/ClientCertificate.js';
+import { SentRequest } from '../../models/SentRequest.js';
+import { ArcResponse } from '../../models/ArcResponse.js';
+import { ErrorResponse } from '../../models/ErrorResponse.js';
+import { RequestsSize } from '../../models/RequestsSize.js';
+import { HttpResponse } from '../../models/HttpResponse.js';
+import { ResponseRedirect } from '../../models/ResponseRedirect.js';
+import { RequestLog, IRequestLog } from '../../models/RequestLog.js';
+import { RequestTime } from '../../models/RequestTime.js';
+import { ResponseAuthorization } from '../../models/ResponseAuthorization.js';
+import { DefaultLogger } from '../logging/DefaultLogger.js';
+import { ILogger, Logger } from '../logging/Logger.js';
+import { Headers } from '../headers/Headers.js';
+import * as RequestUtils from './RequestUtils.js';
+import { Cookies } from '../cookies/Cookies.js';
+import { HttpErrorCodes } from './HttpErrorCodes.js';
+import { NetError } from './Errors.js';
 
 export interface HttpEngineOptions {
   /**
    * The authorization configuration to apply to the request.
    */
-  authorization?: IRequestAuthorization;
+  authorization?: IRequestAuthorization[];
   /**
    * When set it validates certificates during request.
    */

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Entity } from './base';
+import { Entity } from './base.js';
 
 /**
  * @deprecated

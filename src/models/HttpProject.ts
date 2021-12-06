@@ -1,16 +1,16 @@
-import { Environment, IEnvironment } from './Environment';
-import { License, ILicense } from './License';
-import { Provider, IProvider } from './Provider';
-import { IThing, Thing, Kind as ThingKind } from './Thing';
-import { ProjectItem, IProjectItem } from './ProjectItem';
-import { IProjectFolder, ProjectFolder, Kind as ProjectFolderKind } from './ProjectFolder';
-import { IProjectRequest, ProjectRequest, Kind as ProjectRequestKind } from './ProjectRequest';
-import { ProjectSchema, IProjectSchema } from './ProjectSchema';
-import { Request } from './Request';
-import v4 from '../lib/uuid';
-import * as PatchUtils from './PatchUtils';
-import { ARCSavedRequest } from './legacy/request/ArcRequest';
-import { ArcLegacyProject } from './legacy/models/ArcLegacyProject';
+import { Environment, IEnvironment } from './Environment.js';
+import { License, ILicense } from './License.js';
+import { Provider, IProvider } from './Provider.js';
+import { IThing, Thing, Kind as ThingKind } from './Thing.js';
+import { ProjectItem, IProjectItem } from './ProjectItem.js';
+import { IProjectFolder, ProjectFolder, Kind as ProjectFolderKind } from './ProjectFolder.js';
+import { IProjectRequest, ProjectRequest, Kind as ProjectRequestKind } from './ProjectRequest.js';
+import { ProjectSchema, IProjectSchema } from './ProjectSchema.js';
+import { Request } from './Request.js';
+import v4 from '../lib/uuid.js';
+import * as PatchUtils from './PatchUtils.js';
+import { ARCSavedRequest } from './legacy/request/ArcRequest.js';
+import { ArcLegacyProject } from './legacy/models/ArcLegacyProject.js';
 
 export type HttpProjectKind = 'ARC#HttpProject';
 export const Kind = 'ARC#HttpProject';
@@ -565,6 +565,7 @@ export class HttpProject {
     let finalRequest;
     if (request instanceof ProjectRequest) {
       finalRequest = request;
+      finalRequest.project = this;
     } else {
       finalRequest = new ProjectRequest(this, request);
     }
@@ -894,5 +895,67 @@ export class HttpProject {
       this.provider = new Provider();
     }
     return this.provider;
+  }
+
+  /**
+   * @returns On the project level this always returns undefined.
+   */
+  getParent(): ProjectFolder | HttpProject | undefined {
+    return undefined;
+  }
+
+  /**
+   * Reads the list of environments from then selected folder up to the project environments.
+   * It stops going up in the project structure when selected environment has the `encapsulated`
+   * property set to true.
+   * The environments are ordered from the top-most level to the selected folder.
+   * 
+   * When the name is not specified it selects (in order): 
+   * - the first environment from the folder that is being executed; OR
+   * - the first environment from the project
+   * 
+   * @param nameOrKey The name or the key of the environment to select.
+   * @param folderKey The key of the folder to collect the environments for.
+   */
+  async readEnvironments(nameOrKey?: string, folderKey?: string): Promise<Environment[]> {
+    const result: Environment[] = [];
+
+    const root = folderKey ? this.findFolder(folderKey, { keyOnly: true }) : this;
+    if (!root) {
+      return result;
+    }
+    if (!nameOrKey) {
+      if (root.kind === ProjectFolderKind) {
+        const { environments } = root;
+        if (Array.isArray(environments) && environments.length) {
+          result.push(environments[0]);
+          return result;
+        }
+      } else {
+        const { environments } = this;
+        if (Array.isArray(environments) && environments.length) {
+          result.push(environments[0]);
+          return result;
+        }
+      }
+      return result;
+    }
+
+    let current: HttpProject | ProjectFolder | undefined = root;
+    while (current) {
+      const { environments } = current;
+      if (Array.isArray(environments) && environments.length) {
+        const selected = environments.find(i => i.key === nameOrKey || i.info.name === nameOrKey);
+        if (selected) {
+          result.push(selected);
+          if (selected.encapsulated) {
+            break;
+          }
+        }
+      }
+      current = current.getParent();
+    }
+
+    return result.reverse();
   }
 }

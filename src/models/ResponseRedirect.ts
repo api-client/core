@@ -1,6 +1,6 @@
-import { IHttpResponse, HttpResponse, Kind as ResponseKind } from './HttpResponse';
-import { IRequestTime, RequestTime } from './RequestTime';
-import { ResponseRedirect as LegacyRedirect } from './legacy/request/ArcResponse'
+import { IHttpResponse, HttpResponse, Kind as ResponseKind } from './HttpResponse.js';
+import { IRequestTime, RequestTime } from './RequestTime.js';
+import { ResponseRedirect as LegacyRedirect } from './legacy/request/ArcResponse.js';
 
 export const Kind = 'ARC#HttpResponseRedirect';
 

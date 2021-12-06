@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { assert } from 'chai';
 import zlib from 'zlib';
-import { NodeEngine, Headers, ArcResponse, IHttpRequest } from '../../index';
+import { NodeEngine, Headers, ArcResponse, IHttpRequest } from '../../index.js';
 
 describe('http-engine', () => {
   describe('Decompression', () => {
