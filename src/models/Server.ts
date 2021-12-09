@@ -4,38 +4,54 @@ export interface IServer {
   kind: 'ARC#Server';
   /**
    * The base URI of the server.
+   * 
    * Note, the URL can contain URI templates (e.g. `http://{host}.api.com/v1`)
+   * In this case the variable is replaced with the system or project variables.
+   * 
+   * For simplicity, the `uri` can be the full base URI with protocol, host, and the `basePath`
    */
   uri: string;
-  description?: string;
   /**
-   * Usually included in the `url`. When the `url` is missing a protocol 
+   * Usually included in the `uri`. When the `uri` is missing a protocol 
    * this is then used.
    */
   protocol?: string;
   /**
-   * The security to be applied to any request that are going to this server.
+   * The base path for the server. It starts with the `/`.
+   * When set, it is appended to the `uri` value.
    */
-  security?: unknown[];
+  basePath?: string;
+  /**
+   * Optional description of the server.
+   */
+  description?: string;
 }
 
 export class Server {
   kind = Kind;
   /**
    * The base URI of the server.
+   * 
    * Note, the URL can contain URI templates (e.g. `http://{host}.api.com/v1`)
+   * In this case the variable is replaced with the system or project variables.
+   * 
+   * For simplicity, the `uri` can be the full base URI with protocol, host, and the `basePath`
    */
   uri = '';
-  description?: string;
   /**
-   * Usually included in the `url`. When the `url` is missing a protocol 
+   * Usually included in the `uri`. When the `uri` is missing a protocol 
    * this is then used.
    */
   protocol?: string;
   /**
-   * The security to be applied to any request that are going to this server.
+   * The base path for the server. It starts with the `/`.
+   * When set, it is appended to the `uri` value.
    */
-  security?: unknown[];
+  basePath?: string;
+  /**
+   * Optional description of the server.
+   */
+  description?: string;
 
   /**
    * Creates a server definition from a base URI.
@@ -75,12 +91,12 @@ export class Server {
     if (!Server.isServer(init)) {
       throw new Error(`Not an ARC server.`);
     }
-    const { uri, description, protocol, security } = init;
+    const { uri, description, protocol, basePath } = init;
     this.kind = Kind;
     this.uri = uri;
     this.description = description;
     this.protocol = protocol;
-    this.security = security;
+    this.basePath = basePath;
   }
 
   /**
@@ -105,8 +121,32 @@ export class Server {
     if (this.protocol) {
       result.protocol = this.protocol;
     }
-    if (this.security) {
-      result.security = this.security;
+    if (this.basePath) {
+      result.basePath = this.basePath;
+    }
+    return result;
+  }
+
+  /**
+   * Constructs the final URI from the server configuration.
+   */
+  readUri(): string {
+    const { uri, protocol, basePath } = this;
+    let result = '';
+    if (!uri) {
+      return result;
+    }
+    
+    let tmp = uri;
+    if (protocol && !uri.includes('://')) {
+      tmp = `${protocol}//${uri}`;
+    }
+    result = tmp;
+    if (basePath) {
+      if (result.endsWith('/')) {
+        result = result.substring(0, result.length - 1);
+      }
+      result += basePath.startsWith('/') ? basePath : `/${basePath}`
     }
     return result;
   }

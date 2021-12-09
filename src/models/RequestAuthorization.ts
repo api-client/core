@@ -1,4 +1,4 @@
-import { AuthorizationSettingsUnion } from './Authorization.js';
+import { IAuthorizationSettingsUnion, AuthorizationType } from './Authorization.js';
 import { RequestAuthorization as LegacyAuthorization } from './legacy/request/ArcRequest.js';
 
 export const Kind = 'ARC#RequestAuthorization';
@@ -11,11 +11,11 @@ export interface IRequestAuthorization {
   /**
    * Authorization configuration
    */
-  config: AuthorizationSettingsUnion;
+  config: IAuthorizationSettingsUnion;
   /**
    * The name of the authorization
    */
-  type: string;
+  type: AuthorizationType;
   /**
    * Whether the authorization is enabled.
    */
@@ -32,11 +32,11 @@ export class RequestAuthorization {
   /**
    * Authorization configuration
    */
-  config?: AuthorizationSettingsUnion;
+  config?: IAuthorizationSettingsUnion;
   /**
    * The name of the authorization
    */
-  type?: string;
+  type?: AuthorizationType;
   /**
    * Whether the authorization is enabled.
    */
@@ -47,7 +47,7 @@ export class RequestAuthorization {
    */
   valid?: boolean;
 
-  static fromTypedConfig(type: string, config: AuthorizationSettingsUnion, valid=true): RequestAuthorization {
+  static fromTypedConfig(type: AuthorizationType, config: IAuthorizationSettingsUnion, valid=true): RequestAuthorization {
     return new RequestAuthorization({
       kind: Kind,
       config,
@@ -62,7 +62,7 @@ export class RequestAuthorization {
       kind: Kind,
       config: info.config,
       enabled: true,
-      type: info.type,
+      type: info.type as AuthorizationType,
       valid: info.valid,
     });
   }
@@ -81,7 +81,7 @@ export class RequestAuthorization {
         kind: Kind,
         config: {},
         enabled: false,
-        type: '',
+        type: '' as AuthorizationType,
         valid: true,
       };
     }
@@ -107,7 +107,7 @@ export class RequestAuthorization {
       kind: Kind,
       config: this.config || {},
       enabled: this.enabled || false,
-      type: this.type || '',
+      type: this.type || '' as AuthorizationType,
       valid: this.valid || true,
     };
     return result;

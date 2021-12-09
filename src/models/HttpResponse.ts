@@ -1,7 +1,6 @@
 import { SerializablePayload } from './SerializablePayload.js';
-import { Payload } from '../lib/transformers/PayloadSerializer.js';
+import { Payload, PayloadSerializer } from '../lib/transformers/PayloadSerializer.js';
 import { HTTPResponse as LegacyHttpResponse } from './legacy/request/ArcResponse.js';
-import { PayloadSerializer } from '../lib/transformers/PayloadSerializer.js';
 import { Normalizer } from './legacy/Normalizer.js';
 
 export const Kind = 'ARC#HttpResponse';
@@ -132,5 +131,13 @@ export class HttpResponse extends SerializablePayload {
       result.payload = this.payload;
     }
     return result;
+  }
+
+  /**
+   * A shortcut function to create an instance from a response object and to read the payload of it as string.
+   */
+  static readPayloadAsString(info: IHttpResponse): Promise<string | undefined> {
+    const request = new HttpResponse(info);
+    return request.readPayloadAsString();
   }
 }

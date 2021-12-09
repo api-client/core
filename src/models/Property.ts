@@ -58,6 +58,25 @@ export class Property {
     return ['string', 'integer', 'float', 'nil', 'boolean', 'date', 'datetime', 'time', 'enum'];
   }
 
+  /**
+   * Creates an instance of a property recognizing the type of the `value`.
+   * It only works for primitive values.
+   * 
+   * @param name The name of the property
+   * @param value The value of the property. Default to an empty string which is the same as calling `Property.String()`.
+   * @param enabled Whether the property is enabled.
+   */
+  static fromType(name = '', value:unknown = '', enabled = true): Property {
+    const type = typeof value;
+    if (type === 'boolean') {
+      return Property.Boolean(name, value as boolean, enabled);
+    }
+    if (type === 'number') {
+      return Property.Integer(name, value as number, enabled);
+    }
+    return Property.String(name, value as string, enabled);
+  }
+
   static String(name = '', value?: string, enabled = true): Property {
     return new Property({
       kind: Kind,

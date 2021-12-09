@@ -106,8 +106,8 @@ export class ProjectRunner {
     if (this.masterEnvironment) {
       env = [this.masterEnvironment];
     } else {
-      const folderId = this.root?.kind === ProjectFolderKind ? (this.root as ProjectFolder).key : undefined;
-      env = await this.project.readEnvironments(nameOrKey, folderId);
+      const folderKey = this.root?.kind === ProjectFolderKind ? (this.root as ProjectFolder).key : undefined;
+      env = await this.project.readEnvironments({ nameOrKey, folderKey });
     }
     return env;
   }
@@ -121,14 +121,7 @@ export class ProjectRunner {
     environments.forEach((environment) => {
       const { server, variables: envVariables } = environment;
       if (server) {
-        const { protocol, uri } = server;
-        if (uri) {
-          let tmp = uri;
-          if (protocol && !uri.includes('://')) {
-            tmp = `${protocol}//${uri}`;
-          }
-          baseUri = tmp;
-        }
+        baseUri = server.readUri();
       }
       if (envVariables.length) {
         envVariables.forEach((item) => {

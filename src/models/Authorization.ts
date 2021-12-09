@@ -477,4 +477,5 @@ export interface IPassThroughAuthorization {
 export interface IRamlCustomAuthorization extends IPassThroughAuthorization {
 }
 
-export type AuthorizationSettingsUnion = IBasicAuthorization | IBearerAuthorization | INtlmAuthorization | IDigestAuthorization | IOAuth1Authorization | IOAuth2Authorization | ICCAuthorization | IApiKeyAuthorization | IPassThroughAuthorization | IRamlCustomAuthorization | IOidcAuthorization;
+export type IAuthorizationSettingsUnion = IBasicAuthorization | IBearerAuthorization | INtlmAuthorization | IDigestAuthorization | IOAuth1Authorization | IOAuth2Authorization | ICCAuthorization | IApiKeyAuthorization | IPassThroughAuthorization | IRamlCustomAuthorization | IOidcAuthorization;
+export type AuthorizationType = 'basic' | 'bearer' | 'ntlm' | 'digest' | 'oauth 1' | 'oauth 2' | 'client certificate' | 'api key' | 'pass through' | 'raml custom' | 'open id';

@@ -1,4 +1,5 @@
-import { ProjectDefinitionProperty, IProjectDefinitionProperty } from './ProjectDefinitionProperty.js';
+import { ProjectParent } from './ProjectParent.js';
+import { IProjectDefinitionProperty } from './ProjectDefinitionProperty.js';
 import { Environment, IEnvironment } from './Environment.js';
 import { ProjectItem, IProjectItem } from './ProjectItem.js';
 import { ProjectRequest, Kind as ProjectRequestKind, IProjectRequest } from './ProjectRequest.js';
@@ -50,7 +51,7 @@ export interface IProjectFolder extends IProjectDefinitionProperty {
 /**
  * Represents a folder, a group of requests or other folders, in a folder.
  */
-export class ProjectFolder implements ProjectDefinitionProperty {
+export class ProjectFolder extends ProjectParent {
   /**
    * The default name of the folder.
    */
@@ -59,23 +60,10 @@ export class ProjectFolder implements ProjectDefinitionProperty {
   }
 
   kind = Kind;
-  key = '';
   /**
    * A reference to the top level project object.
    */
   project: HttpProject;
-
-  info: Thing = new Thing({ kind: ThingKind });
-  /**
-   * The ordered list of HTTP requests / folders in the projects.
-   * The UI uses this to manipulate the view without changing the definitions.
-   */
-  items: ProjectItem[] = [];
-  /**
-   * The environments defined for this project.
-   * If not set it is inherited from the parent.
-   */
-  environments: Environment[] = [];
   /**
    * Timestamp when the folder was last updated.
    */
@@ -86,6 +74,7 @@ export class ProjectFolder implements ProjectDefinitionProperty {
   created = 0;
 
   constructor(project: HttpProject, input?: string | IProjectFolder) {
+    super();
     this.project = project;
     let init: IProjectFolder;
     if (typeof input === 'string') {

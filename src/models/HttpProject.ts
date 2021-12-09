@@ -1,3 +1,5 @@
+import { ProjectParent } from './ProjectParent.js';
+import { IProjectDefinitionProperty } from './ProjectDefinitionProperty.js';
 import { Environment, IEnvironment } from './Environment.js';
 import { License, ILicense } from './License.js';
 import { Provider, IProvider } from './Provider.js';
@@ -84,12 +86,28 @@ export interface IProjectMoveOptions {
   parent?: string;
 }
 
+export interface IReadEnvironmentOptions {
+  /**
+   * The name or the key of the environment to select.
+   * 
+   * When the name is not specified it selects: 
+   * - the first environment from the project, if any
+   * - any parent folder's first environment to the requested folder, if any (if folderKey is set)
+   * - the requested folder's first environment, if any (if folderKey is set)
+   */
+  nameOrKey?: string;
+  /**
+   * The key of the folder to collect the environments for.
+   */
+  folderKey?: string;
+}
+
 /**
  * The new definition of a project in ARC.
  * Note, this is not the same as future `ApiProject` which is reserved for building APIs
  * using RAML or OAS.
  */
-export interface IHttpProject {
+export interface IHttpProject extends IProjectDefinitionProperty {
   kind: HttpProjectKind;
   /**
    * The license information for this HTTP project.
@@ -128,30 +146,17 @@ export interface IHttpProject {
 /**
  * An instance of an HttpProject.
  */
-export class HttpProject {
+export class HttpProject extends ProjectParent {
   kind = Kind;
   private initEnvironments?: Environment[];
-  /**
-   * The environments defined for this project.
-   */
-  environments: Environment[] = [];
   /**
    * The license information for this HTTP project.
    */
   license?: License;
   /**
-   * The basic information about the project.
-   */
-  info: Thing = new Thing({ kind: ThingKind, name: '' });
-  /**
    * Information about project provider.
    */
   provider?: Provider;
-  /**
-   * The ordered list of HTTP requests / folders in the projects.
-   * The UI uses this to manipulate the view without changing the definitions.
-   */
-  items: ProjectItem[] = [];
   /**
    * The list of all requests stored in this project.
    * Note, this is not used to visualized the request in the UI.
@@ -159,7 +164,6 @@ export class HttpProject {
    * The `items` property is used to build the view.
    */
   definitions: (ProjectRequest | ProjectFolder)[] = [];
-
   /**
    * May be set post project loading. THe list of items id that have no corresponding definitions.
    */
@@ -216,6 +220,7 @@ export class HttpProject {
    * @param environments Optional list of environments to use with this project. It overrides environments stored in the project definition.
    */
   constructor(input?: string | IHttpProject, environments?: IEnvironment[]) {
+    super();
     if (Array.isArray(environments)) {
       this.initEnvironments = environments.map(i => new Environment(i));
     }
@@ -227,6 +232,7 @@ export class HttpProject {
     } else {
       init = {
         kind: Kind,
+        key: v4(), 
         definitions: [],
         environments: [],
         items: [],
@@ -248,7 +254,8 @@ export class HttpProject {
     if (!init || !init.definitions || !init.environments || !init.items) {
       throw new Error(`Not an ARC project.`);
     }
-    const { definitions, environments, items, info, license, provider, schemas } = init;
+    const { key = v4(), definitions, environments, items, info, license, provider, schemas } = init;
+    this.key = key;
     this.environments = [];
     if (Array.isArray(environments)) {
       this.environments = environments.map(i => new Environment(i));
@@ -317,6 +324,7 @@ export class HttpProject {
   toJSON(): IHttpProject {
     const result: IHttpProject = {
       kind: Kind,
+      key: this.key,
       definitions: [],
       environments: [],
       items: [],
@@ -904,40 +912,32 @@ export class HttpProject {
     return undefined;
   }
 
+  attachedCallback(): void {
+    // ...
+  }
+
+  detachedCallback(): void {
+    // ...
+  }
+
+  getProject(): HttpProject {
+    return this;
+  }
+
   /**
    * Reads the list of environments from then selected folder up to the project environments.
    * It stops going up in the project structure when selected environment has the `encapsulated`
    * property set to true.
    * The environments are ordered from the top-most level to the selected folder.
    * 
-   * When the name is not specified it selects (in order): 
-   * - the first environment from the folder that is being executed; OR
-   * - the first environment from the project
-   * 
-   * @param nameOrKey The name or the key of the environment to select.
-   * @param folderKey The key of the folder to collect the environments for.
+   * @param opts The environment read options
    */
-  async readEnvironments(nameOrKey?: string, folderKey?: string): Promise<Environment[]> {
+  async readEnvironments(opts: IReadEnvironmentOptions = {}): Promise<Environment[]> {
     const result: Environment[] = [];
+    const { folderKey, nameOrKey } = opts;
 
     const root = folderKey ? this.findFolder(folderKey, { keyOnly: true }) : this;
     if (!root) {
-      return result;
-    }
-    if (!nameOrKey) {
-      if (root.kind === ProjectFolderKind) {
-        const { environments } = root;
-        if (Array.isArray(environments) && environments.length) {
-          result.push(environments[0]);
-          return result;
-        }
-      } else {
-        const { environments } = this;
-        if (Array.isArray(environments) && environments.length) {
-          result.push(environments[0]);
-          return result;
-        }
-      }
       return result;
     }
 
@@ -945,7 +945,7 @@ export class HttpProject {
     while (current) {
       const { environments } = current;
       if (Array.isArray(environments) && environments.length) {
-        const selected = environments.find(i => i.key === nameOrKey || i.info.name === nameOrKey);
+        const selected = nameOrKey ? environments.find(i => i.key === nameOrKey || i.info.name === nameOrKey) : environments[0];
         if (selected) {
           result.push(selected);
           if (selected.encapsulated) {

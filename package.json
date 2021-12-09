@@ -26,6 +26,7 @@
     "@commitlint/config-conventional": "^14.1.0",
     "@esm-bundle/chai": "^4.3.4-fix.0",
     "@types/chai": "^4.2.22",
+    "@types/chai-as-promised": "^7.1.4",
     "@types/cors": "^2.8.12",
     "@types/fs-extra": "^9.0.13",
     "@types/mocha": "^9.0.0",
@@ -37,6 +38,7 @@
     "@web/test-runner": "^0.13.21",
     "@web/test-runner-playwright": "^0.8.8",
     "chai": "^4.3.4",
+    "chai-as-promised": "^7.1.1",
     "concurrently": "^6.4.0",
     "cors": "^2.8.5",
     "eslint": "^8.2.0",
@@ -63,7 +65,7 @@
     "test:mocha": "mocha",
     "test:mocha:watch": "mocha --watch",
     "test:mocha:watch2": "node scripts/test-node-watch.js",
-    "test:mocha:watch3": "mocha --require ts-node/register --extensions ts,tsx --watch --watch-files src 'test/**/*.node.test.ts'",
+    "test:mocha:watch3": "mocha --watch --recursive --parallel",
     "test": "npm run test:mocha && npm run test:browser"
   },
   "husky": {

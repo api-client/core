@@ -33,6 +33,10 @@ export interface IEnvironment {
    * By default an environment can be extended by the parent object's values.
    */
   encapsulated?: boolean;
+  /**
+   * The security to be applied to all requests that are going to this environment.
+   */
+  security?: unknown;
 }
 
 export const Kind = 'ARC#Environment';
@@ -67,6 +71,10 @@ export class Environment {
    * When encapsulation is disabled you can, for example, skip server definition and only overwrite variables. 
    */
   encapsulated = false;
+  /**
+   * The security to be applied to all requests that are going to this server.
+   */
+  security?: unknown;
   
   /**
    * Creates a new Environment object from a name.
@@ -135,10 +143,11 @@ export class Environment {
     if (!Environment.isEnvironment(init)) {
       throw new Error(`Not an ARC environment.`);
     }
-    const { key=v4(), variables, info, server, encapsulated=false } = init;
+    const { key=v4(), variables, info, server, encapsulated=false, security } = init;
     this.kind = Kind;
     this.key = key;
     this.encapsulated = encapsulated;
+    this.security = security;
     if (Array.isArray(variables)) {
       this.variables = variables.map(i => new Property(i))
     }
@@ -177,18 +186,31 @@ export class Environment {
     if (server) {
       result.server = server.toJSON();
     }
+    if (this.security) {
+      result.security = this.security;
+    }
     return result;
   }
+
+  addVariable(name: string, value: unknown): Property;
+  addVariable(variable: IProperty): Property;
 
   /**
    * Adds a new variable to the list of variables.
    * It makes sure the variables property is initialized.
    */
-  addVariable(variable: IProperty): void {
+  addVariable(variableOrName: IProperty|string, value?: unknown): Property {
     if (!Array.isArray(this.variables)) {
       this.variables = [];
     }
-    this.variables.push(new Property(variable));
+    let prop: Property;
+    if (typeof variableOrName === 'string') {
+      prop = Property.fromType(variableOrName, value);
+    } else {
+      prop = new Property(variableOrName);
+    }
+    this.variables.push(prop);
+    return prop;
   }
 
   /**

@@ -11,9 +11,9 @@ export interface ProjectDefinitionProperty {
   key: string;
   
   /**
-   * A reference to the top level project object.
+   * A reference to the top level project object. Not set in the `HttpProject`. Otherwise it is always set.
    */
-  project: HttpProject;
+  project?: HttpProject;
 
   /**
    * The callback called when the object is attached to a parent.
