@@ -1,10 +1,10 @@
 import { HttpProject } from '../../../models/HttpProject.js';
-import { ProjectRequest, IProjectRequest } from '../../../models/ProjectRequest.js';
+import { ProjectRequest } from '../../../models/ProjectRequest.js';
 import { ProjectFolder, Kind as ProjectFolderKind } from '../../../models/ProjectFolder.js';
 import { Environment } from '../../../models/Environment.js';
 import { Property } from '../../../models/Property.js';
 import { IRequestLog } from '../../../models/RequestLog.js';
-import { VariablesProcessor, EvaluateOptions } from '../variables/VariablesProcessor.js';
+import { VariablesProcessor } from '../variables/VariablesProcessor.js';
 import { NodeEngine } from '../../http-engine/NodeEngine.js';
 import { HttpEngineOptions } from '../../http-engine/HttpEngine.js';
 
@@ -286,6 +286,25 @@ export class ProjectRunner {
         auth[index] = await variablesProcessor.evaluateVariablesWithContext(item, envContext);
       });
     }
+    serialized.expects.url = this.prepareRequestUrl(serialized.expects.url);
     return new ProjectRequest(project, serialized);
+  }
+
+  /**
+   * When defined it applies the serve's base URI to relative URLs.
+   * @param currentUrl The URL to process.
+   */
+  prepareRequestUrl(currentUrl: string): string {
+    const { baseUri } = this;
+    if (!baseUri) {
+      return currentUrl;
+    }
+    if (currentUrl.startsWith('http:') || currentUrl.startsWith('https:')) {
+      return currentUrl;
+    }
+    if (currentUrl.startsWith('/')) {
+      return `${baseUri}${currentUrl}`;
+    }
+    return `${baseUri}/${currentUrl}`;
   }
 }

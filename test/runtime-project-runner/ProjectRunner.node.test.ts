@@ -272,6 +272,60 @@ describe('Runtime', () => {
           assert.equal(body.headers['x-not-included'], 'undefined');
         });
       });
+
+      describe('Base URI', () => {
+        it('applies the base URI to the request from server\'s uri to the variable', async () => {
+          const project = new HttpProject();
+          const env = project.addEnvironment('default');
+          env.addServer(`http://localhost:${httpPort}/v1`);
+          const request = ProjectRequest.fromHttpRequest({
+            url: `{baseUri}/get`,
+            method: 'GET',
+            headers: 'x-test: true',
+          }, project);
+          project.addRequest(request);
+          const runner = new ProjectRunner(project);
+          const result = await runner.run();
+          
+          assert.typeOf(result, 'array', 'returns an array');
+          assert.lengthOf(result, 1, 'has a single result');
+          const [report] = result;
+          assert.typeOf(report, 'object', 'the report is an object');
+          assert.equal(report.key, request.key, 'the report has the key');
+          assert.isUndefined(report.error, 'the report has no error');
+          assert.isUndefined(report.errorMessage, 'the report has no errorMessage');
+  
+          const log = report.log as IRequestLog;
+          assert.typeOf(log, 'object', 'has the log');
+          assert.typeOf(log.response as IArcResponse, 'object', 'has the log.response');
+        });
+
+        it('applies the base URI to the request from server\'s uri without a variable', async () => {
+          const project = new HttpProject();
+          const env = project.addEnvironment('default');
+          env.addServer(`http://localhost:${httpPort}/v1`);
+          const request = ProjectRequest.fromHttpRequest({
+            url: `/get`,
+            method: 'GET',
+            headers: 'x-test: true',
+          }, project);
+          project.addRequest(request);
+          const runner = new ProjectRunner(project);
+          const result = await runner.run();
+          
+          assert.typeOf(result, 'array', 'returns an array');
+          assert.lengthOf(result, 1, 'has a single result');
+          const [report] = result;
+          assert.typeOf(report, 'object', 'the report is an object');
+          assert.equal(report.key, request.key, 'the report has the key');
+          assert.isUndefined(report.error, 'the report has no error');
+          assert.isUndefined(report.errorMessage, 'the report has no errorMessage');
+  
+          const log = report.log as IRequestLog;
+          assert.typeOf(log, 'object', 'has the log');
+          assert.typeOf(log.response as IArcResponse, 'object', 'has the log.response');
+        });
+      });
     });
   });  
 });
