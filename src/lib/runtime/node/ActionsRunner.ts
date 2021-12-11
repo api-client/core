@@ -82,7 +82,7 @@ export class ActionsRunner {
       } else {
         systemVariables = undefined;
       }
-      processor = new VariablesProcessor(this.variables);
+      processor = new VariablesProcessor();
     } else {
       processor = undefined;
       systemVariables = undefined;
@@ -163,7 +163,7 @@ export class ActionsRunner {
       } else {
         systemVariables = undefined;
       }
-      processor = new VariablesProcessor(this.variables);
+      processor = new VariablesProcessor();
     } else {
       processor = undefined;
       systemVariables = undefined;
@@ -215,24 +215,24 @@ export class ActionsRunner {
     if (!config) {
       return copy;
     }
-    const evalOptions: EvaluateOptions = {};
+    
+    const ctx = VariablesProcessor.createContextFromProperties(this.variables);
     if (systemVariables) {
-      const records: Record<string, string> = {};
       Object.keys(systemVariables).forEach(key => {
         const value = systemVariables[key];
         if (value) {
-          records[key] = value;
+          ctx[key] = value;
         }
       });
-      evalOptions.override = records;
     }
+    const context = await processor.buildContext(ctx);
 
-    await processor.evaluateVariables(config, evalOptions);
-    const { source } = (config as any);
-    if (source) {
-      await processor.evaluateVariables(source, evalOptions);
-      if (source.iterator) {
-        await processor.evaluateVariables(source.iterator, evalOptions);
+    copy.config = await processor.evaluateVariablesWithContext(config, context);
+    const typedConfig = (config as any);
+    if (typedConfig.source) {
+      typedConfig.source = await processor.evaluateVariablesWithContext(typedConfig.source, context);
+      if (typedConfig.source.iterator) {
+        typedConfig.source.iterator = await processor.evaluateVariablesWithContext(typedConfig.source.iterator, context);
       }
     }
     return copy;
