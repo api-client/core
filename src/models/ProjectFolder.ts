@@ -327,4 +327,11 @@ export class ProjectFolder extends ProjectParent {
   getProject(): HttpProject {
     return this.project;
   }
+
+  /**
+   * Removes this folder from the project.
+   */
+  remove(): void {
+    this.project.removeFolder(this.key);
+  }
 }

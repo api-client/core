@@ -220,4 +220,11 @@ export class ProjectRequest extends Request implements ProjectDefinitionProperty
   getProject(): HttpProject {
     return this.project;
   }
+
+  /**
+   * Removes this request from the project.
+   */
+  remove(): void {
+    this.project.removeRequest(this.key);
+  }
 }
