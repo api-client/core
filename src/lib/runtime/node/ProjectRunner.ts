@@ -55,6 +55,18 @@ export class ProjectRunner {
   protected systemVariables: Record<string, string> = {};
 
   /**
+   * The variables processor instance.
+   */
+  variablesProcessor = new VariablesProcessor();
+
+  /**
+   * After reading the environment data this is populated
+   * with evaluated by the `VariablesProcessor` context.
+   * This enables storing variables inside variables.
+   */
+  protected envContext: Record<string, string> = {};
+
+  /**
    * @param project The project to execute the requests from.
    * @param environment Optional environment that overrides any other environment definition in the project.
    * When this is set then the environment option from the `run()` function is ignored.
@@ -96,6 +108,8 @@ export class ProjectRunner {
     this.prepareSystemVariables();
     const env = await this.readEnvironments(nameOrKey);
     this.applyVariables(env);
+
+    await this.prepareExecutionContext();
   }
 
   /**
@@ -153,6 +167,22 @@ export class ProjectRunner {
         this.systemVariables[key] = value;
       }
     });
+  }
+
+  /**
+   * Sets the `envContext` with the variables that are finally passed to the request executor.
+   */
+  async prepareExecutionContext(): Promise<void> {
+    const { variables, systemVariables, baseUri } = this;
+    const ctx = VariablesProcessor.createContextFromProperties(variables);
+    Object.keys(systemVariables).forEach((key) => {
+      if (!(key in ctx)) {
+        ctx[key] = systemVariables[key];
+      }
+    });
+    // the `baseUri` is reserved and always set to the environment's `baseUri`.
+    ctx.baseUri = baseUri || '';
+    this.envContext = await this.variablesProcessor.buildContext(ctx);
   }
 
   /**
@@ -242,22 +272,19 @@ export class ProjectRunner {
     const project = request.project;
     const serialized = request.toJSON();
     
-    const { systemVariables, variables } = this;
-    const config = request.getConfig().toJSON();
-    const processor = new VariablesProcessor(variables);
-    const evalOptions: EvaluateOptions = {
-      override: systemVariables,
-    };
+    const { envContext, variablesProcessor } = this;
+    let config = request.getConfig().toJSON();
+    
     // evaluate request configuration
-    await processor.evaluateVariables(config, evalOptions);
+    config = await variablesProcessor.evaluateVariablesWithContext(config, envContext);
     serialized.config = config;
     // evaluate request data
-    await processor.evaluateVariables(serialized.expects, evalOptions);
+    serialized.expects = await variablesProcessor.evaluateVariablesWithContext(serialized.expects, envContext);
     const auth = serialized.authorization;
     if (Array.isArray(auth)) {
-      for (const item of auth) {
-        await processor.evaluateVariables(item, evalOptions);
-      }
+      const ps = auth.map(async (item, index) => {
+        auth[index] = await variablesProcessor.evaluateVariablesWithContext(item, envContext);
+      });
     }
     return new ProjectRequest(project, serialized);
   }

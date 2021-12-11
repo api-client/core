@@ -7,11 +7,7 @@ import { clear } from './Cache.js';
 
 export interface EvaluateOptions {
   /**
-   * A list of variables to override in created context.
-   */
-  override?: Record<string, string>;
-  /**
-   * The execution context to use instead of creating the context≥
+   * The execution context to use instead of creating the context
    */
   context?: Record<string, string>;
   /**
@@ -21,71 +17,108 @@ export interface EvaluateOptions {
   names?: string[];
 }
 
-/**
- * function that tests whether a passed variable contains a variable.
- * @param item The variable to test its value for variables.
- * @returns True when the variable has another variable in the value.
- */
-export const filterToEval = (item: Property): boolean => {
-  const { value } = item;
-  const typedValue = String(value);
-  const isJSLiteral = typedValue.includes('${');
-  const isAPILiteral = !isJSLiteral && typedValue.includes('{');
+export function valueHasVariable(value: string): boolean {
+  let trimmed = value.trim();
+  if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+    // the input here can be a JSON string or a variable.
+    try {
+      // if we can parse the string then this is a JSON string
+      JSON.parse(trimmed);
+      // we trim the first `{` and the last `}` so the rest of this logic can check for existing variables.
+      trimmed = trimmed.substring(1, trimmed.length -1);
+    } catch (e) {
+      // otherwise this must be a variable.
+      return true;
+    }
+  }
+  const isJSLiteral = trimmed.includes('${');
+  const isAPILiteral = !isJSLiteral && trimmed.includes('{');
   return isJSLiteral || isAPILiteral;
-};
+}
 
 export const functionRegex = /(?:\$?{)?([.a-zA-Z0-9_-]+)\(([^)]*)?\)(?:})?/gm;
 export const varValueRe = /^[a-zA-Z0-9_]+$/;
 
 export class VariablesProcessor {
   jexl = new Jexl();
-  variables: Property[];
-  context?: Record<string, string>;
 
   /**
-   * @param variables List of application variables
+   * A helper function to map properties to the context object.
+   * 
+   * The arguments are the lists of `Property`. It starts reading the variables from the right to left,
+   * meaning, variables on the left override variables already defined on the left.
+   * 
+   * ```javascript
+   * const result = VariablesProcessor.createContextFromProperties([Property.String('test1', 'value1')], [Property.String('test1', 'value2')]);
+   * ```
+   * The result has only one variable `test1` with value `value1` because this value if left most in the arguments list.
+   * 
+   * When a property with the same name is repeated in the same group then the last value wins.
+   * 
+   * Note, variables without a name, not enabled, or which `value` is undefined are ignored.
    */
-  constructor(variables: Property[]) {
-    this.variables = variables;
-  }
-
-  /**
-   * Requests for a variables list from the variables manager
-   * and creates a context for Jexl.
-   *
-   * If the `variables-manager` is not present it returns empty object.
-   *
-   * @param override Optional map of variables to use to override the built context.
-   * @return Promise resolved to the context to be passed to Jexl.
-   */
-  async buildContext(override: Record<string, string> = {}): Promise<Record<string, string>> {
-    const copy = { ...override };
-    let { variables } = this;
+  static createContextFromProperties(...input: Property[][]): Record<string, string> {
     const result: Record<string, string> = {};
-    if (!variables || !variables.length) {
-      return result;
-    }
-    // Filter out disabled items
-    variables = variables.filter((item) => item.enabled);
-    variables = this.overrideContext(variables, copy);
-    return this._processContextVariables(result, variables);
-  }
-
-  /**
-   * Overrides variables with passed values.
-   * @param variables Variables to
-   * @param override Values to override the variables with
-   * @return A copy the `variables` object
-   */
-  overrideContext(variables: Property[], override: Record<string, string>): Property[] {
-    const copy = { ...override };
-    const result: Property[] = [...variables];
-    Object.keys(copy).forEach((key) => {
-      const item = Property.String(key);
-      item.value = copy[key];
-      result.push(item);
+    input.reverse().forEach((group) => {
+      group.forEach((item) => {
+        const { enabled, name, value } = item;
+        if (!enabled || !name || value === undefined) {
+          return;
+        }
+        result[name] = value as string;
+      });
     });
     return result;
+  }
+
+  /**
+   * Processes the context itself. This way the context can also contain variables.
+   *
+   * @return Promise resolved to the context to be passed to Jexl.
+   */
+  async buildContext(unprocessedContext: Record<string, string>): Promise<Record<string, string>> {
+    const result: Record<string, string> = {};
+    return this._processContextVariables(result, unprocessedContext);
+  }
+
+  /**
+   * Processes variables in the context recursively.
+   *
+   * @param result A result to where to put the values.
+   * @param variables The map of current variables
+   * @param runCount Current run count in the recursive function. It stops executing after second run.
+   */
+  async _processContextVariables(result: Record<string, string>, variables: Record<string, string>, runCount: number = 0): Promise<Record<string, string>> {
+    let needsRerun = false;
+    const keys = Object.keys(variables);
+    const keysWithVariables: string[] = [];
+
+    // In the first run put all variables that does not require processing to the list of results
+    for (const key of keys) {
+      const value = variables[key];
+      if (!valueHasVariable(String(value))) {
+        result[key] = value;
+      } else {
+        keysWithVariables.push(key);
+      }
+    }
+    if (!keysWithVariables.length) {
+      return result;
+    }
+
+    for (const key of keysWithVariables) {
+      const value = variables[key];
+      const evaluated = await this.evaluateWithContext(result, value);
+      result[key] = evaluated;
+      if (!needsRerun && valueHasVariable(evaluated)) {
+        needsRerun = true;
+      }
+    }
+    if (!needsRerun || runCount >= 2) {
+      return result;
+    }
+    runCount += 1;
+    return this._processContextVariables(result, variables, runCount);
   }
 
   /**
@@ -96,13 +129,17 @@ export class VariablesProcessor {
   }
 
   /**
-   * Evaluates a value against the variables in the current environment
+   * Evaluates a value against the passed variables.
+   * 
+   * Use this method when the context is not evaluated against itself. You can manually
+   * build context with `buildContext()` and call `evaluateWithContext()` for additional 
+   * performance improvement.
    *
    * @param value A value to evaluate
-   * @param options Execution options
+   * @param unprocessedContext The context (or variables) to use when evaluating the value.
    * @return Promise that resolves to the evaluated value.
    */
-  async evaluateVariable(value: string, options: EvaluateOptions = {}): Promise<string> {
+  async evaluateVariable(value: string, unprocessedContext: Record<string, string>): Promise<string> {
     const typeOf = typeof value;
     // Non primitives + null
     if (typeOf === 'object') {
@@ -111,38 +148,56 @@ export class VariablesProcessor {
     if (typeOf !== 'string') {
       value = String(value);
     }
-    const { context, override } = options;
-    const ctx = context || await this.buildContext(override);
+    const ctx = await this.buildContext(unprocessedContext);
     return this.evaluateWithContext(ctx, value);
   }
 
   /**
-   * Evaluates variables on the passed object.
+   * Evaluates the object against the passed variables.
    * 
    * Note, it only performs a shallow evaluation. Deep objects are not evaluated.
+   * 
+   * Use this method when the context is not evaluated against itself. You can manually
+   * build context with `buildContext()` and call `evaluateVariablesWithContext()` for additional 
+   * performance improvement.
    *
    * @param obj The object to evaluate.
-   * @param options Execution options
-   * @return Promise resolved to the evaluated object.
+   * @param unprocessedContext The context (or variables) to use when evaluating the value.
+   * @return Copy of the passed object with the evaluated values.
    */
-  async evaluateVariables(obj: object, options: EvaluateOptions = {}): Promise<any> {
-    const init = { ...options };
-    const names = [...(init.names || Object.keys(obj))];
-    init.names = names
-    if (!init.context) {
-      // this should be done ony once, not each time it evaluates a variable.
-      init.context = await this.buildContext(init.override);
-    }
+  async evaluateVariables<T>(obj: T, unprocessedContext: Record<string, string>, names?: string[]): Promise<T> {
+    const ctx = await this.buildContext(unprocessedContext);
+    return this.evaluateVariablesWithContext(obj, ctx, names);
+  }
+
+  /**
+   * Evaluates the object against the passed variables.
+   * 
+   * Note, it only performs a shallow evaluation. Deep objects are not evaluated.
+   * 
+   * This method is to be used when the passed context is already evaluated against itself.
+   * 
+   * @param obj The object to evaluate.
+   * @param context The evaluated context. use `buildContext()` to prepare the values.
+   * @param names The list of names of variables to evaluate. Note, this function changes this array.
+   * @returns Copy of the passed object with the evaluated values.
+   */
+  async evaluateVariablesWithContext<T>(obj: T, context: Record<string, string>, names?: string[]): Promise<T> {
+    const result = { ...obj };
+    names = names || Object.keys(result);
     const prop = names.shift();
     if (!prop) {
-      return obj;
+      return result;
     }
-    const typed = obj as any;
+    const typed = result as any;
     if (!typed[prop]) {
-      return this.evaluateVariables(obj, init);
+      // just process next name.
+      return this.evaluateVariablesWithContext(result, context, names);
     }
-    typed[prop] = await this.evaluateVariable(typed[prop], init);
-    return this.evaluateVariables(obj, init);
+    if (typeof typed[prop] === 'string') {
+      typed[prop] = await this.evaluateWithContext(context, typed[prop]);
+    }
+    return this.evaluateVariablesWithContext(result, context, names);
   }
 
   /**
@@ -153,7 +208,7 @@ export class VariablesProcessor {
    */
   async evaluateWithContext(context: Record<string, string>, value: string): Promise<string> {
     value = this._upgradeLegacy(value);
-    value = this._evalFunctions(value);
+    value = this._evalFunctions(value, context);
     if (!value) {
       return value;
     }
@@ -194,46 +249,6 @@ export class VariablesProcessor {
       // ...
     }
     return returnValue;
-  }
-
-  /**
-   * Processes variables in the context recursively.
-   *
-   * @param result A result to where put the values.
-   * @param variables A list of current variables
-   * @param requireEvaluation A list of variables that require evaluation
-   * @param runCount Current run count in the recursive function. It stops executing after second run.
-   * @returns Evaluated `result` value.
-   */
-  async _processContextVariables(result: Record<string, string>, variables: Property[], requireEvaluation?: Property[], runCount?: number): Promise<Record<string, string>> {
-    if (!requireEvaluation) {
-      requireEvaluation = variables.filter(filterToEval);
-    }
-    variables.forEach((item) => {
-      result[item.name] = item.value as string;
-    });
-    if (requireEvaluation.length === 0) {
-      return result;
-    }
-    // this array should be sorted so items that should be evaluated first
-    // because are a dependencies of other expressions.
-    for (let i = 0, len = requireEvaluation.length; i < len; i++) {
-      const item = requireEvaluation[i];
-      const value = await this.evaluateVariable(item.value as string, {
-        context: result,
-      });
-      result[item.name] = value;
-      item.value = value;
-    }
-
-    requireEvaluation = requireEvaluation.filter(filterToEval);
-    runCount = runCount || 1;
-    if (requireEvaluation.length === 0 || runCount >= 2) {
-      this.context = result;
-      return result;
-    }
-    runCount += 1;
-    return this._processContextVariables(result, variables, requireEvaluation, runCount);
   }
 
   /**
@@ -278,7 +293,7 @@ export class VariablesProcessor {
    * @returns Evaluated value with removed functions.
    * @throws Error if a function is not supported.
    */
-  _evalFunctions(value: string): string {
+  _evalFunctions(value: string, context: Record<string, string>): string {
     if (!value) {
       return '';
     }
@@ -295,7 +310,7 @@ export class VariablesProcessor {
       if (argsStr) {
         args = argsStr.split(',').map(item => item.trim());
       }
-      const _value = this._callFn(fnName, args);
+      const _value = this._callFn(context, fnName, args);
       value = value.replace(matches[0], String(_value));
       functionRegex.lastIndex -= matches[0].length - String(_value).length;
     }
@@ -309,20 +324,20 @@ export class VariablesProcessor {
    * @param args Arguments find in the expression.
    * @return Result of calling a function. Always a string.
    */
-  _callFn(fnName: string, args?: string[]): string | number {
+  _callFn(context: Record<string, string>, fnName: string, args?: string[]): string | number {
     const dotIndex = fnName.indexOf('.');
     if (dotIndex !== -1) {
-      const namespace = fnName.substr(0, dotIndex);
-      const name = fnName.substr(dotIndex + 1);
+      const namespace = fnName.substring(0, dotIndex);
+      const name = fnName.substring(dotIndex + 1);
       if (['Math', 'String'].indexOf(namespace) !== -1) {
         try {
-          return this._callNamespaceFunction(namespace, name, args);
+          return this._callNamespaceFunction(context, namespace, name, args);
         } catch (e) {
           throw new Error(`Unsupported function ${fnName}`);
         }
       }
     } else {
-      fnName = fnName[0].toUpperCase() + fnName.substr(1);
+      fnName = fnName[0].toUpperCase() + fnName.substring(1);
       if (fnName in EvalFunctions) {
         return EvalFunctions[fnName](this, args);
       }
@@ -339,8 +354,7 @@ export class VariablesProcessor {
    * @param args A list of arguments to call
    * @returns Processed value.
    */
-  _callNamespaceFunction(namespace: string, fn: string, args?: string[]): string | number {
-    const { context } = this;
+  _callNamespaceFunction(context: Record<string, string>, namespace: string, fn: string, args?: string[]): string | number {
     if (context && args) {
       args = args.map(arg => this._applyArgumentsContext(arg, context));
     }
@@ -386,12 +400,11 @@ export class VariablesProcessor {
 
   _applyArgumentsContext(arg: any, context: Record<string, string>): any {
     const typedValue = String(arg);
-    const jSLiteralIndex = typedValue.indexOf('${');
-    const apiLiteralIndex = typedValue.indexOf('{');
-    if (jSLiteralIndex === 0 || apiLiteralIndex === 0) {
-      const index = jSLiteralIndex === 0 ? 2 : 1;
-      const postIndex = jSLiteralIndex === 0 ? 3 : 2;
-      const varName = arg.substr(index, arg.length - postIndex);
+    const hasJsLiteral = typedValue.startsWith('${');
+    const hasApiLiteral = typedValue.startsWith('{');
+    if (hasJsLiteral|| hasApiLiteral) {
+      const index = hasJsLiteral ? 2 : 1;
+      const varName = arg.substring(index, arg.length - 1);
       if (this.isValidName(varName) && context[varName]) {
         return context[varName];
       }
@@ -416,7 +429,7 @@ export class VariablesProcessor {
       try {
         // to handle `{x} something {y}`
         JSON.parse(typedValue);
-        typedValue = typedValue.substr(1, typedValue.length - 2);
+        typedValue = typedValue.substring(1, typedValue.length - 1);
       } catch (e) {
         isJsonValue = false;
       }
@@ -461,7 +474,7 @@ export class VariablesProcessor {
         return value;
       }
       if (!isAPILiteral) {
-        variable = variable.substr(1);
+        variable = variable.substring(1);
       }
       if (!this.isValidName(variable)) {
         continue;
