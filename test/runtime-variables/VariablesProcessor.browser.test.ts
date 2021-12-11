@@ -22,7 +22,7 @@ describe('Runtime', () => {
       describe('Variables processing', () => {
         let instance: VariablesProcessor;
         before(() => {
-          instance = new VariablesProcessor(variables);
+          instance = new VariablesProcessor();
         });
 
         afterEach(() => {
@@ -69,7 +69,8 @@ describe('Runtime', () => {
           [JSON.stringify({data: { complex: true }}, null, 2), '{\n  "data": {\n    "complex": true\n  }\n}'],
         ].forEach(([src, value]) => {
           it(`${src}`, async () => {
-            const result = await instance.evaluateVariable(src);
+            const ctx = VariablesProcessor.createContextFromProperties(variables);
+            const result = await instance.evaluateVariable(src, ctx);
             assert.equal(result, value);
           });
         });
@@ -81,7 +82,8 @@ describe('Runtime', () => {
           ['API syntax: {random()}', /API syntax: \d+/],
         ].forEach(([src, value]) => {
           it(`${src}`, async () => {
-            const result = await instance.evaluateVariable(src as string);
+            const ctx = VariablesProcessor.createContextFromProperties(variables);
+            const result = await instance.evaluateVariable(src as string, ctx);
             assert.match(result, value as RegExp);
           });
         });
@@ -90,7 +92,7 @@ describe('Runtime', () => {
       describe('_applyArgumentsContext()', () => {
         let instance: VariablesProcessor;
         before(() => {
-          instance = new VariablesProcessor(variables);
+          instance = new VariablesProcessor();
         });
 
         it('returns the same string if not a variable', () => {
@@ -140,22 +142,19 @@ describe('Runtime', () => {
         
         let instance: VariablesProcessor;
         before(() => {
-          instance = new VariablesProcessor(vars);
+          instance = new VariablesProcessor();
         });
 
         it('returns the same string without variables', async () => {
           const tmp = { ...obj };
-          const result = await instance.evaluateVariables(tmp, {
-            names: ['var4'],
-          });
+          const result = await instance.evaluateVariables(tmp, {});
           assert.equal(result.var4, 'hello');
         });
 
         it('evaluates only listed properties', async () => {
           const tmp = { ...obj };
-          const result = await instance.evaluateVariables(tmp, {
-            names: ['var1'],
-          });
+          const ctx = VariablesProcessor.createContextFromProperties(vars);
+          const result = await instance.evaluateVariables(tmp, ctx, ['var1']);
           assert.equal(result.var1, 'value1');
           assert.equal(result.var2, '${test2}');
           assert.equal(result.var3, 'test-${test4}');
@@ -164,34 +163,12 @@ describe('Runtime', () => {
 
         it('evaluates all properties', async () => {
           const tmp = { ...obj };
-          const result = await instance.evaluateVariables(tmp);
+          const ctx = VariablesProcessor.createContextFromProperties(vars);
+          const result = await instance.evaluateVariables(tmp, ctx);
           assert.equal(result.var1, 'value1');
           assert.equal(result.var2, 'value2 value1');
           assert.equal(result.var3, 'test-value4');
           assert.equal(result.var4, 'hello');
-        });
-
-        it('uses the "override" property', async () => {
-          const tmp = { ...obj };
-          const result = await instance.evaluateVariables(tmp, {
-            override: {
-              test1: 'override-1',
-              test2: 'override-2',
-            },
-          });
-          assert.equal(result.var1, 'override-1');
-          assert.equal(result.var2, 'override-2');
-        });
-
-        it('uses the "context" property', async () => {
-          const tmp = { ...obj };
-          const result = await instance.evaluateVariables(tmp, {
-            context: {
-              test1: 'context-1',
-            },
-          });
-          assert.equal(result.var1, 'context-1');
-          assert.equal(result.var2, 'undefined');
         });
       });
 
@@ -206,144 +183,154 @@ describe('Runtime', () => {
         
         let instance: VariablesProcessor;
         before(() => {
-          instance = new VariablesProcessor(vars);
+          instance = new VariablesProcessor();
         });
 
         it('returns the same string without variables', async () => {
-          const result = await instance.evaluateVariable('test');
+          const ctx = VariablesProcessor.createContextFromProperties(vars);
+          const result = await instance.evaluateVariable('test', ctx);
           assert.equal(result, 'test');
         });
 
         it('returns value for variable', async () => {
-          const result = await instance.evaluateVariable('test ${test1}');
+          const ctx = VariablesProcessor.createContextFromProperties(vars);
+          const result = await instance.evaluateVariable('test ${test1}', ctx);
           assert.equal(result, 'test value1');
         });
 
         it('evaluates JSON string', async () => {
           const str = '{\n\t"v1":"${test1}",\n\t"v2": "${test2}"\n}';
-          const result = await instance.evaluateVariable(str);
+          const ctx = VariablesProcessor.createContextFromProperties(vars);
+          const result = await instance.evaluateVariable(str, ctx);
           assert.equal(result, '{\n\t"v1":"value1",\n\t"v2": "value2 value1"\n}');
         });
 
-        it('Should return value for complex variable', async () => {
-          const result = await instance.evaluateVariable('test ${test3}');
+        it('returns value for complex variable', async () => {
+          const ctx = VariablesProcessor.createContextFromProperties(vars);
+          const result = await instance.evaluateVariable('test ${test3}', ctx);
           assert.equal(result, 'test value3 value4');
         });
 
-        it('uses "override" from options', async () => {
-          const result = await instance.evaluateVariable('test ${test3}', {
-            override: { test3: 'value3' },
-          });
-          assert.equal(result, 'test value3');
-        });
-
-        it('Should evaluate legacy now function', async () => {
-          const result = await instance.evaluateVariable('test ${now}');
+        it('evaluates legacy now() function', async () => {
+          const ctx = VariablesProcessor.createContextFromProperties(vars);
+          const result = await instance.evaluateVariable('test ${now}', ctx);
           const now = result.split(' ')[1];
           assert.isFalse(Number.isNaN(now));
         });
 
-        it('Should evaluate legacy now function with group', async () => {
-          const result = await instance.evaluateVariable('${now:1} ${now:2} ${now:1}');
+        it('evaluates legacy now() function with a group', async () => {
+          const ctx = VariablesProcessor.createContextFromProperties(vars);
+          const result = await instance.evaluateVariable('${now:1} ${now:2} ${now:1}', ctx);
           const values = result.split(' ');
           assert.isFalse(Number.isNaN(values[0]));
           assert.equal(values[0], values[2]);
         });
 
-        it('Should evaluate legacy random function', async () => {
-          const result = await instance.evaluateVariable('test ${random}');
+        it('evaluates legacy random() function', async () => {
+          const ctx = VariablesProcessor.createContextFromProperties(vars);
+          const result = await instance.evaluateVariable('test ${random}', ctx);
           const value = result.split(' ')[1];
           assert.isFalse(Number.isNaN(value));
         });
 
-        it('Should evaluate legacy random function with group', async () => {
-          const result = await instance
-            .evaluateVariable('${random:1} ${random:2} ${random:1}');
+        it('evaluates legacy random() function with a group', async () => {
+          const ctx = VariablesProcessor.createContextFromProperties(vars);
+          const result = await instance.evaluateVariable('${random:1} ${random:2} ${random:1}', ctx);
           const values = result.split(' ');
           assert.isFalse(Number.isNaN(values[0]));
           assert.equal(values[0], values[2]);
           assert.notEqual(values[1], values[2]);
         });
 
-        it('Should evaluate now()', async () => {
-          const result = await instance.evaluateVariable('test now()');
+        it('evaluates now()', async () => {
+          const ctx = VariablesProcessor.createContextFromProperties(vars);
+          const result = await instance.evaluateVariable('test now()', ctx);
           const now = result.split(' ')[1];
           assert.isFalse(Number.isNaN(now));
         });
 
-        it('Should evaluate now() with group', async () => {
-          const result = await instance.evaluateVariable('now(1) now(2) now(1)');
+        it('evaluates now() with a group', async () => {
+          const ctx = VariablesProcessor.createContextFromProperties(vars);
+          const result = await instance.evaluateVariable('now(1) now(2) now(1)', ctx);
           const values = result.split(' ');
           assert.equal(values[0], values[2]);
         });
 
-        it('Should evaluate random()', async () => {
-          const result = await instance.evaluateVariable('test random()');
+        it('evaluates random()', async () => {
+          const ctx = VariablesProcessor.createContextFromProperties(vars);
+          const result = await instance.evaluateVariable('test random()', ctx);
           const now = result.split(' ')[1];
           assert.isFalse(Number.isNaN(now));
         });
 
-        it('Should evaluate random() with group', async () => {
-          const result = await instance
-            .evaluateVariable('random(1) random(2) random(1)');
+        it('evaluates random() with group', async () => {
+          const ctx = VariablesProcessor.createContextFromProperties(vars);
+          const result = await instance.evaluateVariable('random(1) random(2) random(1)', ctx);
           const values = result.split(' ');
           assert.equal(values[0], values[2]);
         });
 
-        it('Should evaluate Math function', async () => {
-          const result = await instance.evaluateVariable('test Math.abs(-100)');
+        it('evaluates Math function', async () => {
+          const ctx = VariablesProcessor.createContextFromProperties(vars);
+          const result = await instance.evaluateVariable('test Math.abs(-100)', ctx);
           assert.equal(result, 'test 100');
         });
 
-        it('Should evaluate String function', async () => {
-          const result = await instance
-            .evaluateVariable('test String.toUpperCase(test)');
+        it('evaluates String function', async () => {
+          const ctx = VariablesProcessor.createContextFromProperties(vars);
+          const result = await instance.evaluateVariable('test String.toUpperCase(test)', ctx);
           assert.equal(result, 'test TEST');
         });
 
-        it('Should evaluate encodeURIComponent()', async () => {
-          const result = await instance
-            .evaluateVariable('test encodeURIComponent(te s+t)');
+        it('evaluates encodeURIComponent()', async () => {
+          const ctx = VariablesProcessor.createContextFromProperties(vars);
+          const result = await instance.evaluateVariable('test encodeURIComponent(te s+t)', ctx);
           assert.equal(result, 'test te%20s%2Bt');
         });
 
         it('evaluates decodeURIComponent()', async () => {
-          const result = await instance
-            .evaluateVariable('test decodeURIComponent(te%20s%2Bt)');
+          const ctx = VariablesProcessor.createContextFromProperties(vars);
+          const result = await instance.evaluateVariable('test decodeURIComponent(te%20s%2Bt)', ctx);
           assert.equal(result, 'test te s+t');
         });
 
         it('ignores invalid input', async () => {
-          const result = await instance.evaluateVariable('test ${test');
+          const ctx = VariablesProcessor.createContextFromProperties(vars);
+          const result = await instance.evaluateVariable('test ${test', ctx);
           assert.equal(result, 'test ${test');
         });
 
         it('does not evaluate object', async () => {
           const input = { a: 'b' };
-          const result = await instance.evaluateVariable(input as any);
+          const ctx = VariablesProcessor.createContextFromProperties(vars);
+          const result = await instance.evaluateVariable(input as any, ctx);
           assert.isTrue(input as any === result);
         });
 
         it('does not evaluate null', async () => {
           const input = null;
-          const result = await instance.evaluateVariable(input as any);
+          const ctx = VariablesProcessor.createContextFromProperties(vars);
+          const result = await instance.evaluateVariable(input as any, ctx);
           assert.isTrue(input === result);
         });
 
         it('does evaluate numbers', async () => {
           const input = 2;
-          const result = await instance.evaluateVariable(input as any);
+          const ctx = VariablesProcessor.createContextFromProperties(vars);
+          const result = await instance.evaluateVariable(input as any, ctx);
           assert.isTrue(result === '2');
         });
 
         it('does not evaluate booleans', async () => {
           const input = false;
-          const result = await instance.evaluateVariable(input as any);
+          const ctx = VariablesProcessor.createContextFromProperties(vars);
+          const result = await instance.evaluateVariable(input as any, ctx);
           assert.isTrue(result === 'false');
         });
 
-        it('Double slash is preserved', async () => {
-          const result = await instance.evaluateVariable('\\\\test\\\\');
+        it('preserves the double slash', async () => {
+          const ctx = VariablesProcessor.createContextFromProperties(vars);
+          const result = await instance.evaluateVariable('\\\\test\\\\', ctx);
           assert.equal(result, '\\\\test\\\\');
         });
       });
@@ -351,7 +338,7 @@ describe('Runtime', () => {
       describe('_prepareValue()', () => {
         let instance: VariablesProcessor;
         before(() => {
-          instance = new VariablesProcessor(variables);
+          instance = new VariablesProcessor();
         });
 
         it('Prepares simple string', () => {
@@ -382,22 +369,22 @@ describe('Runtime', () => {
       describe('_upgradeLegacy()', () => {
         let instance: VariablesProcessor;
         before(() => {
-          instance = new VariablesProcessor(variables);
+          instance = new VariablesProcessor();
         });
 
-        it('Upgrades ${now}', () => {
+        it('upgrades ${now}', () => {
           assert.equal(instance._upgradeLegacy('test ${now}'), 'test ${now()}');
         });
 
-        it('Upgrades ${now} with groups', () => {
+        it('upgrades ${now} with groups', () => {
           assert.equal(instance._upgradeLegacy('test ${now:1}'), 'test ${now(1)}');
         });
 
-        it('Upgrades ${random}', () => {
+        it('upgrades ${random}', () => {
           assert.equal(instance._upgradeLegacy('test ${random}'), 'test ${random()}');
         });
 
-        it('Upgrades ${random} with groups', () => {
+        it('upgrades ${random} with groups', () => {
           assert.equal(instance._upgradeLegacy('test ${random:1}'), 'test ${random(1)}');
         });
       });
@@ -405,71 +392,54 @@ describe('Runtime', () => {
       describe('buildContext()', () => {
         let instance: VariablesProcessor;
         before(() => {
-          instance = new VariablesProcessor(variables);
+          instance = new VariablesProcessor();
         });
 
         it('sets variable value', async () => {
-          const context = await instance.buildContext();
+          const ctx = VariablesProcessor.createContextFromProperties(variables);
+          const context = await instance.buildContext(ctx);
           assert.equal(context.test2, 'value2 value1');
         });
 
         it('sets variable value defined later', async () => {
-          const context = await instance.buildContext();
+          const ctx = VariablesProcessor.createContextFromProperties(variables);
+          const context = await instance.buildContext(ctx);
           assert.equal(context.test3, 'value3 value4');
         });
 
         it('does not uses disabled items', async () => {
-          const context = await instance.buildContext();
+          const ctx = VariablesProcessor.createContextFromProperties(variables);
+          const context = await instance.buildContext(ctx);
           assert.isUndefined(context.test5);
-        });
-
-        it('Override context values', async () => {
-          const opts = {
-            test1: 'ov1',
-            test2: 'ov2',
-          };
-          const context = await instance.buildContext(opts);
-          assert.equal(context.test1, 'ov1');
-          assert.equal(context.test2, 'ov2');
-          assert.equal(context.test3, 'value3 value4');
-        });
-
-        it('Adds new context values', async () => {
-          const opts = {
-            test1: 'ov1',
-            test2: 'ov2',
-            newVar: 'new',
-          };
-          const context = await instance.buildContext(opts);
-          assert.equal(context.test1, 'ov1');
-          assert.equal(context.test2, 'ov2');
-          assert.equal(context.newVar, 'new');
         });
       });
 
       describe('_callNamespaceFunction() =>', () => {
         let instance: VariablesProcessor;
-        before(() => {
-          instance = new VariablesProcessor(variables);
+        let ctx: Record<string, string>;
+        before(async () => {
+          instance = new VariablesProcessor();
+          const vars = VariablesProcessor.createContextFromProperties(variables);
+          ctx = await instance.buildContext(vars);
         });
 
-        it('Returns empty string when namespace does not exist', () => {
-          const result = instance._callNamespaceFunction('Something', 'fn', []);
+        it('returns empty string when namespace does not exist', () => {
+          const result = instance._callNamespaceFunction(ctx, 'Something', 'fn', []);
           assert.equal(result, '');
         });
 
         it('Calls Math function', () => {
-          const result = instance._callNamespaceFunction('Math', 'abs', ['1']);
+          const result = instance._callNamespaceFunction(ctx, 'Math', 'abs', ['1']);
           assert.equal(result, 1);
         });
 
         it('Calls JSON function', () => {
-          const result = instance._callNamespaceFunction('JSON', 'parse', ['{}']);
+          const result = instance._callNamespaceFunction(ctx, 'JSON', 'parse', ['{}']);
           assert.deepEqual(result as any, {});
         });
 
         it('Calls String function', () => {
-          const result = instance._callNamespaceFunction('String', 'substr', [
+          const result = instance._callNamespaceFunction(ctx, 'String', 'substr', [
             'test',
             '1',
           ]);
@@ -478,123 +448,129 @@ describe('Runtime', () => {
 
         it('Throws when String function has no arguments', () => {
           assert.throws(() => {
-            instance._callNamespaceFunction('String', 'substr');
+            instance._callNamespaceFunction(ctx, 'String', 'substr');
           });
         });
       });
 
       describe('_evalFunctions()', () => {
         let instance: VariablesProcessor;
-        before(() => {
-          instance = new VariablesProcessor(variables);
+        let ctx: Record<string, string>;
+        before(async () => {
+          instance = new VariablesProcessor();
+          const vars = VariablesProcessor.createContextFromProperties(variables);
+          ctx = await instance.buildContext(vars);
         });
 
-        it('Returns empty string when no argument', () => {
-          const result = instance._evalFunctions(undefined as any);
+        it('returns empty string when no argument', () => {
+          const result = instance._evalFunctions(undefined as any, ctx);
           assert.equal(result, '');
         });
 
-        it('Should call now()', () => {
-          const result = instance._evalFunctions('now()');
+        it('calls the now()', () => {
+          const result = instance._evalFunctions('now()', ctx);
           assert.isFalse(Number.isNaN(result));
         });
 
-        it('Should call random()', () => {
-          const result = instance._evalFunctions('random()');
+        it('calls the random()', () => {
+          const result = instance._evalFunctions('random()', ctx);
           assert.isFalse(Number.isNaN(result));
         });
 
-        it('random() with groups', () => {
-          const result = instance._evalFunctions('random(1) random(2) random(1)');
+        it('calls the random() with groups', () => {
+          const result = instance._evalFunctions('random(1) random(2) random(1)', ctx);
           const items = result.split(' ');
           assert.equal(items[0], items[2]);
         });
 
-        it('Calls Math function', () => {
-          const result = instance._evalFunctions('test Math.abs(-110)');
+        it('calls the Math function', () => {
+          const result = instance._evalFunctions('test Math.abs(-110)', ctx);
           assert.equal(result, 'test 110');
         });
 
-        it('Calls String function', () => {
-          const result = instance._evalFunctions('test String.toLowerCase(TEST)');
+        it('calls the String function', () => {
+          const result = instance._evalFunctions('test String.toLowerCase(TEST)', ctx);
           assert.equal(result, 'test test');
         });
 
-        it('Calls encodeURIComponent()', () => {
-          const result = instance._evalFunctions('test encodeURIComponent(te s+t)');
+        it('calls the encodeURIComponent()', () => {
+          const result = instance._evalFunctions('test encodeURIComponent(te s+t)', ctx);
           assert.equal(result, 'test te%20s%2Bt');
         });
 
-        it('Calls decodeURIComponent()', () => {
-          const result = instance._evalFunctions(
-            'test decodeURIComponent(te%20s%2Bt)'
-          );
+        it('calls the decodeURIComponent()', () => {
+          const result = instance._evalFunctions('test decodeURIComponent(te%20s%2Bt)', ctx);
           assert.equal(result, 'test te s+t');
         });
       });
 
       describe('_callFn()', () => {
         let instance: VariablesProcessor;
-        beforeEach(() => {
-          instance = new VariablesProcessor(variables);
+        let ctx: Record<string, string>;
+        beforeEach(async () => {
+          instance = new VariablesProcessor();
+          const vars = VariablesProcessor.createContextFromProperties(variables);
+          ctx = await instance.buildContext(vars);
         });
 
         it('Throws when function do not exists', () => {
           assert.throws(() => {
-            instance._callFn('nonExisting');
+            instance._callFn(ctx, 'nonExisting');
           });
         });
 
         it('Throws when namespace function do not exists', () => {
           assert.throws(() => {
-            instance._callFn('Something.nonExisting');
+            instance._callFn(ctx, 'Something.nonExisting');
           });
         });
 
         it('Calls the EvalFunctions.Now() function', () => {
           const spy = sinon.spy(EvalFunctions, 'Now');
-          instance._callFn('now');
+          instance._callFn(ctx, 'now');
           (EvalFunctions.Now as any).restore();
           assert.isTrue(spy.called);
         });
 
         it('Calls the EvalFunctions.Random() function', () => {
           const spy = sinon.spy(EvalFunctions, 'Random');
-          instance._callFn('random');
+          instance._callFn(ctx, 'random');
           (EvalFunctions.Random as any).restore();
           assert.isTrue(spy.called);
         });
 
         it('Calls the EvalFunctions.EncodeURIComponent() function', () => {
           const spy = sinon.spy(EvalFunctions, 'EncodeURIComponent');
-          instance._callFn('encodeURIComponent', ['a']);
+          instance._callFn(ctx, 'encodeURIComponent', ['a']);
           assert.isTrue(spy.called);
           spy.restore();
         });
 
         it('Calls the EvalFunctions.DecodeURIComponent() function', () => {
           const spy = sinon.spy(EvalFunctions, 'DecodeURIComponent');
-          instance._callFn('decodeURIComponent', ['a']);
+          instance._callFn(ctx, 'decodeURIComponent', ['a']);
           assert.isTrue(spy.called);
           spy.restore();
         });
 
         it('Calls the Math.xxx() function', () => {
           const spy = sinon.spy(instance, '_callNamespaceFunction');
-          instance._callFn('Math.abs', ['1']);
+          instance._callFn(ctx, 'Math.abs', ['1']);
           assert.isTrue(spy.called);
-          assert.equal(spy.args[0][0], 'Math', 'namespace is set');
-          assert.equal(spy.args[0][1], 'abs', 'function name is set');
-          assert.deepEqual(spy.args[0][2], ['1'], 'arguments is set');
+          assert.deepEqual(spy.args[0][0], ctx, 'context is set');
+          assert.equal(spy.args[0][1], 'Math', 'namespace is set');
+          assert.equal(spy.args[0][2], 'abs', 'function name is set');
+          assert.deepEqual(spy.args[0][3], ['1'], 'arguments is set');
         });
 
         it('Calls the String.xxx() function', () => {
           const spy = sinon.spy(instance, '_callNamespaceFunction');
-          instance._callFn('String.substr', ['test', '1']);
+          instance._callFn(ctx, 'String.substr', ['test', '1']);
           assert.isTrue(spy.called);
-          assert.equal(spy.args[0][0], 'String', 'namespace is set');
-          assert.equal(spy.args[0][1], 'substr', 'function name is set');
-          assert.typeOf(spy.args[0][2], 'array', 'arguments is set');
+          assert.deepEqual(spy.args[0][0], ctx, 'context is set');
+          assert.equal(spy.args[0][1], 'String', 'namespace is set');
+          assert.equal(spy.args[0][2], 'substr', 'function name is set');
+          assert.typeOf(spy.args[0][3], 'array', 'arguments is set');
         });
       });
     });

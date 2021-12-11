@@ -26,6 +26,7 @@ describe('Models', () => {
         beforeEach(() => {
           base = {
             kind: HttpProjectKind,
+            key: 'abc',
             definitions: [],
             environments: [],
             items: [],
