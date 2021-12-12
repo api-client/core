@@ -1,0 +1,41 @@
+#%Dialect 1.0
+
+dialect: Environment
+version: 1.0
+
+external:
+  schema-org: http://schema.org/
+
+uses:
+  Thing: Thing.yaml
+  Server: Server.yaml
+  Property: Property.yaml
+
+documents:
+  root:
+    encodes: EnvironmentNode
+
+nodeMappings:
+  EnvironmentNode:
+    classTerm: schema-org.Thing
+    mapping:
+      kind:
+        propertyTerm: schema-org.name
+        range: string
+        mandatory: true
+      key:
+        range: string
+        mandatory: true
+      encapsulated:
+        range: boolean
+        mandatory: false
+      info:
+        range: Thing.ThingNode
+        mandatory: true
+      server:
+        range: Server.ServerNode
+        mandatory: false
+      variables:
+        range: Property.PropertyNode
+        allowMultiple: true
+        mandatory: false

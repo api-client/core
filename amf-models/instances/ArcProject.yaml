@@ -1,6 +1,6 @@
 #%Http Project 1.0
 
-kind: ARC#HttpProject # It is optional when using YAML definition (this value is assumed by default) but is required when manipulating JS objects.
+kind: ARC#HttpProject
 
 license: # Optional license information.
   url: https://license.org

@@ -1,0 +1,43 @@
+#%Dialect 1.0
+
+dialect: Property
+version: 1.0
+
+external:
+  schema-org: http://schema.org/
+
+documents:
+  root:
+    encodes: PropertyNode
+
+nodeMappings:
+  PropertyNode:
+    mapping:
+      kind:
+        propertyTerm: schema-org.name
+        range: string
+        mandatory: true
+      name:
+        range: string
+        mandatory: true
+      value:
+        range: string
+        mandatory: true
+      type:
+        range: string
+        mandatory: true
+      enabled:
+        range: boolean
+        mandatory: false
+      default:
+        range: string
+        mandatory: false
+      enum:
+        range: string
+        mandatory: false
+      description:
+        range: string
+        mandatory: false
+      required:
+        range: boolean
+        mandatory: false

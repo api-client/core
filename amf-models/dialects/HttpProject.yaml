@@ -1,0 +1,47 @@
+#%Dialect 1.0
+
+dialect: Http Project
+version: 1.0
+
+external:
+  schema-org: http://schema.org/
+
+uses:
+  License: License.yaml
+  Thing: Thing.yaml
+  Provider: Provider.yaml
+  Environment: Environment.yaml
+
+documents:
+  root:
+    encodes: DescriptionDataNode
+
+nodeMappings:
+  DescriptionDataNode:
+    classTerm: schema-org.APIReference
+    mapping:
+      kind:
+        propertyTerm: schema-org.name
+        range: string
+        mandatory: true
+      definitions:
+        range: DefinitionNode
+        mandatory: true
+      items:
+        range: ItemNode
+        mandatory: true
+      schemas:
+        range: SchemaNode
+        mandatory: false
+      environments:
+        range: Environment.EnvironmentNode
+        mandatory: false
+      provider:
+        range: Provider.ProviderNode
+        mandatory: false
+      info:
+        range: Thing.ThingNode
+        mandatory: false
+      license:
+        range: License.LicenseNode
+        mandatory: false

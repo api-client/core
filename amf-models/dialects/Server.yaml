@@ -1,0 +1,31 @@
+#%Dialect 1.0
+
+dialect: Server
+version: 1.0
+
+external:
+  schema-org: http://schema.org/
+
+documents:
+  root:
+    encodes: ServerNode
+
+nodeMappings:
+  ServerNode:
+    mapping:
+      kind:
+        propertyTerm: schema-org.name
+        range: string
+        mandatory: true
+      uri:
+        range: string
+        mandatory: true
+      protocol:
+        range: string
+        mandatory: false
+      basePath:
+        range: string
+        mandatory: false
+      description:
+        range: string
+        mandatory: false

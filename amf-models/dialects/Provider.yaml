@@ -1,0 +1,32 @@
+#%Dialect 1.0
+
+dialect: Provider
+version: 1.0
+
+external:
+  schema-org: http://schema.org/
+
+documents:
+  root:
+    encodes: ProviderNode
+
+nodeMappings:
+  ProviderNode:
+    classTerm: schema-org.CreativeWork
+    mapping:
+      kind:
+        propertyTerm: schema-org.name
+        range: string
+        mandatory: true
+      url:
+        propertyTerm: schema-org.url
+        range: string
+        mandatory: false
+      name:
+        propertyTerm: schema-org.name
+        range: string
+        mandatory: false
+      email:
+        propertyTerm: schema-org.email
+        range: string
+        mandatory: false
