@@ -5,6 +5,8 @@
     "formdata",
     "fullchain",
     "headersreceived",
+    "Jmes",
+    "parsererror",
     "preconnecting",
     "privkey",
     "rehandshake",

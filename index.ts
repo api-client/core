@@ -64,3 +64,11 @@ export { ProjectRunner } from './src/lib/runtime/node/ProjectRunner.js';
 export { HttpEngine, HttpEngineOptions, RequestStats } from './src/lib/http-engine/HttpEngine.js';
 export { NodeEngine } from './src/lib/http-engine/NodeEngine.js';
 export { NetError } from './src/lib/http-engine/Errors.js';
+
+// 
+// Data processing
+// 
+export { PayloadPointer } from './src/data/PayloadPointer.js';
+export { JsonReader } from './src/data/JsonReader.js';
+export { XmlReader } from './src/data/XmlReader.js';
+export { UrlEncodedReader } from './src/data/UrlEncodedReader.js';

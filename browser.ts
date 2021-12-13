@@ -56,3 +56,11 @@ export * as UUID from './src/lib/uuid.js';
 // Runtime
 //
 export { VariablesProcessor } from './src/lib/runtime/variables/VariablesProcessor.js';
+
+// 
+// Data processing
+// 
+export { PayloadPointer } from './src/data/PayloadPointer.js';
+export { JsonReader } from './src/data/JsonReader.js';
+export { XmlReader } from './src/data/XmlReader.js';
+export { UrlEncodedReader } from './src/data/UrlEncodedReader.js';

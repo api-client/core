@@ -86,7 +86,7 @@ export class XmlExtractor {
    */
   async extract(): Promise<string | undefined> {
     if (typeof DOMParser === 'undefined') {
-      // 
+      return this.extractNode();
     }
     const parser = new DOMParser();
     const dom = parser.parseFromString(this._data, 'text/xml');
