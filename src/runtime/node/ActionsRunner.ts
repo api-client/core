@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Property } from '../../../models/Property.js';
-import { IRequest } from '../../../models/Request.js';
-import { mapRunnables } from '../actions/RunnableCondition.js';
+import { Property } from '../../models/Property.js';
+import { IRequest } from '../../models/Request.js';
+import { mapRunnables } from '../../lib/runtime/actions/RunnableCondition.js';
 import { VariablesProcessor, EvaluateOptions } from '../variables/VariablesProcessor.js';
-import { ISentRequest } from '../../../models/SentRequest.js';
-import { IArcResponse } from '../../../models/ArcResponse.js';
-import { IErrorResponse } from '../../../models/ErrorResponse.js';
-import { Action, IAction } from '../../../models/actions/Action.js';
+import { ISentRequest } from '../../models/SentRequest.js';
+import { IArcResponse } from '../../models/ArcResponse.js';
+import { IErrorResponse } from '../../models/ErrorResponse.js';
+import { Action, IAction } from '../../models/actions/Action.js';
 
 export interface RequestProcessOptions {
   /**

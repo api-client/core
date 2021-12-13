@@ -1,6 +1,6 @@
 import formDataConverter from './FormData.js';
-import { Headers } from '../headers/Headers.js';
-import { Payload, PayloadSerializer, IMultipartBody } from '../transformers/PayloadSerializer.js';
+import { Headers } from '../../lib/headers/Headers.js';
+import { Payload, PayloadSerializer, IMultipartBody } from '../../lib/transformers/PayloadSerializer.js';
 
 /**
  * A class containing static helper methods to deal with Payload

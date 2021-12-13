@@ -1,4 +1,4 @@
-import { Headers } from '../headers/Headers.js';
+import { Headers } from '../../lib/headers/Headers.js';
 import { ResponseRedirect } from '../../models/ResponseRedirect.js';
 
 /**

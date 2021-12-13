@@ -8,7 +8,7 @@ import { HttpEngine, HttpEngineOptions, ResponseErrorInit, HeadersReceivedDetail
 import { IHttpRequest } from '../../models/HttpRequest.js';
 import { ArcResponse } from '../../models/ArcResponse.js';
 import { IRequestLog } from '../../models/RequestLog.js';
-import { Headers } from '../headers/Headers.js';
+import { Headers } from '../../lib/headers/Headers.js';
 import { PayloadSupport } from './PayloadSupport.js';
 import { addContentLength, getPort } from './RequestUtils.js';
 import { NetError } from './Errors.js';

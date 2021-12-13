@@ -1,12 +1,12 @@
-import { HttpProject } from '../../../models/HttpProject.js';
-import { ProjectRequest } from '../../../models/ProjectRequest.js';
-import { ProjectFolder, Kind as ProjectFolderKind } from '../../../models/ProjectFolder.js';
-import { Environment } from '../../../models/Environment.js';
-import { Property } from '../../../models/Property.js';
-import { IRequestLog } from '../../../models/RequestLog.js';
+import { HttpProject } from '../../models/HttpProject.js';
+import { ProjectRequest } from '../../models/ProjectRequest.js';
+import { ProjectFolder, Kind as ProjectFolderKind } from '../../models/ProjectFolder.js';
+import { Environment } from '../../models/Environment.js';
+import { Property } from '../../models/Property.js';
+import { IRequestLog } from '../../models/RequestLog.js';
 import { VariablesProcessor } from '../variables/VariablesProcessor.js';
-import { NodeEngine } from '../../http-engine/NodeEngine.js';
-import { HttpEngineOptions } from '../../http-engine/HttpEngine.js';
+import { NodeEngine } from '../http-engine/NodeEngine.js';
+import { HttpEngineOptions } from '../http-engine/HttpEngine.js';
 
 export interface RunResult {
   /**

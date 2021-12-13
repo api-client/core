@@ -55,7 +55,7 @@ export * as UUID from './src/lib/uuid.js';
 //
 // Runtime
 //
-export { VariablesProcessor } from './src/lib/runtime/variables/VariablesProcessor.js';
+export { VariablesProcessor } from './src/runtime/variables/VariablesProcessor.js';
 
 // 
 // Data processing

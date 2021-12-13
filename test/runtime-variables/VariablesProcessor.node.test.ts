@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { assert } from 'chai';
 import sinon from 'sinon';
-import { clear } from '../../src/lib/runtime/variables/Cache.js';
+import { clear } from '../../src/runtime/variables/Cache.js';
 import { VariablesProcessor, Property } from '../../index.js';
-import { EvalFunctions } from '../../src/lib/runtime/variables/EvalFunctions.js';
+import { EvalFunctions } from '../../src/runtime/variables/EvalFunctions.js';
 
 describe('Runtime', () => {
   describe('Variables', () => {

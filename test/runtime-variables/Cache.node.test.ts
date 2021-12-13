@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { find, store, clear } from '../../src/lib/runtime/variables/Cache.js';
+import { find, store, clear } from '../../src/runtime/variables/Cache.js';
 
 describe('Runtime', () => {
   describe('Variables', () => {

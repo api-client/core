@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Jexl } from '@pawel-up/jexl';
-import { Property } from '../../../models/Property.js';
+import { Property } from '../../models/Property.js';
 import { VariablesTokenizer } from './VariablesTokenizer.js';
 import { EvalFunctions } from './EvalFunctions.js';
 import { clear } from './Cache.js';

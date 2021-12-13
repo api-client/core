@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { assert } from 'chai';
-import { EvalFunctions } from '../../src/lib/runtime/variables/EvalFunctions.js';
+import { EvalFunctions } from '../../src/runtime/variables/EvalFunctions.js';
 
 const cacheTarget = {};
 

@@ -19,11 +19,11 @@ import { ResponseRedirect } from '../../models/ResponseRedirect.js';
 import { RequestLog, IRequestLog } from '../../models/RequestLog.js';
 import { RequestTime } from '../../models/RequestTime.js';
 import { ResponseAuthorization } from '../../models/ResponseAuthorization.js';
-import { DefaultLogger } from '../logging/DefaultLogger.js';
-import { ILogger, Logger } from '../logging/Logger.js';
-import { Headers } from '../headers/Headers.js';
+import { DefaultLogger } from '../../lib/logging/DefaultLogger.js';
+import { ILogger, Logger } from '../../lib/logging/Logger.js';
+import { Headers } from '../../lib/headers/Headers.js';
 import * as RequestUtils from './RequestUtils.js';
-import { Cookies } from '../cookies/Cookies.js';
+import { Cookies } from '../../lib/cookies/Cookies.js';
 import { HttpErrorCodes } from './HttpErrorCodes.js';
 import { NetError } from './Errors.js';
 

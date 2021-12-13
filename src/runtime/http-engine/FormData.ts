@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import _FormData from 'form-data';
-import { IMultipartBody, PayloadSerializer } from '../transformers/PayloadSerializer.js';
+import { IMultipartBody, PayloadSerializer } from '../../lib/transformers/PayloadSerializer.js';
 
 let target: _FormData;
 

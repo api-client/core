@@ -55,15 +55,15 @@ export * as UUID from './src/lib/uuid.js';
 //
 // Runtime
 //
-export { VariablesProcessor } from './src/lib/runtime/variables/VariablesProcessor.js';
-export { ProjectRunner } from './src/lib/runtime/node/ProjectRunner.js';
+export { VariablesProcessor } from './src/runtime/variables/VariablesProcessor.js';
+export { ProjectRunner } from './src/runtime/node/ProjectRunner.js';
 
 // 
 // HTTP engine
 // 
-export { HttpEngine, HttpEngineOptions, RequestStats } from './src/lib/http-engine/HttpEngine.js';
-export { NodeEngine } from './src/lib/http-engine/NodeEngine.js';
-export { NetError } from './src/lib/http-engine/Errors.js';
+export { HttpEngine, HttpEngineOptions, RequestStats } from './src/runtime/http-engine/HttpEngine.js';
+export { NodeEngine } from './src/runtime/http-engine/NodeEngine.js';
+export { NetError } from './src/runtime/http-engine/Errors.js';
 
 // 
 // Data processing
