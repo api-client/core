@@ -42,7 +42,7 @@ Then accessing project properties this tells the command to search in the folder
 arc project create "name" --version "1.2.3"
 arc project patch [set|append|delete] [path] --value="test"
 arc project move [key] --parent="[folder key]" --index 2 # moves an object between folders and indexes. When the parent is the same as the source parent this only moves the object in the position inside the parent. No parent means moving it into the project's root.
-arc project copy --revalidate # makes a copy of the project and revalidates (re-creates) keys for all object that have keys.
+arc project clone --revalidate # makes a copy of the project and revalidates (re-creates) keys for all object that have keys.
 
 # reading
 arc project list folders --key-only --format="arc|table"

@@ -352,7 +352,7 @@ export class Request {
   }
 
   new(init: IRequest): void {
-    const { expects, log, updated, created, midnight, config, authorization, ui, actions, clientCertificate, info } = init;
+    const { expects, log, updated, created = Date.now(), midnight, config, authorization, ui, actions, clientCertificate, info } = init;
     if (expects) {
       this.expects = new HttpRequest(expects);
     } else {

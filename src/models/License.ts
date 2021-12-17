@@ -118,8 +118,9 @@ export class License {
    * @param operation The operation to perform.
    * @param path The path to the value to update.
    * @param value Optional, the value to set.
+   * @returns The previous value, if available.
    */
-  patch(operation: PatchUtils.PatchOperation, path: string, value?: unknown): void {
+  patch(operation: PatchUtils.PatchOperation, path: string, value?: unknown): any {
     if (!PatchUtils.patchOperations.includes(operation)) {
       throw new Error(`Unknown operation: ${operation}`);
     }
@@ -131,33 +132,33 @@ export class License {
     this.validatePatch(operation, parts, value);
     const root: keyof ILicense = parts[0] as keyof ILicense;
     switch (operation) {
-      case 'append': this.patchAppend(root); break;
-      case 'delete': this.patchDelete(root); break;
-      case 'set': this.patchSet(root, value); break;
+      case 'append': return this.patchAppend(root);
+      case 'delete': return this.patchDelete(root);
+      case 'set': return this.patchSet(root, value);
     }
   }
 
-  protected patchDelete(property: keyof ILicense): void {
-    switch (property) {
-      case 'name':
-      case 'url':
-      case 'content':
-        this[property] = undefined;
-        break;
+  protected patchDelete(property: keyof ILicense): any {
+    const props = ['name', 'url', 'content'];
+    if (!props.includes(property)) {
+      throw new Error(PatchUtils.TXT_unknown_property);
     }
+    const old = this[property];
+    delete this[property];
+    return old;
   }
 
-  protected patchSet(property: keyof ILicense, value: unknown): void {
-    switch (property) {
-      case 'name':
-      case 'url':
-      case 'content':
-        this[property] = String(value);
-        break;
+  protected patchSet(property: keyof ILicense, value: unknown): any {
+    const props = ['name', 'url', 'content'];
+    if (!props.includes(property)) {
+      throw new Error(PatchUtils.TXT_unknown_property);
     }
+    const old = this[property];
+    this[property] = String(value);
+    return old;
   }
 
-  protected patchAppend(property: keyof ILicense): void {
+  protected patchAppend(property: keyof ILicense): any {
     throw new Error(`Unable to "append" to the "${property}" property. Did you mean "set"?`);
   }
 

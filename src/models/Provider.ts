@@ -104,7 +104,7 @@ export class Provider {
    * @param path The path to the value to update.
    * @param value Optional, the value to set.
    */
-  patch(operation: PatchUtils.PatchOperation, path: string, value?: unknown): void {
+  patch(operation: PatchUtils.PatchOperation, path: string, value?: unknown): any {
     if (!PatchUtils.patchOperations.includes(operation)) {
       throw new Error(`Unknown operation: ${operation}`);
     }
@@ -116,33 +116,33 @@ export class Provider {
     this.validatePatch(operation, parts, value);
     const root: keyof IProvider = parts[0] as keyof IProvider;
     switch (operation) {
-      case 'append': this.patchAppend(root); break;
-      case 'delete': this.patchDelete(root); break;
-      case 'set': this.patchSet(root, value); break;
+      case 'append': return this.patchAppend(root);
+      case 'delete': return this.patchDelete(root);
+      case 'set': return this.patchSet(root, value);
     }
   }
 
-  protected patchDelete(property: keyof IProvider): void {
-    switch (property) {
-      case 'name':
-      case 'url':
-      case 'email':
-        this[property] = undefined;
-        break;
+  protected patchDelete(property: keyof IProvider): any {
+    const props = ['name', 'url', 'email'];
+    if (!props.includes(property)) {
+      throw new Error(PatchUtils.TXT_unknown_property);
     }
+    const old = this[property];
+    delete this[property];
+    return old;
   }
 
-  protected patchSet(property: keyof IProvider, value: unknown): void {
-    switch (property) {
-      case 'name':
-      case 'url':
-      case 'email':
-        this[property] = String(value);
-        break;
+  protected patchSet(property: keyof IProvider, value: unknown): any {
+    const props = ['name', 'url', 'email'];
+    if (!props.includes(property)) {
+      throw new Error(PatchUtils.TXT_unknown_property);
     }
+    const old = this[property];
+    this[property] = String(value);
+    return old;
   }
 
-  protected patchAppend(property: keyof IProvider): void {
+  protected patchAppend(property: keyof IProvider): any {
     throw new Error(`Unable to "append" to the ${property} property. Did you mean "set"?`);
   }
 

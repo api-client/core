@@ -17,6 +17,16 @@ import { ArcLegacyProject } from './legacy/models/ArcLegacyProject.js';
 export type HttpProjectKind = 'ARC#HttpProject';
 export const Kind = 'ARC#HttpProject';
 
+/**
+ * A list of options to initialize a project in various situations.
+ */
+export interface IProjectInitOptions {
+  /**
+   * The name of the project.
+   */
+  name: string;
+}
+
 export interface IFolderCreateOptions {
   /**
    * Ignores the operation when the folder with the same name already exists. 
@@ -100,6 +110,24 @@ export interface IReadEnvironmentOptions {
    * The key of the folder to collect the environments for.
    */
   folderKey?: string;
+}
+
+/**
+ * The object stored as a list index for the projects.
+ * This is used to list projects in the store and in the UI.
+ */
+export interface IHttpProjectIndex {
+  key: string;
+  name: string;
+  version?: string;
+}
+
+export interface IProjectCloneOptions {
+  /**
+   * Revalidates (re-creates) keys for all object that have keys.
+   * @default true
+   */
+  revalidate?: boolean;
 }
 
 /**
@@ -191,7 +219,7 @@ export class HttpProject extends ProjectParent {
     return project;
   }
 
-  async fromLegacy(project: ArcLegacyProject, requests: ARCSavedRequest[]): Promise<HttpProject> {
+  static async fromLegacy(project: ArcLegacyProject, requests: ARCSavedRequest[]): Promise<HttpProject> {
     const { name='Unnamed project', description, requests: ids } = project;
   
     const result = HttpProject.fromName(name);
@@ -215,6 +243,11 @@ export class HttpProject extends ProjectParent {
     return result;
   }
 
+  static fromInitOptions(init: IProjectInitOptions): HttpProject {
+    const { name='Unnamed project' } = init;
+    return HttpProject.fromName(name);
+  }
+
   /**
    * @param input The project definition used to restore the state.
    * @param environments Optional list of environments to use with this project. It overrides environments stored in the project definition.
@@ -229,6 +262,9 @@ export class HttpProject extends ProjectParent {
       init = JSON.parse(input);
     } else if (typeof input === 'object') {
       init = input;
+      if (!init.kind) {
+        init.kind = Kind;
+      }
     } else {
       init = {
         kind: Kind,
@@ -349,6 +385,13 @@ export class HttpProject extends ProjectParent {
       result.license = this.license.toJSON();
     }
     return result;
+  }
+
+  /**
+   * @returns JSON representation of the project
+   */
+  toString(): string {
+    return JSON.stringify(this);
   }
 
   /**
@@ -821,7 +864,7 @@ export class HttpProject extends ProjectParent {
    * @param path The path to the value to update.
    * @param value Optional, the value to set.
    */
-  patch(operation: PatchUtils.PatchOperation, path: string, value?: unknown): void {
+  patch(operation: PatchUtils.PatchOperation, path: string, value?: unknown): PatchUtils.StorePatchResult | undefined {
     if (!PatchUtils.patchOperations.includes(operation)) {
       throw new Error(`Unknown operation: ${operation}.`);
     }
@@ -830,28 +873,36 @@ export class HttpProject extends ProjectParent {
     }
     const parts = path.split('.');
     this.validatePatch(parts);
-    const root: keyof HttpProject = parts[0] as keyof HttpProject;
-    if (root === 'info') {
-      this.info.patch(operation, parts.slice(1).join('.'), value);
-      return;
-    }
-    if (root === 'license') {
-      this.patchLicense(operation, parts.slice(1).join('.'), value);
-      return;
-    }
-    if (root === 'provider') {
-      this.patchProvider(operation, parts.slice(1).join('.'), value);
-      return;
-    }
+    // const root: keyof HttpProject = parts[0] as keyof HttpProject;
+    const root: string = parts[0];
 
-    // at this point validation thrown errors for anything else.
+    let oldValue: unknown | undefined;
+    if (root === 'info') {
+      oldValue = this.info.patch(operation, parts.slice(1).join('.'), value);
+    } else if (root === 'license') {
+      oldValue = this.patchLicense(operation, parts.slice(1).join('.'), value);
+    } else if (root === 'provider') {
+      oldValue = this.patchProvider(operation, parts.slice(1).join('.'), value);
+    } else if (root === 'requests') {
+      oldValue = this.patchRequest(operation, value);
+    }
+    return {
+      path,
+      time: Date.now(),
+      operation,
+      oldValue,
+      value,
+      id: this.key,
+      kind: Kind,
+    };
   }
 
   validatePatch(path: string[]): void {
     if (!path.length) {
       throw new Error(PatchUtils.TXT_unknown_path);
     }
-    const root: keyof HttpProject = path[0] as keyof HttpProject;
+    // const root: keyof HttpProject = path[0] as keyof HttpProject;
+    const root: string = path[0];
     switch (root) {
       case 'items':
       case 'environments':
@@ -863,7 +914,10 @@ export class HttpProject extends ProjectParent {
       case 'license': 
       case 'provider': 
         // they have their own validators.
-        break;
+        return;
+      case 'requests':
+        // allowed for now
+        return;
       default:
         throw new Error(PatchUtils.TXT_unknown_path);
     }
@@ -872,15 +926,47 @@ export class HttpProject extends ProjectParent {
   /**
    * Shortcut to read provider info, create it if missing, and calling patch on the provider.
    */
-  patchProvider(operation: PatchUtils.PatchOperation, path: string, value?: unknown): void {
-    this.ensureProvider().patch(operation, path, value);
+  patchProvider(operation: PatchUtils.PatchOperation, path: string, value?: unknown): any | undefined {
+    return this.ensureProvider().patch(operation, path, value);
   }
 
   /**
    * Shortcut to read license info, create it if missing, and calling patch on the license.
    */
-  patchLicense(operation: PatchUtils.PatchOperation, path: string, value?: unknown): void {
-    this.ensureLicense().patch(operation, path, value);
+  patchLicense(operation: PatchUtils.PatchOperation, path: string, value?: unknown): any | undefined {
+    return this.ensureLicense().patch(operation, path, value);
+  }
+
+  /**
+   * Performs the PATCH operation on a request.
+   * 
+   * @returns The old value, if applicable.
+   */
+  patchRequest(operation: PatchUtils.PatchOperation, value: unknown): any | undefined {
+    if (operation === 'append') {
+      if (!value) {
+        throw new Error(`The value for the "append" operation must be set.`);
+      }
+      const pr = value as IProjectRequest;
+      if (!pr.key) {
+        // this will pass this by-reference to the caller so the changelog
+        // is created with the key.
+        pr.key = v4();
+      }
+      this.addRequest(value as IProjectRequest);
+      // old value does not exist
+      return undefined;
+    }
+    if (operation === 'delete') {
+      const request = this.findRequest(value as string, { keyOnly: true });
+      if (!request) {
+        throw new Error(`Unable to find a request identified by ${value}`);
+      }
+      const oldValue = request.toJSON();
+      request.remove();
+      return oldValue;
+    }
+    throw new Error(`Unsupported operation: ${operation}`);
   }
 
   /**
@@ -957,5 +1043,66 @@ export class HttpProject extends ProjectParent {
     }
 
     return result.reverse();
+  }
+
+  /**
+   * Makes a copy of this project.
+   */
+  clone(opts: IProjectCloneOptions = {}): HttpProject {
+    const copy = new HttpProject(this.toJSON());
+    if (opts.revalidate !== false) {
+      HttpProject.regenerateKeys(copy);
+    }
+    return copy;
+  }
+
+  static clone(project: IHttpProject, opts: IProjectCloneOptions = {}): HttpProject {
+    const obj = new HttpProject(project);
+    return obj.clone(opts);
+  }
+
+  /**
+   * Re-generates keys in the project, taking care of the references.
+   * 
+   * Note, this changes the project properties. Make a copy of the project before calling this.
+   * 
+   * @param src The project instance to re-generate keys for.
+   */
+  static regenerateKeys(src: HttpProject): void {
+    const { items=[], definitions=[], schemas=[], environments=[] } = src;
+
+    // create a flat list of all "items" in the project and all folders.
+    let flatItems = [...items];
+    definitions.forEach((item) => {
+      if (item.kind === ProjectFolderKind) {
+        const folder = (item as ProjectFolder);
+        if (Array.isArray(folder.items) && folder.items.length) {
+          flatItems = flatItems.concat(folder.items);
+        }
+      }
+    });
+
+    // iterates over definitions and changes the keys in the definition and the related "item".
+    definitions.forEach((item) => {
+      const oldKey = item.key;
+      if (!oldKey) {
+        return;
+      }
+      const indexObject = flatItems.find(i => i.key === oldKey);
+      if (!indexObject) {
+        return;
+      }
+      const newKey = v4();
+      indexObject.key = newKey;
+      item.key = newKey;
+    });
+
+    environments.forEach((env) => {
+      env.key = v4();
+    });
+
+    schemas.forEach((env) => {
+      env.key = v4();
+    });
   }
 }

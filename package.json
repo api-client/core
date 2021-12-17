@@ -84,5 +84,8 @@
     "@xmldom/xmldom": "^0.7.5",
     "form-data": "^4.0.0",
     "xpath": "^0.0.32"
+  },
+  "engines": {
+    "node": ">=15"
   }
 }

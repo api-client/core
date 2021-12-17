@@ -1,10 +1,11 @@
+import v4 from '../lib/uuid.js';
 export const Kind = 'ARC#ProjectSchema';
 
 export type SchemaPropertyType = 'string' | 'integer' | 'float' | 'nil' | 'boolean' | 'date' | 'datetime' | 'time';
 
 export interface IProjectSchemaProperty {
   name: string;
-  value?: string | number | boolean | null | IProjectSchemaProperty[];
+  value?: string | number | boolean | null | IProjectSchemaProperty | IProjectSchemaProperty[];
   description?: string;
   disabled?: boolean;
   type?: SchemaPropertyType;
@@ -12,6 +13,10 @@ export interface IProjectSchemaProperty {
 
 export interface IProjectSchema {
   kind?: 'ARC#ProjectSchema';
+  /**
+   * The identifier of the environment.
+   */
+  key: string;
   /**
    * The name of the schema.
    */
@@ -46,6 +51,10 @@ export interface IProjectSchema {
 export class ProjectSchema {
   kind = Kind;
   /**
+   * The identifier of the environment.
+   */
+  key = '';
+  /**
    * The optional list of properties in this schema.
    * Because this is a list instead of a map it is possible to duplicate the property name. In this
    * case the last set value is the final value.
@@ -79,6 +88,7 @@ export class ProjectSchema {
       init = {
         kind: Kind,
         name: '',
+        key: v4(),
       }
     }
     this.new(init);
@@ -88,8 +98,9 @@ export class ProjectSchema {
    * Creates a new schema definition clearing anything that is so far defined.
    */
   new(init: IProjectSchema): void {
-    const { content, properties, mime, name='' } = init;
+    const { key=v4(), content, properties, mime, name='' } = init;
     this.name = name;
+    this.key = key;
     if (content) {
       this.content = content;
     } else {
@@ -111,6 +122,7 @@ export class ProjectSchema {
     const result:IProjectSchema = {
       kind: Kind,
       name: this.name || '',
+      key: this.key || v4(),
     };
     if (this.content) {
       result.content = this.content;
