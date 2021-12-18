@@ -1,6 +1,10 @@
-import { IHttpProject, IProjectInitOptions, IProjectMoveOptions, IHttpProjectIndex } from "../../models/HttpProject.js";
+import { IHttpProject, IProjectInitOptions, IProjectMoveOptions, IHttpProjectIndex, IFolderCreateOptions, IRequestAddOptions } from "../../models/HttpProject.js";
+import { IProjectFolder } from "../../models/ProjectFolder.js";
+import { IProjectRequest } from "../../models/ProjectRequest.js";
+import { IEnvironment } from "../../models/Environment.js";
 import { ContextChangeRecord, ContextEvent, ContextReadEvent, ContextUpdateEvent, ContextDeleteRecord, ContextDeleteEvent, ContextEventDetailWithResult } from "../BaseEvents.js";
 import { ModelEventTypes } from './ModelEventTypes.js';
+import CustomEvent from '../CustomEvent.js';
 
 export interface ProjectMoveEventDetail {
   type: 'request' | 'folder';
@@ -13,6 +17,184 @@ export interface ProjectCloneEventDetail {
    * The id of the project to clone in the data store.
    */
   id: string;
+}
+
+/**
+ * A list of options to initialize a folder in a project.
+ */
+export interface IFolderInitOptions extends IFolderCreateOptions {
+  /**
+   * The store id of the project.
+   */
+  id: string;
+  /**
+   * Optional name of the new folder.
+   */
+  name?: string;
+}
+
+/**
+ * A list of options to initialize a request in a project.
+ */
+export interface IRequestInitOptions extends IRequestAddOptions {
+  /**
+   * The store id of the project.
+   */
+  id: string;
+  /**
+   * The URL of the request.
+   */
+  url: string;
+}
+
+export interface IEnvironmentInitOptions {
+  /**
+   * The store id of the project.
+   */
+  id: string;
+  /**
+   * The name of the environment to create.
+   */
+  name: string;
+  /**
+   * The optional key of the parent folder.
+   */
+  key?: string;
+}
+
+class ProjectFolderEvents {
+  /**
+   * Creates a folder in a project.
+   * 
+   * @param target The target on which to dispatch the event
+   * @param id The store id of the project
+   * @param name Optionally, name of the folder to create.
+   * @param opts Optional options to create a folder.
+   * @returns The change record of the created folder. Note, the client should either refresh the project from the store or append the change record to the instance of the project.
+   */
+  static async create(target: EventTarget, id: string, name?: string, opts: IFolderCreateOptions = {}): Promise<ContextChangeRecord<IProjectFolder> | undefined> {
+    const init: IFolderInitOptions = { ...opts, id, name, };
+    const e = new ContextEvent<IFolderInitOptions, ContextChangeRecord<IProjectFolder>>(ModelEventTypes.Project.Folder.create, init);
+    target.dispatchEvent(e);
+    return e.detail.result;
+  }
+
+  /** 
+   * Deletes a folder from a project
+   * 
+   * @param target The target on which to dispatch the event
+   * @param id The data store id of the project
+   * @param key The key of the folder to delete.
+   */
+  static async delete(target: EventTarget, id: string, key: string): Promise<ContextDeleteRecord | undefined> {
+    const e = new ContextDeleteEvent(ModelEventTypes.Project.Folder.delete, key, id);
+    target.dispatchEvent(e);
+    return e.detail.result;
+  }
+
+  /** 
+   * Updates the entire folder schema in a project.
+   * 
+   * @param target The target on which to dispatch the event
+   * @param id The data store id of the project
+   * @param folder The folder to replace the schema for.
+   * @returns The change record of the updated folder.
+   */
+  static async update(target: EventTarget, id: string, folder: IProjectFolder): Promise<ContextChangeRecord<IProjectFolder> | undefined> {
+    const e = new ContextUpdateEvent(ModelEventTypes.Project.Folder.update, { item: folder, parent: id });
+    target.dispatchEvent(e);
+    return e.detail.result;
+  }
+}
+
+class ProjectRequestEvents {
+  /**
+   * Creates a request in a project.
+   * 
+   * @param target The target on which to dispatch the event
+   * @param id The store id of the project
+   * @param url The URL of the request.
+   * @param opts Optional options to create a request.
+   * @returns The change record of the created request. Note, the client should either refresh the project from the store or append the change record to the instance of the project.
+   */
+  static async create(target: EventTarget, id: string, url: string, opts: IRequestAddOptions = {}): Promise<ContextChangeRecord<IProjectRequest> | undefined> {
+    const init: IRequestInitOptions = { ...opts, id, url, };
+    const e = new ContextEvent<IRequestInitOptions, ContextChangeRecord<IProjectRequest>>(ModelEventTypes.Project.Request.create, init);
+    target.dispatchEvent(e);
+    return e.detail.result;
+  }
+
+  /** 
+   * Deletes a request from a project
+   * 
+   * @param target The target on which to dispatch the event
+   * @param id The data store id of the project
+   * @param key The key of the request to delete.
+   */
+  static async delete(target: EventTarget, id: string, key: string): Promise<ContextDeleteRecord | undefined> {
+    const e = new ContextDeleteEvent(ModelEventTypes.Project.Request.delete, key, id);
+    target.dispatchEvent(e);
+    return e.detail.result;
+  }
+
+  /** 
+   * Updates the entire request schema in a project.
+   * 
+   * @param target The target on which to dispatch the event
+   * @param id The data store id of the project
+   * @param request The request to replace the schema for.
+   * @returns The change record of the updated request.
+   */
+  static async update(target: EventTarget, id: string, request: IProjectRequest): Promise<ContextChangeRecord<IProjectRequest> | undefined> {
+    const e = new ContextUpdateEvent(ModelEventTypes.Project.Request.update, { item: request, parent: id });
+    target.dispatchEvent(e);
+    return e.detail.result;
+  }
+}
+
+class ProjectEnvironmentEvents {
+  /**
+   * Creates an environment in a project.
+   * 
+   * @param target The target on which to dispatch the event
+   * @param id The store id of the project
+   * @param name The name of the environment.
+   * @param key The optional key of the parent folder.
+   * @returns The change record of the created environment. Note, the client should either refresh the project from the store or append the change record to the instance of the project.
+   */
+  static async create(target: EventTarget, id: string, name: string, key?: string): Promise<ContextChangeRecord<IEnvironment> | undefined> {
+    const init: IEnvironmentInitOptions = { id, name, key };
+    const e = new ContextEvent<IEnvironmentInitOptions, ContextChangeRecord<IEnvironment>>(ModelEventTypes.Project.Environment.create, init);
+    target.dispatchEvent(e);
+    return e.detail.result;
+  }
+
+  /** 
+   * Deletes an environment from a project
+   * 
+   * @param target The target on which to dispatch the event
+   * @param id The data store id of the project
+   * @param key The key of the environment to delete.
+   */
+  static async delete(target: EventTarget, id: string, key: string): Promise<ContextDeleteRecord | undefined> {
+    const e = new ContextDeleteEvent(ModelEventTypes.Project.Environment.delete, key, id);
+    target.dispatchEvent(e);
+    return e.detail.result;
+  }
+
+  /** 
+   * Updates the entire environment schema in a project.
+   * 
+   * @param target The target on which to dispatch the event
+   * @param id The data store id of the project
+   * @param environment The environment to replace the schema for.
+   * @returns The change record of the updated environment.
+   */
+  static async update(target: EventTarget, id: string, environment: IEnvironment): Promise<ContextChangeRecord<IEnvironment> | undefined> {
+    const e = new ContextUpdateEvent(ModelEventTypes.Project.Environment.update, { item: environment, parent: id });
+    target.dispatchEvent(e);
+    return e.detail.result;
+  }
 }
 
 /**
@@ -124,5 +306,26 @@ export class ProjectEvents {
     });
     target.dispatchEvent(e);
     return e.detail.result;
+  }
+
+  /**
+   * Events related to a folder manipulation in a project.
+   */
+  static get Folder(): ProjectFolderEvents {
+    return ProjectFolderEvents;
+  }
+
+  /**
+   * Events related to a request manipulation in a project.
+   */
+  static get Request(): ProjectRequestEvents {
+    return ProjectRequestEvents;
+  }
+
+  /**
+   * Events related to an environment manipulation in a project.
+   */
+  static get Environment(): ProjectRequestEvents {
+    return ProjectEnvironmentEvents;
   }
 };

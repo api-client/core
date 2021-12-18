@@ -64,3 +64,17 @@ export { PayloadPointer } from './src/data/PayloadPointer.js';
 export { JsonReader } from './src/data/JsonReader.js';
 export { XmlReader } from './src/data/XmlReader.js';
 export { UrlEncodedReader } from './src/data/UrlEncodedReader.js';
+
+// 
+// Events
+// 
+export { Events } from './src/events/Events.js';
+export { EventTypes } from './src/events/EventTypes.js';
+export * from './src/events/BaseEvents.js';
+export { 
+  ProjectMoveEventDetail,
+  ProjectCloneEventDetail,
+  IFolderInitOptions,
+  IRequestInitOptions,
+  IEnvironmentInitOptions,
+} from './src/events/models/ProjectEvents.js';

@@ -200,6 +200,10 @@ export interface ContextUpdateEventDetail<T> {
    * The context store object to be updated by the context provider.
    */
   item: T;
+  /**
+   * The id of the parent object, if applicable.
+   */
+  parent?: string;
 }
 
 /**

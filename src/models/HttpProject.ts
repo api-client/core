@@ -420,13 +420,36 @@ export class HttpProject extends ProjectParent {
   }
 
   /**
+   * Appends new folder to a project from a full folder schema.
+   * This is primarily used to insert a folder on the client side
+   * after a folder was created in the store.
+   * 
+   * @param {IProjectFolder} folder
+   * @param {IFolderCreateOptions} [opts]
+   * @return {*}  {ProjectFolder}
+   */
+  addFolder(folder: IProjectFolder, opts?: IFolderCreateOptions): ProjectFolder;
+
+  /**
    * Appends a new folder to the project or a sub-folder.
    * 
    * @param name The name to set. Optional.
    * @param opts Folder create options.
    * @returns The newly inserted folder. If the folder already existed it returns its instance.
    */
-  addFolder(name: string=ProjectFolder.defaultName, opts: IFolderCreateOptions={}): ProjectFolder {
+  addFolder(name?: string, opts?: IFolderCreateOptions): ProjectFolder;
+
+  /**
+   * Appends a new folder to the project or a sub-folder.
+   * 
+   * Passing the folder schema as the fist argument is primarily used to insert a folder on the client side
+   * after a folder was created in the store.
+   * 
+   * @param init The name or a folder schema. When not set a default name is assumed.
+   * @param opts Folder create options.
+   * @returns The newly inserted folder. If the folder already existed it returns its instance.
+   */
+  addFolder(init: string | IProjectFolder = ProjectFolder.defaultName, opts: IFolderCreateOptions={}): ProjectFolder {
     if (!Array.isArray(this.items)) {
       this.items = [];
     }
@@ -453,7 +476,7 @@ export class HttpProject extends ProjectParent {
         }
       }
     }
-    const definition = ProjectFolder.fromName(this, name);
+    const definition = typeof init === 'string' ? ProjectFolder.fromName(this, init) : new ProjectFolder(this, init);
     this.definitions.push(definition);
     const item = ProjectItem.projectFolder(this, definition.key);
     if (!Array.isArray(root.items)) {
@@ -604,18 +627,54 @@ export class HttpProject extends ProjectParent {
 
   /**
    * Adds a request to the project or a sub-folder.
+   * 
+   * @param url The URL of the request.
+   * @param opts The request add options.
+   * @returns The inserted into the definitions request.
+   */
+  addRequest(url: string, opts?: IRequestAddOptions): ProjectRequest;
+
+  /**
+   * Adds a request to the project or a sub-folder.
+   * 
+   * @param request The request to add.
+   * @param opts The request add options.
+   * @returns The inserted into the definitions request.
+   */
+  addRequest(request: IProjectRequest | ProjectRequest, opts?: IRequestAddOptions): ProjectRequest;
+
+  /**
+   * Adds a request to the project or a sub-folder.
    * @param request The request to add.
    * @param opts Thew request add options.
    * @returns The inserted into the definitions request.
    */
-  addRequest(request: IProjectRequest | ProjectRequest, opts: IRequestAddOptions={}): ProjectRequest {
+  addRequest(request: IProjectRequest | ProjectRequest | string, opts: IRequestAddOptions={}): ProjectRequest {
     if (!Array.isArray(this.definitions)) {
       this.definitions = [];
     }
 
+    // the request can be already added to the project as the same method is used to refresh a request after 
+    // a store update. From the system perspective it is the same event.
+
+    if (typeof request === 'object' && request.key) {
+      const existing = this.definitions.find(i => i.key === request.key) as ProjectRequest | undefined;
+      if (existing) {
+        existing.new(request as IProjectRequest);
+        return existing;
+      }
+    }
+
+    // if we got here, it means that we are adding a new request object to the project.
+
     let finalRequest;
-    if (request instanceof ProjectRequest) {
+    if (typeof request === 'string') {
+      finalRequest = ProjectRequest.fromUrl(request, this);
+    } else if (request instanceof ProjectRequest) {
       finalRequest = request;
+      if (finalRequest.project && finalRequest.project !== this) {
+        finalRequest.detachedCallback();
+      }
       finalRequest.project = this;
     } else {
       finalRequest = new ProjectRequest(this, request);
