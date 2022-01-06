@@ -157,6 +157,9 @@ export class ArcResponse extends HttpResponse {
     this.timings = new RequestTime(timings);
   }
 
+  /**
+   * Sets the authorization data on the response.
+   */
   setAuth(auth: IResponseAuthorization): void {
     this.auth = new ResponseAuthorization(auth);
   }

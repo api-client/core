@@ -1,5 +1,6 @@
 import { assert } from '@esm-bundle/chai';
 import { Kind as ArcResponseKind, ArcResponse, IArcResponse } from '../../src/models/ArcResponse.js';
+import { ErrorResponse } from '../../src/models/ErrorResponse.js';
 import { ISafePayload } from '../../src/lib/transformers/PayloadSerializer.js';
 
 describe('Models', () => {
@@ -173,7 +174,7 @@ describe('Models', () => {
     });
 
     // 
-    // Note, the `auth` object is not checked here as ARC uses it only after the request.
+    // Note, the `auth` object is not checked here as ARC uses it only after the request is made.
     // Because of that the `auth` is unnecessary to restore as it makes no difference.
     // 
     describe('fromLegacy()', () => {
@@ -261,6 +262,40 @@ describe('Models', () => {
         assert.deepEqual(payload.data, [ 116, 101, 115, 116 ]);
       });
 
+      it('sets the payload from a Blob', async () => {
+        const response = await ArcResponse.fromLegacy({
+          status: 200,
+          loadingTime: 123,
+          blob: 'test'
+        });
+        assert.ok(response.payload, 'has the payload');
+        const payload = response.payload as ISafePayload;
+        assert.equal(payload.type, 'blob');
+        assert.deepEqual(payload.data, 'test');
+      });
+
+      it('sets the payload from a multipart', async () => {
+        const response = await ArcResponse.fromLegacy({
+          status: 200,
+          loadingTime: 123,
+          multipart: [
+            {
+              name: 'a',
+              isFile: false,
+              value: 'b',
+            }
+          ],
+        });
+        assert.ok(response.payload, 'has the payload');
+        const payload = response.payload as ISafePayload;
+        assert.equal(payload.type, 'formdata');
+        assert.deepEqual(payload.data, [{
+          name: 'a',
+          isFile: false,
+          value: 'b',
+        }]);
+      });
+
       it('sets the timings', async () => {
         const response = await ArcResponse.fromLegacy({
           status: 200,
@@ -283,6 +318,53 @@ describe('Models', () => {
         assert.equal(response.timings.send, 5);
         assert.equal(response.timings.wait, 6);
         assert.equal(response.timings.ssl, 7);
+      });
+
+      it('sets the default status', async () => {
+        const response = await ArcResponse.fromLegacy({
+          status: undefined,
+          loadingTime: 123,
+        });
+        assert.equal(response.status, 0);
+      });
+
+      it('sets the default loadingTime', async () => {
+        const response = await ArcResponse.fromLegacy({
+          status: undefined,
+          loadingTime: undefined,
+        });
+        assert.equal(response.loadingTime, 0);
+      });
+    });
+
+    describe('ArcResponse.isErrorResponse()', () => {
+      it('returns true when is an error response', () => {
+        const response = new ErrorResponse();
+        const result = ArcResponse.isErrorResponse(response);
+        assert.isTrue(result);
+      });
+
+      it('returns false when is not an error response', () => {
+        const response = new ArcResponse();
+        const result = ArcResponse.isErrorResponse(response);
+        assert.isFalse(result);
+      });
+    });
+
+    describe('setTimings()', () => {
+      it('sets the timings value', () => {
+        const response = new ArcResponse();
+        response.setTimings({
+          blocked: 1,
+          connect: 2,
+          dns: 3,
+          receive: 4,
+          send: 5,
+          wait: 6,
+        });
+
+        assert.typeOf(response.timings, 'object', 'has the timings');
+        assert.equal(response.timings.receive, 4, 'has the values');
       });
     });
   });
