@@ -4,6 +4,14 @@ import { IThing, Thing, Kind as ThingKind } from './Thing.js';
 import v4 from '../lib/uuid.js';
 import { ARCVariable } from './legacy/models/Variable.js';
 
+export interface IEnvironmentCloneOptions {
+  /**
+   * By default it revalidates (re-creates) keys in the environment.
+   * Set this to true to not make any changes to the keys.
+   */
+  withoutRevalidate?: boolean;
+}
+
 /**
  * A project environment definition.
  */
@@ -114,7 +122,7 @@ export class Environment {
   /**
    * @param input The environment definition used to restore the state.
    */
-  constructor(input: string|IEnvironment) {
+  constructor(input?: string|IEnvironment) {
     let init: IEnvironment;
     if (typeof input === 'string') {
       init = JSON.parse(input);
@@ -150,6 +158,8 @@ export class Environment {
     this.security = security;
     if (Array.isArray(variables)) {
       this.variables = variables.map(i => new Property(i))
+    } else {
+      this.variables = [];
     }
     if (server) {
       this.server = new Server(server);
@@ -168,7 +178,7 @@ export class Environment {
    */
   static isEnvironment(input: unknown): boolean {
     const typed = input as IEnvironment;
-    if (!input || !Array.isArray(typed.variables) || typed.kind !== Kind) {
+    if (!input || typed.kind !== Kind) {
       return false;
     }
     return true;
@@ -218,9 +228,10 @@ export class Environment {
    * @param force When set then it creates a server instance when missing.
    */
   getServer(force?: boolean): Server|undefined {
-    if (!this.server || !force) {
+    if (!this.server && !force) {
       return undefined;
     }
+    
     if (!this.server) {
       this.server = new Server();
     }
@@ -252,5 +263,17 @@ export class Environment {
     }
     this.server = srv;
     return srv;
+  }
+
+  /**
+   * Makes a copy of this environment
+   * @param opts Cloning options.
+   */
+  clone(opts: IEnvironmentCloneOptions = {}): Environment {
+    const copy = new Environment(this.toJSON());
+    if (!opts.withoutRevalidate) {
+      copy.key = v4();
+    }
+    return copy;
   }
 }

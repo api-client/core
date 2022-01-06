@@ -104,7 +104,7 @@ export class Server {
    */
   static isServer(input: unknown): boolean {
     const typed = input as IServer;
-    if (!input || !typed.uri || typed.kind !== Kind) {
+    if (!input || typeof typed.uri === 'undefined' || typed.kind !== Kind) {
       return false;
     }
     return true;

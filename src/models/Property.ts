@@ -148,14 +148,14 @@ export class Property {
   }
 
   static fromApiType(type: ApiType): Property {
-    const init: IProperty = { ...type, kind: Kind, type: type.type as PropertyType };
+    const init: IProperty = { ...type, kind: Kind, type: type.type as PropertyType || 'string' };
     return new Property(init);
   }
 
   /**
    * @param input The property definition used to restore the state.
    */
-  constructor(input: string | IProperty) {
+  constructor(input?: string | IProperty) {
     let init: IProperty;
     if (typeof input === 'string') {
       init = JSON.parse(input);
