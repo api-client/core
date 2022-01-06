@@ -519,10 +519,18 @@ describe('Models', () => {
         }, Error, 'Unknown operation: unknown.');
       });
 
+      it('throws when incomplete path', () => {
+        const folder = new ProjectFolder(project);
+        assert.throws(() => {
+          // @ts-ignore
+          folder.patch('unknown', 'provider.name', 'new');
+        }, Error, 'Unknown operation: unknown.');
+      });
+
       it('throws when not providing a value when required', () => {
         const folder = new ProjectFolder(project);
         assert.throws(() => {
-          folder.patch('set', 'provider.name');
+          folder.patch('set', 'info');
         }, Error, 'This operation requires the "value" option.');
       });
 
@@ -588,6 +596,55 @@ describe('Models', () => {
           assert.throws(() => {
             folder.patch('delete', property);
           }, Error, PatchUtils.TXT_unable_delete_value);
+        });
+      });
+    });
+
+    describe('validatePatch()', () => {
+      let project: HttpProject;
+      let folder: ProjectFolder;
+      beforeEach(() => {
+        project = new HttpProject();
+        folder = new ProjectFolder(project);
+      });
+
+      it('throws when empty path', () => {
+        assert.throws(() => {
+          folder.validatePatch('append', []);
+        }, 'The path is invalid.');
+      });
+
+      it('throws when unknown path root', () => {
+        assert.throws(() => {
+          folder.validatePatch('append', ['something']);
+        }, 'The path is invalid.');
+      });
+
+      [
+        'items', 'environments',
+      ].forEach((root) => {
+        it(`throws when the path root starts with ${root}`, () => {
+          assert.throws(() => {
+            folder.validatePatch('append', [root]);
+          }, 'Unable to modify this property. Use a corresponding command to modify this value.');
+        });
+      });
+
+      it(`throws when the path root starts with kind`, () => {
+        assert.throws(() => {
+          folder.validatePatch('append', ['kind']);
+        }, 'The "kind" property cannot be changed.');
+      });
+
+      it(`throws when the path root starts with key`, () => {
+        assert.throws(() => {
+          folder.validatePatch('append', ['key']);
+        }, 'The keys is immutable.');
+      });
+
+      it(`does not throw for info`, () => {
+        assert.doesNotThrow(() => {
+          folder.validatePatch('append', ['info']);
         });
       });
     });
@@ -681,12 +738,6 @@ describe('Models', () => {
         assert.notEqual(copy.key, oldKey, 'has a new key');
       });
 
-      it('ignores key update when configured', () => {
-        const { key: oldKey } = folder;
-        const copy = folder.clone({ withoutRevalidate: true });
-        assert.equal(copy.key, oldKey, 'has a new key');
-      });
-
       it('adds the copy to the project definitions (project root)', () => {
         const copy = folder.clone();
         assert.lengthOf(project.definitions, 2, 'has 2 definitions');
@@ -712,20 +763,6 @@ describe('Models', () => {
         assert.lengthOf(project.items, 1, 'project has 1 item');
         assert.lengthOf(folder.items, 2, 'parent has 2 items');
         assert.isTrue(folder.items.some(i => i.key === copy.key), 'the folder is added to the parent');
-      });
-
-      it('ignores adding folder to the project when configured', () => {
-        folder.clone({ withoutAttach: true });
-        assert.lengthOf(project.items, 1, 'project has 1 item');
-        assert.lengthOf(project.definitions, 1, 'project has 1 definition');
-      });
-
-      it('ignores adding folder to the sub-folder when configured', () => {
-        const sub = folder.addFolder('sub');
-        sub.clone({ withoutAttach: true });
-        assert.lengthOf(folder.items, 1, 'the parent has 1 item');
-        // parent + sub without the copy.
-        assert.lengthOf(project.definitions, 2, 'the project has 2 item');
       });
 
       it('copies requests with the folder by default', () => {
@@ -759,7 +796,7 @@ describe('Models', () => {
         assert.notEqual(f1.key, f2.key, 'folder keys are different');
       });
 
-      it('copies folders with the folder by default', () => {
+      it('copies sub-folders with the folder by default', () => {
         const sub = folder.addFolder('sub');
         const copy = folder.clone();
         
@@ -768,10 +805,10 @@ describe('Models', () => {
         assert.notEqual(copy.items[0].key, sub.key, 'the copied folder has a different key');
       });
 
-      it('adds the copied folder a sub-folder to the project definitions', () => {
-        folder.addFolder('sub');
+      it('adds a sub-folder of the copied folder to the project definitions', () => {
+        folder.addFolder('sub orig');
         folder.clone();
-        
+
         assert.lengthOf(project.definitions, 4, 'the project has 4 definitions');
         
         const [f1, s1, f2, s2] = project.definitions;
@@ -790,6 +827,119 @@ describe('Models', () => {
         assert.lengthOf(project.definitions, 2, 'the project has 2 definitions');
         const [f1, f2] = project.definitions;
         assert.notEqual(f1.key, f2.key, 'folder keys are different');
+      });
+
+      it('copies a folder with a sub-folder with requests', () => {
+        const sub = folder.addFolder('sub');
+        const origRequest = sub.addRequest('http://api.com');
+
+        const result = folder.clone();
+
+        const projectFolders = project.listFolders();
+        assert.lengthOf(projectFolders, 2, 'the project has 2 folders');
+
+        assert.deepEqual(projectFolders[0], folder, 'folder #1 is set');
+        assert.deepEqual(projectFolders[1], result, 'folder #2 is set');
+
+        assert.lengthOf(sub.listRequests(), 1, 'original sub-folder has a single request');
+        assert.deepEqual(sub.listRequests()[0], origRequest, 'original sub-folder has the original request');
+
+        const topRequests = result.listRequests();
+        assert.lengthOf(topRequests, 0, 'root copy folder has no requests');
+
+        const folders = result.listFolders();
+        assert.lengthOf(folders, 1, 'root copy folder has a folder');
+
+        const [subCopy] = folders;
+        const subRequests = subCopy.listRequests();
+        assert.lengthOf(subRequests, 1, 'sub folder has a request');
+      });
+
+      it('copies a folder to a specific folder inside the same project', () => {
+        const sub = folder.addFolder('sub1');
+        sub.addRequest('http://api.com');
+        const targetFolder = project.addFolder('sub2');
+        folder.clone({ targetFolder: targetFolder.key });
+
+        const subFolders = targetFolder.listFolders();
+        assert.lengthOf(subFolders, 1, 'has the copied folder');
+        const [copyTopLevelFolder] = subFolders;
+
+        const [subLevelCopy] = copyTopLevelFolder.listFolders();
+        assert.ok(subLevelCopy, 'has the copied sub-folder');
+
+        const subRequests = subLevelCopy.listRequests();
+        assert.lengthOf(subRequests, 1, 'has the copied request');
+      });
+
+      it('copies a folder to another project to the root level', () => {
+        const sub = folder.addFolder('sub');
+        const origRequest = sub.addRequest('http://api.com');
+
+        const origSnapshot = project.toJSON();
+
+        const targetProject = new HttpProject();
+        folder.clone({ targetProject });
+
+        assert.deepEqual(project.toJSON(), origSnapshot, 'the original project is not changed');
+
+        const copiedTopFolder = targetProject.findFolder(folder.info.name);
+        assert.ok(copiedTopFolder, 'target project has the top-level folder');
+        assert.notEqual(copiedTopFolder.key, folder.key, 'target folder has a new key');
+
+        const subFolder = copiedTopFolder.listFolders()[0];
+        assert.ok(subFolder, 'target project has the sub-folder');
+        assert.notEqual(subFolder.key, sub.key, 'the sub-folder has a new key');
+
+        const copiedRequest = subFolder.listRequests()[0];
+        assert.ok(copiedRequest, 'target project has the request');
+        assert.notEqual(copiedRequest.key, origRequest.key, 'the request has a new key');
+      });
+
+      it('copies a folder to another project under a folder', () => {
+        const sub = folder.addFolder('sub');
+        sub.addRequest('http://api.com');
+
+        const origSnapshot = project.toJSON();
+
+        const targetProject = new HttpProject();
+        const targetFolder = targetProject.addFolder('parent');
+        folder.clone({ targetProject, targetFolder: targetFolder.key });
+
+        assert.deepEqual(project.toJSON(), origSnapshot, 'the original project is not changed');
+
+        // the target folder has 1 folder + copied 2 folders + copied 1 request
+        assert.lengthOf(targetProject.definitions, 4, 'has the copied definitions');
+
+        const rootFolders = targetFolder.listFolders();
+        assert.lengthOf(rootFolders, 1, 'the target folder has a root folder from the originating project');
+
+        const [rootFolder] = rootFolders;
+        const subFolders = rootFolder.listFolders();
+        assert.lengthOf(subFolders, 1, 'the copied folder has a sub-folder');
+
+        const [subFolder] = subFolders;
+
+        const requests = subFolder.listRequests();
+        assert.lengthOf(subFolders, 1, 'the sub-folder has a request');
+      });
+
+      it('throws when unable to find a parent in the same project', () => {
+        const sub = folder.addFolder('sub');
+        sub.addRequest('http://api.com');
+        assert.throws(() => {
+          folder.clone({ targetFolder: 'test' });
+        });
+      });
+
+      it('throws when unable to find a parent in the foreign project', () => {
+        const sub = folder.addFolder('sub');
+        sub.addRequest('http://api.com');
+
+        const targetProject = new HttpProject();
+        assert.throws(() => {
+          folder.clone({ targetProject, targetFolder: 'test' });
+        });
       });
     });
   });

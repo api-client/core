@@ -20,20 +20,6 @@ export interface IFolderAddOptions {
 
 export interface IFolderCloneOptions {
   /**
-   * By default it revalidates (re-creates) keys in the folder.
-   * Set this to `true` to not make any changes to the keys.
-   */
-  withoutRevalidate?: boolean;
-  /**
-   * By default it attaches the folder to the same parent as the original folder.
-   * Set this to `true` when moving a folder between projects to prevent adding the folder to the project. 
-   * 
-   * Note, the folder still have a reference to the original project. You need to update the `project` property.
-   * 
-   * Note, this also applies to all requests when included in the clone.
-   */
-  withoutAttach?: boolean;
-  /**
    * By default it clones the folder with all requests in it.
    * Set this to `true` to skip copying the requests along with the folder.
    */
@@ -43,6 +29,20 @@ export interface IFolderCloneOptions {
    * Set this to `true` to skip copying the folders along with the folder.
    */
   withoutFolders?: boolean;
+  /**
+   * The target project where to put the copied folder.
+   * When the target project is not the same as the source project then the folder 
+   * is put into the project root rather than the parent folder (as it would when cloning
+   * a folder inside the same project).
+   */
+  targetProject?: HttpProject;
+  /**
+   * The **key** of the target folder.
+   * 
+   * By default it clones the folder to its parent unless the clone is attached to another project. 
+   * When the target folder is set then it places the clone under the passed target folder.
+   */
+  targetFolder?: string;
 }
 
 export interface IProjectFolder extends IProjectDefinitionProperty {
@@ -415,65 +415,93 @@ export class ProjectFolder extends ProjectParent {
    * It also, by default, copies requests declared in this folder.
    * 
    * Use the options dictionary to control these behaviors.
+   * 
+   * @param opts Cloning options
    */
   clone(opts: IFolderCloneOptions = {}): ProjectFolder {
-    const copy = new ProjectFolder(this.project, this.toJSON());
-    if (!opts.withoutRevalidate) {
-      copy.key = v4();
-    }
-    if (!opts.withoutAttach) {
-      // if the parent is the project then add the request to the project.
-      const parent = this.getParent();
+    const { targetProject=this.project, targetFolder } = opts;
+    const copy = new ProjectFolder(targetProject, this.toJSON());
+    copy.key = v4();
+
+    const extProject = targetProject !== this.project;
+    if (extProject) {
+      if (targetFolder) {
+        const parent = targetProject.findFolder(targetFolder, { keyOnly: true });
+        if (!parent) {
+          throw new Error(`The target project does not contain the folder ${targetFolder}`);
+        }
+        parent.addFolder(copy);
+      } else {
+        targetProject.addFolder(copy);
+      }
+    } else {
+      const parent = targetFolder ? this.project.findFolder(targetFolder, { keyOnly: true }) : this.getParent();
       if (parent) {
         parent.addFolder(copy);
+      } else {
+        throw new Error(`Unable to locate a parent of the folder.`);
       }
     }
-    const requests = copy.items.filter(i => i.kind === ProjectRequestKind);
-    const folders = copy.items.filter(i => i.kind === Kind);
-    // remove all items. Depending on the passed option we re-add them next.
+    // removes all items. Depending on the passed option we re-add them next.
     copy.items = [];
 
     if (!opts.withoutRequests) {
-      requests.forEach(r => {
-        const { key } = r;
-        const request = this.project.findRequest(key, { keyOnly: true });
-        if (!request) {
-          // Should we throw an error here?
-          // CONS:
-          // - It's not really related to the operation. It means there is an inconsistency in the project. That's the role of the project class.
-          // - Ignoring this would allow us to make a copy that is error free.
-          // - The error may occur in a situation when the user does not expect it (giving the nature of the error)
-          // Pros:
-          // - There's an inconsistency in the project definition that should be reported back to the UI for the user to inspect
-          return;
-        }
-        const requestCopy = request.clone({ withoutAttach: true, withoutRevalidate: true });
-        if (!opts.withoutRevalidate) {
-          requestCopy.key = v4();
-        }
-        
-        if (!opts.withoutAttach) {
-          this.project.addRequest(requestCopy, { parent: copy.key });
-        }
-      });
+      this.cloneRequests(copy, this.project);
     }
     if (!opts.withoutFolders) {
-      folders.forEach(f => {
-        const { key } = f;
-        const folder = this.project.findFolder(key, { keyOnly: true });
-        if (!folder) {
-          // see above the same for the request
-          return;
-        }
-        const folderCopy = folder.clone({ ...opts, withoutAttach: true, withoutRevalidate: true });
-        if (!opts.withoutRevalidate) {
-          folderCopy.key = v4();
-        }
-        if (!opts.withoutAttach) {
-          this.project.addFolder(folderCopy, { parent: copy.key });
-        }
-      });
+      this.cloneSubFolders(copy, this.project, !opts.withoutRequests);
     }
     return copy;
+  }
+
+  /**
+   * Clones the current requests to the target folder.
+   * 
+   * @param folder The target folder into which to put the requests. The folder has to have the target project attached to it.
+   * @param project The originating project where the definitions are stored
+   */
+  protected cloneRequests(folder: ProjectFolder, project: HttpProject): void {
+    const requests = this.items.filter(i => i.kind === ProjectRequestKind);
+    requests.forEach(r => {
+      const request = project.findRequest(r.key, { keyOnly: true });
+      if (!request) {
+        // Should we throw an error here?
+        // CONS:
+        // - It's not really related to the operation. It means there is an inconsistency in the project. That's the role of the project class.
+        // - Ignoring this would allow us to make a copy that is error free.
+        // - The error may occur in a situation when the user does not expect it (giving the nature of the error)
+        // Pros:
+        // - There's an inconsistency in the project definition that should be reported back to the UI for the user to inspect
+        return;
+      }
+      const copy = request.clone({ withoutAttach: true });
+      copy.project = folder.getProject();
+      folder.addRequest(copy);
+    });
+  }
+
+  /**
+   * Clones the sub-folders to the target folder.
+   * 
+   * @param folder The target folder into which to put the sub-folders. The folder has to have the target project attached to it.
+   * @param project The originating project where the definitions are stored
+   * @param withRequests Whether to clone requests with the folder.
+   */
+  protected cloneSubFolders(folder: ProjectFolder, project: HttpProject, withRequests = true): void {
+    const folders = this.items.filter(i => i.kind === Kind);
+    folders.forEach(f => {
+      const definition = project.findFolder(f.key, { keyOnly: true });
+      if (!definition) {
+        return;
+      }
+      const copy = new ProjectFolder(folder.getProject(), definition.toJSON());
+      copy.key = v4();
+      copy.items = [];
+      folder.addFolder(copy);
+      if (withRequests) {
+        definition.cloneRequests(copy, project);
+      }
+      definition.cloneSubFolders(copy, project, withRequests);
+    });
   }
 }

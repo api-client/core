@@ -16,7 +16,7 @@ export const TXT_delete_kind = 'The "kind" property cannot be changed.';
 export const TXT_use_command_instead = 'Unable to modify this property. Use a corresponding command to modify this value.';
 export const TXT_value_required = 'This operation requires the "value" option.';
 export const TXT_unknown_path = 'The path is invalid.';
-export const TXT_key_is_immutable = 'The keys are immutable.';
+export const TXT_key_is_immutable = 'The keys is immutable.';
 export const TXT_value_with_delete = 'The value cannot be set when deleting the value. Did you mean "set" operation?.';
 export const TXT_unknown_property = 'Unknown property.';
 
