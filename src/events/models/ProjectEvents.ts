@@ -282,7 +282,7 @@ export class ProjectEvents {
    * @returns The cloned project (the copy).
    */
   static async clone(target: EventTarget, id: string): Promise<ContextChangeRecord<IHttpProject> | undefined> {
-    const e = new ContextEvent<ProjectCloneEventDetail, ContextChangeRecord<IHttpProject>>(ModelEventTypes.Project.move, {
+    const e = new ContextEvent<ProjectCloneEventDetail, ContextChangeRecord<IHttpProject>>(ModelEventTypes.Project.clone, {
       id,
     });
     target.dispatchEvent(e);
@@ -311,21 +311,21 @@ export class ProjectEvents {
   /**
    * Events related to a folder manipulation in a project.
    */
-  static get Folder(): ProjectFolderEvents {
+  static get Folder(): typeof ProjectFolderEvents {
     return ProjectFolderEvents;
   }
 
   /**
    * Events related to a request manipulation in a project.
    */
-  static get Request(): ProjectRequestEvents {
+  static get Request(): typeof ProjectRequestEvents {
     return ProjectRequestEvents;
   }
 
   /**
    * Events related to an environment manipulation in a project.
    */
-  static get Environment(): ProjectRequestEvents {
+  static get Environment(): typeof ProjectEnvironmentEvents {
     return ProjectEnvironmentEvents;
   }
 };

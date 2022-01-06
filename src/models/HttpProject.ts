@@ -420,13 +420,22 @@ export class HttpProject extends ProjectParent {
   }
 
   /**
+   * Appends an instance of a folder to a project.
+   * 
+   * @param folder The folder to add to this project.
+   * @param opts Optional folder add options.
+   * @returns The added folder.
+   */
+  addFolder(folder: ProjectFolder, opts?: IFolderCreateOptions): ProjectFolder;
+
+  /**
    * Appends new folder to a project from a full folder schema.
    * This is primarily used to insert a folder on the client side
    * after a folder was created in the store.
    * 
-   * @param {IProjectFolder} folder
-   * @param {IFolderCreateOptions} [opts]
-   * @return {*}  {ProjectFolder}
+   * @param folder The folder schema to add to this project.
+   * @param opts Optional folder add options.
+   * @returns The added folder.
    */
   addFolder(folder: IProjectFolder, opts?: IFolderCreateOptions): ProjectFolder;
 
@@ -449,7 +458,7 @@ export class HttpProject extends ProjectParent {
    * @param opts Folder create options.
    * @returns The newly inserted folder. If the folder already existed it returns its instance.
    */
-  addFolder(init: string | IProjectFolder = ProjectFolder.defaultName, opts: IFolderCreateOptions={}): ProjectFolder {
+  addFolder(init: string | IProjectFolder | ProjectFolder = ProjectFolder.defaultName, opts: IFolderCreateOptions={}): ProjectFolder {
     if (!Array.isArray(this.items)) {
       this.items = [];
     }
@@ -476,7 +485,14 @@ export class HttpProject extends ProjectParent {
         }
       }
     }
-    const definition = typeof init === 'string' ? ProjectFolder.fromName(this, init) : new ProjectFolder(this, init);
+    let definition: ProjectFolder;
+    if (typeof init === 'string') {
+      definition = ProjectFolder.fromName(this, init);
+    } else if (init instanceof ProjectFolder) {
+      definition = init;
+    } else {
+      definition = new ProjectFolder(this, init);
+    }
     this.definitions.push(definition);
     const item = ProjectItem.projectFolder(this, definition.key);
     if (!Array.isArray(root.items)) {

@@ -1,14 +1,44 @@
 import v4 from '../lib/uuid.js';
 export const Kind = 'ARC#ProjectSchema';
 
-export type SchemaPropertyType = 'string' | 'integer' | 'float' | 'nil' | 'boolean' | 'date' | 'datetime' | 'time';
+export type SchemaPropertyType = 'string' | 'integer' | 'float' | 'nil' | 'boolean' | 'date' | 'datetime' | 'time' | 'int32' | 'int64' | 'uint32' | 'uint64' | 'sint32' | 'sint64' | 'fixed32' | 'fixed64' | 'sfixed32' | 'sfixed64' | 'double' | 'float' | 'bytes';
 
 export interface IProjectSchemaProperty {
+  /**
+   * The name of the schema property.
+   */
   name: string;
-  value?: string | number | boolean | null | IProjectSchemaProperty | IProjectSchemaProperty[];
+  /**
+   * The value of the property. It is used to prepare the schema.
+   * If none is provided then the system uses the default for  the data type value.
+   * For example, `0` for all number types.
+   */
+  value?: unknown | IProjectSchemaProperty[];
+  /**
+   * Optional description of the property. Uses Markdown.
+   */
   description?: string;
+  /**
+   * Whether the property is "disabled" and should not be considered when constructing a schema.
+   */
   disabled?: boolean;
+  /**
+   * The data type of the property.
+   */
   type?: SchemaPropertyType;
+  /**
+   * Whether or not the property is required.
+   * By default a property is required. It has to be set to `false` to consider it as not required.
+   */
+  required?: boolean;
+  /**
+   * The default value to use with this property.
+   */
+  default?: unknown;
+  /**
+   * When set to `true` it represents a property that is an array.
+   */
+  repeated?: boolean;
 }
 
 export interface IProjectSchema {
@@ -25,6 +55,8 @@ export interface IProjectSchema {
    * The optional list of properties in this schema.
    * Because this is a list instead of a map it is possible to duplicate the property name. In this
    * case the last set value is the final value.
+   * 
+   * When both the `properties` and the `content` is defined, `content` is used instead of properties.
    */
   properties?: IProjectSchemaProperty[];
   /**
@@ -58,6 +90,8 @@ export class ProjectSchema {
    * The optional list of properties in this schema.
    * Because this is a list instead of a map it is possible to duplicate the property name. In this
    * case the last set value is the final value.
+   * 
+   * When both the `properties` and the `content` is defined, `content` is used instead of properties.
    */
   properties?: IProjectSchemaProperty[];
   /**

@@ -113,6 +113,31 @@ describe('Models', () => {
       });
     });
 
+    describe('From JSON string initialization', () => {
+      it('restores project data from JSON string', () => {
+        const project = new HttpProject();
+        const folder = project.addFolder('a folder');
+        const str = JSON.stringify(folder);
+        
+        const result = new ProjectFolder(project, str);
+
+        assert.equal(result.key, folder.key, 'restores the key');
+        assert.equal(result.info.name, 'a folder', 'restores the info object');
+      });
+
+      it('throws when invalid folder object', () => {
+        const project = new HttpProject();
+        const folder = project.addFolder('a folder');
+        const schema = folder.toJSON();
+        delete schema.kind;
+        const str = JSON.stringify(schema);
+
+        assert.throws(() => {
+          new ProjectFolder(project, str);
+        });
+      });
+    });
+
     describe('toJSON()', () => {
       let project: HttpProject;
       let base: IProjectFolder;
@@ -178,7 +203,7 @@ describe('Models', () => {
       });
     });
 
-    describe('fromName()', () => {
+    describe('ProjectFolder.fromName()', () => {
       let project: HttpProject;
       beforeEach(() => {
         project = new HttpProject();
@@ -187,6 +212,11 @@ describe('Models', () => {
       it('sets the name', () => {
         const result = ProjectFolder.fromName(project, 'a name');
         assert.equal(result.info.name, 'a name');
+      });
+
+      it('uses the default name', () => {
+        const result = ProjectFolder.fromName(project);
+        assert.equal(result.info.name, DefaultFolderName);
       });
 
       it('generates the key', () => {
@@ -216,6 +246,71 @@ describe('Models', () => {
       });
     });
 
+    describe('new()', () => {
+      it('restores a folder definition', () => {
+        const project = new HttpProject();
+        const folder = project.addFolder('a folder');
+        const time = 12345;
+        folder.new({
+          created: time,
+          updated: time,
+          info: {
+            kind: ThingKind,
+            name: 'test',
+          },
+          items: [],
+          key: 'abc',
+          kind: 'ARC#ProjectFolder',
+        });
+        assert.equal(folder.created, time, 'updates the created');
+        assert.equal(folder.updated, time, 'updates the created');
+        assert.equal(folder.key, 'abc', 'updates the key');
+        assert.equal(folder.info.name, 'test', 'updates the info');
+      });
+
+      it('restores items', () => {
+        const project = new HttpProject();
+        const folder = project.addFolder('a folder');
+        const time = 12345;
+        const def: IProjectFolder = {
+          created: time,
+          updated: time,
+          info: {
+            kind: ThingKind,
+            name: 'test',
+          },
+          items: [],
+          key: 'abc',
+          kind: 'ARC#ProjectFolder',
+        };
+        folder.new(def);
+        assert.equal(folder.created, time, 'updates the created');
+        assert.equal(folder.updated, time, 'updates the created');
+        assert.equal(folder.key, 'abc', 'updates the key');
+        assert.equal(folder.info.name, 'test', 'updates the info');
+      });
+
+      it('adds the default info object', () => {
+        const project = new HttpProject();
+        const folder = project.addFolder('a folder');
+        const time = 12345;
+        const def: IProjectFolder = {
+          created: time,
+          updated: time,
+          info: {
+            kind: ThingKind,
+            name: 'test',
+          },
+          items: [],
+          key: 'abc',
+          kind: 'ARC#ProjectFolder',
+        };
+        delete def.info;
+        folder.new(def);
+        assert.equal(folder.info.name, DefaultFolderName);
+      });
+    });
+
     describe('addFolder()', () => {
       let project: HttpProject;
       beforeEach(() => {
@@ -235,6 +330,31 @@ describe('Models', () => {
         const parent = project.addFolder('parent');
         parent.addFolder('sub');
         assert.lengthOf(parent.items, 1);
+      });
+
+      it('adds a folder by name', () => {
+        const parent = project.addFolder('parent');
+        parent.addFolder('sub');
+        const def = project.findFolder('sub');
+        assert.equal(def.info.name, 'sub');
+      });
+
+      it('adds a folder by schema', () => {
+        const parent = project.addFolder('parent');
+        const f = new ProjectFolder(project);
+        f.info.name = 'sub';
+        parent.addFolder(f.toJSON());
+        const def = project.findFolder('sub');
+        assert.equal(def.info.name, 'sub');
+      });
+
+      it('adds a folder by an instance', () => {
+        const parent = project.addFolder('parent');
+        const f = new ProjectFolder(project);
+        f.info.name = 'sub';
+        parent.addFolder(f);
+        const def = project.findFolder('sub');
+        assert.equal(def.info.name, 'sub');
       });
     });
 
@@ -259,6 +379,13 @@ describe('Models', () => {
         const request = ProjectRequest.fromName('test', project);
         parent.addRequest(request);
         assert.lengthOf(parent.items, 1);
+      });
+
+      it('adds a request from the url', () => {
+        const parent = project.addFolder('parent');
+        const request = parent.addRequest('https://api.com');
+        assert.equal(request.info.name, 'https://api.com');
+        assert.equal(request.expects.url, 'https://api.com');
       });
     });
 
@@ -462,6 +589,207 @@ describe('Models', () => {
             folder.patch('delete', property);
           }, Error, PatchUtils.TXT_unable_delete_value);
         });
+      });
+    });
+
+    describe('remove()', () => {
+      let project: HttpProject;
+      let folder: ProjectFolder;
+
+      beforeEach(() => {
+        project = new HttpProject();
+        folder = project.addFolder('test');
+      });
+
+      it('removes the folder from the project definitions', () => {
+        folder.remove();
+        assert.deepEqual(project.definitions, []);
+      });
+
+      it('removes the folder from the project items', () => {
+        folder.remove();
+        assert.deepEqual(project.items, []);
+      });
+
+      it('removes the folder from the parent folder items', () => {
+        const sub = folder.addFolder('sub');
+        sub.remove();
+        assert.deepEqual(folder.items, []);
+      });
+
+      it('removes the sub-folder from the project definitions', () => {
+        const sub = folder.addFolder('sub');
+        assert.lengthOf(project.definitions, 2, 'has 2 definitions');
+        sub.remove();
+        assert.lengthOf(project.definitions, 1, 'has 1 definition');
+      });
+    });
+
+    describe('getParent()', () => {
+      let project: HttpProject;
+      beforeEach(() => {
+        project = new HttpProject();
+      });
+
+      it('returns the project object', () => {
+        const folder = project.addFolder('test');
+        const result = folder.getParent();
+        assert.isTrue(result === project);
+      });
+
+      it('returns the folder object', () => {
+        const parent = project.addFolder('test');
+        const folder = parent.addFolder('test 2');
+        const result = folder.getParent();
+        assert.isTrue(result === parent);
+      });
+    });
+
+    describe('getProject()', () => {
+      let project: HttpProject;
+      beforeEach(() => {
+        project = new HttpProject();
+      });
+
+      it('returns the project when added to the project', () => {
+        const folder = project.addFolder('test');
+        const result = folder.getProject();
+        assert.isTrue(result === project);
+      });
+
+      it('returns the project when added to a folder', () => {
+        const parent = project.addFolder('test');
+        const folder = parent.addFolder('test 2');
+        const result = folder.getProject();
+        assert.isTrue(result === project);
+      });
+    });
+
+    describe('clone()', () => {
+      let project: HttpProject;
+      let folder: ProjectFolder;
+
+      beforeEach(() => {
+        project = new HttpProject();
+        folder = project.addFolder('test');
+      });
+
+      it('updates the key by default', () => {
+        const { key: oldKey } = folder;
+        const copy = folder.clone();
+        assert.typeOf(copy.key, 'string', 'has the key');
+        assert.notEqual(copy.key, oldKey, 'has a new key');
+      });
+
+      it('ignores key update when configured', () => {
+        const { key: oldKey } = folder;
+        const copy = folder.clone({ withoutRevalidate: true });
+        assert.equal(copy.key, oldKey, 'has a new key');
+      });
+
+      it('adds the copy to the project definitions (project root)', () => {
+        const copy = folder.clone();
+        assert.lengthOf(project.definitions, 2, 'has 2 definitions');
+        assert.isTrue(project.definitions.some(i => i.key === copy.key), 'has the folder definition');
+      });
+
+      it('adds the copy to the project definitions (folder root)', () => {
+        const sub = folder.addFolder('sub');
+        const copy = sub.clone();
+        assert.lengthOf(project.definitions, 3, 'has 3 definitions');
+        assert.isTrue(project.definitions.some(i => i.key === copy.key), 'has the folder definition');
+      });
+
+      it('adds the copy to the project items (project root)', () => {
+        const copy = folder.clone();
+        assert.lengthOf(project.items, 2, 'has 2 items');
+        assert.isTrue(project.items.some(i => i.key === copy.key), 'has the folder item');
+      });
+
+      it('adds the copy to the sub-folder items', () => {
+        const sub = folder.addFolder('sub');
+        const copy = sub.clone();
+        assert.lengthOf(project.items, 1, 'project has 1 item');
+        assert.lengthOf(folder.items, 2, 'parent has 2 items');
+        assert.isTrue(folder.items.some(i => i.key === copy.key), 'the folder is added to the parent');
+      });
+
+      it('ignores adding folder to the project when configured', () => {
+        folder.clone({ withoutAttach: true });
+        assert.lengthOf(project.items, 1, 'project has 1 item');
+        assert.lengthOf(project.definitions, 1, 'project has 1 definition');
+      });
+
+      it('ignores adding folder to the sub-folder when configured', () => {
+        const sub = folder.addFolder('sub');
+        sub.clone({ withoutAttach: true });
+        assert.lengthOf(folder.items, 1, 'the parent has 1 item');
+        // parent + sub without the copy.
+        assert.lengthOf(project.definitions, 2, 'the project has 2 item');
+      });
+
+      it('copies requests with the folder by default', () => {
+        const r = folder.addRequest('https://copy.com');
+        const copy = folder.clone();
+        
+        assert.lengthOf(copy.items, 1, 'the copy has one request');
+        assert.typeOf(copy.items[0].key, 'string', 'the request has the key');
+        assert.notEqual(copy.items[0].key, r.key, 'the copied request has a different key');
+      });
+
+      it('adds the copied folder and request to the project definitions', () => {
+        const r = folder.addRequest('https://copy.com');
+        const copy = folder.clone();
+        
+        assert.lengthOf(project.definitions, 4, 'the project has 4 definitions');
+        
+        const [f1, r1, f2, r2] = project.definitions;
+
+        assert.notEqual(f1.key, f2.key, 'folder keys are different');
+        assert.notEqual(r1.key, r2.key, 'request keys are different');
+      });
+
+      it('quietly ignores missing requests', () => {
+        const r = folder.addRequest('https://copy.com');
+        const i = project.definitions.findIndex(i => i.key === r.key);
+        project.definitions.splice(i, 1);
+        folder.clone();
+        assert.lengthOf(project.definitions, 2, 'the project has 2 definitions');
+        const [f1, f2] = project.definitions;
+        assert.notEqual(f1.key, f2.key, 'folder keys are different');
+      });
+
+      it('copies folders with the folder by default', () => {
+        const sub = folder.addFolder('sub');
+        const copy = folder.clone();
+        
+        assert.lengthOf(copy.items, 1, 'the copy has one request');
+        assert.typeOf(copy.items[0].key, 'string', 'the folder has the key');
+        assert.notEqual(copy.items[0].key, sub.key, 'the copied folder has a different key');
+      });
+
+      it('adds the copied folder a sub-folder to the project definitions', () => {
+        folder.addFolder('sub');
+        folder.clone();
+        
+        assert.lengthOf(project.definitions, 4, 'the project has 4 definitions');
+        
+        const [f1, s1, f2, s2] = project.definitions;
+
+        assert.notEqual(f1.key, f2.key, 'folder keys are different');
+        assert.equal(f1.info.name, f2.info.name, 'folder 1 names match');
+        assert.notEqual(s1.key, s2.key, 'request keys are different');
+        assert.equal(s2.info.name, s2.info.name, 'folder 2 names match');
+      });
+
+      it('quietly ignores missing folders', () => {
+        const sub = folder.addFolder('sub');
+        const i = project.definitions.findIndex(i => i.key === sub.key);
+        project.definitions.splice(i, 1);
+        folder.clone();
+        assert.lengthOf(project.definitions, 2, 'the project has 2 definitions');
+        const [f1, f2] = project.definitions;
+        assert.notEqual(f1.key, f2.key, 'folder keys are different');
       });
     });
   });

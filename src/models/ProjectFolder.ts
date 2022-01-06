@@ -11,11 +11,38 @@ import * as PatchUtils from './PatchUtils.js';
 export const Kind = 'ARC#ProjectFolder';
 export const DefaultFolderName = 'New folder';
 
-export interface IRequestAddOptions {
+export interface IFolderAddOptions {
   /**
    * Optionally the position at which to add the request into the list of items.
    */
   index?: number;
+}
+
+export interface IFolderCloneOptions {
+  /**
+   * By default it revalidates (re-creates) keys in the folder.
+   * Set this to `true` to not make any changes to the keys.
+   */
+  withoutRevalidate?: boolean;
+  /**
+   * By default it attaches the folder to the same parent as the original folder.
+   * Set this to `true` when moving a folder between projects to prevent adding the folder to the project. 
+   * 
+   * Note, the folder still have a reference to the original project. You need to update the `project` property.
+   * 
+   * Note, this also applies to all requests when included in the clone.
+   */
+  withoutAttach?: boolean;
+  /**
+   * By default it clones the folder with all requests in it.
+   * Set this to `true` to skip copying the requests along with the folder.
+   */
+  withoutRequests?: boolean;
+  /**
+   * By default it clones the folder with all folders in it.
+   * Set this to `true` to skip copying the folders along with the folder.
+   */
+  withoutFolders?: boolean;
 }
 
 export interface IProjectFolder extends IProjectDefinitionProperty {
@@ -181,21 +208,68 @@ export class ProjectFolder extends ProjectParent {
   }
 
   /**
+   * Appends an instance of a folder to a project.
+   * 
+   * @param folder The folder to add to this project.
+   * @returns The added folder.
+   */
+  addFolder(folder: ProjectFolder): ProjectFolder;
+
+  /**
+   * Appends new folder to a project from a full folder schema.
+   * This is primarily used to insert a folder on the client side
+   * after a folder was created in the store.
+   * 
+   * @param folder The folder schema to add to this project.
+   * @returns The added folder.
+   */
+  addFolder(folder: IProjectFolder): ProjectFolder;
+
+  /**
+   * Appends a new folder to the project or a sub-folder.
+   * 
+   * @param name The name to set. Optional.
+   * @returns The newly inserted folder. If the folder already existed it returns its instance.
+   */
+  addFolder(name?: string): ProjectFolder;
+
+  /**
    * Appends a new folder to the folder. It updates the project to add the request definition.
    * @param name The name to set. Optional.
    * @returns The key of newly inserted folder.
    */
-  addFolder(name?: string): ProjectFolder {
-    return this.project.addFolder(name, { parent: this.key });
+  addFolder(name: string | IProjectFolder | ProjectFolder | undefined): ProjectFolder {
+    return this.project.addFolder(name as ProjectFolder, { parent: this.key });
   }
+
+  /**
+   * Adds a request to the project or a sub-folder.
+   * 
+   * @param url The URL of the request.
+   * @param opts The request add options.
+   * @returns The inserted into the definitions request.
+   */
+  addRequest(url: string, opts?: IFolderAddOptions): ProjectRequest;
+
+  /**
+   * Adds a request to the project or a sub-folder.
+   * 
+   * @param request The request to add.
+   * @param opts The request add options.
+   * @returns The inserted into the definitions request.
+   */
+  addRequest(request: IProjectRequest | ProjectRequest, opts?: IFolderAddOptions): ProjectRequest;
 
   /**
    * Appends a new request to the folder. It updates the project to add the request definition.
    * @param request The request to append to the folder.
    * @returns The key of newly inserted request.
    */
-  addRequest(request: IProjectRequest | ProjectRequest, opts: IRequestAddOptions = {}): ProjectRequest {
+  addRequest(request: IProjectRequest | ProjectRequest | string, opts: IFolderAddOptions = {}): ProjectRequest {
     const addOptions = { parent: this.key, ...opts };
+    if (typeof request === 'string') {
+      return this.project.addRequest(request, addOptions);
+    }
     return this.project.addRequest(request, addOptions);
   }
 
@@ -333,5 +407,73 @@ export class ProjectFolder extends ProjectParent {
    */
   remove(): void {
     this.project.removeFolder(this.key);
+  }
+
+  /**
+   * Makes a copy of this folder.
+   * By default it attaches the copied folder to the same parent.
+   * It also, by default, copies requests declared in this folder.
+   * 
+   * Use the options dictionary to control these behaviors.
+   */
+  clone(opts: IFolderCloneOptions = {}): ProjectFolder {
+    const copy = new ProjectFolder(this.project, this.toJSON());
+    if (!opts.withoutRevalidate) {
+      copy.key = v4();
+    }
+    if (!opts.withoutAttach) {
+      // if the parent is the project then add the request to the project.
+      const parent = this.getParent();
+      if (parent) {
+        parent.addFolder(copy);
+      }
+    }
+    const requests = copy.items.filter(i => i.kind === ProjectRequestKind);
+    const folders = copy.items.filter(i => i.kind === Kind);
+    // remove all items. Depending on the passed option we re-add them next.
+    copy.items = [];
+
+    if (!opts.withoutRequests) {
+      requests.forEach(r => {
+        const { key } = r;
+        const request = this.project.findRequest(key, { keyOnly: true });
+        if (!request) {
+          // Should we throw an error here?
+          // CONS:
+          // - It's not really related to the operation. It means there is an inconsistency in the project. That's the role of the project class.
+          // - Ignoring this would allow us to make a copy that is error free.
+          // - The error may occur in a situation when the user does not expect it (giving the nature of the error)
+          // Pros:
+          // - There's an inconsistency in the project definition that should be reported back to the UI for the user to inspect
+          return;
+        }
+        const requestCopy = request.clone({ withoutAttach: true, withoutRevalidate: true });
+        if (!opts.withoutRevalidate) {
+          requestCopy.key = v4();
+        }
+        
+        if (!opts.withoutAttach) {
+          this.project.addRequest(requestCopy, { parent: copy.key });
+        }
+      });
+    }
+    if (!opts.withoutFolders) {
+      folders.forEach(f => {
+        const { key } = f;
+        const folder = this.project.findFolder(key, { keyOnly: true });
+        if (!folder) {
+          // see above the same for the request
+          return;
+        }
+        const folderCopy = folder.clone({ ...opts, withoutAttach: true, withoutRevalidate: true });
+        if (!opts.withoutRevalidate) {
+          folderCopy.key = v4();
+        }
+        if (!opts.withoutAttach) {
+          this.project.addFolder(folderCopy, { parent: copy.key });
+        }
+      });
+    }
+    return copy;
   }
 }

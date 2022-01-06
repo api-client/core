@@ -155,6 +155,22 @@ describe('Models', () => {
         });
       });
 
+      describe('From JSON string initialization', () => {
+        it('restores project data from JSON string', () => {
+          const orig = new HttpProject();
+          orig.info.name = 'a project';
+          orig.addFolder('folder');
+          orig.addRequest('https://api.com');
+          const str = JSON.stringify(orig);
+          const result = new HttpProject(str);
+
+          assert.equal(result.key, orig.key, 'restores the key');
+          assert.equal(result.info.name, orig.info.name, 'restores the info object');
+          assert.ok(result.findFolder('folder'), 'restores a folder');
+          assert.ok(result.findRequest('https://api.com'), 'restores a request');
+        });
+      });
+
       describe('HttpProject.fromName()', () => {
         it('creates an empty project with a name', () => {
           const project = HttpProject.fromName('Test project');

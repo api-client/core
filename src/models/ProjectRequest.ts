@@ -2,7 +2,7 @@ import { Kind as ThingKind } from './Thing.js';
 import { ProjectDefinitionProperty, IProjectDefinitionProperty } from './ProjectDefinitionProperty.js';
 import { ProjectFolder } from './ProjectFolder.js';
 import { IHttpRequest, Kind as HttpRequestKind } from './HttpRequest.js';
-import { HttpProject } from './HttpProject.js';
+import { HttpProject, Kind as ProjectKind } from './HttpProject.js';
 import v4 from '../lib/uuid.js';
 import { IRequest, Request } from './Request.js';
 
@@ -14,6 +14,20 @@ export interface IProjectRequest extends IProjectDefinitionProperty, IRequest {
    * The identifier of the request.
    */
   key: string;
+}
+
+export interface IRequestCloneOptions {
+  /**
+   * By default it revalidates (re-creates) keys in the request.
+   * Set this to true to not make any changes to the keys.
+   */
+  withoutRevalidate?: boolean;
+  /**
+   * By default it attaches the request to the same parent as the original request.
+   * Set this to `true` when moving a request between projects to prevent adding the request to the project. 
+   * Note, the request still have a reference to the original project. You need to update the `project` property.
+   */
+  withoutAttach?: boolean;
 }
 
 /**
@@ -53,7 +67,7 @@ export class ProjectRequest extends Request implements ProjectDefinitionProperty
    */
   static fromUrl(url: string, project?: HttpProject): ProjectRequest {
     if (!project) {
-      throw new Error(`project is required.`);
+      throw new Error(`The project is required.`);
     }
     const now:number = Date.now();
     const request = new ProjectRequest(project, {
@@ -83,7 +97,7 @@ export class ProjectRequest extends Request implements ProjectDefinitionProperty
    */
   static fromName(name: string, project?: HttpProject): ProjectRequest {
     if (!project) {
-      throw new Error(`project is required.`);
+      throw new Error(`The project is required.`);
     }
     const now:number = Date.now();
     const request = new ProjectRequest(project, {
@@ -113,7 +127,7 @@ export class ProjectRequest extends Request implements ProjectDefinitionProperty
    */
   static fromHttpRequest(info: IHttpRequest, project?: HttpProject): ProjectRequest {
     if (!project) {
-      throw new Error(`project is required.`);
+      throw new Error(`The project is required.`);
     }
     const now:number = Date.now();
     const request = new ProjectRequest(project, {
@@ -226,5 +240,38 @@ export class ProjectRequest extends Request implements ProjectDefinitionProperty
    */
   remove(): void {
     this.project.removeRequest(this.key);
+  }
+
+  /**
+   * Makes a copy of this request.
+   * By default it attaches the copied request to the same parent.
+   * Use the options dictionary to control this behavior.
+   */
+  clone(opts: IRequestCloneOptions = {}): ProjectRequest {
+    const copy = new ProjectRequest(this.project, this.toJSON());
+    if (!opts.withoutRevalidate) {
+      copy.key = v4();
+    }
+    if (!opts.withoutAttach) {
+      // if the parent is the project then add the request to the project.
+      const parent = this.getParent();
+      if (parent) {
+        parent.addRequest(copy);
+      }
+    }
+    return copy;
+  }
+
+  /**
+   * The static version of the `clone()` method.
+   * 
+   * @param request The request schema to clone.
+   * @param project The project to add the request to.
+   * @param opts Optional options.
+   * @returns The copied request.
+   */
+  static clone(request: IProjectRequest, project: HttpProject, opts: IRequestCloneOptions = {}): ProjectRequest {
+    const obj = new ProjectRequest(project, request);
+    return obj.clone(opts);
   }
 }
