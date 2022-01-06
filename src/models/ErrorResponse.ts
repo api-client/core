@@ -7,7 +7,7 @@ export interface IErrorResponse extends IHttpResponse {
   /**
    * An error associated with the response
    */
-  error: Error;
+  error: string | Error;
 }
 
 export class ErrorResponse extends HttpResponse {
@@ -16,11 +16,22 @@ export class ErrorResponse extends HttpResponse {
    */
   error = new Error('Unknown error');
 
-  static fromError(error: Error): ErrorResponse {
+  /**
+   * @returns The same Error or new Error instance when passed string.
+   */
+  static ensureError(error: string | Error): Error {
+    return typeof error === 'string' ? new Error(error) : error;
+  }
+
+  /**
+   * @param error The error message or Error object to use.
+   */
+  static fromError(error: Error | string): ErrorResponse {
+    const err = ErrorResponse.ensureError(error);
     return new ErrorResponse({
       kind: Kind,
       status: 0,
-      error,
+      error: err,
     });
   }
 
@@ -28,7 +39,7 @@ export class ErrorResponse extends HttpResponse {
     const init: IErrorResponse = {
       kind: Kind,
       status: input.status || 0,
-      error: input.error || new Error('Unknown error'),
+      error: input.error ? ErrorResponse.ensureError(input.error) : new Error('Unknown error'),
     };
     if (input.headers) {
       init.headers = input.headers;
@@ -73,13 +84,13 @@ export class ErrorResponse extends HttpResponse {
   new(init: IErrorResponse): void {
     super.new(init);
     if (init.error) {
-      this.error = init.error;
+      this.error = ErrorResponse.ensureError(init.error);
     }
   }
 
   toJSON(): IErrorResponse {
     const response = super.toJSON() as IErrorResponse;
-    response.error = this.error;
+    response.error = this.error.message;
     return response;
   }
 
