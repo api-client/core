@@ -3,12 +3,15 @@ import { assert } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { Kind as HttpProjectKind, HttpProject, IHttpProject } from '../../src/models/HttpProject.js';
 import { Kind as ProjectFolderKind, ProjectFolder } from '../../src/models/ProjectFolder.js';
-import { ProjectRequest } from '../../src/models/ProjectRequest.js';
+import { ProjectRequest, IProjectRequest } from '../../src/models/ProjectRequest.js';
 import { Kind as ThingKind } from '../../src/models/Thing.js';
 import { Kind as ProviderKind } from '../../src/models/Provider.js';
 import { Kind as LicenseKind } from '../../src/models/License.js';
 import { Kind as EnvironmentKind, Environment } from '../../src/models/Environment.js';
 import * as PatchUtils from '../../src/models/PatchUtils.js';
+import { ProjectSchema } from '../../src/models/ProjectSchema.js';
+import { ArcLegacyProject } from '../../src/models/legacy/models/ArcLegacyProject.js';
+import { ARCSavedRequest } from '../../src/models/legacy/request/ArcRequest.js';
 // import { HttpProject, ProjectFolderKind, ProjectFolder, ThingKind, IHttpProject, HttpProjectKind } from '../../browser.js';
 
 describe('Models', () => {
@@ -28,6 +31,73 @@ describe('Models', () => {
           assert.equal(info.name, '', 'sets the info.name property');
           assert.isUndefined(result.license, 'has no license property');
           assert.isUndefined(result.provider, 'has no provider property');
+        });
+
+        it('sets initEnvironments', () => {
+          const result = new HttpProject(undefined, [
+            {
+              key: 'a',
+              kind: 'ARC#Environment',
+              info: {
+                kind: 'ARC#Thing',
+                name: 'test',
+              },
+              variables: [],
+              server: {
+                kind: 'ARC#Server',
+                uri: 'https://api.com',
+              }
+            }
+          ]);
+          assert.typeOf(result.effectiveEnvironments, 'array');
+          assert.lengthOf(result.effectiveEnvironments, 1);
+          assert.equal(result.effectiveEnvironments[0].info.name, 'test');
+        });
+
+        it('passed in constructor environments override project environments', () => {
+          const schema = new HttpProject({
+            definitions: [],
+            environments: [
+              {
+                key: 'b',
+                kind: 'ARC#Environment',
+                info: {
+                  kind: 'ARC#Thing',
+                  name: 'test b',
+                },
+                variables: [],
+                server: {
+                  kind: 'ARC#Server',
+                  uri: 'https://domain.com',
+                }
+              }
+            ],
+            info: {
+              kind: 'ARC#Thing',
+              name: 'Project',
+            },
+            items: [],
+            key: 'abc',
+            kind: 'ARC#HttpProject',
+          }).toJSON();
+          const result = new HttpProject(schema, [
+            {
+              key: 'a',
+              kind: 'ARC#Environment',
+              info: {
+                kind: 'ARC#Thing',
+                name: 'test',
+              },
+              variables: [],
+              server: {
+                kind: 'ARC#Server',
+                uri: 'https://api.com',
+              }
+            }
+          ]);
+          assert.typeOf(result.effectiveEnvironments, 'array');
+          assert.lengthOf(result.effectiveEnvironments, 1);
+          assert.equal(result.effectiveEnvironments[0].info.name, 'test');
         });
       });
 
@@ -184,6 +254,80 @@ describe('Models', () => {
           assert.equal(info.name, 'Test project', 'sets the info.name property');
           assert.isUndefined(project.license, 'has no license property');
           assert.isUndefined(project.provider, 'has no provider property');
+        });
+      });
+
+      describe('HttpProject.fromLegacy()', () => {
+        it('sets the name', async () => {
+          const init: ArcLegacyProject = {
+            name: 'abc',
+          };
+          const result = await HttpProject.fromLegacy(init, []);
+          assert.equal(result.info.name, 'abc');
+        });
+
+        it('sets the description', async () => {
+          const init: ArcLegacyProject = {
+            name: 'abc',
+            description: 'test'
+          };
+          const result = await HttpProject.fromLegacy(init, []);
+          assert.equal(result.info.description, 'test');
+        });
+
+        it('adds the requests', async () => {
+          const init: ArcLegacyProject = {
+            name: 'abc',
+            description: 'test',
+            requests: ['1'],
+          };
+          const requests: ARCSavedRequest[] = [
+            {
+              method: 'PUT',
+              name: 'r1',
+              url: 'https://',
+              _id: '1',
+            }
+          ];
+          const result = await HttpProject.fromLegacy(init, requests);
+          const projectRequests = result.listRequests();
+          assert.lengthOf(projectRequests, 1, 'has a single request');
+          assert.equal(projectRequests[0].info.name, 'r1');
+        });
+
+        it('ignores missing requests', async () => {
+          const init: ArcLegacyProject = {
+            name: 'abc',
+            description: 'test',
+            requests: ['1', '2'],
+          };
+          const requests: ARCSavedRequest[] = [
+            {
+              method: 'PUT',
+              name: 'r1',
+              url: 'https://',
+              _id: '1',
+            },
+            {
+              method: 'DELETE',
+              name: 'r3',
+              url: 'https://api.com',
+              _id: '3',
+            }
+          ];
+          const result = await HttpProject.fromLegacy(init, requests);
+          const projectRequests = result.listRequests();
+          assert.lengthOf(projectRequests, 1, 'has a single request');
+          assert.equal(projectRequests[0].info.name, 'r1');
+        });
+      });
+
+      describe('HttpProject.fromInitOptions()', () => {
+        it('sets the name', () => {
+          const result = HttpProject.fromInitOptions({
+            name: 'abc'
+          });
+          assert.equal(result.info.name, 'abc');
         });
       });
     });
@@ -633,7 +777,7 @@ describe('Models', () => {
         assert.equal(created.getParent().kind, HttpProjectKind, 'the request has the parent as the project');
       });
 
-      it.only('adds the request from the schema', () => {
+      it('adds the request from the schema', () => {
         const project = new HttpProject();
         const request = ProjectRequest.fromName('test', project);
         const schema = request.toJSON();
@@ -1153,6 +1297,65 @@ describe('Models', () => {
         assert.equal(project.provider.name, 'new', 'updates the value');
       });
 
+      it('appends a request', () => {
+        const project = new HttpProject();
+        const request = ProjectRequest.fromUrl('api.com', project);
+        const record = project.patch('append', 'requests', request.toJSON());
+
+        assert.equal(record.path, 'requests', 'returns the path');
+        assert.typeOf(record.time, 'number', 'has the time');
+        assert.equal(record.operation, 'append', 'has the operation');
+        assert.isUndefined(record.oldValue, 'has no oldValue');
+        assert.deepEqual(record.value, request.toJSON());
+        assert.equal(record.id, project.key, 'has the id');
+        assert.equal(record.kind, project.kind, 'has the kind');
+      });
+
+      it('appends a request with auto-generated key', () => {
+        const project = new HttpProject();
+        const request = ProjectRequest.fromUrl('api.com', project);
+        const schema = request.toJSON();
+        delete schema.key;
+        const record = project.patch('append', 'requests', schema);
+
+        assert.typeOf((record.value as IProjectRequest).key, 'string');
+      });
+
+      it('throws when appending a request without a value', () => {
+        const project = new HttpProject();
+        assert.throws(() => {
+          project.patch('append', 'requests');
+        });
+      });
+
+      it('deletes a request', () => {
+        const project = new HttpProject();
+        const request = project.addRequest('api.com');
+        const record = project.patch('delete', 'requests', request.key);
+
+        assert.equal(record.path, 'requests', 'returns the path');
+        assert.typeOf(record.time, 'number', 'has the time');
+        assert.equal(record.operation, 'delete', 'has the operation');
+        assert.deepEqual(record.oldValue, request.toJSON());
+        assert.deepEqual(record.value, request.key);
+        assert.equal(record.id, project.key, 'has the id');
+        assert.equal(record.kind, project.kind, 'has the kind');
+      });
+
+      it('throws when deleting an unknown request', () => {
+        const project = new HttpProject();
+        assert.throws(() => {
+          project.patch('delete', 'requests', 'something');
+        });
+      });
+
+      it('throws when unknown request operation', () => {
+        const project = new HttpProject();
+        assert.throws(() => {
+          project.patch('move', 'requests');
+        });
+      });
+
       it('throws when unknown operation', () => {
         const project = new HttpProject();
         assert.throws(() => {
@@ -1193,6 +1396,287 @@ describe('Models', () => {
         assert.throws(() => {
           project.patch('set', `some`, 'a');
         }, Error, PatchUtils.TXT_unknown_path);
+      });
+    });
+
+    describe('patchRequest()', () => {
+      describe('unknown operation', () => {
+        let project: HttpProject;
+        beforeEach(() => {
+          project = new HttpProject();
+        });
+
+        it('throws when unknown operation', () => {
+          assert.throws(() => {
+            project.patchRequest('set', '');
+          }, 'Unsupported operation: set');
+        });
+      });
+
+      describe('append', () => {
+        let project: HttpProject;
+        beforeEach(() => {
+          project = new HttpProject();
+        });
+
+        it('throws when no value', () => {
+          assert.throws(() => {
+            project.patchRequest('append', undefined);
+          }, 'The value for the "append" operation must be set.');
+        });
+
+        it('adds the request', () => {
+          const request = ProjectRequest.fromUrl('api.com', project);
+          const oldValue = project.patchRequest('append', request.toJSON());
+
+          assert.isUndefined(oldValue, 'does not return a value');
+          assert.ok(project.findRequest(request.key), 'project has the request');
+        });
+
+        it('generates the key when missing', () => {
+          const request = ProjectRequest.fromUrl('api.com', project);
+          const schema = request.toJSON();
+          delete schema.key;
+          project.patchRequest('append', schema);
+          assert.typeOf(schema.key, 'string');
+        });
+      });
+
+      describe('delete', () => {
+        let project: HttpProject;
+        let request: ProjectRequest;
+        beforeEach(() => {
+          project = new HttpProject();
+          request = project.addRequest('https://api.com');
+        });
+
+        it('throws when request not found', () => {
+          assert.throws(() => {
+            project.patchRequest('delete', 'something');
+          }, 'Unable to find a request identified by something.');
+        });
+
+        it('removes the request', () => {
+          const oldValue = project.patchRequest('delete', request.key);
+
+          assert.deepEqual(oldValue, request.toJSON(), 'returns the old value');
+          assert.notOk(project.findRequest(request.key), 'the request is removed');
+        });
+      });
+    });
+
+    describe('getParent()', () => {
+      it('always returns undefined', () => {
+        const project = new HttpProject();
+        const result = project.getParent();
+        assert.isUndefined(result);
+      });
+    });
+
+    describe('getProject()', () => {
+      it('always returns the project', () => {
+        const project = new HttpProject();
+        const result = project.getProject();
+        assert.isTrue(result === project);
+      });
+    });
+
+    describe('attachedCallback()', () => {
+      // for code coverage
+      it('is called', () => {
+        const project = new HttpProject();
+        project.attachedCallback();
+      });
+    });
+
+    describe('detachedCallback()', () => {
+      // for code coverage
+      it('is called', () => {
+        const project = new HttpProject();
+        project.detachedCallback();
+      });
+    });
+
+    describe('readEnvironments()', () => {
+      let project: HttpProject;
+      beforeEach(() => {
+        project = new HttpProject();
+      });
+
+      it('reads environments from the project without subfolders without the name', async () => {
+        project.addEnvironment('a');
+        project.addEnvironment('b');
+
+        const envs = await project.readEnvironments();
+        assert.lengthOf(envs, 1, 'has the project environment');
+        assert.equal(envs[0].info.name, 'a', 'has the first environment');
+      });
+
+      it('reads environments from the project without subfolders with the name', async () => {
+        project.addEnvironment('a');
+        project.addEnvironment('b');
+
+        const envs = await project.readEnvironments({ nameOrKey: 'b' });
+        assert.lengthOf(envs, 1, 'has the project environment');
+        assert.equal(envs[0].info.name, 'b', 'has the first environment');
+      });
+
+      it('reads environments to a folder', async () => {
+        project.addEnvironment('a');
+        const f = project.addFolder('folder');
+        f.addEnvironment('b');
+
+        const envs = await project.readEnvironments({ folderKey: f.key });
+        assert.lengthOf(envs, 2, 'has all environments');
+        assert.equal(envs[0].info.name, 'a', 'has the first environment');
+        assert.equal(envs[1].info.name, 'b', 'has the second environment');
+      });
+
+      it('skips folders without environments', async () => {
+        project.addEnvironment('a');
+        const f1 = project.addFolder('folder 1');
+        const f2 = f1.addFolder('folder 2');
+        f2.addEnvironment('b');
+
+        const envs = await project.readEnvironments({ folderKey: f2.key });
+        assert.lengthOf(envs, 2, 'has all environments');
+        assert.equal(envs[0].info.name, 'a', 'has the first environment');
+        assert.equal(envs[1].info.name, 'b', 'has the second environment');
+      });
+
+      it('stops reading when "encapsulated is set"', async () => {
+        project.addEnvironment('a');
+        const f1 = project.addFolder('folder 1');
+        const f2 = f1.addFolder('folder 2');
+        f1.addEnvironment('b');
+        const env = f2.addEnvironment('c');
+        env.encapsulated = true;
+
+        const envs = await project.readEnvironments({ folderKey: f2.key });
+        assert.lengthOf(envs, 1, 'has a single environment');
+        assert.equal(envs[0].info.name, 'c', 'has the folder environment');
+      });
+
+      it('returns empty list when unknown parent', async () => {
+        project.addEnvironment('a');
+        const f = project.addFolder('folder 1');
+        f.addEnvironment('b');
+        const envs = await project.readEnvironments({ folderKey: 'some' });
+        assert.lengthOf(envs, 0);
+      });
+    });
+
+    describe('clone()', () => {
+      let project: HttpProject;
+      beforeEach(() => {
+        project = HttpProject.fromName('a project');
+      });
+
+      it('clones the project', () => {
+        project.addRequest('https://domain.com');
+        project.addFolder('test');
+        const copy = project.clone();
+
+        assert.equal(copy.kind, 'ARC#HttpProject');
+        assert.equal(copy.info.name, 'a project');
+
+        assert.lengthOf(copy.listFolders(), 1, 'has the folder');
+        assert.lengthOf(copy.listRequests(), 1, 'has the requests');
+
+        project.info.name = 'updated';
+        assert.equal(copy.info.name, 'a project');
+      });
+
+      it('recreates the project key', () => {
+        const copy = project.clone();
+
+        assert.typeOf(copy.key, 'string');
+        assert.notEqual(copy.key, project.key);
+      });
+
+      it('recreates folder keys', () => {
+        const f = project.addFolder('test');
+        const copy = project.clone();
+
+        const [folder] = copy.listFolders();
+        assert.typeOf(folder.key, 'string');
+        assert.notEqual(folder.key, f.key);
+      });
+
+      it('recreates requests keys', () => {
+        const r = project.addRequest('https://domain.com');
+        const copy = project.clone();
+
+        const [request] = copy.listRequests();
+        assert.typeOf(request.key, 'string');
+        assert.notEqual(request.key, r.key);
+      });
+
+      it('updates the keys in folder items', () => {
+        const f = project.addFolder('f1');
+        const r = f.addRequest('https://domain.com');
+        r.info.name = 'r1';
+        const copy = project.clone();
+
+        const request = copy.findRequest('r1');
+        const folder = copy.findFolder('f1');
+        assert.ok(request, 'has copied request');
+        assert.ok(folder, 'has copied folder');
+
+        assert.lengthOf(folder.items, 1, 'folder has the item');
+        assert.equal(folder.items[0].key, request.key, 'the item has the reference key');
+      });
+
+      it('updates keys for environments', () => {
+        const env = project.addEnvironment('test');
+        const copy = project.clone();
+
+        assert.typeOf(copy.environments[0].key, 'string');
+        assert.notEqual(copy.environments[0].key, env.key);
+      });
+
+      it('updates keys for schemas', () => {
+        const schema = ProjectSchema.fromName('s1');
+        project.schemas.push(schema);
+        const copy = project.clone();
+
+        assert.typeOf(copy.schemas[0].key, 'string');
+        assert.notEqual(copy.schemas[0].key, schema.key);
+      });
+
+      it('does not update keys when configured', () => {
+        const f = project.addFolder('test');
+        const r = project.addRequest('https://domain.com');
+        const env = project.addEnvironment('test');
+        const schema = ProjectSchema.fromName('s1');
+        project.schemas.push(schema);
+        const copy = project.clone({ withoutRevalidate: true });
+
+        assert.equal(copy.key, project.key);
+        assert.equal(copy.schemas[0].key, schema.key);
+        const [folder] = copy.listFolders();
+        assert.equal(folder.key, f.key);
+        const [request] = copy.listRequests();
+        assert.equal(request.key, r.key);
+        assert.equal(copy.environments[0].key, env.key);
+      });
+    });
+
+    describe('HttpProject.clone()', () => {
+      it('clones a project', () => {
+        const project = HttpProject.fromName('a project');
+        const copy = HttpProject.clone(project.toJSON());
+        assert.equal(copy.info.name, 'a project');
+      });
+    });
+
+    describe('toString()', () => {
+      it('serializes the project', () => {
+        const project = HttpProject.fromName('a project');
+        const str = project.toString();
+        assert.typeOf(str, 'string', 'produces a string');
+        const obj = JSON.parse(str);
+        assert.equal(obj.info.name, 'a project');
       });
     });
   });

@@ -124,10 +124,10 @@ export interface IHttpProjectIndex {
 
 export interface IProjectCloneOptions {
   /**
-   * Revalidates (re-creates) keys for all object that have keys.
-   * @default true
+   * By default it revalidates (re-creates) keys in the request.
+   * Set this to true to not make any changes to the keys.
    */
-  revalidate?: boolean;
+  withoutRevalidate?: boolean;
 }
 
 /**
@@ -219,14 +219,15 @@ export class HttpProject extends ProjectParent {
     return project;
   }
 
+  /**
+   * Creates an HTTP project instance from ARC's legacy project definition.
+   */
   static async fromLegacy(project: ArcLegacyProject, requests: ARCSavedRequest[]): Promise<HttpProject> {
     const { name='Unnamed project', description, requests: ids } = project;
-  
     const result = HttpProject.fromName(name);
     if (description) {
       result.info.description = description;
     }
-  
     if (Array.isArray(ids) && ids.length) {
       const promises = ids.map(async (id) => {
         const old = requests.find((item) => item._id === id);
@@ -239,10 +240,12 @@ export class HttpProject extends ProjectParent {
       });
       await Promise.allSettled(promises);
     }
-  
     return result;
   }
 
+  /**
+   * Creates a new project from a set of options.
+   */
   static fromInitOptions(init: IProjectInitOptions): HttpProject {
     const { name='Unnamed project' } = init;
     return HttpProject.fromName(name);
@@ -476,15 +479,6 @@ export class HttpProject extends ProjectParent {
     } else {
       root = this;
     }
-    if (skipExisting) {
-      const folders = root.listFolderItems();
-      for (const item of folders) {
-        const existing = this.findFolder(item.key, { keyOnly: true });
-        if (existing && existing.info.name === name) {
-          return existing;
-        }
-      }
-    }
     let definition: ProjectFolder;
     if (typeof init === 'string') {
       definition = ProjectFolder.fromName(this, init);
@@ -493,6 +487,17 @@ export class HttpProject extends ProjectParent {
     } else {
       definition = new ProjectFolder(this, init);
     }
+
+    if (skipExisting) {
+      const folders = root.listFolderItems();
+      for (const item of folders) {
+        const existing = this.findFolder(item.key, { keyOnly: true });
+        if (existing && existing.info.name === definition.info.name) {
+          return existing;
+        }
+      }
+    }
+    
     this.definitions.push(definition);
     const item = ProjectItem.projectFolder(this, definition.key);
     if (!Array.isArray(root.items)) {
@@ -1035,7 +1040,7 @@ export class HttpProject extends ProjectParent {
     if (operation === 'delete') {
       const request = this.findRequest(value as string, { keyOnly: true });
       if (!request) {
-        throw new Error(`Unable to find a request identified by ${value}`);
+        throw new Error(`Unable to find a request identified by ${value}.`);
       }
       const oldValue = request.toJSON();
       request.remove();
@@ -1104,9 +1109,9 @@ export class HttpProject extends ProjectParent {
 
     let current: HttpProject | ProjectFolder | undefined = root;
     while (current) {
-      const { environments } = current;
-      if (Array.isArray(environments) && environments.length) {
-        const selected = nameOrKey ? environments.find(i => i.key === nameOrKey || i.info.name === nameOrKey) : environments[0];
+      const { effectiveEnvironments } = current;
+      if (Array.isArray(effectiveEnvironments) && effectiveEnvironments.length) {
+        const selected = nameOrKey ? effectiveEnvironments.find(i => i.key === nameOrKey || i.info.name === nameOrKey) : effectiveEnvironments[0];
         if (selected) {
           result.push(selected);
           if (selected.encapsulated) {
@@ -1125,7 +1130,8 @@ export class HttpProject extends ProjectParent {
    */
   clone(opts: IProjectCloneOptions = {}): HttpProject {
     const copy = new HttpProject(this.toJSON());
-    if (opts.revalidate !== false) {
+    if (!opts.withoutRevalidate) {
+      copy.key = v4();
       HttpProject.regenerateKeys(copy);
     }
     return copy;

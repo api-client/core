@@ -110,6 +110,19 @@ export class ProjectSchema {
   name= '';
 
   /**
+   * Creates a new schema instance from the passed name.
+   * @param name The name of the schema.
+   */
+  static fromName(name: string): ProjectSchema {
+    const init: IProjectSchema = {
+      kind: Kind,
+      name,
+      key: v4(),
+    };
+    return new ProjectSchema(init);
+  }
+
+  /**
    * @param input The schema definition used to restore the state.
    */
   constructor(input?: string | IProjectSchema) {

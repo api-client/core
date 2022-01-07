@@ -28,6 +28,10 @@ export abstract class ProjectParent implements ProjectDefinitionProperty {
    */
   info: Thing = new Thing({ kind: ThingKind, name: '' });
 
+  get effectiveEnvironments(): Environment[] {
+    return this.environments;
+  }
+
   abstract attachedCallback(): void;
 
   abstract detachedCallback(): void;
