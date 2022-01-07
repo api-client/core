@@ -90,7 +90,7 @@ export class ErrorResponse extends HttpResponse {
 
   toJSON(): IErrorResponse {
     const response = super.toJSON() as IErrorResponse;
-    response.error = this.error.message;
+    response.error = this.error;
     return response;
   }
 

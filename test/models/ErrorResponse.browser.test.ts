@@ -72,7 +72,7 @@ describe('Models', () => {
       it('serializes the error', () => {
         const response = ErrorResponse.fromError('test');
         const result = response.toJSON();
-        assert.equal(result.error, 'test');
+        assert.equal((result.error as Error).message, 'test');
       });
 
       it('serializes the parent values', () => {
