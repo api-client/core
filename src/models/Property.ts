@@ -66,7 +66,7 @@ export class Property {
    * @param value The value of the property. Default to an empty string which is the same as calling `Property.String()`.
    * @param enabled Whether the property is enabled.
    */
-  static fromType(name = '', value:unknown = '', enabled = true): Property {
+  static fromType(name = '', value: unknown = '', enabled = true): Property {
     const type = typeof value;
     if (type === 'boolean') {
       return Property.Boolean(name, value as boolean, enabled);

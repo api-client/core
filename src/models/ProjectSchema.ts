@@ -25,7 +25,7 @@ export interface IProjectSchemaProperty {
   /**
    * The data type of the property.
    */
-  type?: SchemaPropertyType;
+  type: SchemaPropertyType;
   /**
    * Whether or not the property is required.
    * By default a property is required. It has to be set to `false` to consider it as not required.
@@ -123,6 +123,24 @@ export class ProjectSchema {
   }
 
   /**
+   * Creates a new schema instance from the content definition
+   * @param name The name of the schema.
+   * @param content The "raw" content of the schema
+   * @param mime The mime type associated with the schema.
+   * @returns The instance of the created schema
+   */
+  static fromContent(name: string, content: string, mime: string): ProjectSchema {
+    const init: IProjectSchema = {
+      kind: Kind,
+      name,
+      key: v4(),
+      content,
+      mime,
+    };
+    return new ProjectSchema(init);
+  }
+
+  /**
    * @param input The schema definition used to restore the state.
    */
   constructor(input?: string | IProjectSchema) {
@@ -178,8 +196,45 @@ export class ProjectSchema {
       result.mime = this.mime;
     }
     if (Array.isArray(this.properties) && this.properties.length) {
-      result.properties = this.properties;
+      result.properties = this.properties.map(i => ({...i}));
     }
     return result;
+  }
+
+  /**
+   * Creates a schema property from a definition.
+   * @param info The property definition.
+   * @returns The same property definition
+   */
+  addProperty(info: IProjectSchemaProperty): IProjectSchemaProperty;
+
+  /**
+   * Creates a schema property from a definition.
+   * 
+   * @param name The property name
+   * @param type The property data type
+   * @returns The created schema definition.
+   */
+  addProperty(name: string, type: SchemaPropertyType): IProjectSchemaProperty;
+
+  addProperty(infoOrName: string | IProjectSchemaProperty, type?: SchemaPropertyType): IProjectSchemaProperty {
+    const infoType = typeof infoOrName;
+    if (infoType === 'string' && !type) {
+      throw new Error('The type is required.');
+    }
+    let info: IProjectSchemaProperty;
+    if (infoType === 'string') {
+      info = {
+        name: infoOrName as string,
+        type: type as SchemaPropertyType,
+      };
+    } else {
+      info = infoOrName as IProjectSchemaProperty;
+    }
+    if (!Array.isArray(this.properties)) {
+      this.properties = [];
+    }
+    this.properties.push(info);
+    return info;
   }
 }
