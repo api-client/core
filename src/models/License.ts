@@ -91,7 +91,7 @@ export class License {
    */
   static isLicense(input: unknown): boolean {
     const typed = input as ILicense;
-    if (typed.kind === Kind) {
+    if (typed && typed.kind === Kind) {
       return true;
     }
     return false;

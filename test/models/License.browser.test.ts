@@ -2,6 +2,7 @@
 import { assert } from '@esm-bundle/chai';
 import { Kind as LicenseKind, License, ILicense } from '../../src/models/License.js';
 import * as PatchUtils from '../../src/models/PatchUtils.js';
+import { Property } from '../../src/models/Property.js';
 
 describe('Models', () => {
   describe('License', () => {
@@ -124,17 +125,51 @@ describe('Models', () => {
       });
 
       it(`throws when accessing an unknown property`, () => {
-        const folder = new License();
+        const license = new License();
         assert.throws(() => {
-          folder.patch('set', `some`, 'a');
+          license.patch('set', `some`, 'a');
         }, Error, PatchUtils.TXT_unknown_path);
       });
 
       it(`throws when accessing the kind`, () => {
-        const folder = new License();
+        const license = new License();
         assert.throws(() => {
-          folder.patch('set', `kind`, 'a');
+          license.patch('set', `kind`, 'a');
         }, Error, PatchUtils.TXT_delete_kind);
+      });
+
+      it(`throws when accessing an unknown operation`, () => {
+        const license = new License();
+        assert.throws(() => {
+          // @ts-ignore
+          license.patch('other', `name`, 'a');
+        }, Error, `Unknown operation: other`);
+      });
+
+      it(`throws when not providing a value when required`, () => {
+        const license = new License();
+        assert.throws(() => {
+          license.patch('set', `name`, undefined);
+        }, Error, PatchUtils.TXT_value_required);
+      });
+    });
+
+    describe('License.isLicense()', () => {
+      it('returns false when no input', () => {
+        const result = License.isLicense(undefined);
+        assert.isFalse(result);
+      });
+
+      it('returns false when invalid type', () => {
+        const instance = Property.String('abc');
+        const result = License.isLicense(instance);
+        assert.isFalse(result);
+      });
+
+      it('returns true when HttpRequest type', () => {
+        const instance = new License();
+        const result = License.isLicense(instance);
+        assert.isTrue(result);
       });
     });
   });

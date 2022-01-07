@@ -1,6 +1,5 @@
 import { Kind as FolderKind, ProjectFolder } from './ProjectFolder.js';
-import { Kind as ProjectRequestKind } from './ProjectRequest.js';
-import { ProjectRequest } from './ProjectRequest.js';
+import { Kind as ProjectRequestKind, ProjectRequest } from './ProjectRequest.js';
 import { HttpProject } from './HttpProject.js';
 
 export interface IProjectItem {
@@ -65,7 +64,7 @@ export class ProjectItem {
    * @param project The top-most project.
    * @param input The project item definition used to restore the state.
    */
-  constructor(project: HttpProject, input?: string|IProjectItem) {
+  constructor(project: HttpProject, input: string|IProjectItem) {
     this.project = project;
     let init: IProjectItem;
     if (typeof input === 'string') {

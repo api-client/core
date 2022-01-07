@@ -1,5 +1,6 @@
 import { assert } from '@esm-bundle/chai';
 import { Kind as HttpRequestKind, HttpRequest, IHttpRequest } from '../../src/models/HttpRequest.js';
+import { Property } from '../../src/models/Property.js';
 import { PayloadSerializer, ISafePayload } from '../../src/lib/transformers/PayloadSerializer.js';
 
 describe('Models', () => {
@@ -207,6 +208,25 @@ describe('Models', () => {
         const request = HttpRequest.fromBaseValues({ url: '', method: '', payload: 'test' });
         await request.writePayload(null);
         assert.isUndefined(request.payload);
+      });
+    });
+
+    describe('HttpRequest.isHttpRequest()', () => {
+      it('returns false when no input', () => {
+        const result = HttpRequest.isHttpRequest(undefined);
+        assert.isFalse(result);
+      });
+
+      it('returns false when invalid type', () => {
+        const instance = Property.String('abc');
+        const result = HttpRequest.isHttpRequest(instance);
+        assert.isFalse(result);
+      });
+
+      it('returns true when HttpRequest type', () => {
+        const instance = new HttpRequest();
+        const result = HttpRequest.isHttpRequest(instance);
+        assert.isTrue(result);
       });
     });
   });
