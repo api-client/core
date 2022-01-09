@@ -26,6 +26,7 @@
     "projectstatedelete",
     "projectstateupdate",
     "rehandshake",
+    "Sfixed",
     "SPDY",
     "statuscode",
     "storeprojectclone",

@@ -1,5 +1,6 @@
 import { assert } from '@esm-bundle/chai';
 import { ProjectSchema, IProjectSchema, Kind as ProjectSchemaKind } from '../../src/models/ProjectSchema.js';
+import { Property, IProperty, Kind as PropertyKind } from '../../src/models/Property.js';
 
 describe('Models', () => {
   describe('ProjectSchema', () => {
@@ -46,19 +47,19 @@ describe('Models', () => {
           mime: 'application/json',
           key: '123',
           properties: [
-            {
-              name: 'p1',
-              type: 'boolean',
-            }
+            Property.Boolean('p1').toJSON(),
           ],
         };
         const result = new ProjectSchema(info);
         assert.equal(result.kind, ProjectSchemaKind);
         assert.equal(result.name, 'test-info');
         assert.equal(result.key, '123');
-        assert.deepEqual(result.properties, info.properties);
         assert.equal(result.content, 'test-content');
         assert.equal(result.mime, 'application/json');
+        assert.typeOf(result.properties, 'array');
+        assert.lengthOf(result.properties, 1);
+        assert.equal(result.properties[0].name, 'p1');
+        assert.equal(result.properties[0].type, 'boolean');
       });
 
       it('creates an instance from a JSON string', () => {
@@ -93,10 +94,7 @@ describe('Models', () => {
         mime: 'application/json',
         key: '123',
         properties: [
-          {
-            name: 'p1',
-            type: 'boolean',
-          }
+          Property.Boolean('p1').toJSON(),
         ],
       };
 
@@ -110,6 +108,26 @@ describe('Models', () => {
         const instance = new ProjectSchema({  ...base });
         const result = instance.toJSON();
         assert.equal(result.key, '123');
+      });
+
+      it('creates the key when missing', () => {
+        const instance = new ProjectSchema({  ...base });
+        instance.key = undefined;
+        const result = instance.toJSON();
+        assert.typeOf(result.key, 'string');
+      });
+
+      it('serializes the name', () => {
+        const instance = new ProjectSchema({  ...base });
+        const result = instance.toJSON();
+        assert.equal(result.name, 'test-info');
+      });
+
+      it('serializes the default name when missing', () => {
+        const instance = new ProjectSchema({  ...base });
+        instance.name = undefined;
+        const result = instance.toJSON();
+        assert.equal(result.name, '');
       });
 
       it('serializes the content', () => {
@@ -188,15 +206,34 @@ describe('Models', () => {
 
       it('adds a property from the schema', () => {
         const instance = new ProjectSchema();
-        instance.addProperty({
+        const schema: IProperty = {
+          kind: PropertyKind,
           name: 'a',
           type: 'string',
-        });
+          value: '',
+        };
+        instance.addProperty(schema);
         assert.typeOf(instance.properties, 'array');
         assert.lengthOf(instance.properties, 1);
         const [prop] = instance.properties;
         assert.equal(prop.name, 'a');
         assert.equal(prop.type, 'string');
+      });
+
+      it('adds the kind property when missing', () => {
+        const instance = new ProjectSchema();
+        const schema: IProperty = {
+          kind: PropertyKind,
+          name: 'a',
+          type: 'string',
+          value: '',
+        };
+        delete schema.kind;
+        instance.addProperty(schema);
+        assert.typeOf(instance.properties, 'array');
+        assert.lengthOf(instance.properties, 1);
+        const [prop] = instance.properties;
+        assert.equal(prop.kind, PropertyKind);
       });
     });
   });
