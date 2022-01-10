@@ -24,12 +24,11 @@ export class Normalizer {
         delete typed[key];
       }
     });
-
-    if (!typed.updated) {
-      typed.updated = Date.now();
-    }
     if (!typed.created) {
       typed.created = Date.now();
+    }
+    if (!typed.updated) {
+      typed.updated = typed.created;
     }
     if (!typed.midnight) {
       const day = new Date(typed.updated);

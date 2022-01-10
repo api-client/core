@@ -89,7 +89,7 @@ export interface RequestConfig {
   /**
    * Hosts table configuration.
    */
-  hosts?: HostRule;
+  hosts?: HostRule[];
   /**
    * Whether the processor should validate certificates.
    */

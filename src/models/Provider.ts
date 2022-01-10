@@ -143,7 +143,7 @@ export class Provider {
   }
 
   protected patchAppend(property: keyof IProvider): any {
-    throw new Error(`Unable to "append" to the ${property} property. Did you mean "set"?`);
+    throw new Error(`Unable to "append" to the "${property}" property. Did you mean "set"?`);
   }
 
   validatePatch(operation: PatchUtils.PatchOperation, path: string[], value?: unknown): void {

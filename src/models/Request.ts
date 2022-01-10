@@ -206,16 +206,8 @@ export class Request {
         name: normalized.name || '',
       },
     };
-    if (normalized.created) {
-      init.created = normalized.created;
-    } else {
-      init.created = Date.now();
-    }
-    if (normalized.updated) {
-      init.updated = normalized.updated;
-    } else {
-      init.updated = init.created;
-    }
+    init.created = normalized.created;
+    init.updated = normalized.updated;
     if (normalized.actions) {
       init.actions = RequestActions.fromLegacy(normalized.actions).toJSON();
     }
@@ -262,6 +254,7 @@ export class Request {
         }
       }
     }
+    init.log = log.toJSON();
     return new Request(init);
   }
 
@@ -359,6 +352,9 @@ export class Request {
       this.expects = new HttpRequest();
     }
     if (info) {
+      if (!info.kind) {
+        info.kind = ThingKind;
+      }
       this.info = new Thing(info);
     } else {
       this.info = new Thing({ kind: ThingKind, name: '' });
@@ -381,6 +377,8 @@ export class Request {
     this.created = created;
     if (updated) {
       this.updated = updated;
+    } else {
+      this.updated = this.created;
     }
     if (midnight) {
       this.midnight = midnight;
