@@ -156,7 +156,7 @@ export class Thing {
   }
 
   protected patchAppend(property: keyof IThing): any {
-    throw new Error(`Unable to "append" to the ${property} property. Did you mean "set"?`);
+    throw new Error(`Unable to "append" to the "${property}" property. Did you mean "set"?`);
   }
 
   validatePatch(operation: PatchUtils.PatchOperation, path: string[], value?: unknown): void {
