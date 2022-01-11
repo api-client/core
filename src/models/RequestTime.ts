@@ -23,7 +23,7 @@ export class RequestTime {
   wait = -1;
   blocked = -1;
   dns = -1;
-  ssl = -1;
+  ssl?: number;
 
   /**
    * @param input The timings definition used to restore the state.

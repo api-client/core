@@ -55,6 +55,13 @@ export class ResponseRedirect {
    */
   url = '';
 
+  /**
+   * Creates a redirect object from basic values.
+   * @param url The redirect URL
+   * @param response The response object created by the transport
+   * @param startTime The time when the request started
+   * @param endTime The time when the request ended
+   */
   static fromValues(url: string, response: IHttpResponse, startTime = 0, endTime = 0): ResponseRedirect {
     return new ResponseRedirect({
       kind: Kind,
@@ -135,7 +142,10 @@ export class ResponseRedirect {
       startTime: this.startTime,
       endTime: this.endTime,
       url: this.url,
-      response: {} as IHttpResponse,
+      response: {
+        kind: ResponseKind,
+        status: 0,
+      } as IHttpResponse,
     };
     if (this.response) {
       result.response = this.response.toJSON();

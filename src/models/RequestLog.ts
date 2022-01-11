@@ -139,18 +139,21 @@ export class RequestLog {
    * Adds a redirect to this log. 
    * It checks whether the redirects array has been initialized.
    */
-  addRedirect(redirect: IResponseRedirect): void {
+  addRedirect(redirect: IResponseRedirect): ResponseRedirect {
     if (!this.redirects) {
       this.redirects = [];
     }
-    this.redirects.push(new ResponseRedirect(redirect));
+    const instance = new ResponseRedirect(redirect);
+    this.redirects.push(instance);
+    return instance;
   }
 
-  async addLegacyRedirect(redirect: LegacyRedirect): Promise<void> {
+  async addLegacyRedirect(redirect: LegacyRedirect): Promise<ResponseRedirect> {
     if (!this.redirects) {
       this.redirects = [];
     }
     const info = await ResponseRedirect.fromLegacy(redirect);
     this.redirects.push(info);
+    return info;
   }
 }

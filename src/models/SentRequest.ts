@@ -64,7 +64,7 @@ export class SentRequest extends HttpRequest {
       url: input.url || '',
       startTime: input.startTime || 0,
     };
-    if (input.endTime) {
+    if (typeof input.endTime === 'number') {
       init.endTime = input.endTime;
     }
     if (input.headers) {

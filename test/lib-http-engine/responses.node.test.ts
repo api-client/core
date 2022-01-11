@@ -113,7 +113,8 @@ describe('http-engine', () => {
 
         const log = await request.send();
         const response = new ArcResponse(log.response as IArcResponse);
-        assert.isAbove(response.timings!.ssl, -1);
+        const ssl = response.timings!.ssl as number;
+        assert.isAbove(ssl, -1);
       });
     });
 
