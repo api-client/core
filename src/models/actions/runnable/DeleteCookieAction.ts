@@ -1,3 +1,4 @@
+import { DeleteCookieConfig } from '../../legacy/actions/Actions.js';
 import { Runnable, IRunnable } from './Runnable.js';
 
 export const Kind = 'ARC#DeleteCookieAction';
@@ -43,6 +44,23 @@ export class DeleteCookieAction extends Runnable {
     return !!this.useRequestUrl || !!this.url;
   }
 
+  static fromLegacy(legacy: DeleteCookieConfig): DeleteCookieAction {
+    const init: IDeleteCookieAction = {
+      kind: Kind,
+      name: legacy.name,
+    };
+    if (legacy.url) {
+      init.url = legacy.url;
+    }
+    if (typeof legacy.useRequestUrl === 'boolean') {
+      init.useRequestUrl = legacy.useRequestUrl;
+    }
+    if (legacy.removeAll) {
+      delete init.name;
+    }
+    return new DeleteCookieAction(init);
+  }
+
   constructor(input?: string | IDeleteCookieAction) {
     super();
     let init: IDeleteCookieAction;
@@ -62,6 +80,8 @@ export class DeleteCookieAction extends Runnable {
     const { useRequestUrl, url, name } = init;
     if (typeof useRequestUrl === 'boolean') {
       this.useRequestUrl = useRequestUrl;
+    } else {
+      this.useRequestUrl = undefined;
     }
     if (url) {
       this.url = url;

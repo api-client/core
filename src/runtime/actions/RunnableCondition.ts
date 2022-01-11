@@ -1,8 +1,8 @@
-import { IRunnableAction, RunnableAction } from '../../../models/actions/RunnableAction.js';
-import { IHttpRequest } from '../../../models/HttpRequest.js';
-import { IArcResponse } from '../../../models/ArcResponse.js';
-import { IErrorResponse } from '../../../models/ErrorResponse.js';
-import { RequestDataExtractor } from '../data-readers/RequestDataExtractor.js';
+import { IRunnableAction, RunnableAction } from '../../models/actions/RunnableAction.js';
+import { IHttpRequest } from '../../models/HttpRequest.js';
+import { IArcResponse } from '../../models/ArcResponse.js';
+import { IErrorResponse } from '../../models/ErrorResponse.js';
+import { RequestDataExtractor } from '../../data/RequestDataExtractor.js';
 import { checkCondition } from './ConditionRunner.js';
 
 /**
@@ -27,10 +27,10 @@ export class RunnableCondition extends RunnableAction {
     const extractor = new RequestDataExtractor(request, response);
     const value = extractor.extract(this.condition);
     const op = this.condition.operator;
-    if (!op || !this.condition.predictedValue) {
+    if (!op || !this.condition.value) {
       return false;
     }
-    return checkCondition(value, op, this.condition.predictedValue);
+    return checkCondition(value, op, this.condition.value);
   }
 }
 

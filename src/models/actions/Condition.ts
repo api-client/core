@@ -1,6 +1,4 @@
 import { ActionTypeEnum, RequestDataSourceEnum, ResponseDataSourceEnum, OperatorEnum } from './Enums.js';
-import { IActionIterator, ActionIterator } from './ActionIterator.js';
-import { IConditionView, ConditionView } from './ConditionView.js';
 import { Condition as LegacyCondition } from '../legacy/actions/Actions.js';
 
 export const Kind = 'ARC#Condition';
@@ -8,7 +6,7 @@ export const Kind = 'ARC#Condition';
 /**
  * A base interface describing a configuration to extract data from a request or a response.
  */
-export interface IBaseCondition {
+export interface IDataSource {
   /**
    * The main data source. Either the request or the response object.
    * This is required when the `source` is not equal to `value. In this case it is ignored
@@ -19,40 +17,23 @@ export interface IBaseCondition {
    */
   source: RequestDataSourceEnum | ResponseDataSourceEnum | 'value';
   /**
-   * The path to the data. When `iteratorEnabled` is set then this
-   * is a path counting from an array item. When not set an entire value of `source` is used.
+   * The path to the data.
+   * For JSON value use https://jmespath.org/ syntax.
+   * For XML use xpath.
+   * For any other use a simple path to the data separated by dot (e.g. headers.content-type)
    */
   path?: string;
   /**
-   * This is only used when `source` is set to `value`. The data is not extracted from any of the request fields but this value is used.
+   * Only used when the `source` is `value`. The data extraction always returns this value.
    */
   value?: string;
 }
 
 /**
- * A configuration that extracts complex data from arrays.
- */
-export interface IDataSourceConfiguration extends IBaseCondition {
-  /**
-   * When set the iterator configuration is enabled
-   */
-  iteratorEnabled?: boolean;
-  /**
-   * Array search configuration.
-   */
-  iterator?: IActionIterator;
-}
-
-/**
  * Describes action's condition configuration.
  */
-export interface ICondition extends IDataSourceConfiguration {
+export interface ICondition extends IDataSource {
   kind: 'ARC#Condition',
-  /**
-   * The value to compare to the result of extracted from the data source value.
-   * Usually it is a string. For `statuscode` acceptable value is a number.
-   */
-  predictedValue?: string | number;
   /**
    * The comparison operator.
    */
@@ -62,10 +43,6 @@ export interface ICondition extends IDataSourceConfiguration {
    * The condition is not really checked, values can be empty. The condition check always returns `true`.
    */
   alwaysPass?: boolean;
-  /**
-   * Options related to the UI state in the application.
-   */
-  view?: IConditionView;
 }
 
 export class Condition {
@@ -79,28 +56,17 @@ export class Condition {
    * Source of the data.
    */
   source: RequestDataSourceEnum | ResponseDataSourceEnum | 'value' = RequestDataSourceEnum.url;
-  /**
-   * The path to the data. When `iteratorEnabled` is set then this
-   * is a path counting from an array item. When not set an entire value of `source` is used.
+  /** 
+   * The path to the data.
+   * For JSON value use https://jmespath.org/ syntax.
+   * For XML use xpath.
+   * For any other use a simple path to the data separated by dot (e.g. headers.content-type)
    */
   path?: string;
   /**
-   * This is only used when `source` is set to `value`. The data is not extracted from any of the request fields but this value is used.
+   * Only used when the `source` is `value`. The data extraction always returns this value.
    */
   value?: string;
-  /**
-   * When set the iterator configuration is enabled
-   */
-  iteratorEnabled?: boolean;
-  /**
-   * Array search configuration.
-   */
-  iterator?: ActionIterator;
-  /**
-   * The value to compare to the result of extracted from the data source value.
-   * Usually it is a string. For `statuscode` acceptable value is a number.
-   */
-  predictedValue?: string | number;
   /**
    * The comparison operator.
    */
@@ -110,10 +76,6 @@ export class Condition {
    * The condition is not really checked, values can be empty. The condition check always returns `true`.
    */
   alwaysPass?: boolean;
-  /**
-   * Options related to the UI state in the application.
-   */
-  view?: ConditionView;
 
   static defaultCondition(type=ActionTypeEnum.response): Condition {
     const init: ICondition = {
@@ -122,29 +84,27 @@ export class Condition {
       source: RequestDataSourceEnum.url,
       operator: OperatorEnum.equal,
       path: '',
-      predictedValue: '',
       alwaysPass: false,
-      view: {
-        opened: true,
-      },
     };
     return new Condition(init);
   }
 
   static fromLegacy(runnable: LegacyCondition): Condition {
-    const { source, alwaysPass, iterator, iteratorEnabled, operator, path, predictedValue, type, value, view } = runnable;
+    const { source, alwaysPass, operator, path, predictedValue, type, value } = runnable;
     const init: ICondition = {
       kind: Kind,
       source: source as RequestDataSourceEnum | ResponseDataSourceEnum | 'value',
-      alwaysPass,
-      iteratorEnabled,
-      path,
-      predictedValue,
-      view,
-      value,
     };
-    if (iterator) {
-      init.iterator = ActionIterator.fromLegacy(iterator).toJSON();
+    if (typeof alwaysPass === 'boolean') {
+      init.alwaysPass = alwaysPass;
+    }
+    if (typeof path === 'string') {
+      init.path = path;
+    }
+    if (path === 'value') {
+      init.value = String(value);
+    } else {
+      init.value = String(predictedValue);
     }
     if (operator) {
       switch (operator) {
@@ -183,37 +143,22 @@ export class Condition {
   }
 
   new(init: ICondition): void {
-    const { source = RequestDataSourceEnum.url, alwaysPass, iterator, iteratorEnabled, operator, path, predictedValue, type, value, view } = init;
+    const { source = RequestDataSourceEnum.url, alwaysPass, operator, path, type, value } = init;
     this.source = source;
     if (typeof alwaysPass === 'boolean') {
       this.alwaysPass = alwaysPass;
     } else {
       this.alwaysPass = undefined;
     }
-    if (iterator) {
-      this.iterator = new ActionIterator(iterator);
-    } else {
-      this.iterator = undefined;
-    }
-    if (typeof iteratorEnabled === 'boolean') {
-      this.iteratorEnabled = iteratorEnabled;
-    } else {
-      this.iteratorEnabled = undefined;
-    }
     if (operator) {
       this.operator = operator;
     } else {
       this.operator = undefined;
     }
-    if (path) {
+    if (typeof path === 'string') {
       this.path = path;
     } else {
       this.path = undefined;
-    }
-    if (predictedValue) {
-      this.predictedValue = predictedValue;
-    } else {
-      this.predictedValue = undefined;
     }
     if (type) {
       this.type = type;
@@ -224,11 +169,6 @@ export class Condition {
       this.value = value;
     } else {
       this.value = undefined;
-    }
-    if (view) {
-      this.view = new ConditionView(view);
-    } else {
-      this.view = undefined;
     }
   }
 
@@ -246,23 +186,11 @@ export class Condition {
     if (this.value) {
       result.value = this.value;
     }
-    if (typeof this.iteratorEnabled === 'boolean') {
-      result.iteratorEnabled = this.iteratorEnabled;
-    }
-    if (this.iterator) {
-      result.iterator = this.iterator.toJSON();
-    }
-    if (['number', 'string'].includes(typeof this.predictedValue)) {
-      result.predictedValue = this.predictedValue;
-    }
     if (this.operator) {
       result.operator = this.operator;
     }
     if (typeof this.alwaysPass === 'boolean') {
       result.alwaysPass = this.alwaysPass;
-    }
-    if (this.view) {
-      result.view = this.view.toJSON();
     }
     return result;
   }

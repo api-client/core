@@ -1,0 +1,36 @@
+#%Http Project Request 1.0
+
+kind: ARC#ProjectRequest
+key: a-request-unique-key-2
+info:
+  name: Data extraction
+expects:
+  url: https://my-org.com/auth/tokens
+  method: POST
+  payload: "username={AUTH_USERNAME}&password={AUTH_PASSWORD}"
+actions:
+  response:
+    - condition:
+        type: response
+        source: status
+        operator: equal
+        value: 200
+      actions:
+        - name: Set the right token
+          failOnError: true
+          config:
+            kind: ARC#SetVariableAction
+            name: AUTH_TOKEN
+            source:
+              type: response
+              source: body
+              path: tokens[?type === 'Bearer'].value # https://jmespath.org/
+
+#
+# Response body:
+# {
+#   "tokens": [
+#     { "type": "Bearer", "value": "..." },
+#     { "type": "openid", "value": "..." },
+#   ]
+# }

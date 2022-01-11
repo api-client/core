@@ -78,3 +78,15 @@ export {
   IRequestInitOptions,
   IEnvironmentInitOptions,
 } from './src/events/models/ProjectEvents.js';
+
+// 
+// Actions
+// 
+export { Action, IAction, Kind as ActionKind } from './src/models/actions/Action.js';
+export { Condition, ICondition, Kind as ConditionKind } from './src/models/actions/Condition.js';
+export { RunnableAction, IRunnableAction, Kind as RunnableActionKind } from './src/models/actions/RunnableAction.js';
+export * as ActionEnums from './src/models/actions/Enums.js';
+export { Runnable, IRunnable } from './src/models/actions/runnable/Runnable.js';
+export { DeleteCookieAction, IDeleteCookieAction } from './src/models/actions/runnable/DeleteCookieAction.js';
+export { SetCookieAction, ISetCookieAction } from './src/models/actions/runnable/SetCookieAction.js';
+export { SetVariableAction, ISetVariableAction } from './src/models/actions/runnable/SetVariableAction.js';

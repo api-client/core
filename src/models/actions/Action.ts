@@ -1,11 +1,10 @@
 import { ActionTypeEnum, ResponseDataSourceEnum, RequestDataSourceEnum } from './Enums.js';
 import { IActions } from './runnable/index.js';
-import { IActionView, ActionView } from './ActionView.js';
 import { Runnable, IRunnable } from './runnable/Runnable.js';
 import { Kind as DeleteCookieKind, DeleteCookieAction, IDeleteCookieAction } from './runnable/DeleteCookieAction.js';
 import { Kind as SetCookieKind, SetCookieAction, ISetCookieAction } from './runnable/SetCookieAction.js';
 import { Kind as SetVariableKind, SetVariableAction, ISetVariableAction } from './runnable/SetVariableAction.js';
-import { Action as LegacyAction } from '../legacy/actions/Actions.js';
+import { Action as LegacyAction, SetCookieConfig, SetVariableConfig, DeleteCookieConfig } from '../legacy/actions/Actions.js';
 
 export const Kind = 'ARC#Action';
 
@@ -15,16 +14,13 @@ export const Kind = 'ARC#Action';
 export interface IAction {
   kind?: 'ARC#Action';
   /**
-   * The type of the action. 
-   * The `request` will only process HTTP request data. The `response` has both request and response data available.
-   */
-  type: ActionTypeEnum;
-  /**
    * Action name.
    */
   name?: string;
   /**
    * Whether the action is enabled.
+   * An action is enabled by default.
+   * @default true
    */
   enabled?: boolean;
   /**
@@ -32,9 +28,9 @@ export interface IAction {
    */
   priority?: number;
   /**
-   * Action configuration
+   * The action configuration. The schema depends on the action type.
    */
-  config?: IActions;
+  config?: unknown;
   /**
    * Whether or not the action is executed synchronously to request / response
    */
@@ -43,19 +39,10 @@ export interface IAction {
    * Whether or not the request should fail when the action fails.
    */
   failOnError?: boolean;
-  /**
-   * Options passed to the UI.
-   */
-  view?: IActionView;
 }
 
 export class Action {
   kind = Kind;
-  /**
-   * The type of the action. 
-   * The `request` will only process HTTP request data. The `response` has both request and response data available.
-   */
-  type: ActionTypeEnum = ActionTypeEnum.response;
   /**
    * Action name.
    */
@@ -80,52 +67,47 @@ export class Action {
    * Whether or not the request should fail when the action fails.
    */
   failOnError?: boolean;
-  /**
-   * Options passed to the UI.
-   */
-  view?: ActionView;
 
   static fromLegacy(item: LegacyAction): Action {
-    const { priority, view, type, config, enabled, failOnError, name, sync } = item;
+    const { priority, config, enabled, failOnError, name, sync } = item;
+    let newConfig: IRunnable | undefined;
+    switch (name) {
+      case 'set-cookie': newConfig = SetCookieAction.fromLegacy(config as SetCookieConfig).toJSON(); break;
+      case 'set-variable': newConfig = SetVariableAction.fromLegacy(config as SetVariableConfig); break;
+      case 'delete-cookie': newConfig = DeleteCookieAction.fromLegacy(config as DeleteCookieConfig); break;
+    }
+    
     const init: IAction = {
       kind: Kind,
-      type: ActionTypeEnum.response,
       priority,
-      view,
-      config,
-      enabled,
-      failOnError,
-      name,
-      sync,
     };
-    if (type) {
-      switch (type) {
-        case 'request': init.type = ActionTypeEnum.request; break;
-        case 'response': init.type = ActionTypeEnum.response; break;
-      }
+    if (typeof enabled === 'boolean') {
+      init.enabled = enabled;
+    }
+    if (typeof failOnError === 'boolean') {
+      init.failOnError = failOnError;
+    }
+    if (typeof sync === 'boolean') {
+      init.sync = sync;
+    }
+    if (typeof name === 'string') {
+      init.name = name;
+    }
+    if (newConfig) {
+      init.config = newConfig;
     }
     return new Action(init);
   }
 
   /**
    * Creates a default configuration of an action
-   * @param type The type of the action.
    */
-  static defaultAction(type=ActionTypeEnum.response): Action {
+  static defaultAction(): Action {
     const init: IAction = {
-      type,
       name: 'New action',
-      config: {
-        source: {
-          type,
-          source: type === ActionTypeEnum.response ? ResponseDataSourceEnum.body : RequestDataSourceEnum.body,
-        },
-        name: '',
-      },
       failOnError: false,
       priority: 0,
       sync: false,
-      view: {},
       enabled: true,
     };
     return new Action(init);
@@ -140,16 +122,14 @@ export class Action {
     } else {
       init = {
         kind: Kind,
-        type: ActionTypeEnum.response,
       };
     }
     this.new(init);
   }
 
   new(init: IAction): void {
-    const { type = ActionTypeEnum.response, name, enabled, priority, sync, failOnError, view, config } = init;
+    const { name, enabled, priority, sync, failOnError, config } = init;
     this.kind = Kind;
-    this.type = type;
     if (name) {
       this.name = name;
     } else {
@@ -175,11 +155,6 @@ export class Action {
     } else {
       this.priority = undefined;
     }
-    if (view) {
-      this.view = new ActionView(view);
-    } else {
-      this.view = undefined;
-    }
     if (config) {
       this.setConfig(config);
     } else {
@@ -190,13 +165,9 @@ export class Action {
   toJSON(): IAction {
     const result: IAction = {
       kind: Kind,
-      type: this.type,
     };
     if (this.name) {
       result.name = this.name;
-    }
-    if (this.view) {
-      result.view = this.view.toJSON();
     }
     if (this.config) {
       result.config = this.config.toJSON() as IActions;
@@ -216,12 +187,13 @@ export class Action {
     return result;
   }
 
-  setConfig(config: IRunnable): void {
-    const { kind } = config;
+  setConfig(config: unknown): void {
+    const { kind } = config as IRunnable;
     switch (kind) {
       case DeleteCookieKind: this.config = new DeleteCookieAction(config as IDeleteCookieAction); break;
       case SetCookieKind: this.config = new SetCookieAction(config as ISetCookieAction); break;
       case SetVariableKind: this.config = new SetVariableAction(config as ISetVariableAction); break;
+      default: throw new Error(`Unknown action config.`)
     }
   }
 

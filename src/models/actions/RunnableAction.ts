@@ -1,5 +1,4 @@
 import { ICondition, Condition } from './Condition.js';
-import { ActionTypeEnum } from './Enums.js';
 import { IAction, Action } from './Action.js';
 import { RunnableAction as LegacyRunnable } from '../legacy/actions/Actions.js';
 
@@ -17,18 +16,14 @@ export interface IRunnableAction {
    */
   condition: ICondition;
   /**
-   * The type of the runnable. 
-   * The `request` will only process HTTP request data. The `response` has both request and response data available.
-   */
-  type: ActionTypeEnum;
-  /**
    * The list of actions to execute.
    */
   actions: IAction[];
   /**
    * Whether the entire runnable is enabled. This is checked before the condition is executed.
+   * An action is enabled by default.
    */
-  enabled: boolean;
+  enabled?: boolean;
 }
 
 export class RunnableAction {
@@ -38,31 +33,18 @@ export class RunnableAction {
    */
   condition: Condition = new Condition();
   /**
-   * The type of the runnable. 
-   * The `request` will only process HTTP request data. The `response` has both request and response data available.
-   */
-  type: ActionTypeEnum = ActionTypeEnum.response;
-  /**
    * The list of actions to execute.
    */
   actions: Action[] = [];
   /**
    * Whether the entire runnable is enabled. This is checked before the condition is executed.
    */
-  enabled = false;
+  enabled?: boolean;
 
   static fromLegacy(runnable: LegacyRunnable): RunnableAction {
-    const { actions, condition, enabled, type=ActionTypeEnum.response, } = runnable;
-    const init: IRunnableAction = {
-      type: type as ActionTypeEnum,
-      actions: [],
-      enabled,
-      condition: Condition.fromLegacy(condition).toJSON(),
-    };
-    if (Array.isArray(actions) && actions.length) {
-      init.actions = actions.map(i => Action.fromLegacy(i).toJSON());
-    }
-    return new RunnableAction(init);
+    const result = new RunnableAction();
+    result.fromLegacy(runnable);
+    return result;
   }
 
   constructor(input?: string | IRunnableAction) {
@@ -75,22 +57,20 @@ export class RunnableAction {
       init = {
         kind: Kind,
         condition: new Condition().toJSON(),
-        type: ActionTypeEnum.response,
         actions: [],
-        enabled: false,
+        enabled: true,
       };
     }
     if (init.kind === Kind) {
       this.new(init);
     } else {
-      this.fromLegacy(init as LegacyRunnable);
+      this.fromLegacy((init as unknown) as LegacyRunnable);
     }
   }
 
   new(init: IRunnableAction): void {
-    const { enabled = false, condition, type = ActionTypeEnum.response, actions = [] } = init;
+    const { enabled, condition, actions } = init;
     this.enabled = enabled;
-    this.type = type;
     if (condition) {
       this.condition = new Condition(condition);
     } else {
@@ -105,19 +85,21 @@ export class RunnableAction {
 
   toJSON(): IRunnableAction {
     const result: IRunnableAction = {
-      enabled: this.enabled,
-      type: this.type,
       condition: this.condition.toJSON(),
       actions: this.actions.map(i => i.toJSON()),
       kind: Kind,
     };
+    if (typeof this.enabled === 'boolean') {
+      result.enabled = this.enabled;
+    }
     return result;
   }
 
   fromLegacy(runnable: LegacyRunnable): void {
-    const { actions, condition, enabled, type=ActionTypeEnum.response, } = runnable;
-    this.enabled = enabled;
-    this.type = type as ActionTypeEnum;
+    const { actions, condition, enabled } = runnable;
+    if (typeof enabled === 'boolean') {
+      this.enabled = enabled;
+    }
     if (condition) {
       this.condition = Condition.fromLegacy(condition);
     } else {
@@ -128,5 +110,35 @@ export class RunnableAction {
     } else {
       this.actions = [];
     }
+  }
+
+  /**
+   * Adds a new action to the list of runnable action.
+   * 
+   * @param schema The schema of the action
+   * @returns Created instance of the action.
+   */
+  addAction(schema: IAction): Action;
+
+  /**
+   * Adds a new action to the list of runnable action.
+   * 
+   * @param schema The instance of the action
+   * @returns The same instance of the action.
+   */
+  addAction(instance: Action): Action;
+  
+  addAction(value: Action | IAction): Action {
+    if (!Array.isArray(this.actions)) {
+      this.actions = [];
+    }
+    let finalAction: Action;
+    if (value instanceof Action) {
+      finalAction = value;
+    } else {
+      finalAction = new Action(value);
+    }
+    this.actions.push(finalAction);
+    return finalAction;
   }
 }

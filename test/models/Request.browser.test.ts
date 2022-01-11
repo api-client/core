@@ -7,7 +7,6 @@ import { RequestConfig, Kind as RequestConfigKind } from '../../src/models/Reque
 import { RequestAuthorization } from '../../src/models/RequestAuthorization.js';
 import { RequestUiMeta } from '../../src/models/RequestUiMeta.js';
 import { RequestActions } from '../../src/models/RequestActions.js';
-import { ActionTypeEnum } from '../../src/models/actions/Enums.js';
 import { Kind as ThingKind } from '../../src/models/Thing.js';
 import { ARCSavedRequest } from '../../src/models/legacy/request/ArcRequest.js';
 import { ISafePayload } from '../../src/lib/transformers/PayloadSerializer.js';
@@ -216,10 +215,10 @@ describe('Models', () => {
                   {
                     priority: 0,
                     type: 'request',
+                    name: 'set-cookie',
                     config: {
-
+                      
                     },
-                    name: 'action name',
                   }
                 ],
                 enabled: true,
@@ -239,9 +238,8 @@ describe('Models', () => {
                     priority: 0,
                     type: 'response',
                     config: {
-
                     },
-                    name: 'action name',
+                    name: 'set-cookie',
                   }
                 ],
                 enabled: true,
@@ -257,11 +255,9 @@ describe('Models', () => {
 
         const [reqAction] = actions.request;
         assert.equal(reqAction.kind, 'ARC#RunnableAction');
-        assert.equal(reqAction.type, 'request');
 
         const [resAction] = actions.response;
         assert.equal(resAction.kind, 'ARC#RunnableAction');
-        assert.equal(resAction.type, 'response');
       });
 
       it('translates the ui object', async () => {
@@ -915,15 +911,13 @@ describe('Models', () => {
               actions: [
                 {
                   priority: 0,
-                  type: ActionTypeEnum.request,
                   config: {
 
                   },
-                  name: 'action name',
+                  name: 'set-cookie',
                 }
               ],
               enabled: true,
-              type: ActionTypeEnum.request,
             }
           ],
           response: [],
@@ -937,7 +931,6 @@ describe('Models', () => {
 
         const [reqAction] = actions.request;
         assert.equal(reqAction.kind, 'ARC#RunnableAction');
-        assert.equal(reqAction.type, 'request');
       });
 
       it('sets the actions to undefined when missing', () => {
@@ -1145,15 +1138,13 @@ describe('Models', () => {
               actions: [
                 {
                   priority: 0,
-                  type: ActionTypeEnum.request,
                   config: {
 
                   },
-                  name: 'action name',
+                  name: 'set-cookie',
                 }
               ],
               enabled: true,
-              type: ActionTypeEnum.request,
             }
           ],
           response: [],
@@ -1166,7 +1157,6 @@ describe('Models', () => {
 
         const [reqAction] = actions.request;
         assert.equal(reqAction.kind, 'ARC#RunnableAction');
-        assert.equal(reqAction.type, 'request');
       });
 
       it('does not set the actions when missing', () => {

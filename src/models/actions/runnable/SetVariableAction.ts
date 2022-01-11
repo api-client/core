@@ -1,5 +1,6 @@
+import { SetVariableConfig } from '../../legacy/actions/Actions.js';
 import { Runnable, IRunnable } from './Runnable.js';
-import { IDataSourceConfiguration } from '../Condition.js';
+import { IDataSource } from '../Condition.js';
 import { RequestDataSourceEnum } from '../Enums.js';
 
 export const Kind = 'ARC#SetVariableAction';
@@ -13,7 +14,7 @@ export interface ISetVariableAction extends IRunnable {
   /**
    * Source of the cookie value
    */
-  source: IDataSourceConfiguration;
+  source: IDataSource;
 }
 
 export class SetVariableAction extends Runnable {
@@ -25,7 +26,21 @@ export class SetVariableAction extends Runnable {
   /**
    * Source of the cookie value
    */
-  source: IDataSourceConfiguration = { source: RequestDataSourceEnum.url, };
+  source: IDataSource = { source: RequestDataSourceEnum.url, };
+
+  static fromLegacy(legacy: SetVariableConfig): SetVariableAction {
+    const source = ({ ...legacy.source } as unknown) as IDataSource;
+    // @ts-ignore
+    delete source.iterator;
+    // @ts-ignore
+    delete source.iteratorEnabled;
+    const init: ISetVariableAction = {
+      kind: Kind,
+      name: legacy.name,
+      source,
+    };
+    return new SetVariableAction(init);
+  }
 
   constructor(input?: string | ISetVariableAction) {
     super();

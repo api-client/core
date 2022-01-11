@@ -19,8 +19,7 @@ actions: # Actions are a helper logic that is executed before the request and af
         operator: equal
         value: 200
       actions: # The actions to be executed when the condition pass.
-        - type: response # type for this action only. It means it reads the data from the response.
-          name: Set the auth variable from a cookie
+        - name: Set the auth variable from a cookie
           failOnError: true # Stops the execution of the logic chain (other actions, tests) when this action fail.
           config: # The specifics of a particular action.
             kind: ARC#SetVariableAction # This is how the system recognizes action type. Here, it is the set variable action.

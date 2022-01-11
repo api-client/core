@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { assert } from '@esm-bundle/chai';
-import sinon from 'sinon';
 import { Kind as ThingKind } from '../../src/models/Thing.js';
 import { Environment, IEnvironment, Kind as EnvironmentKind } from '../../src/models/Environment.js';
 import { Server } from '../../src/models/Server.js';

@@ -2,7 +2,7 @@ import { Kind as ThingKind } from './Thing.js';
 import { ProjectDefinitionProperty, IProjectDefinitionProperty } from './ProjectDefinitionProperty.js';
 import { ProjectFolder } from './ProjectFolder.js';
 import { IHttpRequest, Kind as HttpRequestKind } from './HttpRequest.js';
-import { HttpProject, Kind as ProjectKind } from './HttpProject.js';
+import { HttpProject } from './HttpProject.js';
 import v4 from '../lib/uuid.js';
 import { IRequest, Request } from './Request.js';
 

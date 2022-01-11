@@ -1,4 +1,4 @@
-import { PayloadSerializer, Payload, DeserializedPayload, ISafePayload, hasBuffer } from '../lib/transformers/PayloadSerializer.js';
+import { PayloadSerializer, Payload, DeserializedPayload, hasBuffer } from '../lib/transformers/PayloadSerializer.js';
 
 export class SerializablePayload {
   /**

@@ -36,19 +36,22 @@ export class RequestActions {
 
   static isLegacy(input: unknown): boolean {
     const { request=[], response=[] } = input as RequestActions;
+    if (!request.length && !response.length) {
+      return false;
+    }
     if (request[0]) {
       const r = request[0];
       if (r.kind === RunnableActionKind) {
-        return true;
+        return false;
       }
     }
     if (response[0]) {
       const r = response[0];
       if (r.kind === RunnableActionKind) {
-        return true;
+        return false;
       }
     }
-    return false;
+    return true;
   }
 
   /**
@@ -94,5 +97,67 @@ export class RequestActions {
       result.response = this.response.map(i => i.toJSON());
     }
     return result;
+  }
+
+  /**
+   * Adds a request action to the list of actions.
+   * If the list does not exist it's created by this method.
+   * 
+   * @param action The schema of the action.
+   * @returns Created instance of the action.
+   */
+  addRequestAction(action: IRunnableAction): RunnableAction;
+  /**
+   * Adds a request action to the list of actions.
+   * If the list does not exist it's created by this method.
+   * 
+   * @param action The instance of the action.
+   * @returns The same instance of the action.
+   */
+  addRequestAction(action: RunnableAction): RunnableAction;
+
+  addRequestAction(action: RunnableAction | IRunnableAction): RunnableAction {
+    if (!Array.isArray(this.request)) {
+      this.request = [];
+    }
+    let finalAction: RunnableAction;
+    if (action instanceof RunnableAction) {
+      finalAction = action;
+    } else {
+      finalAction = new RunnableAction(action);
+    }
+    this.request.push(finalAction);
+    return finalAction;
+  }
+
+  /**
+   * Adds a request action to the list of actions.
+   * If the list does not exist it's created by this method.
+   * 
+   * @param action The schema of the action.
+   * @returns Created instance of the action.
+   */
+  addResponseAction(action: IRunnableAction): RunnableAction;
+  /**
+   * Adds a response action to the list of actions.
+   * If the list does not exist it's created by this method.
+   * 
+   * @param action The instance of the action.
+   * @returns The same instance of the action.
+   */
+  addResponseAction(action: RunnableAction): RunnableAction;
+
+  addResponseAction(action: RunnableAction | IRunnableAction): RunnableAction {
+    if (!Array.isArray(this.response)) {
+      this.response = [];
+    }
+    let finalAction: RunnableAction;
+    if (action instanceof RunnableAction) {
+      finalAction = action;
+    } else {
+      finalAction = new RunnableAction(action);
+    }
+    this.response.push(finalAction);
+    return finalAction;
   }
 }

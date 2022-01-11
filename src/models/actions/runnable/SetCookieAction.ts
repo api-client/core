@@ -1,5 +1,6 @@
+import { SetCookieConfig } from '../../legacy/actions/Actions.js';
 import { Runnable, IRunnable } from './Runnable.js';
-import { IDataSourceConfiguration } from '../Condition.js';
+import { IDataSource } from '../Condition.js';
 import { RequestDataSourceEnum } from '../Enums.js';
 
 export const Kind = 'ARC#SetCookieAction';
@@ -13,7 +14,7 @@ export interface ISetCookieAction extends IRunnable {
   /**
    * Source of the cookie value
    */
-  source: IDataSourceConfiguration;
+  source: IDataSource;
   /**
    * When set it uses request URL instead of defined URL in the action
    */
@@ -53,7 +54,7 @@ export class SetCookieAction extends Runnable {
   /**
    * Source of the cookie value
    */
-  source: IDataSourceConfiguration = { source: RequestDataSourceEnum.url, };
+  source: IDataSource = { source: RequestDataSourceEnum.url, };
   /**
    * When set it uses request URL instead of defined URL in the action
    */
@@ -82,6 +83,41 @@ export class SetCookieAction extends Runnable {
    * Whether the cookie is a session cookie
    */
   session?: boolean;
+
+  static fromLegacy(legacy: SetCookieConfig): SetCookieAction {
+    const source = ({ ...legacy.source } as unknown) as IDataSource;
+    // @ts-ignore
+    delete source.iterator;
+    // @ts-ignore
+    delete source.iteratorEnabled;
+    const init: ISetCookieAction = {
+      kind: Kind,
+      name: legacy.name,
+      source,
+    };
+    if (legacy.url) {
+      init.url = legacy.url;
+    }
+    if (typeof legacy.useRequestUrl === 'boolean') {
+      init.useRequestUrl = legacy.useRequestUrl;
+    }
+    if (legacy.expires) {
+      init.expires = legacy.expires;
+    }
+    if (typeof legacy.hostOnly === 'boolean') {
+      init.hostOnly = legacy.hostOnly;
+    }
+    if (typeof legacy.httpOnly === 'boolean') {
+      init.httpOnly = legacy.httpOnly;
+    }
+    if (typeof legacy.secure === 'boolean') {
+      init.secure = legacy.secure;
+    }
+    if (typeof legacy.session === 'boolean') {
+      init.session = legacy.session;
+    }
+    return new SetCookieAction(init);
+  }
 
   constructor(input?: string | ISetCookieAction) {
     super();
@@ -119,15 +155,23 @@ export class SetCookieAction extends Runnable {
     }
     if (typeof hostOnly === 'boolean') {
       this.hostOnly = hostOnly;
+    } else {
+      this.hostOnly = undefined;
     }
     if (typeof httpOnly === 'boolean') {
       this.httpOnly = httpOnly;
+    } else {
+      this.httpOnly = undefined;
     }
     if (typeof secure === 'boolean') {
       this.secure = secure;
+    } else {
+      this.secure = undefined;
     }
     if (typeof session === 'boolean') {
       this.session = session;
+    } else {
+      this.session = undefined;
     }
   }
 

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { OperatorEnum } from '../../../models/actions/Enums.js';
+import { OperatorEnum } from '../../models/actions/Enums.js';
 
 /**
  * Checks if values equal.
