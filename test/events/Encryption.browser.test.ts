@@ -20,7 +20,7 @@ describe('Events', () => {
         });
       });
   
-      it('has unique events for OAuth2 namespace', () => {
+      it('has unique events for the namespace', () => {
         ensureUnique('EventTypes.Encryption', EventTypes.Encryption);
       });
     });
@@ -31,7 +31,7 @@ describe('Events', () => {
         const passphrase = 'passphrase data';
         const method = 'aes';
     
-        it('dispatches navigation event', () => {
+        it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Encryption.encrypt, spy);
           Events.Encryption.encrypt(document.body, data, passphrase, method);
@@ -72,7 +72,7 @@ describe('Events', () => {
         const passphrase = 'passphrase data';
         const method = 'aes';
     
-        it('dispatches navigation event', () => {
+        it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Encryption.decrypt, spy);
           Events.Encryption.decrypt(document.body, data, passphrase, method);

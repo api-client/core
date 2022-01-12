@@ -19,7 +19,7 @@ describe('Events', () => {
         });
       });
   
-      it('has unique events for OAuth2 namespace', () => {
+      it('has unique events for the namespace', () => {
         ensureUnique('EventTypes.Reporting', EventTypes.Reporting);
       });
     });
@@ -30,7 +30,7 @@ describe('Events', () => {
         const desc = 'test error';
         const cmp = 'test component';
     
-        it('dispatches navigation event', () => {
+        it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Reporting.error, spy);
           Events.Reporting.error(document.body, desc);

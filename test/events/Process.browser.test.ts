@@ -21,7 +21,7 @@ describe('Events', () => {
         });
       });
   
-      it('has unique events for OAuth2 namespace', () => {
+      it('has unique events for the namespace', () => {
         ensureUnique('EventTypes.Process', EventTypes.Process);
       });
     });
@@ -31,7 +31,7 @@ describe('Events', () => {
         const pid = 'process-id-1';
         const message = 'test-message';
     
-        it('dispatches navigation event', () => {
+        it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Process.loadingStart, spy);
           Events.Process.loadingStart(document.body, pid, message);
@@ -61,7 +61,7 @@ describe('Events', () => {
       describe('loadingStop()', () => {
         const pid = 'process-id-1';
     
-        it('dispatches navigation event', () => {
+        it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Process.loadingStop, spy);
           Events.Process.loadingStop(document.body, pid);
@@ -84,7 +84,7 @@ describe('Events', () => {
         const message = 'test-message';
         const error = new Error('test-message');
     
-        it('dispatches navigation event', () => {
+        it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Process.loadingError, spy);
           Events.Process.loadingError(document.body, pid, message);

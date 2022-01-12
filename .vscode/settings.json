@@ -56,6 +56,12 @@
     "storeprojectpatch",
     "storeprojectupdate",
     "storestateprojectchange",
-    "storestateprojectdelete"
+    "storestateprojectdelete",
+    "telemetryevent",
+    "telemetryexception",
+    "telemetryscreenview",
+    "telemetrysocial",
+    "telemetrystateset",
+    "telemetrytiming"
   ]
 }

@@ -4,6 +4,7 @@ import { AuthorizationEventTypes } from './authorization/AuthorizationEventTypes
 import { EncryptionEventTypes } from './encryption/EncryptionEventTypes.js';
 import { ProcessEventTypes } from './process/ProcessEventTypes.js';
 import { ReportingEventTypes } from './reporting/ReportingEventTypes.js';
+import { TelemetryEventTypes } from './telemetry/TelemetryEventTypes.js';
 
 export const EventTypes = Object.freeze({
   Authorization: AuthorizationEventTypes,
@@ -12,4 +13,5 @@ export const EventTypes = Object.freeze({
   Model: ModelEventTypes,
   Process: ProcessEventTypes,
   Reporting: ReportingEventTypes,
+  Telemetry: TelemetryEventTypes,
 });

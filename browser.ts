@@ -93,6 +93,16 @@ export {
   IProcessStopDetail,
 } from './src/events/process/ProcessEvents.js';
 export { IReportingErrorDetail } from './src/events/reporting/ReportingEvents.js';
+export { 
+  ITelemetryCustomMetric,
+  ITelemetryCustomValue,
+  ITelemetryDetail,
+  ITelemetryEventDetail,
+  ITelemetryExceptionDetail,
+  ITelemetryScreenViewDetail,
+  ITelemetrySocialDetail,
+  ITelemetryTimingDetail,
+} from './src/events/telemetry/TelemetryEvents.js';
 
 // 
 // Actions
