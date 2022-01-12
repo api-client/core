@@ -92,6 +92,7 @@ export {
   IProcessStartDetail,
   IProcessStopDetail,
 } from './src/events/process/ProcessEvents.js';
+export { IReportingErrorDetail } from './src/events/reporting/ReportingEvents.js';
 
 // 
 // Actions
