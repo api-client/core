@@ -217,3 +217,43 @@ export class ContextUpdateEvent<T extends object> extends ContextEvent<ContextUp
     super(type, updateInfo);
   }
 }
+
+/**
+ * Data store query result object.
+ */
+export interface ContextListResult<T> {
+  /**
+   * Next page token to be used with pagination.
+   * It is not set when the query has not returned any results.
+   */
+  nextPageToken?: string;
+  /**
+   * The list of items in the response.
+   * May be empty array when there was no more results.
+   */
+  items: T[];
+}
+
+/**
+ * Base query options for the data store.
+ */
+export interface ContextListOptions {
+  /**
+   * The number of results per the page.
+   */
+  limit?: number;
+  /**
+   * A string that should be used with the pagination.
+   */
+  nextPageToken?: string;
+}
+
+export class ContextListEvent<T> extends ContextEvent<ContextListOptions, ContextListResult<T>> {
+  /**
+   * @param type The type of the event
+   * @param opts Query options.
+   */
+  constructor(type: string, opts: ContextListOptions = {}) {
+    super(type, opts);
+  }
+}
