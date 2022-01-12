@@ -231,9 +231,6 @@ export class ActionsRunner {
     const typedConfig = (config as any);
     if (typedConfig.source) {
       typedConfig.source = await processor.evaluateVariablesWithContext(typedConfig.source, context);
-      if (typedConfig.source.iterator) {
-        typedConfig.source.iterator = await processor.evaluateVariablesWithContext(typedConfig.source.iterator, context);
-      }
     }
     return copy;
   }

@@ -12,6 +12,7 @@ export { ErrorResponse, IErrorResponse } from './src/models/ErrorResponse.js';
 export { HistoryIndex, IHistoryIndex } from './src/models/HistoryIndex.js';
 export { HistoryRequest, Kind as HistoryRequestKind } from './src/models/HistoryRequest.js';
 export { IHostRule, HostRule, Kind as HostRuleKind } from './src/models/HostRule.js';
+export { IHttpCookie, HttpCookie, CookieChangeReason, CookieSameSiteType } from './src/models/HttpCookie.js';
 export { HttpProject, IHttpProject, Kind as HttpProjectKind, IFolderCreateOptions, IFolderDeleteOptions, IFolderSearchOptions, IProjectMoveOptions, IRequestAddOptions, IRequestDeleteOptions, IRequestSearchOptions } from './src/models/HttpProject.js';
 export { IHttpRequest, HttpRequest } from './src/models/HttpRequest.js';
 export { HttpResponse, IHttpResponse, Kind as HttpResponseKind } from './src/models/HttpResponse.js';
@@ -86,3 +87,10 @@ export {
   IEnvironmentInitOptions,
 } from './src/events/models/ProjectEvents.js';
 export * from './src/events/BaseEvents.js';
+export {
+  ICookieDeleteUrlDetail,
+  ICookieDetail,
+  ICookieDomainListDetail,
+  ICookieItemsDetail,
+  ICookieUrlListDetail,
+} from './src/events/cookies/CookieEvents.js';

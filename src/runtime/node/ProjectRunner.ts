@@ -283,10 +283,15 @@ export class ProjectRunner {
     const auth = serialized.authorization;
     if (Array.isArray(auth)) {
       const ps = auth.map(async (item, index) => {
-        auth[index] = await variablesProcessor.evaluateVariablesWithContext(item, envContext);
+        const copy = await variablesProcessor.evaluateVariablesWithContext(item, envContext);
+        if (copy.config) {
+          copy.config = await variablesProcessor.evaluateVariablesWithContext(copy.config, envContext);
+        }
+        auth[index] = copy;
       });
+      await Promise.allSettled(ps);
     }
-    serialized.expects.url = this.prepareRequestUrl(serialized.expects.url);
+    // serialized.expects.url = this.prepareRequestUrl(serialized.expects.url);
     return new ProjectRequest(project, serialized);
   }
 
