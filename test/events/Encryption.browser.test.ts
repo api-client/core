@@ -2,8 +2,6 @@ import { assert } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { EventTypes } from  '../../src/events/EventTypes.js';
 import { Events } from  '../../src/events/Events.js';
-import { IHttpCookie } from  '../../src/models/HttpCookie.js';
-import { ContextUpdateEvent, ContextUpdateEventDetail, ContextChangeRecord } from '../../src/events/BaseEvents.js';
 import { ensureUnique } from './EventsTestHelpers.js';
 
 describe('Events', () => {

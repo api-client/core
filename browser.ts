@@ -86,9 +86,12 @@ export {
   ICookieItemsDetail,
   ICookieUrlListDetail,
 } from './src/events/cookies/CookieEvents.js';
+export { IEncryptionEventDetail } from './src/events/encryption/EncryptionEvents.js';
 export {
-  EncryptionEventDetail,
-} from './src/events/encryption/EncryptionEvents.js';
+  IProcessErrorDetail,
+  IProcessStartDetail,
+  IProcessStopDetail,
+} from './src/events/process/ProcessEvents.js';
 
 // 
 // Actions

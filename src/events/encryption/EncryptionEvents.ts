@@ -1,7 +1,7 @@
 import { EncryptionEventTypes } from './EncryptionEventTypes.js';
 import { ContextEvent } from "../BaseEvents.js";
 
-export interface EncryptionEventDetail {
+export interface IEncryptionEventDetail {
   /**
    * The data to export
    */
@@ -27,8 +27,8 @@ export class EncryptionEvents {
    * @returns Promise resolved to the encryption result
    */
   static async encrypt(target: EventTarget, data: any, passphrase: string, method: string): Promise<string | undefined> {
-    const config: EncryptionEventDetail = { data, passphrase, method };
-    const e = new ContextEvent<EncryptionEventDetail, string>(EncryptionEventTypes.encrypt, config);
+    const config: IEncryptionEventDetail = { data, passphrase, method };
+    const e = new ContextEvent<IEncryptionEventDetail, string>(EncryptionEventTypes.encrypt, config);
     target.dispatchEvent(e);
     return e.detail.result;
   }
@@ -43,8 +43,8 @@ export class EncryptionEvents {
    * @returns Promise resolved to the decrypted result
    */
   static async decrypt(target: EventTarget, data: any, passphrase: string, method: string): Promise<string | undefined> {
-    const config: EncryptionEventDetail = { data, passphrase, method };
-    const e = new ContextEvent<EncryptionEventDetail, string>(EncryptionEventTypes.decrypt, config);
+    const config: IEncryptionEventDetail = { data, passphrase, method };
+    const e = new ContextEvent<IEncryptionEventDetail, string>(EncryptionEventTypes.decrypt, config);
     target.dispatchEvent(e);
     return e.detail.result;
   }
