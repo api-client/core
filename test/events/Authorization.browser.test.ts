@@ -2,8 +2,6 @@ import { assert } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { EventTypes } from  '../../src/events/EventTypes.js';
 import { Events } from  '../../src/events/Events.js';
-import { IHttpCookie } from  '../../src/models/HttpCookie.js';
-import { ContextUpdateEvent, ContextUpdateEventDetail, ContextChangeRecord } from '../../src/events/BaseEvents.js';
 import { ensureUnique } from './EventsTestHelpers.js';
 
 describe('Events', () => {
@@ -77,10 +75,8 @@ describe('Events', () => {
             Events.Authorization.OAuth2.authorize(document.body, config);
             window.removeEventListener(EventTypes.Authorization.OAuth2.authorize, spy);
             const e = spy.args[0][0];
-            
             const cnf = e.detail;
             delete cnf.result;
-            
             assert.deepEqual(cnf, config);
           });
         });

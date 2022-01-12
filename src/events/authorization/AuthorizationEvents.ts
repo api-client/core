@@ -1,6 +1,6 @@
 import { IOAuth2Authorization, ITokenRemoveOptions, IOidcTokenInfo, IOidcTokenError, ITokenInfo } from '../../models/Authorization.js';
 import { AuthorizationEventTypes } from './AuthorizationEventTypes.js';
-import { ContextEventDetailWithResult, ContextEvent, ContextChangeRecord, ContextUpdateEvent, ContextStateUpdateEvent } from "../BaseEvents.js";
+import { ContextEvent } from "../BaseEvents.js";
 
 export class AuthorizationEvents {
   static get OAuth2(): typeof OAuth2Events {
