@@ -3,7 +3,6 @@
 import { assert } from 'chai';
 import net from 'net';
 import { NodeEngine, DummyLogger, HttpEngineOptions } from '../../index.js';
-import { ExpressServer } from '../servers/ExpressServer.js';
 
 const logger = new DummyLogger();
 
@@ -12,18 +11,7 @@ describe('http-engine', () => {
     const opts: HttpEngineOptions = {
       logger,
     };
-
-    const server = new ExpressServer();
-    let port:number;
-
-    before(async () => {
-      await server.start();
-      port = server.httpPort as number;
-    });
-
-    after(async () => {
-      await server.stop();
-    });
+    const port = Number(process.env.HTTP_TEST_PORT);
 
     describe('Aborting the request', () => {
       function setupSocket(base: NodeEngine): Promise<void> {

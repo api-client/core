@@ -1,6 +1,7 @@
 import { IRunnableAction, RunnableAction } from '../../models/actions/RunnableAction.js';
 import { IHttpRequest } from '../../models/HttpRequest.js';
 import { IArcResponse } from '../../models/ArcResponse.js';
+import { ISentRequest } from '../../models/SentRequest.js';
 import { IErrorResponse } from '../../models/ErrorResponse.js';
 import { RequestDataExtractor } from '../../data/RequestDataExtractor.js';
 import { checkCondition } from './ConditionRunner.js';
@@ -17,15 +18,16 @@ export class RunnableCondition extends RunnableAction {
    * @param response The ARC response object, if available.
    * @return True when the condition is satisfied.
    */
-  satisfied(request: IHttpRequest, response?: IArcResponse | IErrorResponse): boolean {
-    if (!this.enabled) {
+  async satisfied(request: IHttpRequest | ISentRequest, response?: IArcResponse | IErrorResponse): Promise<boolean> {
+    if (this.enabled === false) {
       return false;
     }
     if (this.condition.alwaysPass === true) {
       return true;
     }
     const extractor = new RequestDataExtractor(request, response);
-    const value = extractor.extract(this.condition);
+    const value = await extractor.extract(this.condition);
+    
     const op = this.condition.operator;
     if (!op || !this.condition.value) {
       return false;

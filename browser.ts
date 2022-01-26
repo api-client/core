@@ -103,6 +103,7 @@ export {
   ITelemetrySocialDetail,
   ITelemetryTimingDetail,
 } from './src/events/telemetry/TelemetryEvents.js';
+export { ISetVariableDetail } from './src/events/environment/EnvironmentEvents.js';
 
 // 
 // Actions

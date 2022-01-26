@@ -20,10 +20,10 @@ export class Cookies {
   /**
    * Constructs an object.
    *
-   * @param cookie A HTTP cookie string to parse.
+   * @param header A HTTP cookie string to parse.
    * @param url A request url for this cookie. If empty some cookie computations (like checking if cookies matches) will be omitted.
    */
-  constructor(cookie = '', url?: string) {
+  constructor(header = '', url?: string) {
     /**
      * A base URL for this object.
      */
@@ -32,7 +32,7 @@ export class Cookies {
     /**
      * A list of parsed cookies.
      */
-    this.cookies = Cookies.parse(cookie);
+    this.cookies = Cookies.parse(header);
     if (this.uri && url) {
       fillCookieAttributes(this.uri, url, this.cookies);
     }
@@ -66,13 +66,14 @@ export class Cookies {
    * @returns List of parsed cookies.
    */
   static parse(cookies: string): Cookie[] {
-    const cookieParts = [
+    const cookieParts: (keyof Cookie)[] = [
       'path',
       'domain',
       'max-age',
       'expires',
       'secure',
       'httponly',
+      'samesite',
     ];
     const list: Cookie[] = [];
     if (!cookies || !cookies.trim()) {
@@ -87,13 +88,12 @@ export class Cookies {
       if (!name) {
         return;
       }
-      const lowerName = name.toLowerCase();
+      const lowerName = name.toLowerCase() as keyof Cookie;
       let value: string | undefined;
       if (parts.length > 1) {
         try {
           value = decodeURIComponent(parts[1].trim());
         } catch (e) {
-          // eslint-disable-next-line prefer-destructuring
           value = parts[1];
         }
       } else {

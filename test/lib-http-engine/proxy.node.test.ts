@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { assert } from 'chai';
 import { NodeEngine, HttpEngineOptions, IHttpRequest, IArcResponse, ArcResponse, DummyLogger, RequestTime, ResponseRedirect } from '../../index.js';
-import { ExpressServer } from '../servers/ExpressServer.js';
 import { ProxyServer } from '../servers/ProxyServer.js';
 
 const logger = new DummyLogger();
@@ -18,23 +17,20 @@ describe('http-engine', () => {
         validateCertificates: false,
       };
       const proxy = new ProxyServer();
-      const server = new ExpressServer();
       let baseHttpHostname: string;
       let baseHttpsHostname: string;
 
       before(async () => {
         // proxy.debug = true;
         await proxy.start();
-        await server.start();
         httpOpts.proxy = `127.0.0.1:${proxy.httpPort}`;
         httpsOpts.proxy = `https://127.0.0.1:${proxy.httpsPort}`;
-        baseHttpHostname = `localhost:${server.httpPort}`;
-        baseHttpsHostname = `localhost:${server.httpsPort}`;
+        baseHttpHostname = `localhost:${process.env.HTTP_TEST_PORT}`;
+        baseHttpsHostname = `localhost:${process.env.HTTPS_TEST_PORT}`;
       });
 
       after(async () => {
         await proxy.stop();
-        await server.stop();
       });
 
       describe('http proxy', () => {

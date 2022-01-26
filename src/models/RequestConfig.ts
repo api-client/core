@@ -4,40 +4,76 @@ import { RequestConfig as LegacyConfig } from './legacy/request/ArcRequest.js';
 
 export const Kind = 'ARC#RequestConfig';
 
+export interface IRequestBaseConfig {
+  /**
+   * Request timeout in milliseconds
+   * Default no timeout.
+   */
+  timeout?: number;
+  /**
+   * When false the request object won't follow redirects.
+   * @default true
+   */
+  followRedirects?: boolean;
+  /**
+   * Hosts table configuration.
+   */
+  hosts?: IHostRule[];
+  /**
+   * A limit of characters to include into the `sentHttpMessage` property
+   * of the request object. 0 to disable limit. Default to 2048.
+   * @default 2048
+   */
+  sentMessageLimit?: number;
+  /**
+   * When set the request adds `accept` and `user-agent` headers if missing.
+   */
+  defaultHeaders?: boolean;
+  /**
+   * Default `user-agent` header to be used with request when `defaultHeaders`
+   * is set.
+   *
+   * @default api-client
+   */
+  defaultUserAgent?: string;
+  /**
+   * Default `accept` header to be used with request when `defaultHeaders`
+   * is set.
+   * @default *\/*
+   */
+  defaultAccept?: string;
+  /**
+   * The proxy URI to connect to when making the connection.
+   * It should contain the host and port. Default port is 80.
+   */
+  proxy?: string;
+  /**
+   * The proxy authorization username value.
+   */
+  proxyUsername?: string;
+  /**
+   * The proxy authorization password value.
+   */
+  proxyPassword?: string;
+  /**
+   * Whether the processor should validate certificates.
+   */
+  validateCertificates?: boolean;
+}
+
 /**
  * ARC request `config` object.
  */
-export interface IRequestConfig {
+export interface IRequestConfig extends IRequestBaseConfig {
   kind: string;
   /**
    * Whether the processor should use this configuration.
    */
   enabled: boolean;
   /**
-   * The request timeout.
-   * Default no timeout.
-   */
-  timeout?: number;
-  /**
-   * Whether or not the request should follow redirects.
-   */
-  followRedirects?: boolean;
-  /**
    * Does not set session (saved) cookies to this request
    */
   ignoreSessionCookies?: boolean;
-  /**
-   * Hosts table configuration.
-   */
-  hosts?: IHostRule[];
-  /**
-   * Whether the processor should validate certificates.
-   */
-  validateCertificates?: boolean;
-  /**
-   * Whether to put a "default" headers (accept and user agent)
-   */
-  defaultHeaders?: boolean;
   /**
    * A list of variables to use with the request.
    * Note, request variables override application and workspace variables.

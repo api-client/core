@@ -58,6 +58,7 @@ export * as UUID from './src/lib/uuid.js';
 //
 export { VariablesProcessor } from './src/runtime/variables/VariablesProcessor.js';
 export { ProjectRunner } from './src/runtime/node/ProjectRunner.js';
+export { RequestFactory } from './src/runtime/node/RequestFactory.js';
 
 // 
 // HTTP engine
@@ -73,6 +74,7 @@ export { PayloadPointer } from './src/data/PayloadPointer.js';
 export { JsonReader } from './src/data/JsonReader.js';
 export { XmlReader } from './src/data/XmlReader.js';
 export { UrlEncodedReader } from './src/data/UrlEncodedReader.js';
+export { RequestDataExtractor } from './src/data/RequestDataExtractor.js';
 
 // 
 // Events
@@ -111,3 +113,20 @@ export {
   ITelemetrySocialDetail,
   ITelemetryTimingDetail,
 } from './src/events/telemetry/TelemetryEvents.js';
+export { ISetVariableDetail } from './src/events/environment/EnvironmentEvents.js';
+
+// 
+// Request actions
+// 
+export { ISetCookieAction, SetCookieAction } from './src/models/actions/runnable/SetCookieAction.js';
+export { ISetVariableAction, SetVariableAction } from './src/models/actions/runnable/SetVariableAction.js';
+export { Condition, ICondition } from './src/models/actions/Condition.js';
+export { RunnableAction, IRunnableAction } from './src/models/actions/RunnableAction.js';
+export { RunnableCondition } from './src/runtime/actions/RunnableCondition.js';
+
+// 
+// Request modules
+// 
+export { ModulesRegistry, RegistryPermission, RegisteredRequestModule, RegisteredResponseModule, ExecutionContext, ExecutionEvents } from './src/runtime/modules/ModulesRegistry.js';
+export * as RequestCookiesModule  from './src/runtime/modules/RequestCookies.js';
+export * as RequestAuthorizationModule  from './src/runtime/modules/RequestAuthorization.js';

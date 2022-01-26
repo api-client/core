@@ -435,9 +435,9 @@ export class NodeEngine extends HttpEngine {
       options.rejectUnauthorized = false;
       options.requestOCSP = false;
     }
-    const cert = this.opts.clientCertificate;
-    if (cert) {
-      this._addClientCertificate(cert, options);
+    const certs = this.opts.certificates;
+    if (Array.isArray(certs)) {
+      certs.forEach(cert => this._addClientCertificate(cert, options));
     }
     options.agent = new https.Agent(options);
   }

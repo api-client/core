@@ -3,22 +3,11 @@ import { assert } from 'chai';
 import { URL } from 'url';
 import { OutgoingHttpHeaders } from 'http';
 import { NodeEngine, IArcResponse, ArcResponse, HttpEngineOptions, IHttpRequest } from '../../index.js';
-import { ExpressServer } from '../servers/ExpressServer.js';
 
 describe('http-engine', () => {
   describe('NodeEngine', () => {
-    const server = new ExpressServer();
-    let httpPort: number;
-
     const jsonBody = JSON.stringify({ test: true, body: 'some value' });
-
-    before(async () => {
-      httpPort = await server.startHttp();
-    });
-
-    after(async () => {
-      await server.stopHttp();
-    });
+    const httpPort = process.env.HTTP_TEST_PORT;
 
     describe('Basic requests', () => {
       const opts: HttpEngineOptions = {

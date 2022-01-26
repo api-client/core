@@ -1,3 +1,5 @@
+import { CookieSameSiteType } from '../../models/HttpCookie.js';
+
 /**
  * Cookie creation options.
  */
@@ -35,6 +37,10 @@ export interface CookieOptions {
    * or `false` otherwise.
    */
   hostOnly?: boolean;
+  /**
+   * The SameSite attribute of the Set-Cookie HTTP response header allows you to declare if your cookie should be restricted to a first-party or same-site context.
+   */
+  sameSite?: CookieSameSiteType;
 }
 
 /* eslint-disable no-control-regex */
@@ -57,6 +63,7 @@ export class Cookie {
   path?: string;
   secure?: boolean;
   httpOnly?: boolean;
+  sameSite?: CookieSameSiteType;
 
   /**
    * Constructs a new cookie.
@@ -111,6 +118,9 @@ export class Cookie {
     }
     if ('httpOnly' in opts) {
       this.httpOnly = opts.httpOnly;
+    }
+    if ('sameSite' in opts) {
+      this.sameSite = opts.sameSite;
     }
   }
 
@@ -189,6 +199,22 @@ export class Cookie {
     return this._domain;
   }
 
+  get samesite(): CookieSameSiteType | undefined {
+    return this.sameSite;
+  }
+
+  set samesite(value: CookieSameSiteType | undefined) {
+    this.sameSite = value;
+  }
+
+  get httponly(): boolean | undefined {
+    return this.httpOnly;
+  }
+
+  set httponly(value: boolean | undefined) {
+    this.httpOnly = value;
+  }
+
   /**
    * @return Cookie's `name=value` string.
    */
@@ -213,7 +239,7 @@ export class Cookie {
     if (expires) {
       header += `; expires=${expires.toUTCString()}`;
     }
-    const { path, domain, httpOnly } = this;
+    const { path, domain, httpOnly, sameSite, secure } = this;
     if (path) {
       header += `; path=${path}`;
     }
@@ -222,6 +248,12 @@ export class Cookie {
     }
     if (httpOnly) {
       header += `; httpOnly=${httpOnly}`;
+    }
+    if (sameSite) {
+      header += `; SameSite=${sameSite}`;
+    }
+    if (secure) {
+      header += `; Secure`;
     }
     return header;
   }
@@ -238,7 +270,7 @@ export class Cookie {
     const keys: (keyof Cookie)[] = Object.keys(this) as (keyof Cookie)[];
     keys.forEach((key) => {
       if (key.indexOf('_') === 0) {
-        const realKey = key.substr(1);
+        const realKey = key.substring(1);
         copy[realKey] = this[key];
       } else {
         copy[key] = this[key];

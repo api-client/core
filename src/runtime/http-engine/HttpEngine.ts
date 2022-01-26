@@ -7,8 +7,9 @@ import net from 'net';
 import http from 'http';
 import { EventEmitter } from 'events';
 import { IHttpRequest, HttpRequest } from '../../models/HttpRequest.js';
+import { IRequestBaseConfig } from '../../models/RequestConfig.js';
 import { IRequestAuthorization } from '../../models/RequestAuthorization.js';
-import { IHostRule, HostRule } from '../../models/HostRule.js';
+import { HostRule } from '../../models/HostRule.js';
 import { IRequestCertificate } from '../../models/ClientCertificate.js';
 import { SentRequest } from '../../models/SentRequest.js';
 import { ArcResponse } from '../../models/ArcResponse.js';
@@ -27,70 +28,19 @@ import { Cookies } from '../../lib/cookies/Cookies.js';
 import { HttpErrorCodes } from './HttpErrorCodes.js';
 import { NetError } from './Errors.js';
 
-export interface HttpEngineOptions {
+export interface HttpEngineOptions extends IRequestBaseConfig {
   /**
    * The authorization configuration to apply to the request.
    */
   authorization?: IRequestAuthorization[];
   /**
-   * When set it validates certificates during request.
-   */
-  validateCertificates?: boolean;
-  /**
-   * When false the request object won't follow redirects.
-   */
-  followRedirects?: boolean;
-  /**
-   * Request timeout in milliseconds
-   */
-  timeout?: number;
-  /**
    * Logger object.
    */
   logger?: ILogger;
   /**
-   * Hosts table.
-   */
-  hosts?: IHostRule[];
-  /**
-   * A limit of characters to include into the `sentHttpMessage` property
-   * of the request object. 0 to disable limit. Default to 2048.
-   */
-  sentMessageLimit?: number;
-  /**
-   * When set the request adds `accept` and `user-agent` headers if missing.
-   */
-  defaultHeaders?: boolean;
-  /**
-   * Default `user-agent` header to be used with request when `defaultHeaders`
-   * is set.
-   *
-   * @default advanced-rest-client
-   */
-  defaultUserAgent?: string;
-  /**
-   * Default `accept` header to be used with request when `defaultHeaders`
-   * is set.
-   * @default *\/*
-   */
-  defaultAccept?: string;
-  /**
    * A certificate to use with the request.
    */
-  clientCertificate?: IRequestCertificate;
-  /**
-   * The proxy URI to connect to when making the connection.
-   * It should contain the host and port. Default port is 80.
-   */
-  proxy?: string;
-  /**
-   * The proxy authorization username value.
-   */
-  proxyUsername?: string;
-  /**
-   * The proxy authorization password value.
-   */
-  proxyPassword?: string;
+  certificates?: IRequestCertificate[];
 }
 
 export interface RequestStats {
@@ -803,7 +753,10 @@ Check your request parameters.`);
       cert.cert = [cert.cert];
     }
     if (cert.type === 'p12') {
-      options.pfx = cert.cert.map((item) => {
+      if (!options.pfx) {
+        options.pfx = [];
+      }
+      const added = cert.cert.map((item) => {
         const struct: tls.PxfObject = {
           buf: Buffer.from(item.data as string),
         };
@@ -812,13 +765,21 @@ Check your request parameters.`);
         }
         return struct;
       });
+      options.pfx = (options.pfx as tls.PxfObject[]).concat(added);
     } else if (cert.type === 'pem') {
-      options.cert = cert.cert.map((item) => Buffer.from(item.data as string));
+      if (!options.cert) {
+        options.cert = [];
+      }
+      const added = cert.cert.map((item) => Buffer.from(item.data as string));
+      options.cert = (options.cert as Buffer[]).concat(added);
       if (cert.key) {
         if (!Array.isArray(cert.key)) {
           cert.key = [cert.key];
         }
-        options.key = cert.key.map((item) => {
+        if (!options.key) {
+          options.key = [];
+        }
+        const keys = cert.key.map((item) => {
           const struct: tls.KeyObject = {
             pem: Buffer.from(item.data as string),
           };
@@ -827,6 +788,7 @@ Check your request parameters.`);
           }
           return struct;
         });
+        options.key = (options.key as tls.KeyObject[]).concat(keys);
       }
     }
   }

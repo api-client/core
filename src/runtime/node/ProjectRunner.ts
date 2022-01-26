@@ -291,7 +291,7 @@ export class ProjectRunner {
       });
       await Promise.allSettled(ps);
     }
-    // serialized.expects.url = this.prepareRequestUrl(serialized.expects.url);
+    serialized.expects.url = this.prepareRequestUrl(serialized.expects.url);
     return new ProjectRequest(project, serialized);
   }
 

@@ -127,6 +127,16 @@ export class Condition {
     return new Condition(init);
   }
 
+  static alwaysPass(type=ActionTypeEnum.request): Condition {
+    const init: ICondition = {
+      kind: Kind,
+      type,
+      source: 'value',
+      alwaysPass: true,
+    };
+    return new Condition(init);
+  }
+
   constructor(input?: string | ICondition) {
     let init: ICondition;
     if (typeof input === 'string') {

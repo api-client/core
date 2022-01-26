@@ -1,5 +1,6 @@
 import * as DataUtils from './DataUtils.js';
 import { IHttpRequest, HttpRequest } from '../models/HttpRequest.js';
+import { ISentRequest, SentRequest } from '../models/SentRequest.js';
 import { IHttpResponse, HttpResponse } from '../models/HttpResponse.js';
 import { IErrorResponse, ErrorResponse } from '../models/ErrorResponse.js';
 import { IDataSource } from '../models/actions/Condition.js';
@@ -17,12 +18,12 @@ export class RequestDataExtractor {
   /**
    * The request that has been sent to the server.
    */
-  request: HttpRequest;
+  request: HttpRequest | SentRequest;
   /**
    * The response object
    */
   response?: HttpResponse | ErrorResponse;
-  constructor(request: IHttpRequest, response?: IHttpResponse | IErrorResponse) {
+  constructor(request: IHttpRequest | ISentRequest, response?: IHttpResponse | IErrorResponse) {
     this.request = new HttpRequest(request);
     if (response) {
       if (ErrorResponse.isErrorResponse(response)) {

@@ -1,4 +1,4 @@
-import { IClientCertificate, ICertificateIndex } from '../../models/ClientCertificate.js';
+import { IClientCertificate, ICertificateIndex, IRequestCertificate } from '../../models/ClientCertificate.js';
 import { ContextReadEvent, ContextListEvent, ContextListOptions, ContextListResult, ContextDeleteEvent, ContextDeleteRecord, ContextUpdateEvent, ContextChangeRecord, ContextStateUpdateEvent, ContextStateDeleteEvent } from '../BaseEvents.js';
 import { ModelEventTypes } from './ModelEventTypes.js';
 
@@ -11,7 +11,7 @@ export class ClientCertificateEvents {
    * @param rev The revision of the client certificate. If not set then the latest revision is used.
    * @returns Promise resolved to a client certificate model.
    */
-  static async read(target: EventTarget, id: string, rev?: string): Promise<IClientCertificate | undefined> {
+  static async read(target: EventTarget, id: string, rev?: string): Promise<IRequestCertificate | undefined> {
     const e = new ContextReadEvent<IClientCertificate>(ModelEventTypes.ClientCertificate.read, id, rev);
     target.dispatchEvent(e);
     return e.detail.result;

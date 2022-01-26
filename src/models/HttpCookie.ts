@@ -1,4 +1,5 @@
 import { ARCCookie as LegacyARCCookie } from './legacy/models/Cookies.js';
+import { Cookie as ParserCookie } from '../lib/cookies/Cookie.js';
 
 export type CookieSameSiteType = 'unspecified' | 'no_restriction' | 'lax' | 'strict';
 export type CookieChangeReason = 'explicit' | 'overwrite' | 'expired' | 'evicted' | 'expired-overwrite';
@@ -145,6 +146,46 @@ export class HttpCookie {
     }
     if (typeof old.session === 'boolean') {
       init.session = old.session;
+    }
+    return new HttpCookie(init);
+  }
+
+  static fromValue(name: string, value: string = ''): HttpCookie {
+    const init: IHttpCookie = {
+      name,
+      value,
+      sameSite: 'unspecified',
+    };
+    return new HttpCookie(init);
+  }
+
+  static fromCookieParser(cookie: ParserCookie): HttpCookie {
+    const { name, value, sameSite='unspecified' } = cookie;
+    const init: IHttpCookie = {
+      name,
+      value,
+      sameSite,
+    };
+    if (typeof cookie.domain === 'string') {
+      init.domain = cookie.domain;
+    }
+    if (typeof cookie.path === 'string') {
+      init.path = cookie.path;
+    }
+    if (typeof cookie.expires === 'number') {
+      init.expirationDate = cookie.expires;
+    }
+    if (typeof cookie.hostOnly === 'boolean') {
+      init.hostOnly = cookie.hostOnly;
+    }
+    if (typeof cookie.httpOnly === 'boolean') {
+      init.httpOnly = cookie.httpOnly;
+    }
+    if (typeof cookie.secure === 'boolean') {
+      init.secure = cookie.secure;
+    }
+    if (typeof cookie.persistent === 'boolean') {
+      init.session = !cookie.persistent;
     }
     return new HttpCookie(init);
   }

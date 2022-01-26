@@ -2,22 +2,12 @@
 import chai, { assert } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { ProjectRunner, HttpProject, IRequestLog, ProjectRequest, ArcResponse, IArcResponse } from '../../index.js';
-import { ExpressServer } from '../servers/ExpressServer.js';
 
 chai.use(chaiAsPromised);
 
 describe('Runtime', () => {
   describe('NodeJS', () => {
-    const server = new ExpressServer();
-    let httpPort: number;
-
-    before(async () => {
-      httpPort = await server.startHttp();
-    });
-
-    after(async () => {
-      await server.stopHttp();
-    });
+    const httpPort = process.env.HTTP_TEST_PORT;
 
     describe('ProjectRunner', () => {
       describe('Base runs', () => {

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { assert } from 'chai';
 import { NodeEngine, ISentRequest, IArcResponse, ResponseRedirect, IHttpRequest, DummyLogger, HttpEngineOptions } from '../../index.js';
-import { ExpressServer } from '../servers/ExpressServer.js';
 
 const logger = new DummyLogger();
 
@@ -11,17 +10,7 @@ describe('http-engine', () => {
       logger,
     };
 
-    const server = new ExpressServer();
-    let port:number;
-
-    before(async () => {
-      await server.startHttp();
-      port = server.httpPort as number;
-    });
-
-    after(async () => {
-      await server.stop();
-    });
+    const port = Number(process.env.HTTP_TEST_PORT);
 
     describe('Redirects test', () => {
       describe('Absolute redirects', () => {
