@@ -9,6 +9,7 @@ import imageRoute from './ImagesApi.js';
 import responsesRoute from './ResponsesApi.js';
 import compressionRoute from './CompressApi.js';
 import delayRoute from './DelayRoute.js';
+import CookieApi from './CookieApi.js';
 
 const router = Router();
 export default router;
@@ -23,3 +24,4 @@ router.use('/image', imageRoute);
 router.use('/response', responsesRoute);
 router.use('/compression', compressionRoute);
 router.use('/delay', delayRoute);
+router.use('/cookie', CookieApi);

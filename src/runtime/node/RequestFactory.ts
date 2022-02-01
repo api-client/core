@@ -355,7 +355,7 @@ export class RequestFactory {
   }
 
   async processResponseModules(log: IRequestLog): Promise<void> {
-    const modules = ModulesRegistry.get(ModulesRegistry.request);
+    const modules = ModulesRegistry.get(ModulesRegistry.response);
     for (const [id, main] of modules) {
       const mod = main as RegisteredResponseModule;
       const context = await this.buildExecutionContext(mod.permissions);

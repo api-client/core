@@ -852,7 +852,7 @@ describe('Runtime', () => {
         });
       });
 
-      describe('response action', () => {
+      describe('response actions', () => {
         describe('conditions', () => {
           it('does not run an action when not enabled', async () => {
             const et = new EventTarget();
@@ -1148,6 +1148,85 @@ describe('Runtime', () => {
             const e = spy.args[0][0] as CustomEvent;
             const { item } = e.detail;
             assert.equal(item.value, `x-value`);
+          });
+        });
+      });
+
+      describe('response modules', () => {
+        describe('response cookies', () => {
+          beforeEach(() => {
+            ModulesRegistry.register('response', 'response/cookies', RequestCookiesModule.processResponseCookies, [RegistryPermission.events]);
+          });
+
+          afterEach(() => {
+            ModulesRegistry.unregister('response', 'response/cookies');
+          });
+
+          it('dispatches the event to set cookies', async () => {
+            const et = new EventTarget();
+            const factory = new RequestFactory(et);
+            const request: IHttpRequest = {
+              url: `http://localhost:${httpPort}/v1/cookie`,
+              method: 'GET',
+            };
+            const spy = sinon.spy();
+            et.addEventListener(EventTypes.Cookie.updateBulk, spy);
+            await factory.run(request);
+            const { cookies } = spy.args[0][0].detail;
+            assert.typeOf(cookies, 'array', 'has the cookies on the event');
+            assert.lengthOf(cookies, 3, 'has all the cookies');
+            assert.equal(cookies[0].name, 'c1');
+            assert.equal(cookies[1].name, 'c2');
+            assert.equal(cookies[2].name, 'c3');
+          });
+
+          it('ignores the cookies when configured', async () => {
+            const et = new EventTarget();
+            const factory = new RequestFactory(et);
+            factory.config = {
+              kind: 'ARC#RequestConfig',
+              enabled: true,
+              ignoreSessionCookies: true,
+            };
+            const request: IHttpRequest = {
+              url: `http://localhost:${httpPort}/v1/cookie`,
+              method: 'GET',
+            };
+            const spy = sinon.spy();
+            et.addEventListener(EventTypes.Cookie.updateBulk, spy);
+            await factory.run(request);
+            assert.isFalse(spy.called);
+          });
+
+          it('does not ignores cookies when configuration not enabled', async () => {
+            const et = new EventTarget();
+            const factory = new RequestFactory(et);
+            factory.config = {
+              kind: 'ARC#RequestConfig',
+              enabled: false,
+              ignoreSessionCookies: true,
+            };
+            const request: IHttpRequest = {
+              url: `http://localhost:${httpPort}/v1/cookie`,
+              method: 'GET',
+            };
+            const spy = sinon.spy();
+            et.addEventListener(EventTypes.Cookie.updateBulk, spy);
+            await factory.run(request);
+            assert.isTrue(spy.called);
+          });
+
+          it('ignores the cookies when no cookies', async () => {
+            const et = new EventTarget();
+            const factory = new RequestFactory(et);
+            const request: IHttpRequest = {
+              url: `http://localhost:${httpPort}/v1/get`,
+              method: 'GET',
+            };
+            const spy = sinon.spy();
+            et.addEventListener(EventTypes.Cookie.updateBulk, spy);
+            await factory.run(request);
+            assert.isFalse(spy.called);
           });
         });
       });

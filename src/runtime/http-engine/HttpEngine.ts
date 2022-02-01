@@ -814,7 +814,11 @@ Check your request parameters.`);
     for (let i = 0, len = res.rawHeaders.length; i < len; i += 2) {
       const name = res.rawHeaders[i];
       const value = res.rawHeaders[i + 1];
-      headers[name] = value;
+      if (headers[name]) {
+        headers[name] += `; ${value}`;
+      } else {
+        headers[name] = value;
+      }
     }
     return new Headers(headers);
   }

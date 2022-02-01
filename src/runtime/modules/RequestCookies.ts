@@ -62,7 +62,7 @@ function applyCookieHeader(header: string, request: IHttpRequest): void {
  * @param redirects List of redirect responses 
  * @returns An object with `cookies` and `expired` arrays of cookies.
  */
-function extract(response: IArcResponse, url: string, redirects?: IResponseRedirect[]): Record<string, Cookie[]> {
+function extract(response: IArcResponse, url: string, redirects?: IResponseRedirect[]): Record<'expired'|'cookies', Cookie[]> {
   let expired: Cookie[] = [];
   let parser;
   let exp;
@@ -136,12 +136,21 @@ export async function processResponseCookies(log: IRequestLog, context: Executio
   if (typedError.error) {
     return;
   }
-  const { config } = context;
-  const ignore = config && config.enabled === true && config.ignoreSessionCookies === true;
+  const config = context.config || {
+    kind: 'ARC#RequestConfig',
+    enabled: false,
+  };
+  let ignore = false; 
+  if (config.enabled !== false && config.ignoreSessionCookies) {
+    ignore = true;
+  }
+  
   if (ignore) {
     return;
   }
   const typedResponse = log.response as IArcResponse;
   const result = extract(typedResponse, log.request.url, log.redirects);
-  await CookieEvents.updateBulk(context.eventsTarget, result.cookies.map(c => HttpCookie.fromCookieParser(c).toJSON()));
+  if (result.cookies.length) {
+    await CookieEvents.updateBulk(context.eventsTarget, result.cookies.map(c => HttpCookie.fromCookieParser(c).toJSON()));
+  }
 }
