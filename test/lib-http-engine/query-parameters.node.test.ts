@@ -1,5 +1,6 @@
 import { assert } from 'chai';
 import { NodeEngine, IArcResponse, ArcResponse, IHttpRequest, DummyLogger, HttpEngineOptions } from '../../index.js';
+import getConfig from '../helpers/getSetup.js';
 
 const logger = new DummyLogger();
 
@@ -8,7 +9,12 @@ describe('http-engine', () => {
     const opts: HttpEngineOptions = {
       logger,
     };
-    const port = Number(process.env.HTTP_TEST_PORT);
+    let port: number;
+
+    before(async () => {
+      const cnf = await getConfig();
+      port = cnf.httpPort;
+    });
 
     describe('query parameters processing', () => {
       let requestData: IHttpRequest;

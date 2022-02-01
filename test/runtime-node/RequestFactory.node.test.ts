@@ -21,13 +21,19 @@ import {
   IHttpRequest, 
   IHttpCookie,
 } from '../../index.js';
+import getConfig from '../helpers/getSetup.js';
 
 chai.use(chaiAsPromised);
 
 describe('Runtime', () => {
   describe('NodeJS', () => {
     describe('RequestFactory', () => {
-      const httpPort = process.env.HTTP_TEST_PORT;
+      let httpPort: number;
+
+      before(async () => {
+        const cnf = await getConfig();
+        httpPort = cnf.httpPort;
+      });
   
       describe('simple request run', () => {
         it('sends a simple request', async () => {

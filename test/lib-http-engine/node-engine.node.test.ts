@@ -3,11 +3,17 @@ import { assert } from 'chai';
 import { URL } from 'url';
 import { OutgoingHttpHeaders } from 'http';
 import { NodeEngine, IArcResponse, ArcResponse, HttpEngineOptions, IHttpRequest } from '../../index.js';
+import getConfig from '../helpers/getSetup.js';
 
 describe('http-engine', () => {
   describe('NodeEngine', () => {
     const jsonBody = JSON.stringify({ test: true, body: 'some value' });
-    const httpPort = process.env.HTTP_TEST_PORT;
+    let httpPort: number;
+
+    before(async () => {
+      const cnf = await getConfig();
+      httpPort = cnf.httpPort;
+    });
 
     describe('Basic requests', () => {
       const opts: HttpEngineOptions = {

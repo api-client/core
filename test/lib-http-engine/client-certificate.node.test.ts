@@ -80,7 +80,7 @@ describe('http-engine', () => {
           method: 'GET',
           headers: 'host: localhost',
         }, {
-          clientCertificate: aliceP12,
+          certificates: [aliceP12],
         });
 
         const data = await request.send();
@@ -101,7 +101,7 @@ describe('http-engine', () => {
           method: 'GET',
           headers: 'host: localhost',
         }, {
-          clientCertificate: alicePassword,
+          certificates: [alicePassword],
         });
         
         const data = await request.send();
@@ -121,7 +121,7 @@ describe('http-engine', () => {
           method: 'GET',
           headers: 'host: localhost',
         }, {
-          clientCertificate: bobP12,
+          certificates: [bobP12],
         });
 
         const data = await request.send();
@@ -143,7 +143,7 @@ describe('http-engine', () => {
           method: 'GET',
           headers: 'host: localhost',
         }, {
-          clientCertificate: alicePem,
+          certificates: [alicePem],
         });
         
         const data = await request.send();

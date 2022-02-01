@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { assert } from 'chai';
 import { NodeEngine, ISentRequest, IArcResponse, ResponseRedirect, IHttpRequest, DummyLogger, HttpEngineOptions } from '../../index.js';
+import getConfig from '../helpers/getSetup.js';
 
 const logger = new DummyLogger();
 
@@ -10,7 +11,12 @@ describe('http-engine', () => {
       logger,
     };
 
-    const port = Number(process.env.HTTP_TEST_PORT);
+    let port: number;
+
+    before(async () => {
+      const cnf = await getConfig();
+      port = cnf.httpPort;
+    });
 
     describe('Redirects test', () => {
       describe('Absolute redirects', () => {

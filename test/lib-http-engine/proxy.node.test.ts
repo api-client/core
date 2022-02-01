@@ -2,6 +2,7 @@
 import { assert } from 'chai';
 import { NodeEngine, HttpEngineOptions, IHttpRequest, IArcResponse, ArcResponse, DummyLogger, RequestTime, ResponseRedirect } from '../../index.js';
 import { ProxyServer } from '../servers/ProxyServer.js';
+import getConfig from '../helpers/getSetup.js';
 
 const logger = new DummyLogger();
 
@@ -23,10 +24,11 @@ describe('http-engine', () => {
       before(async () => {
         // proxy.debug = true;
         await proxy.start();
+        const cnf = await getConfig();
         httpOpts.proxy = `127.0.0.1:${proxy.httpPort}`;
         httpsOpts.proxy = `https://127.0.0.1:${proxy.httpsPort}`;
-        baseHttpHostname = `localhost:${process.env.HTTP_TEST_PORT}`;
-        baseHttpsHostname = `localhost:${process.env.HTTPS_TEST_PORT}`;
+        baseHttpHostname = `localhost:${cnf.httpPort}`;
+        baseHttpsHostname = `localhost:${cnf.httpsPort}`;
       });
 
       after(async () => {

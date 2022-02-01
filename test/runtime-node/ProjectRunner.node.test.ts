@@ -2,12 +2,18 @@
 import chai, { assert } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { ProjectRunner, HttpProject, IRequestLog, ProjectRequest, ArcResponse, IArcResponse } from '../../index.js';
+import getConfig from '../helpers/getSetup.js';
 
 chai.use(chaiAsPromised);
 
 describe('Runtime', () => {
   describe('NodeJS', () => {
-    const httpPort = process.env.HTTP_TEST_PORT;
+    let httpPort: number;
+
+    before(async () => {
+      const cnf = await getConfig();
+      httpPort = cnf.httpPort;
+    });
 
     describe('ProjectRunner', () => {
       describe('Base runs', () => {

@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { assert } from 'chai';
 import { NodeEngine, DummyLogger, HttpEngineOptions, ErrorResponse, IErrorResponse } from '../../index.js';
+import getConfig from '../helpers/getSetup.js';
 
 const logger = new DummyLogger();
 
@@ -14,7 +15,12 @@ describe('http-engine', () => {
         followRedirects: false,
       };
   
-      const port = Number(process.env.HTTP_TEST_PORT);
+      let port: number;
+
+      before(async () => {
+        const cnf = await getConfig();
+        port = cnf.httpPort;
+      });
 
       it('timeouts the request from the class options', async () => {
         const request = new NodeEngine({
