@@ -36,6 +36,7 @@ describe('http-engine', () => {
       });
   
       it('returns 80 port from the protocol', () => {
+        // @ts-ignore
         const result = RequestUtils.getPort(undefined, 'http:');
         assert.equal(result, 80);
       });
@@ -66,12 +67,13 @@ describe('http-engine', () => {
   
       it('adds the content length header', () => {
         const b = Buffer.from([0x74, 0x65, 0x73, 0x74, 0x0a, 0x74, 0x65, 0x73, 0x74]);
-        RequestUtils.addContentLength(requests[0].method, b, headers);
+        RequestUtils.addContentLength(requests[0].method as string, b, headers);
         assert.equal(headers.get('content-length'), '9');
       });
   
       it('does nothing for GET requests', () => {
-        RequestUtils.addContentLength(requests[1].method, undefined, headers);
+        // @ts-ignore
+        RequestUtils.addContentLength(requests[1].method as string, undefined, headers);
         assert.isFalse(headers.has('content-length'));
       });
     });
@@ -125,6 +127,7 @@ describe('http-engine', () => {
     describe('isRedirectLoop()', () => {
       const url = 'https://domain.com';
       it('returns false when no redirects', () => {
+        // @ts-ignore
         const result = RequestUtils.isRedirectLoop(url, undefined);
         assert.isFalse(result);
       });

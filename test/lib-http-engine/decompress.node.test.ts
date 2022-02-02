@@ -83,7 +83,7 @@ describe('http-engine', () => {
         const request = new NodeEngine(requestData);
         request.currentHeaders = new Headers();
         request.currentResponse = ArcResponse.fromValues(200);
-        const result = await request.decompress(b);
+        const result = await request.decompress(b) as Buffer;
         assert.equal(result.compare(b), 0);
       });
 
@@ -92,7 +92,7 @@ describe('http-engine', () => {
         const request = new NodeEngine(requestData);
         request.currentResponse = ArcResponse.fromValues(200, '', 'content-encoding: deflate');
         request.currentHeaders = new Headers('content-encoding: deflate');
-        const result = await request.decompress(b);
+        const result = await request.decompress(b) as Buffer;
         assert.equal(result.toString(), 'deflate-string');
       });
 
@@ -101,7 +101,7 @@ describe('http-engine', () => {
         const request = new NodeEngine(requestData);
         request.currentResponse = ArcResponse.fromValues(200, '', 'content-encoding: gzip');
         request.currentHeaders = new Headers('content-encoding: gzip');
-        const result = await request.decompress(b);
+        const result = await request.decompress(b) as Buffer;
         assert.equal(result.toString(), 'gzip-string');
       });
 
@@ -110,7 +110,7 @@ describe('http-engine', () => {
         const request = new NodeEngine(requestData);
         request.currentResponse = ArcResponse.fromValues(200, '', 'content-encoding: br');
         request.currentHeaders = new Headers('content-encoding: br');
-        const result = await request.decompress(b);
+        const result = await request.decompress(b) as Buffer;
         assert.equal(result.toString(), 'brotli-string');
       });
     });
