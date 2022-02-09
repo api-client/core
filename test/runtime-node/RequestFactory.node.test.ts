@@ -20,8 +20,11 @@ import {
   RegistryPermission, 
   IHttpRequest, 
   IHttpCookie,
+  DummyLogger,
 } from '../../index.js';
 import getConfig from '../helpers/getSetup.js';
+
+const logger = new DummyLogger();
 
 chai.use(chaiAsPromised);
 
@@ -39,6 +42,7 @@ describe('Runtime', () => {
         it('sends a simple request', async () => {
           const et = new EventTarget();
           const factory = new RequestFactory(et);
+          factory.logger = logger;
           const request: IHttpRequest = {
             url: `http://localhost:${httpPort}/v1/get`,
             method: 'GET',
@@ -55,6 +59,7 @@ describe('Runtime', () => {
         it('applies variables to the URL', async () => {
           const et = new EventTarget();
           const factory = new RequestFactory(et);
+          factory.logger = logger;
           factory.variables = {
             var1: 'value1',
             var2: 'value2',
@@ -71,6 +76,7 @@ describe('Runtime', () => {
         it('applies variables to the method', async () => {
           const et = new EventTarget();
           const factory = new RequestFactory(et);
+          factory.logger = logger;
           factory.variables = {
             var1: 'value1',
             var2: 'value2',
@@ -88,6 +94,7 @@ describe('Runtime', () => {
         it('applies variables to the headers', async () => {
           const et = new EventTarget();
           const factory = new RequestFactory(et);
+          factory.logger = logger;
           factory.variables = {
             var1: 'value1',
             var2: 'value2',
@@ -106,6 +113,7 @@ describe('Runtime', () => {
         it('applies variables to the payload', async () => {
           const et = new EventTarget();
           const factory = new RequestFactory(et);
+          factory.logger = logger;
           factory.variables = {
             var1: 'value1',
             var2: 'value2',
@@ -124,6 +132,7 @@ describe('Runtime', () => {
         it('applies request configuration (defaultHeaders)', async () => {
           const et = new EventTarget();
           const factory = new RequestFactory(et);
+          factory.logger = logger;
           factory.config = {
             kind: 'ARC#RequestConfig',
             enabled: true,
@@ -147,6 +156,7 @@ describe('Runtime', () => {
           it('does not run an action when not enabled', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             factory.actions = {
               request: [
                 {
@@ -177,6 +187,7 @@ describe('Runtime', () => {
           it('does not run the action when condition failed (method)', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             factory.actions = {
               request: [
                 {
@@ -212,6 +223,7 @@ describe('Runtime', () => {
           it('does not run the action when condition failed (url)', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             factory.actions = {
               request: [
                 {
@@ -251,6 +263,7 @@ describe('Runtime', () => {
           it('deletes a cookie from the request URL', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             factory.actions = {
               request: [
                 {
@@ -283,6 +296,7 @@ describe('Runtime', () => {
           it('deletes a cookie from the passed URL', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             factory.actions = {
               request: [
                 {
@@ -315,6 +329,7 @@ describe('Runtime', () => {
           it('has the optional name', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             factory.actions = {
               request: [
                 {
@@ -350,6 +365,7 @@ describe('Runtime', () => {
           it('sets a cookie from the request URL', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             const now = new Date().getTime();
             factory.actions = {
               request: [
@@ -404,6 +420,7 @@ describe('Runtime', () => {
           it('sets a cookie from the set URL', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             factory.actions = {
               request: [
                 {
@@ -443,6 +460,7 @@ describe('Runtime', () => {
           it('reads the cookie value from the request', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             factory.actions = {
               request: [
                 {
@@ -482,7 +500,7 @@ describe('Runtime', () => {
           it('sets a variable from the passed value', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
-            const now = new Date().getTime();
+            factory.logger = logger;
             factory.actions = {
               request: [
                 {
@@ -520,6 +538,7 @@ describe('Runtime', () => {
           it('sets a cookie from the request data', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             factory.actions = {
               request: [
                 {
@@ -591,6 +610,7 @@ describe('Runtime', () => {
           it('adds a cookie to the request', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             const request: IHttpRequest = {
               url: `http://localhost:${httpPort}/v1/get`,
               method: 'GET',
@@ -605,6 +625,7 @@ describe('Runtime', () => {
           it('ignores when event not handled', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             const request: IHttpRequest = {
               url: `http://localhost:${httpPort}/v1/get`,
               method: 'GET',
@@ -619,6 +640,7 @@ describe('Runtime', () => {
           it('creates headers when not set', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             const request: IHttpRequest = {
               url: `http://localhost:${httpPort}/v1/get`,
               method: 'GET',
@@ -642,6 +664,7 @@ describe('Runtime', () => {
           it('applies the Bearer token', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             const request: IHttpRequest = {
               url: `http://localhost:${httpPort}/v1/get`,
               method: 'GET',
@@ -665,6 +688,7 @@ describe('Runtime', () => {
           it('applies the OIDC token', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             const request: IHttpRequest = {
               url: `http://localhost:${httpPort}/v1/get`,
               method: 'GET',
@@ -688,6 +712,7 @@ describe('Runtime', () => {
           it('applies the OAuth2 token with defaults', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             const request: IHttpRequest = {
               url: `http://localhost:${httpPort}/v1/get`,
               method: 'GET',
@@ -711,6 +736,7 @@ describe('Runtime', () => {
           it('applies the OAuth2 token with tokenType', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             const request: IHttpRequest = {
               url: `http://localhost:${httpPort}/v1/get`,
               method: 'GET',
@@ -735,6 +761,7 @@ describe('Runtime', () => {
           it('applies the OAuth2 token with deliveryName', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             const request: IHttpRequest = {
               url: `http://localhost:${httpPort}/v1/get`,
               method: 'GET',
@@ -759,6 +786,7 @@ describe('Runtime', () => {
           it('applies the OAuth2 token with deliveryMethod', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             const request: IHttpRequest = {
               url: `http://localhost:${httpPort}/v1/get`,
               method: 'GET',
@@ -783,6 +811,7 @@ describe('Runtime', () => {
           it('ignores OAuth2 when no token', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             const request: IHttpRequest = {
               url: `http://localhost:${httpPort}/v1/get`,
               method: 'GET',
@@ -806,6 +835,7 @@ describe('Runtime', () => {
           it('applies the Basic method', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             const request: IHttpRequest = {
               url: `http://localhost:${httpPort}/v1/get`,
               method: 'GET',
@@ -830,6 +860,7 @@ describe('Runtime', () => {
           it('ignores the Basic method when no username', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             const request: IHttpRequest = {
               url: `http://localhost:${httpPort}/v1/get`,
               method: 'GET',
@@ -857,6 +888,7 @@ describe('Runtime', () => {
           it('does not run an action when not enabled', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             factory.actions = {
               response: [
                 {
@@ -887,6 +919,7 @@ describe('Runtime', () => {
           it('does not run the action when condition failed (status)', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             factory.actions = {
               response: [
                 {
@@ -922,6 +955,7 @@ describe('Runtime', () => {
           it('runs the action when condition success (status)', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             factory.actions = {
               response: [
                 {
@@ -959,6 +993,7 @@ describe('Runtime', () => {
           it('deletes a cookie from the response URL', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             factory.actions = {
               response: [
                 {
@@ -990,6 +1025,7 @@ describe('Runtime', () => {
           it('deletes a cookie from the passed URL', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             factory.actions = {
               response: [
                 {
@@ -1022,6 +1058,7 @@ describe('Runtime', () => {
           it('has the optional name', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             factory.actions = {
               response: [
                 {
@@ -1057,6 +1094,7 @@ describe('Runtime', () => {
           it('sets a cookie from the request URL', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             const now = new Date().getTime();
             factory.actions = {
               response: [
@@ -1111,6 +1149,7 @@ describe('Runtime', () => {
           it('reads the cookie value from the response', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             factory.actions = {
               response: [
                 {
@@ -1165,6 +1204,7 @@ describe('Runtime', () => {
           it('dispatches the event to set cookies', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             const request: IHttpRequest = {
               url: `http://localhost:${httpPort}/v1/cookie`,
               method: 'GET',
@@ -1183,6 +1223,7 @@ describe('Runtime', () => {
           it('ignores the cookies when configured', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             factory.config = {
               kind: 'ARC#RequestConfig',
               enabled: true,
@@ -1201,6 +1242,7 @@ describe('Runtime', () => {
           it('does not ignores cookies when configuration not enabled', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             factory.config = {
               kind: 'ARC#RequestConfig',
               enabled: false,
@@ -1219,6 +1261,7 @@ describe('Runtime', () => {
           it('ignores the cookies when no cookies', async () => {
             const et = new EventTarget();
             const factory = new RequestFactory(et);
+            factory.logger = logger;
             const request: IHttpRequest = {
               url: `http://localhost:${httpPort}/v1/get`,
               method: 'GET',

@@ -8,6 +8,7 @@
     "formdata",
     "fullchain",
     "headersreceived",
+    "hostonly",
     "httponly",
     "Jmes",
     "modeldestroy",

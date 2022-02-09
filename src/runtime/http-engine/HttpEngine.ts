@@ -59,7 +59,7 @@ export interface RequestStats {
 }
 
 export interface ResponseErrorInit {
-  code?: number;
+  code?: number | string;
   message?: string;
 }
 
@@ -70,6 +70,13 @@ export interface BeforeRedirectDetail {
 export interface HeadersReceivedDetail {
   value: string;
   returnValue: boolean;
+}
+
+export interface IRequestAuthState {
+  method: 'ntlm';
+  state: number;
+  headers?: string;
+  challengeHeader?: string;
 }
 
 export declare interface HttpEngine {
@@ -177,6 +184,8 @@ export abstract class HttpEngine extends EventEmitter {
   _rawBody?: Buffer;
 
   stats: RequestStats = {};
+
+  auth?: IRequestAuthState;
 
   protected mainResolver?: (log: IRequestLog) => void;
   protected mainRejecter?: (err: NetError) => void;

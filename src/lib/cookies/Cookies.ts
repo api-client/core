@@ -74,12 +74,36 @@ export class Cookies {
       'secure',
       'httponly',
       'samesite',
+      'hostonly',
+    ];
+    const booleanParts: (keyof Cookie)[] = [
+      'secure', 'httponly', 'hostonly'
     ];
     const list: Cookie[] = [];
     if (!cookies || !cookies.trim()) {
       return list;
     }
-    cookies.split(/;/).forEach((cookie) => {
+    const blocks = cookies.split(';').map(i => i.trim());
+    blocks.forEach((part, index) => {
+      // Consider the following set-cookie string:
+      // c1=v1; Path=/; Expires=Wed, 09 Feb 2022 01:30:04 GMT; HttpOnly,c2=v2; Path=/,c3=v3; Path=/; Secure; SameSite=Strict
+      // It is a valid set-cookie header event though it mixes different formatting making it harder to parse cookies.
+      // This loop looks for invalid parts and creates a canonical cookie parts array.
+      const periodIndex = part.indexOf(',');
+      if (periodIndex === -1) {
+        return;
+      }
+      if (part.toLowerCase().startsWith('expires=')) {
+        return;
+      }
+      const tmp = part.split(',');
+      // remove current
+      blocks.splice(index, 1);
+      // add the new two
+      blocks.splice(index, 0, ...tmp);
+    });
+
+    blocks.forEach((cookie) => {
       const parts = cookie.split(/=/, 2);
       if (parts.length === 0) {
         return;
@@ -89,7 +113,7 @@ export class Cookies {
         return;
       }
       const lowerName = name.toLowerCase() as keyof Cookie;
-      let value: string | undefined;
+      let value: string | boolean | undefined;
       if (parts.length > 1) {
         try {
           value = decodeURIComponent(parts[1].trim());
@@ -97,7 +121,7 @@ export class Cookies {
           value = parts[1];
         }
       } else {
-        value = undefined;
+        value = true;
       }
       // if this is an attribute of previous cookie, set it for last
       // added cookie.
@@ -109,7 +133,7 @@ export class Cookies {
         }
       } else {
         try {
-          list.push(new Cookie(name, value));
+          list.push(new Cookie(name, value as string));
         } catch (e) {
           // ..
         }

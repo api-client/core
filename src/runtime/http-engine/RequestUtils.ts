@@ -37,7 +37,7 @@ export function getHostHeader(value: string): string | undefined {
   let hostValue = uri.hostname;
   const defaultPorts = [80, 443];
   const port = getPort(uri.port, uri.protocol);
-  if (defaultPorts.indexOf(port) === -1) {
+  if (!defaultPorts.includes(port)) {
     hostValue += `:${port}`;
   }
   return hostValue;

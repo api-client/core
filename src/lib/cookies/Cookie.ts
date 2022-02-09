@@ -215,6 +215,14 @@ export class Cookie {
     this.httpOnly = value;
   }
 
+  get hostonly(): boolean | undefined {
+    return this.hostOnly;
+  }
+
+  set hostonly(value: boolean | undefined) {
+    this.hostOnly = value;
+  }
+
   /**
    * @return Cookie's `name=value` string.
    */

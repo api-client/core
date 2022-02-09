@@ -414,7 +414,7 @@ describe('Runtime', () => {
         });
       });
 
-      describe('_callNamespaceFunction() =>', () => {
+      describe('_callNamespaceFunction()', () => {
         let instance: VariablesProcessor;
         let ctx: Record<string, string>;
         before(async () => {

@@ -203,4 +203,147 @@ describe('Cookies', () => {
       assert.isTrue(instance.cookies[0].hostOnly);
     });
   });
+
+  describe('complex cookies', () => {
+    it('parses several simple cookies', () => {
+      const header = 'c1=v1,c2=v2,c3=v3';
+      const parser = new Cookies(header);
+      assert.lengthOf(parser.cookies, 3, 'has 3 cookies');
+
+      const [c1, c2, c3] = parser.cookies;
+
+      assert.equal(c1.name, 'c1', 'c1 name');
+      assert.equal(c1.value, 'v1', 'c1 value');
+      assert.typeOf(c1.created, 'number', 'c1 created');
+      assert.typeOf(c1.lastAccess, 'number', 'c1 lastAccess');
+      assert.typeOf(c1.expires, 'number', 'c1 expires');
+      assert.isFalse(c1.persistent, 'c1 persistent');
+      assert.isFalse(c1.hostOnly, 'c1 hostOnly');
+      assert.isUndefined(c1.httpOnly, 'c1 httpOnly');
+      assert.isUndefined(c1.path, 'c1 path');
+      assert.isUndefined(c1.domain, 'c1 domain');
+      assert.isUndefined(c1.maxAge, 'c1 maxAge');
+      assert.isUndefined(c1.secure, 'c1 secure');
+
+      assert.equal(c2.name, 'c2', 'c2 name');
+      assert.equal(c2.value, 'v2', 'c2 value');
+      assert.typeOf(c2.created, 'number', 'c2 created');
+      assert.typeOf(c2.lastAccess, 'number', 'c2 lastAccess');
+      assert.typeOf(c2.expires, 'number', 'c2 expires');
+      assert.isFalse(c2.persistent, 'c2 persistent');
+      assert.isFalse(c2.hostOnly, 'c2 hostOnly');
+      assert.isUndefined(c2.httpOnly, 'c2 httpOnly');
+      assert.isUndefined(c2.path, 'c2 path');
+      assert.isUndefined(c2.domain, 'c2 domain');
+      assert.isUndefined(c2.maxAge, 'c2 maxAge');
+      assert.isUndefined(c2.secure, 'c2 secure');
+
+      assert.equal(c3.name, 'c3', 'c3 name');
+      assert.equal(c3.value, 'v3', 'c3 value');
+      assert.typeOf(c3.created, 'number', 'c3 created');
+      assert.typeOf(c3.lastAccess, 'number', 'c3 lastAccess');
+      assert.typeOf(c3.expires, 'number', 'c3 expires');
+      assert.isFalse(c3.persistent, 'c3 persistent');
+      assert.isFalse(c3.hostOnly, 'c3 hostOnly');
+      assert.isUndefined(c3.secure, 'c3 secure');
+      assert.isUndefined(c3.httpOnly, 'c3 httpOnly');
+      assert.isUndefined(c3.path, 'c3 path');
+      assert.isUndefined(c3.domain, 'c3 domain');
+      assert.isUndefined(c3.maxAge, 'c3 maxAge');
+    });
+    
+    it('parses several cookies with attributes', () => {
+      const header = 'c1=v1; Path=/; HttpOnly,c2=v2; Path=/,c3=v3; Path=/abc; Secure; HostOnly; SameSite=Strict';
+      const parser = new Cookies(header);
+      assert.lengthOf(parser.cookies, 3, 'has 3 cookies');
+
+      const [c1, c2, c3] = parser.cookies;
+
+      assert.equal(c1.name, 'c1', 'c1 name');
+      assert.equal(c1.value, 'v1', 'c1 value');
+      assert.typeOf(c1.created, 'number', 'c1 created');
+      assert.typeOf(c1.lastAccess, 'number', 'c1 lastAccess');
+      assert.typeOf(c1.expires, 'number', 'c1 expires');
+      assert.isFalse(c1.persistent, 'c1 persistent');
+      assert.isFalse(c1.hostOnly, 'c1 hostOnly');
+      assert.isTrue(c1.httpOnly, 'c1 httpOnly');
+      assert.equal(c1.path, '/', 'c1 path');
+      assert.isUndefined(c1.domain, 'c1 domain');
+      assert.isUndefined(c1.maxAge, 'c1 maxAge');
+      assert.isUndefined(c1.secure, 'c1 secure');
+
+      assert.equal(c2.name, 'c2', 'c2 name');
+      assert.equal(c2.value, 'v2', 'c2 value');
+      assert.typeOf(c2.created, 'number', 'c2 created');
+      assert.typeOf(c2.lastAccess, 'number', 'c2 lastAccess');
+      assert.typeOf(c2.expires, 'number', 'c2 expires');
+      assert.isFalse(c2.persistent, 'c2 persistent');
+      assert.isFalse(c2.hostOnly, 'c2 hostOnly');
+      assert.isUndefined(c2.httpOnly, 'c2 httpOnly');
+      assert.equal(c2.path, '/', 'c2 path');
+      assert.isUndefined(c2.domain, 'c2 domain');
+      assert.isUndefined(c2.maxAge, 'c2 maxAge');
+      assert.isUndefined(c2.secure, 'c2 secure');
+
+      assert.equal(c3.name, 'c3', 'c3 name');
+      assert.equal(c3.value, 'v3', 'c3 value');
+      assert.typeOf(c3.created, 'number', 'c3 created');
+      assert.typeOf(c3.lastAccess, 'number', 'c3 lastAccess');
+      assert.typeOf(c3.expires, 'number', 'c3 expires');
+      assert.isFalse(c3.persistent, 'c3 persistent');
+      assert.isTrue(c3.hostOnly, 'c3 hostOnly');
+      assert.isTrue(c3.secure, 'c3 secure');
+      assert.isUndefined(c3.httpOnly, 'c3 httpOnly');
+      assert.equal(c3.path, '/abc', 'c3 path');
+      assert.isUndefined(c3.domain, 'c3 domain');
+      assert.isUndefined(c3.maxAge, 'c3 maxAge');
+    });
+    
+    it('parses several cookies with attributes and expires', () => {
+      const header = 'c1=v1; Path=/; Expires=Wed, 09 Feb 2022 01:30:04 GMT; HttpOnly,c2=v2; Path=/,c3=v3; Path=/; Secure; SameSite=Strict';
+      const parser = new Cookies(header);
+      assert.lengthOf(parser.cookies, 3, 'has 3 cookies');
+
+      const [c1, c2, c3] = parser.cookies;
+
+      assert.equal(c1.name, 'c1', 'c1 name');
+      assert.equal(c1.value, 'v1', 'c1 value');
+      assert.typeOf(c1.created, 'number', 'c1 created');
+      assert.typeOf(c1.lastAccess, 'number', 'c1 lastAccess');
+      assert.equal(c1.expires, 1644370204000, 'c1 expires');
+      assert.isTrue(c1.persistent, 'c1 persistent');
+      assert.isFalse(c1.hostOnly, 'c1 hostOnly');
+      assert.isTrue(c1.httpOnly, 'c1 httpOnly');
+      assert.equal(c1.path, '/', 'c1 path');
+      assert.isUndefined(c1.domain, 'c1 domain');
+      assert.isUndefined(c1.maxAge, 'c1 maxAge');
+      assert.isUndefined(c1.secure, 'c1 secure');
+
+      assert.equal(c2.name, 'c2', 'c2 name');
+      assert.equal(c2.value, 'v2', 'c2 value');
+      assert.typeOf(c2.created, 'number', 'c2 created');
+      assert.typeOf(c2.lastAccess, 'number', 'c2 lastAccess');
+      assert.typeOf(c2.expires, 'number', 'c2 expires');
+      assert.isFalse(c2.persistent, 'c2 persistent');
+      assert.isFalse(c2.hostOnly, 'c2 hostOnly');
+      assert.isUndefined(c2.httpOnly, 'c2 httpOnly');
+      assert.equal(c2.path, '/', 'c2 path');
+      assert.isUndefined(c2.domain, 'c2 domain');
+      assert.isUndefined(c2.maxAge, 'c2 maxAge');
+      assert.isUndefined(c2.secure, 'c2 secure');
+
+      assert.equal(c3.name, 'c3', 'c3 name');
+      assert.equal(c3.value, 'v3', 'c3 value');
+      assert.typeOf(c3.created, 'number', 'c3 created');
+      assert.typeOf(c3.lastAccess, 'number', 'c3 lastAccess');
+      assert.typeOf(c3.expires, 'number', 'c3 expires');
+      assert.isFalse(c3.persistent, 'c3 persistent');
+      assert.isFalse(c3.hostOnly, 'c3 hostOnly');
+      assert.isTrue(c3.secure, 'c3 secure');
+      assert.isUndefined(c3.httpOnly, 'c3 httpOnly');
+      assert.equal(c3.path, '/', 'c3 path');
+      assert.isUndefined(c3.domain, 'c3 domain');
+      assert.isUndefined(c3.maxAge, 'c3 maxAge');
+    });
+  });
 });

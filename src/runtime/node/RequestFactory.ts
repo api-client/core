@@ -11,10 +11,11 @@ import { Action } from '../../models/actions/Action.js';
 import { RunnableCondition } from '../actions/RunnableCondition.js';
 import { ActionRunner } from '../actions/ActionRunner.js';
 import { HttpEngineOptions } from '../http-engine/HttpEngine.js';
-import { NodeEngine } from '../http-engine/NodeEngine.js';
+import { ArcEngine } from '../http-engine/ArcEngine.js';
 import { ModulesRegistry, RegisteredRequestModule, RegisteredResponseModule, ExecutionContext, RegistryPermission } from '../modules/ModulesRegistry.js';
 import { ExecutionResponse } from '../modules/ExecutionResponse.js';
 import { Events } from '../../events/Events.js';
+import { Logger } from '../../lib/logging/Logger.js';
 
 export const prepareEnvironmentSymbol = Symbol('prepareEnvironment');
 
@@ -63,11 +64,12 @@ export class RequestFactory {
    * The cumulative list of all variables to be applied to the request and other properties.
    */
   variables?: Record<string, string>;
-
   /**
    * The variables processor instance.
    */
   variablesProcessor = new VariablesProcessor();
+
+  logger?: Logger;
 
   /**
    * Creates an instance from the IRequest object with setting the corresponding variables.
@@ -276,7 +278,7 @@ export class RequestFactory {
    */
   async executeRequest(request: IHttpRequest): Promise<IRequestLog> {
     const opts = await this.prepareEngineConfig();
-    const engine = new NodeEngine(request, opts);
+    const engine = new ArcEngine(request, opts);
     return engine.send();
   }
 
@@ -284,7 +286,7 @@ export class RequestFactory {
    * Creates a configuration options for the HTTP engine.
    */
   async prepareEngineConfig(): Promise<HttpEngineOptions> {
-    const { certificates } = this;
+    const { certificates, logger } = this;
     const auth = await this.readAuthorization();
     const config = await this.readConfig();
     const opts: HttpEngineOptions = {};
@@ -293,6 +295,9 @@ export class RequestFactory {
     }
     if (Array.isArray(auth)) {
       opts.authorization = auth;
+    }
+    if (logger) {
+      opts.logger = logger;
     }
     if (!config || config.enabled === false) {
       return opts;

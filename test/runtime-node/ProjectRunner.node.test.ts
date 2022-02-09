@@ -1,8 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import chai, { assert } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { ProjectRunner, HttpProject, IRequestLog, ProjectRequest, ArcResponse, IArcResponse } from '../../index.js';
 import getConfig from '../helpers/getSetup.js';
+import { 
+  ProjectRunner, 
+  HttpProject, 
+  IRequestLog, 
+  ProjectRequest, 
+  ArcResponse, 
+  IArcResponse,
+  DummyLogger,
+} from '../../index.js';
+
+const logger = new DummyLogger();
 
 chai.use(chaiAsPromised);
 
@@ -29,6 +39,7 @@ describe('Runtime', () => {
             parent: folder.key,
           });
           const runner = new ProjectRunner(project);
+          runner.logger = logger;
           const result = await runner.run(folder.key);
           
           assert.typeOf(result, 'array', 'returns an array');
@@ -63,6 +74,7 @@ describe('Runtime', () => {
             parent: folder.key,
           });
           const runner = new ProjectRunner(project);
+          runner.logger = logger;
           const result = await runner.run(folder.key);
           
           assert.typeOf(result, 'array', 'returns an array');
@@ -107,6 +119,7 @@ describe('Runtime', () => {
             parent: folder2.key,
           });
           const runner = new ProjectRunner(project);
+          runner.logger = logger;
           const result = await runner.run(folder1.key);
           
           assert.typeOf(result, 'array', 'returns an array');
@@ -124,6 +137,7 @@ describe('Runtime', () => {
         it('returns empty array when the project has no requests', async () => {
           const project = new HttpProject();
           const runner = new ProjectRunner(project);
+          runner.logger = logger;
           const result = await runner.run();
           
           assert.typeOf(result, 'array', 'returns an array');
@@ -134,6 +148,7 @@ describe('Runtime', () => {
           const project = new HttpProject();
           const folder = project.addFolder();
           const runner = new ProjectRunner(project);
+          runner.logger = logger;
           const result = await runner.run(folder.key);
           
           assert.typeOf(result, 'array', 'returns an array');
@@ -143,6 +158,7 @@ describe('Runtime', () => {
         it('throws when folder not found', async () => {
           const project = new HttpProject();
           const runner = new ProjectRunner(project);
+          runner.logger = logger;
           await assert.isRejected(runner.run('test'), `Folder not found: test`);
         });
       });
@@ -162,6 +178,7 @@ describe('Runtime', () => {
             parent: folder.key,
           });
           const runner = new ProjectRunner(project);
+          runner.logger = logger;
           const result = await runner.run(folder.key);
           
           assert.typeOf(result, 'array', 'returns an array');
@@ -191,6 +208,7 @@ describe('Runtime', () => {
             parent: folder.key,
           });
           const runner = new ProjectRunner(project);
+          runner.logger = logger;
           const result = await runner.run(folder.key);
           
           assert.typeOf(result, 'array', 'returns an array');
@@ -222,6 +240,7 @@ describe('Runtime', () => {
             parent: folder.key,
           });
           const runner = new ProjectRunner(project);
+          runner.logger = logger;
           const result = await runner.run(folder.key);
           
           assert.typeOf(result, 'array', 'returns an array');
@@ -257,6 +276,7 @@ describe('Runtime', () => {
             parent: folder.key,
           });
           const runner = new ProjectRunner(project);
+          runner.logger = logger;
           const result = await runner.run(folder.key);
 
           const [report] = result;
@@ -281,6 +301,7 @@ describe('Runtime', () => {
           }, project);
           project.addRequest(request);
           const runner = new ProjectRunner(project);
+          runner.logger = logger;
           const result = await runner.run();
           
           assert.typeOf(result, 'array', 'returns an array');
@@ -307,6 +328,7 @@ describe('Runtime', () => {
           }, project);
           project.addRequest(request);
           const runner = new ProjectRunner(project);
+          runner.logger = logger;
           const result = await runner.run();
           
           assert.typeOf(result, 'array', 'returns an array');

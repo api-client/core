@@ -1,3 +1,5 @@
+import http from 'http';
+
 /* eslint-disable no-unused-vars */
 interface RawValue {
   name: string;
@@ -72,7 +74,7 @@ export class Headers {
   /**
    * @param headers The headers to parse.
    */
-  constructor(headers?: string | Record<string, string> | Headers) {
+  constructor(headers?: string | Record<string, string> | Headers | http.IncomingHttpHeaders) {
     if (headers instanceof Headers) {
       headers.forEach((value, name) => this.append(name, value));
     } else if (typeof headers === 'string') {
@@ -90,9 +92,13 @@ export class Headers {
   /**
    * Adds value to existing header or creates new header
    */
-  append(name: string, value: string): void {
+  append(name: string, value: string | string[] | undefined): void {
+    if (Array.isArray(value)) {
+      value.forEach(v => this.append(name, v));
+      return;
+    }
     const normalizedName = normalizeName(name);
-    value = normalizeValue(value);
+    value = value ? normalizeValue(value) : '';
     let item = this.map[normalizedName];
     if (item) {
       const oldValue = item.value;

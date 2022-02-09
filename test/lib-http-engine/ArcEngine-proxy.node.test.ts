@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { assert } from 'chai';
-import { NodeEngine, HttpEngineOptions, IHttpRequest, IArcResponse, ArcResponse, DummyLogger, RequestTime, ResponseRedirect } from '../../index.js';
-import { ProxyServer } from '../servers/ProxyServer.js';
+import { ArcEngine, HttpEngineOptions, IHttpRequest, IArcResponse, ArcResponse, DummyLogger, RequestTime, ResponseRedirect } from '../../index.js';
 import getConfig from '../helpers/getSetup.js';
 
 const logger = new DummyLogger();
 
 describe('http-engine', () => {
-  describe('NodeEngine', () => {
+  describe('ArcEngine', () => {
     describe('Proxying requests', () => {
       const httpOpts: HttpEngineOptions = {
         logger,
@@ -17,22 +16,15 @@ describe('http-engine', () => {
         logger,
         validateCertificates: false,
       };
-      const proxy = new ProxyServer();
       let baseHttpHostname: string;
       let baseHttpsHostname: string;
 
       before(async () => {
-        // proxy.debug = true;
-        await proxy.start();
         const cnf = await getConfig();
-        httpOpts.proxy = `127.0.0.1:${proxy.httpPort}`;
-        httpsOpts.proxy = `https://127.0.0.1:${proxy.httpsPort}`;
+        httpOpts.proxy = `127.0.0.1:${cnf.proxyHttpPort}`;
+        httpsOpts.proxy = `https://127.0.0.1:${cnf.proxyHttpsPort}`;
         baseHttpHostname = `localhost:${cnf.httpPort}`;
         baseHttpsHostname = `localhost:${cnf.httpsPort}`;
-      });
-
-      after(async () => {
-        await proxy.stop();
       });
 
       describe('http proxy', () => {
@@ -42,10 +34,11 @@ describe('http-engine', () => {
             method: 'GET',
             headers: 'x-custom: true',
           };
-          const request = new NodeEngine(config, httpOpts);
+          const request = new ArcEngine(config, httpOpts);
           const log = await request.send();
           assert.ok(log, 'has the ARC response');
           const response = new ArcResponse(log.response as IArcResponse);
+          
           assert.strictEqual(response.status, 200, 'has the response status code');
           assert.strictEqual(response.statusText, 'OK', 'has the response status text');
           assert.isNotEmpty(response.headers, 'has the response headers');
@@ -70,7 +63,7 @@ describe('http-engine', () => {
           assert.isAtLeast(timings.receive, 0, 'has the timings.receive');
           assert.isAtLeast(timings.send, 0, 'has the timings.send');
           assert.isAtLeast(response.loadingTime, timings.wait, 'has the timings.wait');
-          assert.strictEqual(timings.dns, -1, 'has the timings.dns');
+          assert.strictEqual(timings.dns, 0, 'has the timings.dns');
           assert.strictEqual(timings.ssl, -1, 'has the timings.ssl');
         });
 
@@ -82,7 +75,7 @@ describe('http-engine', () => {
             headers: `content-type: application/json\nx-custom: true`,
             payload: sentBody,
           };
-          const request = new NodeEngine(config, httpOpts);
+          const request = new ArcEngine(config, httpOpts);
           const log = await request.send();
           assert.ok(log, 'has the ARC response');
           const response = new ArcResponse(log.response as IArcResponse);
@@ -123,9 +116,7 @@ describe('http-engine', () => {
             method: 'GET',
             headers: `x-custom: true`,
           };
-          // config.url = 'https://httpbin.org/get?o=p';
-          // httpOpts.proxy = '192.168.86.249:8118';
-          const request = new NodeEngine(config, httpOpts);
+          const request = new ArcEngine(config, httpOpts);
           const log = await request.send();
           assert.ok(log, 'has the ARC response');
           const response = new ArcResponse(log.response as IArcResponse);
@@ -163,7 +154,7 @@ describe('http-engine', () => {
             headers: `content-type: application/json\nx-custom: true`,
             payload: sentBody,
           };
-          const request = new NodeEngine(config, httpOpts);
+          const request = new ArcEngine(config, httpOpts);
           const log = await request.send();
           assert.ok(log, 'has the ARC response');
           const response = new ArcResponse(log.response as IArcResponse);
@@ -200,7 +191,7 @@ describe('http-engine', () => {
             method: 'GET',
             headers: 'x-custom: true',
           };
-          const request = new NodeEngine(config, httpOpts);
+          const request = new ArcEngine(config, httpOpts);
           const log = await request.send();
           assert.ok(log, 'has the ARC response');
 
@@ -226,7 +217,7 @@ describe('http-engine', () => {
             headers: 'x-custom: true',
           };
           const localOptions = { ...httpOpts, proxyUsername: 'proxy-name', proxyPassword: 'proxy-password' };
-          const request = new NodeEngine(config, localOptions);
+          const request = new ArcEngine(config, localOptions);
           
           const log = await request.send();
           assert.ok(log, 'has the ARC response');
@@ -249,7 +240,7 @@ describe('http-engine', () => {
             headers: 'x-custom: true',
           };
           const localOptions = { ...httpOpts, proxyUsername: 'some-name' };
-          const request = new NodeEngine(config, localOptions);
+          const request = new ArcEngine(config, localOptions);
           const log = await request.send();
           assert.ok(log, 'has the ARC response');
           const response = new ArcResponse(log.response as IArcResponse);
@@ -263,14 +254,14 @@ describe('http-engine', () => {
         });
       });
 
-      describe.skip('https proxy', () => {
+      describe('https proxy', () => {
         it('reads from an HTTP server', async () => {
           const config: IHttpRequest = {
             url: `http://${baseHttpHostname}/v1/get?a=b`,
             method: 'GET',
             headers: 'x-custom: true',
           };
-          const request = new NodeEngine(config, httpsOpts);
+          const request = new ArcEngine(config, httpsOpts);
           const log = await request.send();
           assert.ok(log, 'has the ARC response');
           const response = new ArcResponse(log.response as IArcResponse);
@@ -299,7 +290,7 @@ describe('http-engine', () => {
           assert.isAtLeast(timings.receive, 0, 'has the timings.receive');
           assert.isAtLeast(timings.send, 0, 'has the timings.send');
           assert.isAtLeast(response.loadingTime, timings.wait, 'has the timings.wait');
-          assert.strictEqual(timings.dns, -1, 'has the timings.dns');
+          assert.isAtLeast(timings.dns, 0, 'has the timings.dns');
           assert.isAtLeast(timings.ssl!, 0, 'has the timings.ssl');
         });
 
@@ -311,7 +302,7 @@ describe('http-engine', () => {
             headers: `content-type: application/json\nx-custom: true`,
             payload: sentBody,
           };
-          const request = new NodeEngine(config, httpsOpts);
+          const request = new ArcEngine(config, httpsOpts);
           const log = await request.send();
           assert.ok(log, 'has the ARC response');
           const response = new ArcResponse(log.response as IArcResponse);
@@ -351,7 +342,7 @@ describe('http-engine', () => {
             method: 'GET',
             headers: 'x-custom: true',
           };
-          const request = new NodeEngine(config, httpsOpts);
+          const request = new ArcEngine(config, httpsOpts);
           const log = await request.send();
           assert.ok(log, 'has the ARC response');
           const response = new ArcResponse(log.response as IArcResponse);
@@ -389,7 +380,7 @@ describe('http-engine', () => {
             headers: `content-type: application/json\nx-custom: true`,
             payload: sentBody,
           };
-          const request = new NodeEngine(config, httpsOpts);
+          const request = new ArcEngine(config, httpsOpts);
           const log = await request.send();
           assert.ok(log, 'has the ARC response');
           
@@ -428,7 +419,7 @@ describe('http-engine', () => {
             method: 'GET',
             headers: 'x-custom: true',
           };
-          const request = new NodeEngine(config, httpOpts);
+          const request = new ArcEngine(config, httpOpts);
           const log = await request.send();
           assert.ok(log, 'has the ARC response');
           
@@ -452,7 +443,7 @@ describe('http-engine', () => {
             headers: 'x-custom: true',
           };
           const localOptions = { ...httpOpts, proxyUsername: 'proxy-name', proxyPassword: 'proxy-password' };
-          const request = new NodeEngine(config, localOptions);
+          const request = new ArcEngine(config, localOptions);
           const log = await request.send();
           assert.ok(log, 'has the ARC response');
           const response = new ArcResponse(log.response as IArcResponse);
@@ -470,7 +461,7 @@ describe('http-engine', () => {
             headers: 'x-custom: true',
           };
           const localOptions = { ...httpOpts, proxyUsername: 'some-name' };
-          const request = new NodeEngine(config, localOptions);
+          const request = new ArcEngine(config, localOptions);
           const log = await request.send();
 
           assert.ok(log, 'has the ARC response');
@@ -491,7 +482,7 @@ describe('http-engine', () => {
             headers: 'x-custom: true',
           };
           const localOptions = { ...httpOpts, proxyUsername: 'some-name' };
-          const request = new NodeEngine(config, localOptions);
+          const request = new ArcEngine(config, localOptions);
           const log = await request.send();
 
           assert.ok(log, 'has the ARC response');

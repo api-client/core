@@ -12,6 +12,8 @@ import { Headers } from '../../lib/headers/Headers.js';
 import { PayloadSupport } from './PayloadSupport.js';
 import { addContentLength, getPort } from './RequestUtils.js';
 import { NetError } from './Errors.js';
+import { INtlmAuthorization } from '../../models/Authorization.js';
+import { NtlmAuth, INtlmAuthConfig } from './ntlm/NtlmAuth.js';
 
 export class NodeEngine extends HttpEngine {
   responseReported = false;
@@ -34,16 +36,6 @@ export class NodeEngine extends HttpEngine {
     this._socketHandler = this._socketHandler.bind(this);
     this._sendEndHandler = this._sendEndHandler.bind(this);
   }
-
-  // _cleanUp(): void {
-  //   super._cleanUp();
-  //   this.receivingResponse = false;
-  // }
-
-  // _cleanUpRedirect(): void {
-  //   super._cleanUpRedirect();
-  //   this.receivingResponse = false;
-  // }
 
   /**
    * Sends the request
@@ -79,19 +71,30 @@ export class NodeEngine extends HttpEngine {
    * @return Resolved promise to a `Buffer`. Undefined when no message.
    */
   async _prepareMessage(): Promise<Buffer|undefined> {
-    const { method='GET', headers, payload } = this.request;
+    const { method='GET', headers } = this.request;
+    let { payload } = this.request;
+    if (['get', 'head'].includes(method.toLowerCase())) {
+      payload = undefined;
+    }
     const engineHeaders = new Headers(headers);
     this.prepareHeaders(engineHeaders);
-    if (!payload || ['get', 'head'].includes(method.toLowerCase())) {
-      this.sentRequest.headers = engineHeaders.toString();
-      return undefined;
+    let buffer: Buffer | undefined;
+    if (payload) {
+      buffer = await PayloadSupport.payloadToBuffer(payload, engineHeaders);
+      if (buffer) {
+        addContentLength(method, buffer, engineHeaders);
+      }
     }
-    const buffer = await PayloadSupport.payloadToBuffer(payload, engineHeaders);
-    if (!buffer) {
-      return undefined;
-    }
-    addContentLength(method, buffer, engineHeaders);
+    this._handleAuthorization(engineHeaders);
     this.sentRequest.headers = engineHeaders.toString();
+    // if (this.auth) {
+    //   // This restores altered by the authorization original headers
+    //   // so it can be safe to use when redirecting
+    //   if (this.auth.headers) {
+    //     this.request.headers = this.auth.headers;
+    //     delete this.auth.headers;
+    //   }
+    // }
     return buffer;
   }
 
@@ -115,6 +118,7 @@ export class NodeEngine extends HttpEngine {
       uri.port = '80';
     }
     const options = this._createGenericOptions(uri);
+    options.agent = new http.Agent({ keepAlive: true });
     const startTime = Date.now();
     this.stats.startTime = startTime;
     this.sentRequest.startTime = startTime;
@@ -280,6 +284,11 @@ export class NodeEngine extends HttpEngine {
       this.abort();
       return;
     }
+    // if (status === 401 && this.auth) {
+    //   switch (this.auth.method) {
+    //     case 'ntlm': this._handleNtlmResponse(); break;
+    //   }
+    // }
     res.on('data', (chunk) => {
       if (!this._rawBody) {
         this._rawBody = chunk;
@@ -704,5 +713,75 @@ export class NodeEngine extends HttpEngine {
     }
     connectRequest.end();
     return connectRequest;
+  }
+
+  /**
+   * Alters authorization header depending on the `auth` object
+   * @param {ArcHeaders} headers A headers object where to append headers if
+   * needed
+   */
+  _handleAuthorization(headers: Headers): void {
+    const { authorization } = this.opts;
+    const enabled = Array.isArray(authorization) ? authorization.filter((i) => i.enabled) : [];
+    if (!enabled.length) {
+      return;
+    }
+    const ntlm = enabled.find((i) => i.type === 'ntlm');
+    if (ntlm) {
+      this._authorizeNtlm(ntlm.config as INtlmAuthorization, headers);
+    }
+  }
+
+  /**
+   * Authorize the request with NTLM
+   * @param authData The credentials to use
+   * @param headers A headers object where to append headers if needed
+   */
+  _authorizeNtlm(authData: INtlmAuthorization, headers: Headers): void {
+    const init = { ...authData, url: this.request.url } as INtlmAuthConfig;
+    const auth = new NtlmAuth(init);
+    if (!this.auth) {
+      this.auth = {
+        method: 'ntlm',
+        state: 0,
+        headers: headers.toString(),
+      };
+      const msg = auth.createMessage1(this.uri.host);
+      headers.set('Authorization', `NTLM ${msg.toBase64()}`);
+      headers.set('Connection', 'keep-alive');
+    } else if (this.auth && this.auth.state === 1) {
+      const msg = auth.createMessage3(this.auth.challengeHeader!, this.uri.host);
+      this.auth.state = 2;
+      headers.set('Authorization', `NTLM ${msg.toBase64()}`);
+    }
+  }
+
+  /**
+   * Handles the response with NTLM authorization
+   */
+  async _handleNtlmResponse(res: http.IncomingMessage): Promise<void> {
+    const headers = this.computeResponseHeaders(res);
+    const { auth } = this;
+    if (auth && auth.state === 0) {
+      console.log('Handling 401 2');
+      if (headers.has('www-authenticate')) {
+        auth.state = 1;
+        auth.challengeHeader = headers.get('www-authenticate');
+        this._cleanUpRedirect();
+        console.log('Preparing message');
+        
+        const message = await this._prepareMessage();
+        console.log('The message', message);
+        
+        if (message) {
+          console.log('writing the message');
+          this.socket?.write(message);
+        }
+        return;
+      }
+    }
+    delete this.auth;
+    this.emit('loadend');
+    this._publishResponse();
   }
 }

@@ -5,8 +5,8 @@ import { Environment } from '../../models/Environment.js';
 import { Property } from '../../models/Property.js';
 import { IRequestLog } from '../../models/RequestLog.js';
 import { VariablesProcessor } from '../variables/VariablesProcessor.js';
-import { NodeEngine } from '../http-engine/NodeEngine.js';
-import { HttpEngineOptions } from '../http-engine/HttpEngine.js';
+import { RequestFactory } from '../node/RequestFactory.js';
+import { Logger } from '../../lib/logging/Logger.js';
 
 export interface RunResult {
   /**
@@ -34,6 +34,8 @@ export interface RunResult {
  * It allows to select a specific folder and run the requests one-by-one using ARC's HTTP runtime.
  */
 export class ProjectRunner {
+  eventTarget = new EventTarget();
+  logger?: Logger;
   project: HttpProject;
   protected queue: ProjectRequest[] = [];
   protected executed: RunResult[] = [];
@@ -194,15 +196,32 @@ export class ProjectRunner {
       await this.finalize();
       return;
     }
-    const request = await this.evaluateVariables(item);
-    const opts = this.prepareEngineConfig(request)
-    const engine = new NodeEngine(request.expects, opts);
-    const info: RunResult = {
-      key: request.key,
+    const config = item.getConfig();
+    const factory = new RequestFactory(this.eventTarget);
+    factory.variables = this.envContext;
+    if (item.authorization) {
+      factory.authorization = item.authorization.map(i => i.toJSON());
     }
+    if (item.actions) {
+      factory.actions = item.actions.toJSON();
+    }
+    if (item.clientCertificate) {
+      factory.certificates = [item.clientCertificate];
+    }
+    if (config.enabled !== false) {
+      factory.config = config.toJSON();
+    }
+    if (this.logger) {
+      factory.logger = this.logger;
+    }
+    const info: RunResult = {
+      key: item.key,
+    };
+    const requestData = { ...item.expects };
+    requestData.url = this.prepareRequestUrl(requestData.url);
     try {
-      const log = await engine.send();
-      request.setLog(log);
+      const log = await factory.run(requestData);
+      item.setLog(log);
       info.log = log;
     } catch (e) {
       info.error = true;
@@ -210,32 +229,6 @@ export class ProjectRunner {
     }
     this.executed.push(info);
     setTimeout(() => this.next(), 1);
-  }
-
-  protected prepareEngineConfig(request: ProjectRequest): HttpEngineOptions {
-    const opts: HttpEngineOptions = {};
-    const config = request.getConfig();
-    if (request.authorization) {
-      opts.authorization = request.authorization.map(i => i.toJSON());
-    }
-    if (config.enabled !== false) {
-      if (config.defaultHeaders) {
-        opts.defaultHeaders = config.defaultHeaders;
-      }
-      if (config.followRedirects) {
-        opts.followRedirects = config.followRedirects;
-      }
-      if (Array.isArray(config.hosts)) {
-        opts.hosts = config.hosts.map(i => i.toJSON());
-      }
-      if (typeof config.timeout === 'number') {
-        opts.timeout = config.timeout;
-      }
-      if (typeof config.validateCertificates === 'boolean') {
-        opts.validateCertificates = config.validateCertificates;
-      }
-    }
-    return opts;
   }
 
   /**
@@ -262,37 +255,6 @@ export class ProjectRunner {
     this.mainResolver = undefined;
     this.mainRejecter = undefined;
     this.queue = [];
-  }
-
-  /**
-   * Evaluates variables in the project request.
-   * Note, this returns a copy of the project.
-   */
-  protected async evaluateVariables(request: ProjectRequest): Promise<ProjectRequest> {
-    const project = request.project;
-    const serialized = request.toJSON();
-    
-    const { envContext, variablesProcessor } = this;
-    let config = request.getConfig().toJSON();
-    
-    // evaluate request configuration
-    config = await variablesProcessor.evaluateVariablesWithContext(config, envContext);
-    serialized.config = config;
-    // evaluate request data
-    serialized.expects = await variablesProcessor.evaluateVariablesWithContext(serialized.expects, envContext);
-    const auth = serialized.authorization;
-    if (Array.isArray(auth)) {
-      const ps = auth.map(async (item, index) => {
-        const copy = await variablesProcessor.evaluateVariablesWithContext(item, envContext);
-        if (copy.config) {
-          copy.config = await variablesProcessor.evaluateVariablesWithContext(copy.config, envContext);
-        }
-        auth[index] = copy;
-      });
-      await Promise.allSettled(ps);
-    }
-    serialized.expects.url = this.prepareRequestUrl(serialized.expects.url);
-    return new ProjectRequest(project, serialized);
   }
 
   /**

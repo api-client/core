@@ -63,8 +63,8 @@ export { RequestFactory } from './src/runtime/node/RequestFactory.js';
 // 
 // HTTP engine
 // 
-export { HttpEngine, HttpEngineOptions, RequestStats } from './src/runtime/http-engine/HttpEngine.js';
-export { NodeEngine } from './src/runtime/http-engine/NodeEngine.js';
+export { HttpEngine, HttpEngineOptions, RequestStats, HeadersReceivedDetail, BeforeRedirectDetail, ResponseErrorInit, IRequestAuthState } from './src/runtime/http-engine/HttpEngine.js';
+export { ArcEngine, RequestState } from './src/runtime/http-engine/ArcEngine.js';
 export { NetError } from './src/runtime/http-engine/Errors.js';
 
 // 

@@ -23,6 +23,7 @@
   "include": [
     "src/**/*",
     "index.ts",
-    "browser.ts"
+    "browser.ts",
+    "test/servers/ssl-root-cas.d.ts"
   ]
 }
