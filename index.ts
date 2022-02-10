@@ -47,6 +47,7 @@ export { WebApiIndex, IWebApiIndex, ILegacyWebApiIndex } from './src/models/WebA
 export { PayloadSerializer, ISafePayload, IMultipartBody, Payload, DeserializedPayload } from './src/lib/transformers/PayloadSerializer.js';
 export { ILogger, Logger } from './src/lib/logging/Logger.js';
 export { DummyLogger } from './src/lib/logging/DummyLogger.js';
+export { DefaultLogger } from './src/lib/logging/DefaultLogger.js';
 export { Headers } from './src/lib/headers/Headers.js';
 export { Cookie, CookieOptions } from './src/lib/cookies/Cookie.js';
 export { Cookies } from './src/lib/cookies/Cookies.js';
@@ -118,10 +119,14 @@ export { ISetVariableDetail } from './src/events/environment/EnvironmentEvents.j
 // 
 // Request actions
 // 
+export { Action, IAction, Kind as ActionKind } from './src/models/actions/Action.js';
+export { Condition, ICondition, Kind as ConditionKind, IDataSource } from './src/models/actions/Condition.js';
+export { RunnableAction, IRunnableAction, Kind as RunnableActionKind } from './src/models/actions/RunnableAction.js';
+export * as ActionEnums from './src/models/actions/Enums.js';
+export { Runnable, IRunnable } from './src/models/actions/runnable/Runnable.js';
+export { DeleteCookieAction, IDeleteCookieAction } from './src/models/actions/runnable/DeleteCookieAction.js';
 export { ISetCookieAction, SetCookieAction } from './src/models/actions/runnable/SetCookieAction.js';
 export { ISetVariableAction, SetVariableAction } from './src/models/actions/runnable/SetVariableAction.js';
-export { Condition, ICondition } from './src/models/actions/Condition.js';
-export { RunnableAction, IRunnableAction } from './src/models/actions/RunnableAction.js';
 export { RunnableCondition } from './src/runtime/actions/RunnableCondition.js';
 
 // 

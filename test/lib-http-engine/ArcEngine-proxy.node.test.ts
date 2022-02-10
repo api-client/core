@@ -63,7 +63,7 @@ describe('http-engine', () => {
           assert.isAtLeast(timings.receive, 0, 'has the timings.receive');
           assert.isAtLeast(timings.send, 0, 'has the timings.send');
           assert.isAtLeast(response.loadingTime, timings.wait, 'has the timings.wait');
-          assert.strictEqual(timings.dns, 0, 'has the timings.dns');
+          assert.isAtLeast(timings.dns, 0, 'has the timings.dns');
           assert.strictEqual(timings.ssl, -1, 'has the timings.ssl');
         });
 

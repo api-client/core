@@ -10,6 +10,7 @@ import {
   ArcResponse, 
   IArcResponse,
   DummyLogger,
+  Environment,
 } from '../../index.js';
 
 const logger = new DummyLogger();
@@ -35,9 +36,7 @@ describe('Runtime', () => {
             method: 'GET',
             headers: 'x-test: true',
           }, project);
-          project.addRequest(request, {
-            parent: folder.key,
-          });
+          folder.addRequest(request);
           const runner = new ProjectRunner(project);
           runner.logger = logger;
           const result = await runner.run(folder.key);
@@ -286,6 +285,38 @@ describe('Runtime', () => {
           const body = JSON.parse(payload as string);
           assert.equal(body.headers['x-included'], 'test2');
           assert.equal(body.headers['x-not-included'], 'undefined');
+        });
+
+        it('uses the passed environment instead of the project ones', async () => {
+          const project = new HttpProject();
+          const env = project.addEnvironment('default');
+          env.addVariable('httpPort', '1234567890'); // this would fail the request when used
+          const folder = project.addFolder();
+          const request = ProjectRequest.fromHttpRequest({
+            url: `http://localhost:{httpPort}/v1/get`,
+            method: 'GET',
+            headers: 'x-test: true',
+          }, project);
+          folder.addRequest(request);
+
+          const masterEnvironment = Environment.fromName('master');
+          masterEnvironment.addVariable('httpPort', httpPort);
+
+          const runner = new ProjectRunner(project, masterEnvironment);
+          runner.logger = logger;
+          const result = await runner.run(folder.key);
+          
+          assert.typeOf(result, 'array', 'returns an array');
+          assert.lengthOf(result, 1, 'has a single result');
+          const [report] = result;
+          assert.typeOf(report, 'object', 'the report is an object');
+          assert.equal(report.key, request.key, 'the report has the key');
+          assert.isUndefined(report.error, 'the report has no error');
+          assert.isUndefined(report.errorMessage, 'the report has no errorMessage');
+  
+          const log = report.log as IRequestLog;
+          assert.typeOf(log, 'object', 'has the log');
+          assert.typeOf(log.response as IArcResponse, 'object', 'has the log.response');
         });
       });
 

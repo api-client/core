@@ -47,6 +47,7 @@ export { WebApiIndex, IWebApiIndex, ILegacyWebApiIndex } from './src/models/WebA
 export { PayloadSerializer, ISafePayload, IMultipartBody, Payload, DeserializedPayload } from './src/lib/transformers/PayloadSerializer.js';
 export { ILogger, Logger } from './src/lib/logging/Logger.js';
 export { DummyLogger } from './src/lib/logging/DummyLogger.js';
+export { DefaultLogger } from './src/lib/logging/DefaultLogger.js';
 export { Headers } from './src/lib/headers/Headers.js';
 export { Cookie, CookieOptions } from './src/lib/cookies/Cookie.js';
 export { Cookies } from './src/lib/cookies/Cookies.js';
@@ -65,6 +66,7 @@ export { PayloadPointer } from './src/data/PayloadPointer.js';
 export { JsonReader } from './src/data/JsonReader.js';
 export { XmlReader } from './src/data/XmlReader.js';
 export { UrlEncodedReader } from './src/data/UrlEncodedReader.js';
+export { RequestDataExtractor } from './src/data/RequestDataExtractor.js';
 
 // 
 // Events
@@ -109,7 +111,7 @@ export { ISetVariableDetail } from './src/events/environment/EnvironmentEvents.j
 // Actions
 // 
 export { Action, IAction, Kind as ActionKind } from './src/models/actions/Action.js';
-export { Condition, ICondition, Kind as ConditionKind } from './src/models/actions/Condition.js';
+export { Condition, ICondition, Kind as ConditionKind, IDataSource } from './src/models/actions/Condition.js';
 export { RunnableAction, IRunnableAction, Kind as RunnableActionKind } from './src/models/actions/RunnableAction.js';
 export * as ActionEnums from './src/models/actions/Enums.js';
 export { Runnable, IRunnable } from './src/models/actions/runnable/Runnable.js';

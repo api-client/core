@@ -98,6 +98,13 @@ export class RequestFactory {
     this.eventTarget = eventTarget;
   }
 
+  /**
+   * Runs the request and all tasks around the HTTp request execution like gathering 
+   * environment information, running actions, and HTTP modules.
+   * 
+   * @param request The request object to execute.
+   * @returns The execution log.
+   */
   async run(request: IHttpRequest): Promise<IRequestLog> {
     await this[prepareEnvironmentSymbol]();
     const requestCopy = await this.processRequest(request);
