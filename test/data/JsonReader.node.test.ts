@@ -8,7 +8,7 @@ describe('data', () => {
       const reader = new JsonReader();
       await reader.writePayload(payload);
 
-      const result = await reader.getValue('a');
+      const result = await reader.getValue('/a/text()');
       assert.equal(result, 'b');
     });
 
@@ -17,22 +17,68 @@ describe('data', () => {
       const reader = new JsonReader();
       await reader.writePayload(payload);
 
-      const result = await reader.getValue('a.b');
+      const result = await reader.getValue('/a/b');
       assert.equal(result, 'c');
     });
 
-    it('searches for the value', async () => {
+    it('searches for the value (absolute path)', async () => {
       const payload = JSON.stringify([
-        {"name": "Seattle", "state": "WA"},
-        {"name": "New York", "state": "NY"},
-        {"name": "Bellevue", "state": "WA"},
-        {"name": "Olympia", "state": "WA"}
+        { "city": {"name": "Seattle", "state": "WA"}},
+        { "city": {"name": "New York", "state": "NY"}},
+        { "city": {"name": "Bellevue", "state": "WA"}},
+        { "city": {"name": "Olympia", "state": "WA"}},
       ]);
       const reader = new JsonReader();
       await reader.writePayload(payload);
 
-      const result = await reader.getValue('[?state == \'WA\'].name | [1]');
+      const result = await reader.getValue('/city[state=\'WA\'][2]/name');
       assert.equal(result, 'Bellevue');
+    });
+
+    it('searches for the value (relative path)', async () => {
+      const payload = JSON.stringify([
+        { "city": {"name": "Seattle", "state": "WA"}},
+        { "city": {"name": "New York", "state": "NY"}},
+        { "city": {"name": "Bellevue", "state": "WA"}},
+        { "city": {"name": "Olympia", "state": "WA"}},
+      ]);
+      const reader = new JsonReader();
+      await reader.writePayload(payload);
+
+      const result = await reader.getValue('//city[state=\'WA\'][2]/name');
+      assert.equal(result, 'Bellevue');
+    });
+
+    it('selects an element under root element', async () => {
+      const payload = JSON.stringify({
+        xml: [
+          { "city": {"name": "Seattle", "state": "WA"}},
+          { "city": {"name": "New York", "state": "NY"}},
+          { "city": {"name": "Bellevue", "state": "WA"}},
+          { "city": {"name": "Olympia", "state": "WA"}},
+        ]
+      });
+      const reader = new JsonReader();
+      await reader.writePayload(payload);
+
+      const result = await reader.getValue('xml/city[1]/name');
+      assert.equal(result, 'Seattle');
+    });
+
+    it('selects direct descendant of an element under root element', async () => {
+      const payload = JSON.stringify({
+        xml: [
+          { "city": {"name": "Seattle", "state": "WA"}},
+          { "city": {"name": "New York", "state": "NY"}},
+          { "city": {"name": "Bellevue", "state": "WA"}},
+          { "city": {"name": "Olympia", "state": "WA"}},
+        ]
+      });
+      const reader = new JsonReader();
+      await reader.writePayload(payload);
+
+      const result = await reader.getValue('xml/city[1]//name');
+      assert.equal(result, 'Seattle');
     });
   });
 });

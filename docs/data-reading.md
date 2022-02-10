@@ -8,11 +8,9 @@ The `RequestDataExtractor` takes request and response definitions and additional
 
 ## Configuring the data search path in the body
 
-Depending on the media type of the request or response a different `path` is used. This is due being as close to industry standards as possible without creating own standards.
+The body search uses the [XPath](https://www.w3schools.com/xml/xpath_syntax.asp) notation to search in the response data. Internally responses are translated into an XML document and it runs the XML's XPath implementation to search for the value.
 
 ### XML
-
-The XML reader uses the [XPath](https://www.w3schools.com/xml/xpath_syntax.asp) notation.
 
 Examples of configuring the path for the XML reader:
 
@@ -84,8 +82,6 @@ reads the value `Bellevue`.
 
 ### JSON
 
-The JSON reader uses the [JMESPath](https://jmespath.org/) query language.
-
 Examples of configuring the path for the JSON reader:
 
 #### Simple JSON
@@ -97,7 +93,7 @@ Examples of configuring the path for the JSON reader:
 The path:
 
 ```xpath
-a
+/a
 ```
 
 reads the value `b`.
@@ -111,7 +107,7 @@ reads the value `b`.
 The path:
 
 ```xpath
-a.b
+/a/b
 ```
 
 reads the value `c`.
@@ -130,7 +126,7 @@ reads the value `c`.
 The path:
 
 ```xpath
-[?state == \'WA\'].name | [1]
+/city[state='WA'][2]/name
 ```
 
 reads the value `Bellevue`.
@@ -165,11 +161,11 @@ import { ActionEnums, IDataSource } from '@advanced-rest-client/core';
 const config: IDataSource = {
   type: ActionEnums.ActionTypeEnum.response,
   source: ActionEnums.ResponseDataSourceEnum.body,
-  path: '[?state == \'WA\'].name | [1]',
+  path: '/city[state=\'WA\'][2]/name',
 }
 ```
 
-Which translates to: take the `response` object, then in the `body` search for a value given the query `[?state == \'WA\'].name | [1]`.
+Which translates to: take the `response` object, then in the `body` search for a value given the query `/city[state=\'WA\'][2]/name`.
 
 ## Headers reading configuration
 

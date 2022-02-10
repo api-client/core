@@ -12,6 +12,10 @@ export class XmlReader extends DataReader {
     if (!doc) {
       return undefined;
     }
+    return this.queryDocument(path, doc);
+  }
+
+  queryDocument(path: string, doc: Document): unknown {
     try {
       const result = doc.evaluate(path, doc);
       switch (result.resultType) {
@@ -52,6 +56,10 @@ export class XmlReader extends DataReader {
     if (!body) {
       return undefined;
     }
+    return this.getDocumentWithBody(body);
+  }
+
+  async getDocumentWithBody(body: string): Promise<Document|undefined> {
     if (typeof DOMParser === 'undefined') {
       return this.getNodeDocument(body);
     }

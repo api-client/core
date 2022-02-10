@@ -64,6 +64,7 @@ export { VariablesProcessor } from './src/runtime/variables/VariablesProcessor.j
 // 
 export { PayloadPointer } from './src/data/PayloadPointer.js';
 export { JsonReader } from './src/data/JsonReader.js';
+export { JmesparthReader } from './src/data/JmesparthReader.js';
 export { XmlReader } from './src/data/XmlReader.js';
 export { UrlEncodedReader } from './src/data/UrlEncodedReader.js';
 export { RequestDataExtractor } from './src/data/RequestDataExtractor.js';

@@ -14,7 +14,7 @@ export { HistoryRequest, Kind as HistoryRequestKind } from './src/models/History
 export { IHostRule, HostRule, Kind as HostRuleKind } from './src/models/HostRule.js';
 export { IHttpCookie, HttpCookie, CookieChangeReason, CookieSameSiteType } from './src/models/HttpCookie.js';
 export { HttpProject, IHttpProject, Kind as HttpProjectKind, IFolderCreateOptions, IFolderDeleteOptions, IFolderSearchOptions, IProjectMoveOptions, IRequestAddOptions, IRequestDeleteOptions, IRequestSearchOptions } from './src/models/HttpProject.js';
-export { IHttpRequest, HttpRequest } from './src/models/HttpRequest.js';
+export { IHttpRequest, HttpRequest, Kind as HttpRequestKind } from './src/models/HttpRequest.js';
 export { HttpResponse, IHttpResponse, Kind as HttpResponseKind } from './src/models/HttpResponse.js';
 export { License, ILicense, Kind as LicenseKind } from './src/models/License.js';
 export { IProjectFolder, ProjectFolder, Kind as ProjectFolderKind, DefaultFolderName } from './src/models/ProjectFolder.js';
@@ -73,6 +73,7 @@ export { NetError } from './src/runtime/http-engine/Errors.js';
 // 
 export { PayloadPointer } from './src/data/PayloadPointer.js';
 export { JsonReader } from './src/data/JsonReader.js';
+export { JmesparthReader } from './src/data/JmesparthReader.js';
 export { XmlReader } from './src/data/XmlReader.js';
 export { UrlEncodedReader } from './src/data/UrlEncodedReader.js';
 export { RequestDataExtractor } from './src/data/RequestDataExtractor.js';

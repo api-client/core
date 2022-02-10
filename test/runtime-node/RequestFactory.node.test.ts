@@ -1164,7 +1164,7 @@ describe('Runtime', () => {
                       url: 'https://api.com',
                       source: {
                         source: RequestDataSourceEnum.body,
-                        path: 'headers."x-test"'
+                        path: 'headers/x-test'
                       },
                     } as ISetCookieAction,
                   }]
