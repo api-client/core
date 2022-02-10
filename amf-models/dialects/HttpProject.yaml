@@ -3,14 +3,16 @@
 dialect: Http Project
 version: 1.0
 
-external:
-  schema-org: http://schema.org/
-
 uses:
   License: License.yaml
   Thing: Thing.yaml
   Provider: Provider.yaml
   Environment: Environment.yaml
+  ProjectSchema: ProjectSchema.yaml
+  ProjectItem: ProjectItem.yaml
+  ProjectFolder: ProjectFolder.yaml
+  ProjectRequest: ProjectRequest.yaml
+  ApiProject: ApiProjectVocabulary.yaml
 
 documents:
   root:
@@ -18,24 +20,30 @@ documents:
 
 nodeMappings:
   DescriptionDataNode:
-    classTerm: schema-org.APIReference
+    classTerm: ApiProject.HttpProject
     mapping:
       kind:
-        propertyTerm: schema-org.name
         range: string
         mandatory: true
       definitions:
-        range: DefinitionNode
         mandatory: true
+        allowMultiple: true
+        union:
+          - ProjectFolder.ProjectFolderNode
+          - ProjectRequest.ProjectRequestNode
+        typeDiscriminatorName: kind
       items:
-        range: ItemNode
+        range: ProjectItem.ProjectItemNode
         mandatory: true
+        allowMultiple: true
       schemas:
-        range: SchemaNode
+        range: ProjectSchema.ProjectSchemaNode
         mandatory: false
+        allowMultiple: true
       environments:
         range: Environment.EnvironmentNode
         mandatory: false
+        allowMultiple: true
       provider:
         range: Provider.ProviderNode
         mandatory: false

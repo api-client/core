@@ -1,0 +1,22 @@
+#%Dialect 1.0
+
+dialect: Project Item
+version: 1.0
+
+uses:
+  ApiProject: ApiProjectVocabulary.yaml
+
+documents:
+  root:
+    encodes: ProjectItemNode
+
+nodeMappings:
+  ProjectItemNode:
+    classTerm: ApiProject.ProjectItem
+    mapping:
+      kind:
+        range: string
+        mandatory: true
+      key:
+        range: string
+        mandatory: true

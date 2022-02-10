@@ -1,0 +1,23 @@
+#%Dialect 1.0
+
+dialect: Project Request
+version: 1.0
+
+uses:
+  ApiProject: ApiProjectVocabulary.yaml
+
+documents:
+  root:
+    encodes: ProjectRequestNode
+
+nodeMappings:
+  ProjectRequestNode:
+    classTerm: ApiProject.ProjectRequest
+    mapping:
+      kind:
+        range: string
+        mandatory: true
+      key:
+        propertyTerm: schema-org.identifier
+        range: string
+        mandatory: true

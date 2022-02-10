@@ -3,8 +3,8 @@
 dialect: Property
 version: 1.0
 
-external:
-  schema-org: http://schema.org/
+uses:
+  ApiProject: ApiProjectVocabulary.yaml
 
 documents:
   root:
@@ -12,9 +12,9 @@ documents:
 
 nodeMappings:
   PropertyNode:
+    classTerm: ApiProject.Property
     mapping:
       kind:
-        propertyTerm: schema-org.name
         range: string
         mandatory: true
       name:

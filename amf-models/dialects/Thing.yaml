@@ -3,8 +3,8 @@
 dialect: Thing
 version: 1.0
 
-external:
-  schema-org: http://schema.org/
+uses:
+  ApiProject: ApiProjectVocabulary.yaml
 
 documents:
   root:
@@ -12,10 +12,9 @@ documents:
 
 nodeMappings:
   ThingNode:
-    classTerm: schema-org.Thing
+    classTerm: ApiProject.Info
     mapping:
       kind:
-        propertyTerm: schema-org.name
         range: string
         mandatory: true
       version:

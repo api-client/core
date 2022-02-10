@@ -1,0 +1,43 @@
+#%Dialect 1.0
+
+dialect: Project Folder
+version: 1.0
+
+uses:
+  Thing: Thing.yaml
+  ProjectItem: ProjectItem.yaml
+  Environment: Environment.yaml
+  ApiProject: ApiProjectVocabulary.yaml
+
+documents:
+  root:
+    encodes: ProjectFolderNode
+
+nodeMappings:
+  ProjectFolderNode:
+    classTerm: ApiProject.ProjectFolder
+    mapping:
+      kind:
+        range: string
+        mandatory: true
+      key:
+        propertyTerm: schema-org.identifier
+        range: string
+        mandatory: true
+      info:
+        range: Thing.ThingNode
+        mandatory: true
+      items:
+        range: ProjectItem.ProjectItemNode
+        mandatory: true
+        allowMultiple: true
+      environments:
+        range: Environment.EnvironmentNode
+        mandatory: false
+        allowMultiple: true
+      updated:
+        range: integer
+        mandatory: false
+      created:
+        range: integer
+        mandatory: false

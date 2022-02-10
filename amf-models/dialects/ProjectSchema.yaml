@@ -1,31 +1,36 @@
 #%Dialect 1.0
 
-dialect: Server
+dialect: Project Schema
 version: 1.0
 
 uses:
+  Property: Property.yaml
   ApiProject: ApiProjectVocabulary.yaml
 
 documents:
   root:
-    encodes: ServerNode
+    encodes: ProjectSchemaNode
 
 nodeMappings:
-  ServerNode:
-    classTerm: ApiProject.Server
+  ProjectSchemaNode:
+    classTerm: ApiProject.ProjectSchema
     mapping:
       kind:
         range: string
         mandatory: true
-      uri:
+      key:
         range: string
         mandatory: true
-      protocol:
+      name:
         range: string
         mandatory: false
-      basePath:
-        range: string
+      content:
         mandatory: false
-      description:
         range: string
+      mime:
+        mandatory: false
+        range: string
+      properties:
+        range: Property.PropertyNode
+        allowMultiple: true
         mandatory: false

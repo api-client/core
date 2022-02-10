@@ -3,13 +3,11 @@
 dialect: Environment
 version: 1.0
 
-external:
-  schema-org: http://schema.org/
-
 uses:
   Thing: Thing.yaml
   Server: Server.yaml
   Property: Property.yaml
+  ApiProject: ApiProjectVocabulary.yaml
 
 documents:
   root:
@@ -17,10 +15,9 @@ documents:
 
 nodeMappings:
   EnvironmentNode:
-    classTerm: schema-org.Thing
+    classTerm: ApiProject.Environment
     mapping:
       kind:
-        propertyTerm: schema-org.name
         range: string
         mandatory: true
       key:

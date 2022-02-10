@@ -1,0 +1,233 @@
+#%Vocabulary 1.0
+
+vocabulary: api-project
+base: http://api-client.io/vocabularies/project#
+
+usage: |
+  The vocabulary definition of an API project.
+
+external:
+  schema-org: http://schema.org/
+
+classTerms:
+  Thing:
+    properties:
+    - extends
+  
+  ProjectFolder:
+    extends: Thing
+    properties:
+      - kind
+      - key
+      - info
+      - items
+      - environments
+      - updated
+      - created
+  ProjectItem:
+    extends: Thing
+    properties:
+      - kind
+      - key
+  Environment:
+    extends: Thing
+    properties:
+      - kind
+      - key
+      - encapsulated
+      - info
+      - server
+      - variables
+  Info:
+    extends: Thing
+    properties:
+      - kind
+      - version
+      - name
+      - description
+  Server:
+    extends: Thing
+    properties:
+      - kind
+      - uri
+      - protocol
+      - basePath
+      - description
+  Property:
+    extends: Thing
+    properties:
+      - kind
+      - name
+      - type
+      - enabled
+      - default
+      - enum
+      - description
+      - required
+  License:
+    extends: Thing
+    properties:
+      - kind
+      - url
+      - name
+      - content
+  Provider:
+    extends: Thing
+    properties:
+      - kind
+      - url
+      - name
+      - email
+  ProjectSchema:
+    extends: Thing
+    properties:
+      - kind
+      - key
+      - name
+      - content
+      - mime
+      - properties
+  HttpProject:
+    extends: Thing
+    properties:
+      - kind
+      - items
+      - provider
+      - info
+      - license
+  Request:
+    extends: Thing
+    properties:
+      - kind
+      - info
+      - expects
+      - log
+      - updated
+      - created
+      - midnight
+      - config
+      - authorization
+      - actions
+      - clientCertificate
+  ProjectRequest:
+    extends: Request
+    properties:
+      - key
+
+propertyTerms:
+  kind:
+    displayName: kind
+    range: string
+    description: The kind that identifies the object 
+  key:
+    displayName: key
+    range: string
+    description: The unique identifier of an object
+  updated:
+    displayName: updated
+    range: integer
+    description: The timestamp when the object was last updated
+  created:
+    displayName: created
+    range: integer
+    description: The timestamp when the object was created
+  items:
+    displayName: items
+    description: An item located in a project or a folder
+    range: ProjectItem
+  environments:
+    displayName: environments
+    description: The execution environment
+    range: Environment
+  info:
+    displayName: info
+    description: The base information about the object
+    range: Info
+  version:
+    displayName: version
+    range: schema-org.version
+    description: The version of the object
+  name:
+    displayName: name
+    range: schema-org.name
+    description: The name of the object
+  description:
+    displayName: description
+    range: schema-org.description
+    description: The description of the object
+  encapsulated:
+    displayName: encapsulated
+    range: boolean
+    description: Whether the object is encapsulated to its parent.
+  server:
+    displayName: server
+    range: Server
+    description: A server of an API
+  variables:
+    displayName: variables
+    range: Property
+    description: A list of properties in an environment
+  uri:
+    displayName: uri
+    range: string
+    description: The URI of a resource
+  url:
+    displayName: url
+    range: string
+    description: The URL of a resource
+  protocol:
+    displayName: protocol
+    range: string
+    description: The protocol used to construct an URL
+  basePath:
+    displayName: basePath
+    range: string
+    description: The API base path.
+  type:
+    displayName: type
+    range: string
+    description: The type of a property.
+  enabled:
+    displayName: enabled
+    range: boolean
+    description: Whether the property is allowed to be processed.
+  default:
+    displayName: default
+    range: any
+    description: The default value for a property
+  enum:
+    displayName: enum
+    range: any
+    description: The enum values for a property
+  required:
+    displayName: required
+    range: boolean
+    description: Whether the property is required.
+  content:
+    displayName: content
+    range: string
+    description: The rich content, usually used with a documents.
+  email:
+    displayName: email
+    range: string
+    description: The contact email to the person or the organization.
+  mime:
+    displayName: mime
+    range: string
+    description: The mime type of the object.
+  properties:
+    displayName: properties
+    range: Property
+    description: The list of properties in the object.
+  provider:
+    displayName: provider
+    range: Provider
+    description: The provider of the object.
+  license:
+    displayName: license
+    range: License
+    description: The license of the object.
+  midnight:
+    displayName: midnight
+    range: integer
+    description: The timestamp describing the midnight when an event happened.
