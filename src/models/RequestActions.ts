@@ -7,7 +7,7 @@ export interface IRequestActions {
    */
   request?: IRunnableAction[];
   /**
-   * Actions to be executed after the response is fully received but before it is reported back to the UI.
+   * Actions to be executed after the response is fully received but before it is reported back to the application.
    */
   response?: IRunnableAction[];
 }
@@ -18,7 +18,7 @@ export class RequestActions {
    */
   request?: RunnableAction[];
   /**
-   * Actions to be executed after the response is fully received but before it is reported back to the UI.
+   * Actions to be executed after the response is fully received but before it is reported back to the application.
    */
   response?: RunnableAction[];
 

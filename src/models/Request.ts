@@ -1,6 +1,5 @@
 import { IRequestConfig, RequestConfig } from './RequestConfig.js';
 import { Thing, IThing, Kind as ThingKind } from './Thing.js';
-import { IRequestUiMeta, RequestUiMeta } from './RequestUiMeta.js';
 import { IRequestActions, RequestActions } from './RequestActions.js';
 import { IRequestCertificate } from './ClientCertificate.js';
 import { IRequestAuthorization, RequestAuthorization } from './RequestAuthorization.js';
@@ -59,12 +58,6 @@ export interface IRequest {
    */
   authorization?: IRequestAuthorization[];
   /**
-   * The UI configuration for the request.
-   * Each part of the UI has its own default state so this is optional and 
-   * always updated when the UI change.
-   */
-  ui?: IRequestUiMeta;
-  /**
    * Actions to be performed when the request is executed.
    */
   actions?: IRequestActions;
@@ -99,12 +92,6 @@ export class Request {
    * Request authorization configuration
    */
   authorization?: RequestAuthorization[];
-  /**
-   * The UI configuration for the request.
-   * Each part of the UI has its own default state so this is optional and 
-   * always updated when the UI change.
-   */
-  ui?: RequestUiMeta;
   /**
    * Actions to be performed when the request is executed.
    */
@@ -213,9 +200,6 @@ export class Request {
     }
     if (Array.isArray(normalized.authorization) && normalized.authorization.length) {
       init.authorization = normalized.authorization.map((i) => RequestAuthorization.fromLegacy(i).toJSON());
-    }
-    if (normalized.ui) {
-      init.ui = RequestUiMeta.fromLegacy(normalized.ui).toJSON();
     }
     if (normalized.config) {
       init.config = RequestConfig.fromLegacy(normalized.config).toJSON();
@@ -345,7 +329,7 @@ export class Request {
   }
 
   new(init: IRequest): void {
-    const { expects, log, updated, created = Date.now(), midnight, config, authorization, ui, actions, clientCertificate, info } = init;
+    const { expects, log, updated, created = Date.now(), midnight, config, authorization, actions, clientCertificate, info } = init;
     if (expects) {
       this.expects = new HttpRequest(expects);
     } else {
@@ -383,11 +367,6 @@ export class Request {
     if (midnight) {
       this.midnight = midnight;
     }
-    if (ui) {
-      this.ui = new RequestUiMeta(ui);
-    } else {
-      this.ui = undefined;
-    }
     if (actions) {
       this.actions = new RequestActions(actions);
     } else {
@@ -417,9 +396,6 @@ export class Request {
     }
     if (Array.isArray(this.authorization)) {
       result.authorization = this.authorization.map(i => i.toJSON());
-    }
-    if (this.ui) {
-      result.ui = this.ui.toJSON();
     }
     if (this.actions) {
       result.actions = this.actions.toJSON();
