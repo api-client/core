@@ -12,9 +12,11 @@ import * as PatchUtils from '../../src/models/PatchUtils.js';
 import { ProjectSchema } from '../../src/models/ProjectSchema.js';
 import { ArcLegacyProject } from '../../src/models/legacy/models/ArcLegacyProject.js';
 import { ARCSavedRequest } from '../../src/models/legacy/request/ArcRequest.js';
-// import { HttpProject, ProjectFolderKind, ProjectFolder, ThingKind, IHttpProject, HttpProjectKind } from '../../browser.js';
+import { LegacyMock } from '../../src/mocking/LegacyMock.js';
 
 describe('Models', () => {
+  const generator = new LegacyMock();
+
   describe('HttpProject', () => {
     describe('Initialization', () => {
 
@@ -1068,6 +1070,40 @@ describe('Models', () => {
         assert.throws(() => {
           project.moveRequest(moved.key, { parent: 'unknown' });
         }, Error, 'Unable to locate the new parent folder unknown');
+      });
+    });
+
+    describe('addLegacyRequest()', () => {
+      it('adds a legacy history request', async () => {
+        const project = new HttpProject();
+        const request = generator.http.history();
+        const created = await project.addLegacyRequest(request);
+        assert.ok(created, 'returns the created request');
+        assert.lengthOf(project.definitions, 1, 'has one definition');
+
+        assert.deepEqual(project.definitions[0], created, 'inserts the definition into project\'s definitions');
+        assert.equal(project.items[0].key, created.key, 'the project has the item');
+
+        assert.equal(created.getParent().kind, HttpProjectKind, 'the request has the parent as the project');
+
+        assert.equal(created.expects.url, request.url, 'has the URL');
+        assert.equal(created.info.name, 'Unnamed request', 'has the default name');
+      });
+
+      it('adds a legacy saved request', async () => {
+        const project = new HttpProject();
+        const request = generator.http.saved();
+        const created = await project.addLegacyRequest(request);
+        assert.ok(created, 'returns the created request');
+        assert.lengthOf(project.definitions, 1, 'has one definition');
+
+        assert.deepEqual(project.definitions[0], created, 'inserts the definition into project\'s definitions');
+        assert.equal(project.items[0].key, created.key, 'the project has the item');
+
+        assert.equal(created.getParent().kind, HttpProjectKind, 'the request has the parent as the project');
+
+        assert.equal(created.expects.url, request.url, 'has the URL');
+        assert.equal(created.info.name, request.name, 'has the name');
       });
     });
 

@@ -9,9 +9,9 @@ export class Normalizer {
     if (!request) {
       return undefined;
     }
-    const typed = request as any;
+    const typed = { ...request as object } as any;
     if (typed.legacyProject) {
-      const saved = (request) as ARCSavedRequest;
+      const saved = typed as ARCSavedRequest;
       if (!saved.projects) {
         saved.projects = [];
       }
@@ -49,7 +49,7 @@ export class Normalizer {
       typed._id = Normalizer.generateHistoryId(typed);
     }
 
-    return Normalizer.normalizeAuthorization(request as ARCHistoryRequest | ARCSavedRequest);
+    return Normalizer.normalizeAuthorization(typed as ARCHistoryRequest | ARCSavedRequest);
   }
 
   static generateHistoryId(request: ARCHistoryRequest): string {

@@ -11,8 +11,8 @@ import { ProjectSchema, IProjectSchema } from './ProjectSchema.js';
 import { Request } from './Request.js';
 import v4 from '../lib/uuid.js';
 import * as PatchUtils from './PatchUtils.js';
-import { ARCSavedRequest } from './legacy/request/ArcRequest.js';
-import { ArcLegacyProject } from './legacy/models/ArcLegacyProject.js';
+import { ARCSavedRequest, ARCHistoryRequest } from './legacy/request/ArcRequest.js';
+import { ArcLegacyProject, ARCProject } from './legacy/models/ArcLegacyProject.js';
 
 export type HttpProjectKind = 'ARC#HttpProject';
 export const Kind = 'ARC#HttpProject';
@@ -224,7 +224,11 @@ export class HttpProject extends ProjectParent {
    */
   static async fromLegacy(project: ArcLegacyProject, requests: ARCSavedRequest[]): Promise<HttpProject> {
     const { name='Unnamed project', description, requests: ids } = project;
+    const typedLegacyDb = project as ARCProject;
     const result = HttpProject.fromName(name);
+    if (typedLegacyDb._id) {
+      result.key = typedLegacyDb._id;
+    }
     if (description) {
       result.info.description = description;
     }
@@ -236,6 +240,9 @@ export class HttpProject extends ProjectParent {
         }
         const request = await Request.fromLegacy(old);
         const projectRequest = ProjectRequest.fromRequest(request.toJSON(), result);
+        if (old._id) {
+          projectRequest.key = old._id;
+        }
         result.addRequest(projectRequest);
       });
       await Promise.allSettled(promises);
@@ -736,6 +743,18 @@ export class HttpProject extends ProjectParent {
     }
     finalRequest.attachedCallback();
     return finalRequest;
+  }
+
+  /**
+   * Adds a request to the project that has been created for a previous version of ARC.
+   * 
+   * @param legacy The legacy request definition.
+   * @returns The created project request.
+   */
+  async addLegacyRequest(legacy: ARCSavedRequest|ARCHistoryRequest): Promise<ProjectRequest> {
+    const request = await Request.fromLegacy(legacy);
+    const projectRequest = ProjectRequest.fromRequest(request.toJSON(), this);
+    return this.addRequest(projectRequest);
   }
 
   /**

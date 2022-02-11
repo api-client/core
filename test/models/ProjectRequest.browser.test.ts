@@ -33,7 +33,6 @@ describe('Models', () => {
           assert.isUndefined(result.log, 'does not set the log property');
           assert.isUndefined(result.config, 'does not set the config property');
           assert.isUndefined(result.authorization, 'does not set the authorization property');
-          assert.isUndefined(result.ui, 'does not set the ui property');
           assert.isUndefined(result.actions, 'does not set the actions property');
           assert.isUndefined(result.clientCertificate, 'does not set the clientCertificate property');
         });
@@ -178,16 +177,6 @@ describe('Models', () => {
           const request = new ProjectRequest(project, init);
           now.setHours(0, 0, 0, 0);
           assert.equal(request.midnight, now.getTime());
-        });
-
-        it('sets the ui property', () => {
-          const ui: IRequestUiMeta = {
-            selectedEditor: 1,
-          };
-          const init: IProjectRequest = { ...base, ui };
-          const request = new ProjectRequest(project, init);
-          assert.typeOf(request.ui, 'object');
-          assert.equal(request.ui.selectedEditor, 1);
         });
       });
 

@@ -260,37 +260,6 @@ describe('Models', () => {
         assert.equal(resAction.kind, 'ARC#RunnableAction');
       });
 
-      it('translates the ui object', async () => {
-        const instance = await Request.fromLegacy({
-          method: 'PUT',
-          name: 'test',
-          url: 'https://dot.com',
-          ui: {
-            body: {
-              model: [{ type: '', viewModel: [], }]
-            },
-            headers: {
-              source: false,
-              model: [{ name: 'h1', value: 'hv1' }]
-            },
-            selectedEditor: 1,
-            url: {
-              model: [{ name: 'u1', value: 'uv1' }],
-            },
-          },
-        });
-        const { ui } = instance;
-
-        assert.typeOf(ui, 'object', 'has the UI definition');
-        assert.equal(ui.kind, 'ARC#RequestUiMeta');
-
-        const { body, url, selectedEditor } = ui;
-
-        assert.equal(selectedEditor, 1);
-        assert.typeOf(body.model, 'array');
-        assert.typeOf(url.model, 'array');
-      });
-
       it('translates the config object', async () => {
         const instance = await Request.fromLegacy({
           method: 'PUT',
@@ -498,7 +467,7 @@ describe('Models', () => {
         };
         delete info.name;
         const instance = await Request.fromLegacy(info);
-        assert.equal(instance.info.name, '');
+        assert.equal(instance.info.name, 'Unnamed request');
       });
     });
 
@@ -855,51 +824,6 @@ describe('Models', () => {
         assert.equal(instance.midnight, 1234567);
       });
 
-      it('sets the ui', () => {
-        const instance = new Request();
-        const schema = instance.toJSON();
-        schema.ui = {
-          body: {
-            model: [{ type: '', viewModel: [], }]
-          },
-          headers: {
-            source: false,
-            model: [{ name: 'h1', value: 'hv1', kind: 'ARC#Property', type: 'string' }]
-          },
-          selectedEditor: 1,
-          url: {
-            model: [{ name: 'u1', value: 'uv1', kind: 'ARC#Property', type: 'string' }],
-          },
-        };
-        instance.new(schema);
-
-        const { ui } = instance;
-
-        assert.typeOf(ui, 'object', 'has the UI definition');
-        assert.equal(ui.kind, 'ARC#RequestUiMeta');
-
-        const { body, url, selectedEditor } = ui;
-
-        assert.equal(selectedEditor, 1);
-        assert.typeOf(body.model, 'array');
-        assert.typeOf(url.model, 'array');
-      });
-
-      it('sets the ui to undefined when missing', () => {
-        const instance = new Request();
-        const schema = instance.toJSON();
-        schema.ui = {
-          body: {
-            model: [{ type: '', viewModel: [], }]
-          },
-        };
-        instance.new(schema);
-        delete schema.ui;
-        instance.new(schema);
-
-        assert.isUndefined(instance.ui);
-      });
-
       it('sets the actions', () => {
         const instance = new Request();
         const schema = instance.toJSON();
@@ -1096,38 +1020,7 @@ describe('Models', () => {
         const result = instance.toJSON();
         assert.isUndefined(result.authorization);
       });
-
-      it('sets the ui', () => {
-        const instance = new Request();
-        instance.ui = new RequestUiMeta({
-          body: {
-            model: [{ type: '', viewModel: [], }]
-          },
-          headers: {
-            source: false,
-            model: [{ name: 'h1', value: 'hv1', kind: 'ARC#Property', type: 'string' }]
-          },
-          selectedEditor: 1,
-          url: {
-            model: [{ name: 'u1', value: 'uv1', kind: 'ARC#Property', type: 'string' }],
-          },
-        });
-        const result = instance.toJSON();
-        const { ui } = result;
-        assert.typeOf(ui, 'object', 'has the UI definition');
-        assert.equal(ui.kind, 'ARC#RequestUiMeta');
-        const { body, url, selectedEditor } = ui;
-        assert.equal(selectedEditor, 1);
-        assert.typeOf(body.model, 'array');
-        assert.typeOf(url.model, 'array');
-      });
-
-      it('does not set the ui when missing', () => {
-        const instance = new Request();
-        const result = instance.toJSON();
-        assert.isUndefined(result.ui);
-      });
-
+      
       it('sets the actions', () => {
         const instance = new Request();
         instance.actions = new RequestActions({

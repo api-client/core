@@ -9,7 +9,7 @@ import { ErrorResponse } from './ErrorResponse.js';
 import { ArcResponse } from './ArcResponse.js';
 import { RequestsSize } from './RequestsSize.js';
 import { IHttpRequest, HttpRequest, Kind as HttpRequestKind } from './HttpRequest.js';
-import { ARCSavedRequest } from './legacy/request/ArcRequest.js';
+import { ARCSavedRequest, ARCHistoryRequest } from './legacy/request/ArcRequest.js';
 import { ErrorResponse as LegacyErrorResponse, Response as LegacyResponse } from './legacy/request/ArcResponse.js';
 import { PayloadSerializer } from '../lib/transformers/PayloadSerializer.js';
 import { Normalizer } from './legacy/Normalizer.js';
@@ -175,7 +175,7 @@ export class Request {
     return request;
   }
 
-  static async fromLegacy(request: ARCSavedRequest): Promise<Request> {
+  static async fromLegacy(request: ARCSavedRequest|ARCHistoryRequest): Promise<Request> {
     const normalized = Normalizer.normalizeRequest(request) as ARCSavedRequest;
     if (!normalized) {
       throw new Error(`Unknown object.`);
@@ -190,7 +190,7 @@ export class Request {
       },
       info: {
         kind: ThingKind,
-        name: normalized.name || '',
+        name: normalized.name || 'Unnamed request',
       },
     };
     init.created = normalized.created;

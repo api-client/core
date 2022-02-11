@@ -1,5 +1,8 @@
+import { Entity } from './base.js';
+
 /**
  * The legacy structure of a project.
+ * @deprecated
  */
 export interface ArcLegacyProject {
   /**
@@ -27,4 +30,10 @@ export interface ArcLegacyProject {
    */
   description?: string;
   error?: boolean;
+}
+
+/**
+ * @deprecated
+ */
+export declare interface ARCProject extends ArcLegacyProject, Entity {
 }
