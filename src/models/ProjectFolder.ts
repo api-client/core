@@ -293,7 +293,7 @@ export class ProjectFolder extends ProjectParent {
    * Lists folders in this folder.
    */
   listFolders(): ProjectFolder[] {
-    return this.project.listFolders(this.key);
+    return this.project.listFolders({ folder: this.key });
   }
 
   /**

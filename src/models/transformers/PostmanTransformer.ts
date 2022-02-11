@@ -1,8 +1,4 @@
-/* eslint-disable no-param-reassign */
-/* eslint-disable class-methods-use-this */
-
-import { BaseTransformer } from './BaseTransformer.js';
-import { ArcExportObject } from '../legacy/DataExport.js';
+import { HttpProject } from '../HttpProject.js';
 
 export const postmanVarRegex = /\{\{(.*?)\}\}/gim;
 
@@ -39,74 +35,34 @@ export function paramValue(input: string): string {
   return input;
 }
 
+export const dataValue = Symbol('dataValue');
+
+export type PostmanImportLogLevel = 'error' | 'warning' | 'info';
+
+export interface PostmanImportLog {
+  type: PostmanImportLogLevel;
+  message: string;
+}
+
 /**
  * Base class for all Postman transformers
  */
-export abstract class PostmanTransformer extends BaseTransformer {
+export abstract class PostmanTransformer {
+  [dataValue]: any;
+  logs: PostmanImportLog[] = [];
 
   /**
-   * Computes body value for Postman's v1 body definition.
-   *
-   * @param item Postman v1 model.
-   * @return Body value
+   * @param data Data to be transformed.
    */
-  computeBodyOld(item: any): string {
-    if (typeof item.data === 'string') {
-      return this.ensureVariablesSyntax(item.data) as string;
-    }
-    if (item.data instanceof Array && !item.data.length) {
-      return '';
-    }
-    switch (item.dataMode) {
-      case 'params': return this.computeFormDataBody(item);
-      case 'urlencoded': return this.computeUrlEncodedBody(item);
-      // case 'binary': return '';
-      default: return '';
-    }
+  constructor(data: any) {
+    this[dataValue] = data;
   }
 
-  /**
-   * Computes body as a FormData data model.
-   * This function sets `multipart` property on the item.
-   *
-   * @param item Postman v1 model.
-   * @returns Body value. Always empty string.
-   */
-  computeFormDataBody(item: any): string {
-    if (!item.data || !item.data.length) {
-      return '';
-    }
-    const multipart: any[] = [];
-    item.data = this.ensureVarsRecursively(item.data);
-    (item.data as any[]).forEach((data) => {
-      const obj = {
-        enabled: data.enabled,
-        name: data.key,
-        isFile: data.type === 'file',
-        value: data.type === 'file' ? '' : data.value,
-      };
-      multipart.push(obj);
+  addLog(type: PostmanImportLogLevel, message: string): void {
+    this.logs.push({
+      type,
+      message,
     });
-    item.multipart = multipart;
-    return '';
-  }
-
-  /**
-   * Computes body as a URL encoded data model.
-   *
-   * @param item Postman v1 model.
-   * @return Body value.
-   */
-  computeUrlEncodedBody(item: any): string  {
-    if (!item.data || !item.data.length) {
-      return '';
-    }
-    item.data = this.ensureVarsRecursively(item.data);
-    return (item.data as any[]).map((obj) => {
-      const name = paramValue(obj.key);
-      const value = paramValue(obj.value);
-      return `${name}=${value}`;
-    }).join('&');
   }
 
   /**
@@ -146,5 +102,5 @@ export abstract class PostmanTransformer extends BaseTransformer {
    * Transforms the data into ARC data model.
    * @returns Promise resolved when data are transformed.
    */
-  abstract transform(): Promise<ArcExportObject>;
+  abstract transform(): Promise<HttpProject|HttpProject[]>;
 }

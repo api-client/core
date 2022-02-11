@@ -1,0 +1,542 @@
+{
+	"info": {
+		"_postman_id": "5ae50643-6b0c-4126-9b41-0ab73f0df128",
+		"name": "HTTPBin",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "HTTP Methods",
+			"item": [
+				{
+					"name": "/delete",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": "https://httpbin.org/delete",
+						"description": "\nThe request's DELETE parameters."
+					},
+					"response": [
+						{
+							"name": "/delete",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "https://httpbin.org/delete?id=123",
+									"protocol": "https",
+									"host": [
+										"httpbin",
+										"org"
+									],
+									"path": [
+										"delete"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "123"
+										}
+									]
+								}
+							},
+							"_postman_previewlanguage": null,
+							"header": null,
+							"cookie": [],
+							"body": null
+						}
+					]
+				},
+				{
+					"name": "/get",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": "https://httpbin.org/get",
+						"description": "\nThe request's query parameters."
+					},
+					"response": [
+						{
+							"name": "/get",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "https://httpbin.org/get?qp1=a query value",
+									"protocol": "https",
+									"host": [
+										"httpbin",
+										"org"
+									],
+									"path": [
+										"get"
+									],
+									"query": [
+										{
+											"key": "qp1",
+											"value": "a query value"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Date",
+									"value": "Fri, 11 Feb 2022 19:52:31 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "386"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Server",
+									"value": "gunicorn/19.9.0"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"args\": {},\n    \"headers\": {\n        \"Accept\": \"application/json\",\n        \"Accept-Encoding\": \"gzip, deflate, br\",\n        \"Host\": \"httpbin.org\",\n        \"Postman-Token\": \"9ad28555-9e44-4b78-befa-7e9626336b97\",\n        \"User-Agent\": \"PostmanRuntime/7.26.10\",\n        \"X-Amzn-Trace-Id\": \"Root=1-6206be7f-2cb09cd524d3087e0d8974bf\"\n    },\n    \"origin\": \"69.215.151.37\",\n    \"url\": \"https://httpbin.org/get\"\n}"
+						}
+					]
+				},
+				{
+					"name": "/put",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "www-form-urlencoded-value",
+									"value": "a value",
+									"type": "text"
+								},
+								{
+									"key": "other-key",
+									"value": "other value",
+									"type": "text"
+								}
+							],
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "https://httpbin.org/put",
+						"description": "The request's PUT parameters."
+					},
+					"response": [
+						{
+							"name": "/get",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "https://httpbin.org/get?qp1=a query value",
+									"protocol": "https",
+									"host": [
+										"httpbin",
+										"org"
+									],
+									"path": [
+										"get"
+									],
+									"query": [
+										{
+											"key": "qp1",
+											"value": "a query value"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Date",
+									"value": "Fri, 11 Feb 2022 19:52:31 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "386"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Server",
+									"value": "gunicorn/19.9.0"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"args\": {},\n    \"headers\": {\n        \"Accept\": \"application/json\",\n        \"Accept-Encoding\": \"gzip, deflate, br\",\n        \"Host\": \"httpbin.org\",\n        \"Postman-Token\": \"9ad28555-9e44-4b78-befa-7e9626336b97\",\n        \"User-Agent\": \"PostmanRuntime/7.26.10\",\n        \"X-Amzn-Trace-Id\": \"Root=1-6206be7f-2cb09cd524d3087e0d8974bf\"\n    },\n    \"origin\": \"69.215.151.37\",\n    \"url\": \"https://httpbin.org/get\"\n}"
+						}
+					]
+				},
+				{
+					"name": "/post",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"kind\": \"test\",\n    \"key\": \"value\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://httpbin.org/post?queryParam=query value",
+							"protocol": "https",
+							"host": [
+								"httpbin",
+								"org"
+							],
+							"path": [
+								"post"
+							],
+							"query": [
+								{
+									"key": "queryParam",
+									"value": "query value"
+								}
+							]
+						},
+						"description": "\nThe request's query parameters."
+					},
+					"response": [
+						{
+							"name": "/get",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "https://httpbin.org/get?qp1=a query value",
+									"protocol": "https",
+									"host": [
+										"httpbin",
+										"org"
+									],
+									"path": [
+										"get"
+									],
+									"query": [
+										{
+											"key": "qp1",
+											"value": "a query value"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Date",
+									"value": "Fri, 11 Feb 2022 19:52:31 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "386"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Server",
+									"value": "gunicorn/19.9.0"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"args\": {},\n    \"headers\": {\n        \"Accept\": \"application/json\",\n        \"Accept-Encoding\": \"gzip, deflate, br\",\n        \"Host\": \"httpbin.org\",\n        \"Postman-Token\": \"9ad28555-9e44-4b78-befa-7e9626336b97\",\n        \"User-Agent\": \"PostmanRuntime/7.26.10\",\n        \"X-Amzn-Trace-Id\": \"Root=1-6206be7f-2cb09cd524d3087e0d8974bf\"\n    },\n    \"origin\": \"69.215.151.37\",\n    \"url\": \"https://httpbin.org/get\"\n}"
+						}
+					]
+				},
+				{
+					"name": "/patch",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "text-part",
+									"value": "text value",
+									"type": "text"
+								},
+								{
+									"key": "file-part",
+									"type": "file",
+									"src": "/home/pawel/Documents/rename.txt"
+								}
+							],
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "https://httpbin.org/patch",
+						"description": "\nThe request's query parameters."
+					},
+					"response": [
+						{
+							"name": "/get",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "https://httpbin.org/get?qp1=a query value",
+									"protocol": "https",
+									"host": [
+										"httpbin",
+										"org"
+									],
+									"path": [
+										"get"
+									],
+									"query": [
+										{
+											"key": "qp1",
+											"value": "a query value"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Date",
+									"value": "Fri, 11 Feb 2022 19:52:31 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "386"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Server",
+									"value": "gunicorn/19.9.0"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"args\": {},\n    \"headers\": {\n        \"Accept\": \"application/json\",\n        \"Accept-Encoding\": \"gzip, deflate, br\",\n        \"Host\": \"httpbin.org\",\n        \"Postman-Token\": \"9ad28555-9e44-4b78-befa-7e9626336b97\",\n        \"User-Agent\": \"PostmanRuntime/7.26.10\",\n        \"X-Amzn-Trace-Id\": \"Root=1-6206be7f-2cb09cd524d3087e0d8974bf\"\n    },\n    \"origin\": \"69.215.151.37\",\n    \"url\": \"https://httpbin.org/get\"\n}"
+						}
+					]
+				}
+			],
+			"description": "Testing different HTTP verbs"
+		},
+		{
+			"name": "Status codes",
+			"item": [
+				{
+					"name": "Sub status codes",
+					"item": [
+						{
+							"name": "PUT status",
+							"protocolProfileBehavior": {
+								"followRedirects": false,
+								"strictSSL": false
+							},
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "file",
+									"file": {
+										"src": "/home/pawel/Documents/arc-request.json"
+									}
+								},
+								"url": "https://httpbin.org/status/201"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "/status/{code}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "https://httpbin.org/status/200"
+					},
+					"response": []
+				}
+			],
+			"description": "Generates responses with given status code"
+		},
+		{
+			"name": "Free request",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "https://api.com"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "collectionVariable",
+			"value": "test1234"
+		},
+		{
+			"key": "disabledVariable",
+			"value": "other",
+			"disabled": true
+		},
+		{
+			"key": "withVar",
+			"value": "{{collectionVariable}}-test"
+		}
+	]
+}

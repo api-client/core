@@ -1,15 +1,11 @@
-import v4 from '../../lib/uuid.js';
-import { dataValue } from './BaseTransformer.js';
-import { PostmanTransformer } from './PostmanTransformer.js';
-import {
-  ArcExportObject,
-  ExportArcProjects,
-  ExportArcSavedRequest,
-  ExportArcHistoryRequest,
-  ExportArcVariable,
-} from '../legacy/DataExport.js';
+import { PostmanTransformer, dataValue, paramValue } from './PostmanTransformer.js';
+import { HttpProject, IHttpProject, Kind as ProjectKind } from '../HttpProject.js';
+import { ProjectFolder } from '../ProjectFolder.js';
+import { ProjectRequest } from '../ProjectRequest.js';
+import { IMultipartBody } from '../../lib/transformers/PayloadSerializer.js';
+import { Environment } from '../Environment.js';
 
-export declare interface PostmanBackupV1 {
+interface PostmanBackupV1 {
   version: number;
   collections?: PostmanCollection[];
   environments?: PostmanEnvironment[];
@@ -17,7 +13,7 @@ export declare interface PostmanBackupV1 {
   globals?: PostmanVariable[];
 }
 
-export declare interface PostmanCollection {
+interface PostmanCollection {
   id: string;
   name: string;
   description: string;
@@ -39,8 +35,9 @@ export declare interface PostmanCollection {
   published: boolean;
   favorite: boolean;
   requests: PostmanRequest[];
+  variables?: PostmanVariable[];
 }
-export declare interface PostmanRequest {
+interface PostmanRequest {
   id: string;
   name: string;
   time: number;
@@ -59,36 +56,42 @@ export declare interface PostmanRequest {
   version: number;
   tests: string;
   currentHelper: string;
+  rawModeData?: string;
 }
-export declare interface PostmanEnvironment {
+interface PostmanEnvironment {
   id: string;
   name: string;
   timestamp: number;
   synced: boolean;
   values: PostmanParameter[];
 }
-export declare interface PostmanHeadersPreset {
+interface PostmanHeadersPreset {
   id: string;
   name: string;
   headers: PostmanHeader[];
   timestamp: number;
 }
-export declare interface PostmanParameter {
+
+interface PostmanVariable {
+  disabled: boolean;
+  key: string;
+  value: string;
+}
+
+interface PostmanParameter {
   enabled: boolean;
   key: string;
   value: string;
   type: string;
 }
-export declare interface PostmanBodyParam extends PostmanParameter {
+interface PostmanBodyParam extends PostmanParameter {
   description: string;
 }
-export declare interface PostmanVariable extends PostmanParameter {
-}
-export declare interface PostmanHeader extends PostmanParameter {
+interface PostmanHeader extends PostmanParameter {
   description: string;
   warning: string;
 }
-export declare interface PostmanFolder {
+interface PostmanFolder {
   name: string;
   description: string;
   collectionId: string;
@@ -101,225 +104,202 @@ export declare interface PostmanFolder {
   id: string;
   collection_id: string;
 }
-export declare interface PostmanArcRequestData {
-  projects: ExportArcProjects[];
-  requests: ExportArcSavedRequest[];
-}
-export declare interface PostmanArcCollection {
-  project: ExportArcProjects;
-  requests: ExportArcSavedRequest[];
-}
 
 /**
  * Transformer for Postman backup file.
  */
 export class PostmanBackupTransformer extends PostmanTransformer {
-  /**
-   * Transforms `_data` into ARC data model.
-   * @return Promise resolved when data are transformed.
-   */
-  transform(): Promise<ArcExportObject> {
-    const raw = /** @type PostmanBackupV1 */ (this[dataValue]);
-
-    const collections = this.readRequestsData(raw.collections);
-    const result: ArcExportObject = {
-      createdAt: new Date().toISOString(),
-      version: 'postman-backup',
-      kind: 'ARC#Import',
-      requests: collections.requests,
-      projects: collections.projects,
-    };
-    const variables = this.computeVariables(raw);
-    if (variables && variables.length) {
-      result.variables = variables;
-    }
-    return Promise.resolve(result);
-  }
-
-  /**
-   * Iterates over collection requests array and transforms objects
-   * to ARC requests.
-   *
-   * @returns List of ARC request objects.
-   */
-  readRequestsData(data: PostmanCollection[]): PostmanArcRequestData {
-    const result: PostmanArcRequestData = {
-      projects: [],
-      requests: [],
-    };
-    if (!data || !data.length) {
+  async transform(): Promise<HttpProject[]> {
+    const raw = this[dataValue] as PostmanBackupV1;
+    const result: HttpProject[] = [];
+    if (!raw.collections) {
       return result;
     }
-    const parts = data.map((item, index) => this.readCollectionData(item, index));
-    parts.forEach((part) => {
-      result.projects.push(part.project);
-      result.requests = result.requests.concat(part.requests);
-    });
-    return result;
-  }
-
-  /**
-   * Reads collections data.
-   *
-   * @return Map of projects and requests.
-   */
-  readCollectionData(collection: PostmanCollection, index: number): PostmanArcCollection {
-    const project: ExportArcProjects = {
-      kind: 'ARC#ProjectData',
-      key: collection.id,
-      name: collection.name,
-      description: collection.description,
-      order: index,
-      created: collection.createdAt,
-      updated: collection.updatedAt,
-    };
-    const requests = this.computeRequestsOrder(collection);
-    const result: PostmanArcCollection = {
-      project,
-      requests: requests.map((item) => this.createRequestObject(item, project)),
-    };
-    return result;
-  }
-
-  /**
-   * Creates ordered list of requests as defined in collection order property.
-   * This creates a flat structure of requests and order assumes ARC's flat
-   * structure.
-   *
-   * @returns List of ordered Postman requests
-   */
-  computeRequestsOrder(collection: PostmanCollection): PostmanRequest[] {
-    let ordered:string[] = [];
-    if (collection.order && collection.order.length) {
-      ordered = ordered.concat(collection.order);
+    for (const collection of raw.collections) {
+      const project = await this.transformCollection(collection);
+      result.push(project);
     }
-    if (collection.folders) {
-      const folders = this.computeOrderedFolders(collection.folders, collection.folders_order);
-      if (folders) {
-        folders.forEach((folder) => {
-          if (folder.order && folder.order.length) {
-            ordered = ordered.concat(folder.order);
-          }
-        });
+    return result;
+  }
+
+  async transformCollection(collection: PostmanCollection): Promise<HttpProject> {
+    const { folders_order, order } = collection;
+    const project = this.createProject(collection);
+    this.setProjectVariables(project, collection);
+    if (Array.isArray(folders_order)) {
+      for (const id of folders_order) {
+        await this.addFolder(project, collection, id);
       }
     }
+    if (Array.isArray(order)) {
+      for (const id of order) {
+        await this.addRequest(project, collection, id);
+      }
+    }
+    return project;
+  }
+
+  createProject(collection: PostmanCollection): HttpProject {
+    const { description, id, name } = collection;
+    const init: IHttpProject = {
+      kind: ProjectKind,
+      definitions: [],
+      environments: [],
+      info: {
+        kind: 'ARC#Thing',
+        name,
+      },
+      items: [],
+      key: id,
+    };
+    if (description) {
+      init.info.description = description;
+    }
+    const project = new HttpProject(init);
+    return project;
+  }
+
+  setProjectVariables(project: HttpProject, collection: PostmanCollection): void {
+    const { variables } = collection;
+    if (!Array.isArray(variables)) {
+      return;
+    }
+    const env = Environment.fromName('Default');
+    project.addEnvironment(env);
+    variables.forEach((param) => {
+      const { disabled=false, key, value } = param;
+
+      const parsed = this.ensureVariablesSyntax(value) as string;
+      const created = env.addVariable(key, parsed);
+      created.enabled = !disabled;
+    });
+  }
+
+  async addFolder(current: HttpProject | ProjectFolder, collection: PostmanCollection, id: string): Promise<void> {
+    const { folders } = collection;
+    const folder = folders?.find(i => i.id === id);
+    if (!folder) {
+      this.addLog('warning', `Folder ${id} not found in the collection.`);
+      return;
+    }
+    const created = current.addFolder(folder.name);
+    if (folder.description) {
+      created.info.description = folder.description;
+    }
+    if (Array.isArray(folder.folders_order)) {
+      for (const id of folder.folders_order) {
+        await this.addFolder(created, collection, id);
+      }
+    }
+    if (Array.isArray(folder.order)) {
+      for (const id of folder.order) {
+        await this.addRequest(created, collection, id);
+      }
+    }
+  }
+
+  async addRequest(current: HttpProject | ProjectFolder, collection: PostmanCollection, id: string): Promise<void> {
     const { requests } = collection;
-    const result: PostmanRequest[] = ordered.map((id) => requests.find((request) => request.id === id)).filter((item) => !!item) as PostmanRequest[];
-    return result;
-  }
-
-  /**
-   * Computes list of folders including sub-folders .
-   *
-   * @param folders Collection folders definition
-   * @param orderIds Collection order info array
-   * @returns Ordered list of folders.
-   */
-  computeOrderedFolders(folders: PostmanFolder[], orderIds: string[]): PostmanFolder[]|undefined {
-    if (!folders || !folders.length) {
-      return undefined;
+    const request = requests?.find(i => i.id === id);
+    if (!request) {
+      this.addLog('warning', `Request ${id} not found in the collection.`);
+      return;
     }
-    if (!orderIds || !orderIds.length) {
-      return folders;
-    }
-    const result = orderIds.map((id) => folders.find((folder) => folder.id === id)).filter((item) => !!item) as PostmanFolder[];
-    return result;
-  }
 
-  /**
-   * Transforms postman request to ARC request
-   * @param item Postman request object
-   * @param project Project object
-   * @returns ARC request object
-   */
-  createRequestObject(item: PostmanRequest, project: ExportArcProjects): ExportArcSavedRequest {
-    const name = item.name || 'unnamed';
-    let url = item.url || 'http://';
+    const name = request.name || 'unnamed';
+    let url = request.url || 'http://';
     url = this.ensureVariablesSyntax(url) as string;
-    let method = item.method || 'GET';
+    let method = request.method || 'GET';
     method = this.ensureVariablesSyntax(method) as string;
-    let headers = item.headers || '';
+    let headers = request.headers || '';
     headers = this.ensureVariablesSyntax(headers) as string;
-    const body = this.computeBodyOld(item);
 
-    let created = Number(item.time);
-    if (Number.isNaN(created)) {
-      created = Date.now();
+    let createdTime = Number(request.time);
+    if (Number.isNaN(createdTime)) {
+      createdTime = Date.now();
     }
-    const result: ExportArcSavedRequest = {
-      key: '',
-      created,
-      updated: Date.now(),
-      headers,
-      method,
-      name,
-      payload: body,
-      type: 'saved',
-      url
-    };
-    const id = this.generateRequestId(result, project && project.key);
-    result.key = id;
-    if (project) {
-      this.addProjectReference(result, project.key);
-      this.addRequestReference(project, id);
+
+    const created = current.addRequest(url);
+    created.info.name = name;
+    if (request.description) {
+      created.info.description = request.description;
     }
-    if (item.description) {
-      result.description = item.description;
+    created.expects.method = method;
+    if (headers) {
+      created.expects.headers = headers;
     }
-    // @ts-ignore
-    if (item.multipart) {
-      // @ts-ignore
-      result.multipart = item.multipart;
-    }
-    return result;
+
+    await this.addRequestBody(created, request);
   }
 
-  /**
-   * Computes list of variables to import.
-   *
-   * @param data Postman import object
-   * @return List of variables or undefined if no variables found.
-   */
-  computeVariables(data: PostmanBackupV1): ExportArcVariable[]|undefined {
-    const result: ExportArcVariable[] = [];
-    if (data.globals && data.globals.length) {
-      data.globals.forEach((item) => {
-        const obj = this.computeVariableObject(item, 'default');
-        result.push(obj);
-      });
+  async addRequestBody(created: ProjectRequest, request: PostmanRequest): Promise<void> {
+    switch (request.dataMode) {
+      case 'urlencoded': return this.addUrlencodedBody(created, request);
+      case 'binary': return this.addBinaryBody(created, request);
+      case 'params': return this.addParamsBody(created, request);
+      case 'raw': return this.addRawBody(created, request);
     }
-
-    if (data.environments && data.environments.length) {
-      data.environments.forEach((env) => {
-        if (!env.values || !env.values.length) {
-          return;
-        }
-        const name = env.name || 'Unnamed';
-        env.values.forEach((item) => {
-          const obj = this.computeVariableObject(item, name);
-          result.push(obj);
-        });
-      });
-    }
-    return result.length ? result : undefined;
   }
 
-  /**
-   * Creates a variable object item.
-   *
-   * @param item Postman's variable definition.
-   * @param environment Environment name
-   * @return ARC's variable definition.
-   */
-  computeVariableObject(item: PostmanVariable, environment: string): ExportArcVariable {
-    const result = {
-      kind: 'ARC#VariableData',
-      key: v4(),
-      enabled: item.enabled || true,
-      environment,
-      value: this.ensureVariablesSyntax(item.value),
-      name: item.key,
+  async addUrlencodedBody(created: ProjectRequest, request: PostmanRequest): Promise<void> {
+    if (!Array.isArray(request.data)) {
+      return;
+    }
+    const data = request.data as PostmanBodyParam[];
+    const body =  data.map(i => `${paramValue(i.key)}=${paramValue(i.value)}`).join('&');
+    await created.expects.writePayload(body);
+  }
+
+  async addBinaryBody(created: ProjectRequest, request: PostmanRequest): Promise<void> {
+    // Postman sets the `rawModeData` property with the path to the file
+    // but not data itself. Because of that this method is a stub that can be extended
+    // by particular implementation (like node, CLI).
+  }
+
+  async addParamsBody(created: ProjectRequest, request: PostmanRequest): Promise<void> {
+    // "params" is Postman's FormData implementation.
+    // Similarly to the `addBinaryBody()`, file parts carry no data.
+    // Override the `addParamsFilePart()` to handle file read from the filesystem.
+    if (!Array.isArray(request.data)) {
+      return;
+    }
+    const data = request.data as PostmanBodyParam[];
+    const body: IMultipartBody[] = [];
+    for (const part of data) {
+      if (part.type === 'text') {
+        await this.addParamsTextPart(body, part);
+      } else if (part.type === 'file') {
+        await this.addParamsFilePart(body, part);
+      }
+    }
+    created.expects.payload = {
+      type: 'formdata',
+      data: body,
     };
-    return result;
+  }
+
+  async addParamsTextPart(body: IMultipartBody[], param: PostmanBodyParam): Promise<void> {
+    const { key, value, enabled=true } = param;
+    body.push({
+      isFile: false,
+      name: key,
+      value,
+      enabled,
+    });
+  }
+
+  async addParamsFilePart(body: IMultipartBody[], param: PostmanBodyParam): Promise<void> {
+    // Postman sets the `value` property with the path to the file
+    // but not data itself. Because of that this method is a stub that can be extended
+    // by particular implementation (like node, CLI).
+  }
+
+  async addRawBody(created: ProjectRequest, request: PostmanRequest): Promise<void> {
+    const { rawModeData, data } = request;
+    if (rawModeData && typeof rawModeData === 'string') {
+      await created.expects.writePayload(rawModeData);
+    } else if (data && typeof data === 'string') {
+      await created.expects.writePayload(data);
+    }
   }
 }

@@ -1,0 +1,775 @@
+{
+	"version": 1,
+	"collections": [
+		{
+			"id": "5ae50643-6b0c-4126-9b41-0ab73f0df128",
+			"uid": "0-5ae50643-6b0c-4126-9b41-0ab73f0df128",
+			"name": "HTTPBin",
+			"description": null,
+			"auth": null,
+			"events": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "8040d848-6cda-4de1-b5dc-bb039a303a76",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "898178dd-ba33-429d-9d2b-d09ad2e965bb",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"variables": [
+				{
+					"key": "collectionVariable",
+					"value": "test1234",
+					"disabled": false
+				},
+				{
+					"key": "disabledVariable",
+					"value": "other",
+					"disabled": true
+				},
+				{
+					"key": "withVar",
+					"value": "{{collectionVariable}}-test",
+					"disabled": false
+				}
+			],
+			"order": [
+				"256dcd16-a1f1-4302-bd51-adf91b397781"
+			],
+			"folders_order": [
+				"6b3e8f9e-cb45-40dc-80a8-1d7fb2307bdf",
+				"cbed1adf-c581-4519-ba6b-1acdf4527dae"
+			],
+			"protocolProfileBehavior": {},
+			"createdAt": "2022-02-11T19:47:34.264Z",
+			"folders": [
+				{
+					"id": "6b3e8f9e-cb45-40dc-80a8-1d7fb2307bdf",
+					"uid": "0-6b3e8f9e-cb45-40dc-80a8-1d7fb2307bdf",
+					"name": "HTTP Methods",
+					"description": "Testing different HTTP verbs",
+					"auth": null,
+					"events": null,
+					"collection": "5ae50643-6b0c-4126-9b41-0ab73f0df128",
+					"folder": null,
+					"order": [
+						"a2c531c4-1d1d-4fb5-b623-9eb4bda1bcb7",
+						"e4139d9c-ab1a-466b-b299-94f0b246a926",
+						"53b1e321-3a67-4bf7-ae19-8f1f7a93e353",
+						"eb5ca7ed-1f18-4c86-9554-0a29488a7957",
+						"babe27f6-d535-431f-af64-6de9697b4ef4"
+					],
+					"folders_order": [],
+					"owner": "0",
+					"protocolProfileBehavior": {},
+					"createdAt": "2022-02-11T19:49:05.598Z",
+					"collectionId": "5ae50643-6b0c-4126-9b41-0ab73f0df128",
+					"folderId": "6b3e8f9e-cb45-40dc-80a8-1d7fb2307bdf"
+				},
+				{
+					"id": "cbed1adf-c581-4519-ba6b-1acdf4527dae",
+					"uid": "0-cbed1adf-c581-4519-ba6b-1acdf4527dae",
+					"name": "Status codes",
+					"description": "Generates responses with given status code",
+					"auth": null,
+					"events": null,
+					"collection": "5ae50643-6b0c-4126-9b41-0ab73f0df128",
+					"folder": null,
+					"order": [
+						"4e5cdbe5-3dfe-4789-b586-b3cc2413d882"
+					],
+					"folders_order": [
+						"00f8867b-4101-4769-a2c3-6796b4a5833f"
+					],
+					"owner": "0",
+					"protocolProfileBehavior": {},
+					"createdAt": "2022-02-11T19:59:31.882Z",
+					"collectionId": "5ae50643-6b0c-4126-9b41-0ab73f0df128",
+					"folderId": "cbed1adf-c581-4519-ba6b-1acdf4527dae"
+				},
+				{
+					"id": "00f8867b-4101-4769-a2c3-6796b4a5833f",
+					"uid": "0-00f8867b-4101-4769-a2c3-6796b4a5833f",
+					"name": "Sub status codes",
+					"description": null,
+					"auth": null,
+					"events": null,
+					"collection": "5ae50643-6b0c-4126-9b41-0ab73f0df128",
+					"folder": "cbed1adf-c581-4519-ba6b-1acdf4527dae",
+					"order": [
+						"6f6af2ea-eaaf-4f17-b5eb-049322cbc164"
+					],
+					"folders_order": [],
+					"owner": "0",
+					"protocolProfileBehavior": {},
+					"createdAt": "2022-02-11T20:01:06.536Z",
+					"collectionId": "5ae50643-6b0c-4126-9b41-0ab73f0df128",
+					"folderId": "00f8867b-4101-4769-a2c3-6796b4a5833f"
+				}
+			],
+			"requests": [
+				{
+					"id": "256dcd16-a1f1-4302-bd51-adf91b397781",
+					"uid": "0-256dcd16-a1f1-4302-bd51-adf91b397781",
+					"name": "Free request",
+					"url": "https://api.com",
+					"description": null,
+					"data": null,
+					"dataOptions": null,
+					"dataMode": null,
+					"headerData": null,
+					"method": "GET",
+					"pathVariableData": [],
+					"queryParams": [],
+					"auth": null,
+					"events": null,
+					"folder": null,
+					"currentHelper": null,
+					"helperAttributes": null,
+					"collectionId": "5ae50643-6b0c-4126-9b41-0ab73f0df128",
+					"pathVariables": {}
+				},
+				{
+					"id": "4e5cdbe5-3dfe-4789-b586-b3cc2413d882",
+					"uid": "0-4e5cdbe5-3dfe-4789-b586-b3cc2413d882",
+					"name": "/status/{code}",
+					"url": "https://httpbin.org/status/200",
+					"description": null,
+					"data": null,
+					"dataOptions": null,
+					"dataMode": null,
+					"headerData": null,
+					"method": "GET",
+					"pathVariableData": [],
+					"queryParams": [],
+					"auth": null,
+					"events": null,
+					"folder": "cbed1adf-c581-4519-ba6b-1acdf4527dae",
+					"currentHelper": null,
+					"helperAttributes": null,
+					"collectionId": "5ae50643-6b0c-4126-9b41-0ab73f0df128",
+					"pathVariables": {}
+				},
+				{
+					"id": "53b1e321-3a67-4bf7-ae19-8f1f7a93e353",
+					"uid": "0-53b1e321-3a67-4bf7-ae19-8f1f7a93e353",
+					"name": "/put",
+					"url": "https://httpbin.org/put",
+					"description": "The request's PUT parameters.",
+					"data": [
+						{
+							"key": "www-form-urlencoded-value",
+							"value": "a value",
+							"description": "",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "other-key",
+							"value": "other value",
+							"description": "",
+							"type": "text",
+							"enabled": true
+						}
+					],
+					"dataOptions": {
+						"raw": {
+							"language": "json"
+						}
+					},
+					"dataMode": "urlencoded",
+					"headerData": [
+						{
+							"key": "Accept",
+							"value": "application/json",
+							"description": "",
+							"type": "text",
+							"enabled": true
+						}
+					],
+					"method": "PUT",
+					"pathVariableData": [],
+					"queryParams": [],
+					"auth": null,
+					"events": null,
+					"folder": "6b3e8f9e-cb45-40dc-80a8-1d7fb2307bdf",
+					"responses_order": [
+						"125b8347-74fd-41c7-bdb6-c3e9f0e69284"
+					],
+					"responses": [
+						{
+							"id": "125b8347-74fd-41c7-bdb6-c3e9f0e69284",
+							"uid": "0-125b8347-74fd-41c7-bdb6-c3e9f0e69284",
+							"name": "/get",
+							"status": null,
+							"mime": null,
+							"language": "json",
+							"text": "{\n    \"args\": {},\n    \"headers\": {\n        \"Accept\": \"application/json\",\n        \"Accept-Encoding\": \"gzip, deflate, br\",\n        \"Host\": \"httpbin.org\",\n        \"Postman-Token\": \"9ad28555-9e44-4b78-befa-7e9626336b97\",\n        \"User-Agent\": \"PostmanRuntime/7.26.10\",\n        \"X-Amzn-Trace-Id\": \"Root=1-6206be7f-2cb09cd524d3087e0d8974bf\"\n    },\n    \"origin\": \"69.215.151.37\",\n    \"url\": \"https://httpbin.org/get\"\n}",
+							"responseCode": {
+								"code": 200,
+								"name": "OK"
+							},
+							"requestObject": {
+								"data": null,
+								"dataMode": null,
+								"dataOptions": null,
+								"headerData": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"description": "",
+										"type": "text",
+										"enabled": true
+									}
+								],
+								"method": "GET",
+								"pathVariableData": [],
+								"queryParams": [
+									{
+										"key": "qp1",
+										"value": "a query value",
+										"equals": true,
+										"description": null,
+										"enabled": true
+									}
+								],
+								"url": "https://httpbin.org/get?qp1=a query value"
+							},
+							"headers": [
+								{
+									"key": "Date",
+									"value": "Fri, 11 Feb 2022 19:52:31 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "386"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Server",
+									"value": "gunicorn/19.9.0"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								}
+							],
+							"cookies": null,
+							"request": "53b1e321-3a67-4bf7-ae19-8f1f7a93e353",
+							"collection": "5ae50643-6b0c-4126-9b41-0ab73f0df128",
+							"owner": "0"
+						}
+					],
+					"currentHelper": null,
+					"helperAttributes": null,
+					"collectionId": "5ae50643-6b0c-4126-9b41-0ab73f0df128",
+					"headers": "Accept: application/json\n",
+					"pathVariables": {}
+				},
+				{
+					"id": "6f6af2ea-eaaf-4f17-b5eb-049322cbc164",
+					"uid": "0-6f6af2ea-eaaf-4f17-b5eb-049322cbc164",
+					"name": "PUT status",
+					"url": "https://httpbin.org/status/201",
+					"description": null,
+					"data": [],
+					"dataOptions": null,
+					"dataMode": "binary",
+					"headerData": null,
+					"method": "PUT",
+					"pathVariableData": [],
+					"queryParams": [],
+					"auth": null,
+					"events": null,
+					"folder": "00f8867b-4101-4769-a2c3-6796b4a5833f",
+					"protocolProfileBehavior": {
+						"followRedirects": false,
+						"strictSSL": false
+					},
+					"currentHelper": null,
+					"helperAttributes": null,
+					"collectionId": "5ae50643-6b0c-4126-9b41-0ab73f0df128",
+					"rawModeData": "/home/pawel/Documents/arc-request.json",
+					"pathVariables": {}
+				},
+				{
+					"id": "a2c531c4-1d1d-4fb5-b623-9eb4bda1bcb7",
+					"uid": "0-a2c531c4-1d1d-4fb5-b623-9eb4bda1bcb7",
+					"name": "/delete",
+					"url": "https://httpbin.org/delete",
+					"description": "\nThe request's DELETE parameters.",
+					"data": null,
+					"dataOptions": null,
+					"dataMode": null,
+					"headerData": [
+						{
+							"key": "Accept",
+							"value": "application/json",
+							"description": "",
+							"type": "text",
+							"enabled": true
+						}
+					],
+					"method": "DELETE",
+					"pathVariableData": [],
+					"queryParams": [],
+					"auth": null,
+					"events": null,
+					"folder": "6b3e8f9e-cb45-40dc-80a8-1d7fb2307bdf",
+					"responses_order": [
+						"8abf33d9-6181-490c-96fb-713bfd0ec456"
+					],
+					"responses": [
+						{
+							"id": "8abf33d9-6181-490c-96fb-713bfd0ec456",
+							"uid": "0-8abf33d9-6181-490c-96fb-713bfd0ec456",
+							"name": "/delete",
+							"status": null,
+							"mime": null,
+							"language": null,
+							"text": null,
+							"responseCode": null,
+							"requestObject": {
+								"data": null,
+								"dataMode": null,
+								"dataOptions": null,
+								"headerData": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"description": "",
+										"type": "text",
+										"enabled": true
+									}
+								],
+								"method": "DELETE",
+								"pathVariableData": [],
+								"queryParams": [
+									{
+										"key": "id",
+										"value": "123",
+										"description": null,
+										"enabled": true
+									}
+								],
+								"url": "https://httpbin.org/delete?id=123"
+							},
+							"headers": null,
+							"cookies": null,
+							"request": "a2c531c4-1d1d-4fb5-b623-9eb4bda1bcb7",
+							"collection": "5ae50643-6b0c-4126-9b41-0ab73f0df128",
+							"owner": "0"
+						}
+					],
+					"currentHelper": null,
+					"helperAttributes": null,
+					"collectionId": "5ae50643-6b0c-4126-9b41-0ab73f0df128",
+					"headers": "Accept: application/json\n",
+					"pathVariables": {}
+				},
+				{
+					"id": "babe27f6-d535-431f-af64-6de9697b4ef4",
+					"uid": "0-babe27f6-d535-431f-af64-6de9697b4ef4",
+					"name": "/patch",
+					"url": "https://httpbin.org/patch",
+					"description": "\nThe request's query parameters.",
+					"data": [
+						{
+							"key": "text-part",
+							"value": "text value",
+							"description": "",
+							"type": "text",
+							"enabled": true
+						},
+						{
+							"key": "file-part",
+							"value": "/home/pawel/Documents/rename.txt",
+							"description": "",
+							"type": "file",
+							"enabled": true
+						}
+					],
+					"dataOptions": {
+						"raw": {
+							"language": "json"
+						}
+					},
+					"dataMode": "params",
+					"headerData": [
+						{
+							"key": "Accept",
+							"value": "application/json",
+							"description": "",
+							"type": "text",
+							"enabled": true
+						}
+					],
+					"method": "PATCH",
+					"pathVariableData": [],
+					"queryParams": [],
+					"auth": null,
+					"events": null,
+					"folder": "6b3e8f9e-cb45-40dc-80a8-1d7fb2307bdf",
+					"responses_order": [
+						"95c699e4-6610-4e4d-9bd8-22a4606d8f18"
+					],
+					"responses": [
+						{
+							"id": "95c699e4-6610-4e4d-9bd8-22a4606d8f18",
+							"uid": "0-95c699e4-6610-4e4d-9bd8-22a4606d8f18",
+							"name": "/get",
+							"status": null,
+							"mime": null,
+							"language": "json",
+							"text": "{\n    \"args\": {},\n    \"headers\": {\n        \"Accept\": \"application/json\",\n        \"Accept-Encoding\": \"gzip, deflate, br\",\n        \"Host\": \"httpbin.org\",\n        \"Postman-Token\": \"9ad28555-9e44-4b78-befa-7e9626336b97\",\n        \"User-Agent\": \"PostmanRuntime/7.26.10\",\n        \"X-Amzn-Trace-Id\": \"Root=1-6206be7f-2cb09cd524d3087e0d8974bf\"\n    },\n    \"origin\": \"69.215.151.37\",\n    \"url\": \"https://httpbin.org/get\"\n}",
+							"responseCode": {
+								"code": 200,
+								"name": "OK"
+							},
+							"requestObject": {
+								"data": null,
+								"dataMode": null,
+								"dataOptions": null,
+								"headerData": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"description": "",
+										"type": "text",
+										"enabled": true
+									}
+								],
+								"method": "GET",
+								"pathVariableData": [],
+								"queryParams": [
+									{
+										"key": "qp1",
+										"value": "a query value",
+										"description": null,
+										"enabled": true
+									}
+								],
+								"url": "https://httpbin.org/get?qp1=a query value"
+							},
+							"headers": [
+								{
+									"key": "Date",
+									"value": "Fri, 11 Feb 2022 19:52:31 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "386"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Server",
+									"value": "gunicorn/19.9.0"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								}
+							],
+							"cookies": null,
+							"request": "babe27f6-d535-431f-af64-6de9697b4ef4",
+							"collection": "5ae50643-6b0c-4126-9b41-0ab73f0df128",
+							"owner": "0"
+						}
+					],
+					"currentHelper": null,
+					"helperAttributes": null,
+					"collectionId": "5ae50643-6b0c-4126-9b41-0ab73f0df128",
+					"headers": "Accept: application/json\n",
+					"pathVariables": {}
+				},
+				{
+					"id": "e4139d9c-ab1a-466b-b299-94f0b246a926",
+					"uid": "0-e4139d9c-ab1a-466b-b299-94f0b246a926",
+					"name": "/get",
+					"url": "https://httpbin.org/get",
+					"description": "\nThe request's query parameters.",
+					"data": null,
+					"dataOptions": null,
+					"dataMode": null,
+					"headerData": [
+						{
+							"key": "Accept",
+							"value": "application/json",
+							"description": "",
+							"type": "text",
+							"enabled": true
+						}
+					],
+					"method": "GET",
+					"pathVariableData": [],
+					"queryParams": [],
+					"auth": null,
+					"events": null,
+					"folder": "6b3e8f9e-cb45-40dc-80a8-1d7fb2307bdf",
+					"responses_order": [
+						"fbb7fa4d-df0d-4a46-a7e7-36276eefaace"
+					],
+					"responses": [
+						{
+							"id": "fbb7fa4d-df0d-4a46-a7e7-36276eefaace",
+							"uid": "0-fbb7fa4d-df0d-4a46-a7e7-36276eefaace",
+							"name": "/get",
+							"status": null,
+							"mime": null,
+							"language": "json",
+							"text": "{\n    \"args\": {},\n    \"headers\": {\n        \"Accept\": \"application/json\",\n        \"Accept-Encoding\": \"gzip, deflate, br\",\n        \"Host\": \"httpbin.org\",\n        \"Postman-Token\": \"9ad28555-9e44-4b78-befa-7e9626336b97\",\n        \"User-Agent\": \"PostmanRuntime/7.26.10\",\n        \"X-Amzn-Trace-Id\": \"Root=1-6206be7f-2cb09cd524d3087e0d8974bf\"\n    },\n    \"origin\": \"69.215.151.37\",\n    \"url\": \"https://httpbin.org/get\"\n}",
+							"responseCode": {
+								"code": 200,
+								"name": "OK"
+							},
+							"requestObject": {
+								"data": null,
+								"dataMode": null,
+								"dataOptions": null,
+								"headerData": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"description": "",
+										"type": "text",
+										"enabled": true
+									}
+								],
+								"method": "GET",
+								"pathVariableData": [],
+								"queryParams": [
+									{
+										"key": "qp1",
+										"value": "a query value",
+										"description": null,
+										"enabled": true
+									}
+								],
+								"url": "https://httpbin.org/get?qp1=a query value"
+							},
+							"headers": [
+								{
+									"key": "Date",
+									"value": "Fri, 11 Feb 2022 19:52:31 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "386"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Server",
+									"value": "gunicorn/19.9.0"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								}
+							],
+							"cookies": null,
+							"request": "e4139d9c-ab1a-466b-b299-94f0b246a926",
+							"collection": "5ae50643-6b0c-4126-9b41-0ab73f0df128",
+							"owner": "0"
+						}
+					],
+					"currentHelper": null,
+					"helperAttributes": null,
+					"collectionId": "5ae50643-6b0c-4126-9b41-0ab73f0df128",
+					"headers": "Accept: application/json\n",
+					"pathVariables": {}
+				},
+				{
+					"id": "eb5ca7ed-1f18-4c86-9554-0a29488a7957",
+					"uid": "0-eb5ca7ed-1f18-4c86-9554-0a29488a7957",
+					"name": "/post",
+					"url": "https://httpbin.org/post?queryParam=query value",
+					"description": "\nThe request's query parameters.",
+					"data": [],
+					"dataOptions": {
+						"raw": {
+							"language": "json"
+						}
+					},
+					"dataMode": "raw",
+					"headerData": [
+						{
+							"key": "Accept",
+							"value": "application/json",
+							"description": "",
+							"type": "text",
+							"enabled": true
+						}
+					],
+					"method": "POST",
+					"pathVariableData": [],
+					"queryParams": [
+						{
+							"key": "queryParam",
+							"value": "query value",
+							"equals": true,
+							"description": null,
+							"enabled": true
+						}
+					],
+					"auth": null,
+					"events": null,
+					"folder": "6b3e8f9e-cb45-40dc-80a8-1d7fb2307bdf",
+					"responses_order": [
+						"d2bf3524-bdf8-41b5-ab72-e66bc9b16579"
+					],
+					"responses": [
+						{
+							"id": "d2bf3524-bdf8-41b5-ab72-e66bc9b16579",
+							"uid": "0-d2bf3524-bdf8-41b5-ab72-e66bc9b16579",
+							"name": "/get",
+							"status": null,
+							"mime": null,
+							"language": "json",
+							"text": "{\n    \"args\": {},\n    \"headers\": {\n        \"Accept\": \"application/json\",\n        \"Accept-Encoding\": \"gzip, deflate, br\",\n        \"Host\": \"httpbin.org\",\n        \"Postman-Token\": \"9ad28555-9e44-4b78-befa-7e9626336b97\",\n        \"User-Agent\": \"PostmanRuntime/7.26.10\",\n        \"X-Amzn-Trace-Id\": \"Root=1-6206be7f-2cb09cd524d3087e0d8974bf\"\n    },\n    \"origin\": \"69.215.151.37\",\n    \"url\": \"https://httpbin.org/get\"\n}",
+							"responseCode": {
+								"code": 200,
+								"name": "OK"
+							},
+							"requestObject": {
+								"data": null,
+								"dataMode": null,
+								"dataOptions": null,
+								"headerData": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"description": "",
+										"type": "text",
+										"enabled": true
+									}
+								],
+								"method": "GET",
+								"pathVariableData": [],
+								"queryParams": [
+									{
+										"key": "qp1",
+										"value": "a query value",
+										"description": null,
+										"enabled": true
+									}
+								],
+								"url": "https://httpbin.org/get?qp1=a query value"
+							},
+							"headers": [
+								{
+									"key": "Date",
+									"value": "Fri, 11 Feb 2022 19:52:31 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "386"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Server",
+									"value": "gunicorn/19.9.0"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								}
+							],
+							"cookies": null,
+							"request": "eb5ca7ed-1f18-4c86-9554-0a29488a7957",
+							"collection": "5ae50643-6b0c-4126-9b41-0ab73f0df128",
+							"owner": "0"
+						}
+					],
+					"currentHelper": null,
+					"helperAttributes": null,
+					"collectionId": "5ae50643-6b0c-4126-9b41-0ab73f0df128",
+					"rawModeData": "{\n    \"kind\": \"test\",\n    \"key\": \"value\"\n}",
+					"headers": "Accept: application/json\n",
+					"pathVariables": {}
+				}
+			]
+		}
+	],
+	"environments": [
+		{
+			"id": "78cb171e-85e3-49ed-8fa5-d105924ed3c2",
+			"name": "MyEnv",
+			"values": [
+				{
+					"key": "asdasd",
+					"value": "asdasd",
+					"enabled": true
+				},
+				{
+					"key": "AP_TOKEN",
+					"value": "nothing",
+					"enabled": true
+				}
+			]
+		},
+		{
+			"id": "d5beb0d8-049b-4c93-865d-9b90d9834ebf",
+			"name": "My Workspace - globals",
+			"values": []
+		}
+	],
+	"headerPresets": [],
+	"globals": []
+}

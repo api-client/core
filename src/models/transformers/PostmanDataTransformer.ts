@@ -1,26 +1,21 @@
-/* eslint-disable class-methods-use-this */
-
 import { PostmanBackupTransformer } from './PostmanBackupTransformer.js';
-import { PostmanEnvTransformer } from './PostmanEnvTransformer.js';
-import { PostmanV1Transformer } from './PostmanV1Transformer.js';
+
 import { PostmanV2Transformer } from './PostmanV2Transformer.js';
 import { PostmanV21Transformer } from './PostmanV21Transformer.js';
 import { PostmanTransformer } from './PostmanTransformer.js';
-import { ArcExportObject } from '../legacy/DataExport.js';
+import { HttpProject } from '../HttpProject.js';
 
+/**
+ * Transforms Postman collections (v2 and v2.1) and Postman's data export 
+ * into an HTTP Project (or projects for data export).
+ */
 export class PostmanDataTransformer {
-  transform(data: any): Promise<ArcExportObject> {
+  transform(data: any): Promise<HttpProject|HttpProject[]> {
     const version = this.recognizeVersion(data);
     let instance: PostmanTransformer;
     switch (version) {
       case 'backup':
         instance = new PostmanBackupTransformer(data);
-        break;
-      case 'environment':
-        instance = new PostmanEnvTransformer(data);
-        break;
-      case 'collection':
-        instance = new PostmanV1Transformer(data);
         break;
       case 'collection-v2':
         instance = new PostmanV2Transformer(data);
@@ -36,12 +31,6 @@ export class PostmanDataTransformer {
   recognizeVersion(data: any): string | undefined {
     if (data.version) {
       return 'backup';
-    }
-    if (!data.info && data.name && data.folders) {
-      return 'collection';
-    }
-    if (data._postman_variable_scope && data._postman_variable_scope === 'environment') {
-      return 'environment';
     }
     if (data.info.schema) {
       switch (data.info.schema) {

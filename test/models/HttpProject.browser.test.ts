@@ -1177,7 +1177,7 @@ describe('Models', () => {
         const f2 = project.addFolder('f2');
         const f3 = f2.addFolder('f3');
         f2.addRequest(ProjectRequest.fromName('r1', project));
-        const result = project.listFolders(f2.key);
+        const result = project.listFolders({ folder: f2.key });
         assert.lengthOf(result, 1, 'has a single folder');
         assert.equal(result[0].key, f3.key);
       });
@@ -1185,14 +1185,14 @@ describe('Models', () => {
       it('returns empty list when no items', () => {
         const project = new HttpProject();
         const f1 = project.addFolder('f1');
-        const result = project.listFolders(f1.key);
+        const result = project.listFolders({ folder:  f1.key });
         assert.deepEqual(result, []);
       });
 
       it('throws when parent folder not found', () => {
         const project = new HttpProject();
         assert.throws(() => {
-          project.listFolders('unknown');
+          project.listFolders({ folder: 'unknown' });
         }, Error, 'Unable to find the folder unknown.');
       });
     });

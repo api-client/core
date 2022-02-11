@@ -136,3 +136,9 @@ export { RunnableCondition } from './src/runtime/actions/RunnableCondition.js';
 export { ModulesRegistry, RegistryPermission, RegisteredRequestModule, RegisteredResponseModule, ExecutionContext, ExecutionEvents } from './src/runtime/modules/ModulesRegistry.js';
 export * as RequestCookiesModule  from './src/runtime/modules/RequestCookies.js';
 export * as RequestAuthorizationModule  from './src/runtime/modules/RequestAuthorization.js';
+// 
+// External data importers
+// 
+export { LegacyDataExportToApiProject } from './src/models/transformers/LegacyDataExportToApiProject.js';
+export { PostmanDataTransformer } from './src/models/transformers/PostmanDataTransformer.js';
+export { ArcLegacyNormalizer } from './src/models/transformers/ArcLegacyNormalizer.js';

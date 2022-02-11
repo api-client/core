@@ -119,3 +119,10 @@ export { Runnable, IRunnable } from './src/models/actions/runnable/Runnable.js';
 export { DeleteCookieAction, IDeleteCookieAction } from './src/models/actions/runnable/DeleteCookieAction.js';
 export { SetCookieAction, ISetCookieAction } from './src/models/actions/runnable/SetCookieAction.js';
 export { SetVariableAction, ISetVariableAction } from './src/models/actions/runnable/SetVariableAction.js';
+
+// 
+// External data importers
+// 
+export { LegacyDataExportToApiProject } from './src/models/transformers/LegacyDataExportToApiProject.js';
+export { PostmanDataTransformer } from './src/models/transformers/PostmanDataTransformer.js';
+export { ArcLegacyNormalizer } from './src/models/transformers/ArcLegacyNormalizer.js';

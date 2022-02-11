@@ -456,7 +456,7 @@ describe('Models', () => {
         const spy = sinon.spy(project, 'listFolders');
         folder.listFolders();
         assert.isTrue(spy.calledOnce);
-        assert.equal(spy.args[0][0], folder.key, 'has the only argument');
+        assert.equal(spy.args[0][0].folder, folder.key, 'has the only argument');
       });
 
       it('returns the list', () => {

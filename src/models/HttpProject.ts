@@ -130,6 +130,13 @@ export interface IProjectCloneOptions {
   withoutRevalidate?: boolean;
 }
 
+export interface IFolderListOptions {
+  /**
+   * Folder name or key to list folders for.
+   */
+  folder?: string;
+}
+
 /**
  * The new definition of a project in ARC.
  * Note, this is not the same as future `ApiProject` which is reserved for building APIs
@@ -878,14 +885,14 @@ export class HttpProject extends ProjectParent {
 
   /**
    * Lists folders from the project or a sub-folder.
-   * @param folder The optional folder name or the key to list folders for.
+   * @param opts Folder listing options.
    */
-  listFolders(folder?: string): ProjectFolder[] {
+  listFolders(opts: IFolderListOptions = {}): ProjectFolder[] {
     let root;
-    if (folder) {
-      const parent = this.findFolder(folder);
+    if (opts.folder) {
+      const parent = this.findFolder(opts.folder);
       if (!parent) {
-        throw new Error(`Unable to find the folder ${folder}.`);
+        throw new Error(`Unable to find the folder ${opts.folder}.`);
       }
       root = parent;
     } else {
