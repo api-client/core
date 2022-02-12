@@ -4,8 +4,6 @@ The core library of the Advanced REST Client application. Targeted release: ARC 
 
 Contains the core models, events, and logic related to ARC. This replaces the `events`, `lib`, and parts of `base` libraries.
 
-> This is a work in progress.
-
 ## Purpose
 
 The core library provides the libraries that ARC and related projects are re-using under the hood.
@@ -39,3 +37,16 @@ These libraries can be used, among others, to:
 ## Community driven
 
 The entire ARC project is community driven. We build tools for API developers to make them successful without investing into very expensive enterprise solutions. We are happy to hear from you. If your ideas can benefit the community we will implement them. That's on us. But you are welcome to clone the project, build your idea, and send us a PR. We will accept it if it won't influence the stability of the project and it's safe to marge with the main branch.
+
+## Documentation
+
+Please, see the `docs` folder for the use documentation.
+
+## TODO
+
+Tasks planned for the future releases.
+
+- [ ] Add support for AMF parser to parse HTTP project data
+- [ ] Add client certificate class logic
+- [ ] Add patch operation for the remaining models
+- [ ] Add HTTP project mocking class

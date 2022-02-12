@@ -3,8 +3,9 @@
   "description": "The ARC core client library. Works in NodeJS and in a ES enabled browser.",
   "version": "0.1.0",
   "license": "Apache-2.0",
-  "main": "main.js",
-  "module": "index.js",
+  "main": "build/main.js",
+  "module": "build/index.js",
+  "types": "build/index.d.ts",
   "type": "module",
   "author": {
     "name": "Pawel Uchida-Psztyc",
