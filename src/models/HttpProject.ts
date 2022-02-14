@@ -137,6 +137,13 @@ export interface IFolderListOptions {
   folder?: string;
 }
 
+export interface ISchemaAddOptions {
+  /**
+   * Optionally the position at which to add the schema into the list of schemas.
+   */
+  index?: number;
+}
+
 /**
  * The new definition of a project in ARC.
  * Note, this is not the same as future `ApiProject` which is reserved for building APIs
@@ -230,7 +237,7 @@ export class HttpProject extends ProjectParent {
    * Creates an HTTP project instance from ARC's legacy project definition.
    */
   static async fromLegacy(project: ArcLegacyProject, requests: ARCSavedRequest[]): Promise<HttpProject> {
-    const { name='Unnamed project', description, requests: ids } = project;
+    const { name = 'Unnamed project', description, requests: ids } = project;
     const typedLegacyDb = project as ARCProject;
     const result = HttpProject.fromName(name);
     if (typedLegacyDb._id) {
@@ -261,7 +268,7 @@ export class HttpProject extends ProjectParent {
    * Creates a new project from a set of options.
    */
   static fromInitOptions(init: IProjectInitOptions): HttpProject {
-    const { name='Unnamed project' } = init;
+    const { name = 'Unnamed project' } = init;
     return HttpProject.fromName(name);
   }
 
@@ -285,7 +292,7 @@ export class HttpProject extends ProjectParent {
     } else {
       init = {
         kind: Kind,
-        key: v4(), 
+        key: v4(),
         definitions: [],
         environments: [],
         items: [],
@@ -475,7 +482,7 @@ export class HttpProject extends ProjectParent {
    * @param opts Folder create options.
    * @returns The newly inserted folder. If the folder already existed it returns its instance.
    */
-  addFolder(init: string | IProjectFolder | ProjectFolder = ProjectFolder.defaultName, opts: IFolderCreateOptions={}): ProjectFolder {
+  addFolder(init: string | IProjectFolder | ProjectFolder = ProjectFolder.defaultName, opts: IFolderCreateOptions = {}): ProjectFolder {
     if (!Array.isArray(this.items)) {
       this.items = [];
     }
@@ -511,7 +518,7 @@ export class HttpProject extends ProjectParent {
         }
       }
     }
-    
+
     this.definitions.push(definition);
     const item = ProjectItem.projectFolder(this, definition.key);
     if (!Array.isArray(root.items)) {
@@ -599,7 +606,7 @@ export class HttpProject extends ProjectParent {
    * @param key The key of the request to move.
    * @param opts The moving options.
    */
-  moveFolder(key: string, opts: IProjectMoveOptions={}): void {
+  moveFolder(key: string, opts: IProjectMoveOptions = {}): void {
     const { index, parent } = opts;
     const movedFolder = this.findFolder(key);
     if (!movedFolder) {
@@ -651,7 +658,7 @@ export class HttpProject extends ProjectParent {
     if (!target) {
       throw new Error(`Unable to locate the folder ${folder}`);
     }
-    const { items=[] } = target;
+    const { items = [] } = target;
     for (const item of items) {
       if (item.key === child) {
         return true;
@@ -690,7 +697,7 @@ export class HttpProject extends ProjectParent {
    * @param opts Thew request add options.
    * @returns The inserted into the definitions request.
    */
-  addRequest(request: IProjectRequest | ProjectRequest | string, opts: IRequestAddOptions={}): ProjectRequest {
+  addRequest(request: IProjectRequest | ProjectRequest | string, opts: IRequestAddOptions = {}): ProjectRequest {
     if (!Array.isArray(this.definitions)) {
       this.definitions = [];
     }
@@ -723,7 +730,7 @@ export class HttpProject extends ProjectParent {
     if (!finalRequest.key) {
       finalRequest.key = v4();
     }
-    
+
     let root: ProjectFolder | HttpProject;
     if (opts.parent) {
       const rootCandidate = this.findFolder(opts.parent);
@@ -748,7 +755,7 @@ export class HttpProject extends ProjectParent {
 
     this.definitions.push(finalRequest);
     const item = ProjectItem.projectRequest(this, finalRequest.key);
-    
+
     if (typeof opts.index === 'number') {
       root.items.splice(opts.index, 0, item);
     } else {
@@ -764,7 +771,7 @@ export class HttpProject extends ProjectParent {
    * @param legacy The legacy request definition.
    * @returns The created project request.
    */
-  async addLegacyRequest(legacy: ARCSavedRequest|ARCHistoryRequest): Promise<ProjectRequest> {
+  async addLegacyRequest(legacy: ARCSavedRequest | ARCHistoryRequest): Promise<ProjectRequest> {
     const request = await Request.fromLegacy(legacy);
     const projectRequest = ProjectRequest.fromRequest(request.toJSON(), this);
     return this.addRequest(projectRequest);
@@ -839,7 +846,7 @@ export class HttpProject extends ProjectParent {
    * @param key The key of the request to move.
    * @param opts The moving options.
    */
-  moveRequest(key: string, opts: IProjectMoveOptions={}): void {
+  moveRequest(key: string, opts: IProjectMoveOptions = {}): void {
     const { index, parent } = opts;
     const request = this.findRequest(key);
     if (!request) {
@@ -877,7 +884,7 @@ export class HttpProject extends ProjectParent {
    * Lists items (not the actual definitions!) that are folders.
    */
   listFolderItems(): ProjectItem[] {
-    const { items=[] } = this;
+    const { items = [] } = this;
     return items.filter(i => i.kind === ProjectFolderKind);
   }
 
@@ -885,7 +892,7 @@ export class HttpProject extends ProjectParent {
    * Lists items (not the actual definitions!) that are requests.
    */
   listRequestItems(): ProjectItem[] {
-    const { items=[] } = this;
+    const { items = [] } = this;
     return items.filter(i => i.kind === ProjectRequestKind);
   }
 
@@ -959,8 +966,8 @@ export class HttpProject extends ProjectParent {
       root = this;
     }
     const result: (ProjectFolder | ProjectRequest)[] = [];
-    const { items=[] } = root;
-    const { definitions=[] } = this;
+    const { items = [] } = root;
+    const { definitions = [] } = this;
     items.forEach((item) => {
       const definition = definitions.find(d => item.key === d.key);
       if (definition) {
@@ -1022,9 +1029,9 @@ export class HttpProject extends ProjectParent {
         throw new Error(PatchUtils.TXT_use_command_instead);
       case 'kind':
         throw new Error(PatchUtils.TXT_delete_kind);
-      case 'info': 
-      case 'license': 
-      case 'provider': 
+      case 'info':
+      case 'license':
+      case 'provider':
         // they have their own validators.
         return;
       case 'requests':
@@ -1182,7 +1189,7 @@ export class HttpProject extends ProjectParent {
    * @param src The project instance to re-generate keys for.
    */
   static regenerateKeys(src: HttpProject): void {
-    const { items=[], definitions=[], schemas=[], environments=[] } = src;
+    const { items = [], definitions = [], schemas = [], environments = [] } = src;
 
     // create a flat list of all "items" in the project and all folders.
     let flatItems = [...items];
@@ -1217,5 +1224,77 @@ export class HttpProject extends ProjectParent {
     schemas.forEach((env) => {
       env.key = v4();
     });
+  }
+
+  /**
+   * Adds an empty schema to the project.
+   * 
+   * @param name The name of the schema
+   * @param opts The schema add options.
+   * @returns The inserted into the schemas schema.
+   */
+  addSchema(url: string, opts?: ISchemaAddOptions): ProjectSchema;
+
+  /**
+   * Adds a schema to the project.
+   * 
+   * @param schema The schema to add.
+   * @param opts The schema add options.
+   * @returns The inserted into the schemas schema.
+   */
+  addSchema(schema: IProjectSchema | ProjectSchema, opts?: ISchemaAddOptions): ProjectSchema;
+
+  /**
+   * Adds a request to the project or a sub-folder.
+   * @param schema The schema to add.
+   * @param opts Thew schema add options.
+   * @returns The inserted into the schemas schema.
+   */
+  addSchema(schema: IProjectSchema | ProjectSchema | string, opts: ISchemaAddOptions = {}): ProjectSchema {
+    if (!Array.isArray(this.schemas)) {
+      this.schemas = [];
+    }
+
+    // this renews existing schema
+    if (typeof schema === 'object' && schema.key) {
+      const existing = this.schemas.find(i => i.key === schema.key) as ProjectSchema | undefined;
+      if (existing) {
+        existing.new(schema as IProjectSchema);
+        return existing;
+      }
+    }
+
+    let finalSchema: ProjectSchema;
+    if (typeof schema === 'string') {
+      finalSchema = ProjectSchema.fromName(schema);
+    } else if (schema instanceof ProjectSchema) {
+      finalSchema = schema;
+    } else {
+      finalSchema = new ProjectSchema(schema);
+    }
+    if (!finalSchema.key) {
+      finalSchema.key = v4();
+    }
+
+    if (typeof opts.index === 'number') {
+      const maxIndex = Math.max(this.schemas.length - 1, 0);
+      if (opts.index > maxIndex) {
+        throw new RangeError(`Index out of bounds. Maximum index is ${maxIndex}.`);
+      }
+      this.schemas.splice(opts.index, 0, finalSchema);
+    } else {
+      this.schemas.push(finalSchema);
+    }
+    return finalSchema;
+  }
+
+  /**
+   * @returns The current list of schemas in the project.
+   */
+  listSchemas(): ProjectSchema[] {
+    if (!Array.isArray(this.schemas)) {
+      return [];
+    }
+    return this.schemas;
   }
 }

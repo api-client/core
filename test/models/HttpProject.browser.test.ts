@@ -454,7 +454,7 @@ describe('Models', () => {
       });
     });
 
-    describe.only('removeFolder()', () => {
+    describe('removeFolder()', () => {
       it('removes the folder from the project', () => {
         const name = 'abc';
         const project = new HttpProject();
@@ -1750,6 +1750,62 @@ describe('Models', () => {
         assert.typeOf(str, 'string', 'produces a string');
         const obj = JSON.parse(str);
         assert.equal(obj.info.name, 'a project');
+      });
+    });
+
+    describe('addSchema()', () => {
+      it('adds an instance of the schema', () => {
+        const project = new HttpProject();
+        const schema = ProjectSchema.fromName('test');
+        const created = project.addSchema(schema);
+        assert.deepEqual(created, schema);
+
+        assert.lengthOf(project.schemas, 1, 'has one schema');
+        assert.equal(project.schemas[0].key, created.key, 'the project has the schema');
+      });
+
+      it('adds by a schema', () => {
+        const project = new HttpProject();
+        const schema = ProjectSchema.fromName('test');
+        const created = project.addSchema(schema.toJSON());
+        assert.deepEqual(created, schema);
+
+        assert.lengthOf(project.schemas, 1, 'has one schema');
+        assert.equal(project.schemas[0].key, created.key, 'the project has the schema');
+      });
+
+      it('adds by name', () => {
+        const project = new HttpProject();
+        const created = project.addSchema('test schema');
+        assert.equal(created.name, 'test schema');
+
+        assert.lengthOf(project.schemas, 1, 'has one schema');
+        assert.equal(project.schemas[0].key, created.key, 'the project has the schema');
+      });
+
+      it('inserts schema at position', () => {
+        const project = new HttpProject();
+        project.addSchema('schema 1');
+        project.addSchema('schema 2');
+        const key = project.addSchema('schema 3', { index: 1 }).key;
+        assert.equal(project.schemas[1].key, key);
+      });
+    });
+
+    describe('listSchemas()', () => {
+      it('returns empty array when no schemas', () => {
+        const project = new HttpProject();
+        delete project.schemas;
+        const result = project.listSchemas();
+        assert.deepEqual(result, []);
+      });
+
+      it('returns created schemas', () => {
+        const project = new HttpProject();
+        project.addSchema('s1');
+        project.addSchema('s2');
+        const result = project.listSchemas();
+        assert.lengthOf(result, 2);
       });
     });
   });
