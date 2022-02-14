@@ -1,6 +1,6 @@
 {
   "parser": "@typescript-eslint/parser",
-  "plugins": ["import", "@typescript-eslint", "unused-imports"],
+  "plugins": ["import", "@typescript-eslint", "unused-imports", "no-only-tests"],
   "extends": [
     "eslint:recommended",
     "plugin:import/recommended",
@@ -13,7 +13,8 @@
       "js": "never",
       "ts": "never"
     }],
-    "unused-imports/no-unused-imports": "error"
+    "unused-imports/no-unused-imports": "error",
+    "no-only-tests/no-only-tests": "error"
   },
   "env": {
     "mocha": true,
