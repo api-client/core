@@ -5,7 +5,6 @@ import { ErrorResponse } from '../../src/models/ErrorResponse.js';
 import { RequestLog } from '../../src/models/RequestLog.js';
 import { RequestConfig, Kind as RequestConfigKind } from '../../src/models/RequestConfig.js';
 import { RequestAuthorization } from '../../src/models/RequestAuthorization.js';
-import { RequestUiMeta } from '../../src/models/RequestUiMeta.js';
 import { RequestActions } from '../../src/models/RequestActions.js';
 import { Kind as ThingKind } from '../../src/models/Thing.js';
 import { ARCSavedRequest } from '../../src/models/legacy/request/ArcRequest.js';

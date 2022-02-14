@@ -34,7 +34,7 @@ describe('Events', () => {
       it('has frozen State namespace', () => {
         assert.throws(() => {
           // @ts-ignore
-          SessionCookieEventTypes.State = { read: '' };
+          EventTypes.Cookie.State = { read: '' };
         });
       });
 

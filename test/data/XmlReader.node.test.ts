@@ -69,7 +69,7 @@ describe('data', () => {
 
     it('selects an element under root element', async () => {
       const reader = new XmlReader();
-      await reader.writePayload(cities);;
+      await reader.writePayload(cities);
 
       const result = await reader.getValue('xml/city[1]/name');
       assert.equal(result, 'Seattle');

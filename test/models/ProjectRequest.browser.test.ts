@@ -8,7 +8,6 @@ import { Kind as RequestLogKind, RequestLog } from '../../src/models/RequestLog.
 import { SentRequest } from '../../src/models/SentRequest.js';
 import { RequestConfig } from '../../src/models/RequestConfig.js';
 import { RequestAuthorization } from '../../src/models/RequestAuthorization.js';
-import { IRequestUiMeta } from '../../src/models/RequestUiMeta.js';
 import { Request, IRequest, Kind as RequestKind } from '../../src/models/Request.js';
 import { Kind as ProjectFolderKind, ProjectFolder } from '../../src/models/ProjectFolder.js';
 

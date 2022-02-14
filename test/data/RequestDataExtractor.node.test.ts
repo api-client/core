@@ -410,7 +410,7 @@ describe('data', () => {
       });
 
       describe('JSON data extraction', () => {
-        const simpleBody = JSON.stringify({ a: { b: { c: 'value' } } });;
+        const simpleBody = JSON.stringify({ a: { b: { c: 'value' } } });
 
         let request: IHttpRequest;
         beforeEach(() => {

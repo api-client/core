@@ -775,8 +775,8 @@ describe('Models', () => {
       });
 
       it('adds the copied folder and request to the project definitions', () => {
-        const r = folder.addRequest('https://copy.com');
-        const copy = folder.clone();
+        folder.addRequest('https://copy.com');
+        folder.clone();
         
         assert.lengthOf(project.definitions, 4, 'the project has 4 definitions');
         
@@ -921,7 +921,7 @@ describe('Models', () => {
         const [subFolder] = subFolders;
 
         const requests = subFolder.listRequests();
-        assert.lengthOf(subFolders, 1, 'the sub-folder has a request');
+        assert.lengthOf(requests, 1, 'the sub-folder has a request');
       });
 
       it('throws when unable to find a parent in the same project', () => {

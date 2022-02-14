@@ -49,7 +49,6 @@ describe('data', () => {
     });
 
     it('returns undefined when no payload', async () => {
-      const payload = JSON.stringify({ a: 'b', c: 'd' });
       const reader = new PayloadPointer('a', undefined, 'application/json');
 
       const result = await reader.getValue();

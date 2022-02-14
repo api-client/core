@@ -1803,7 +1803,7 @@ describe('http-engine', () => {
             base.socket = socket;
             resolve();
           });
-          socket.on('error', (e) => {
+          socket.on('error', () => {
             reject(new Error('Unable to connect'));
           });
         });

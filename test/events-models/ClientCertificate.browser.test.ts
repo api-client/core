@@ -2,7 +2,6 @@ import { assert } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { Events } from '../../src/events/Events.js';
 import { EventTypes } from '../../src/events/EventTypes.js';
-import { ContextUpdateEvent, ContextUpdateEventDetail } from '../../src/events/BaseEvents.js';
 import { IClientCertificate } from '../../src/models/ClientCertificate.js';
 
 describe('Events', () => {
