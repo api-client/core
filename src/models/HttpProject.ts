@@ -575,6 +575,12 @@ export class HttpProject extends ProjectParent {
       }
       throw new Error(`Unable to find a parent of the folder ${key}`);
     }
+
+    const requests = folder.listRequests();
+    requests.forEach(r => r.remove());
+    const folders = folder.listFolders();
+    folders.forEach(f => f.remove());
+
     const itemIndex = parent.items.findIndex(i => i.key === key);
     const definitionIndex = definitions.findIndex(i => i.key === key);
     definitions.splice(definitionIndex, 1);

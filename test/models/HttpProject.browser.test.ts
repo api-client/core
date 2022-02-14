@@ -454,7 +454,7 @@ describe('Models', () => {
       });
     });
 
-    describe('removeFolder()', () => {
+    describe.only('removeFolder()', () => {
       it('removes the folder from the project', () => {
         const name = 'abc';
         const project = new HttpProject();
@@ -536,6 +536,43 @@ describe('Models', () => {
         const spy = sinon.spy(created, 'detachedCallback');
         project.removeFolder(created.key);
         assert.isTrue(spy.calledOnce);
+      });
+
+      it('removes requests from the folder', () => {
+        const project = new HttpProject();
+        const parent = project.addFolder('f1');
+        parent.addRequest('r1');
+        parent.addRequest('r2');
+        parent.remove();
+
+        assert.deepEqual(project.items, []);
+        assert.deepEqual(project.definitions, []);
+      });
+
+      it('removes folders from the folder', () => {
+        const project = new HttpProject();
+        const parent = project.addFolder('f1');
+        parent.addFolder('f2');
+        parent.addFolder('f3');
+        parent.remove();
+
+        assert.deepEqual(project.items, []);
+        assert.deepEqual(project.definitions, []);
+      });
+
+      it('deeply removes folders and request from the folder', () => {
+        const project = new HttpProject();
+        const parent = project.addFolder('f1');
+        parent.addFolder('f2');
+        const f3 = parent.addFolder('f3');
+        f3.addRequest('r1');
+        f3.addRequest('r2');
+        parent.remove();
+        const otherFolder = project.addFolder('f4');
+        const otherRequest = project.addRequest('r3');
+
+        assert.lengthOf(project.items, 2, 'has the remaining items');
+        assert.deepEqual(project.definitions, [otherFolder, otherRequest]);
       });
     });
 
