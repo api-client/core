@@ -67,6 +67,8 @@ describe('Runtime', () => {
           ['https://{host}.domain.com', 'https://api.domain.com'],
           ['https://api.domain.com/a/{path}/b', 'https://api.domain.com/a/path/b'],
           [JSON.stringify({data: { complex: true }}, null, 2), '{\n  "data": {\n    "complex": true\n  }\n}'],
+          ['{"test":true}', '{"test":true}'],
+          ['[{"test":true}]', '[{"test":true}]'],
         ].forEach(([src, value]) => {
           it(`${src}`, async () => {
             const ctx = VariablesProcessor.createContextFromProperties(variables);

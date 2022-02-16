@@ -38,6 +38,8 @@ export function valueHasVariable(value: string): boolean {
 
 export const functionRegex = /(?:\$?{)?([.a-zA-Z0-9_-]+)\(([^)]*)?\)(?:})?/gm;
 export const varValueRe = /^[a-zA-Z0-9_]+$/;
+export const varExprRe = /\$?{[a-zA-Z0-9_]+}/;
+export const varStrictExprRe = /^\$?{[a-zA-Z0-9_]+}$/;
 
 export class VariablesProcessor {
   jexl = new Jexl();
@@ -213,6 +215,15 @@ export class VariablesProcessor {
       return value;
     }
     const typedValue = String(value);
+    const hasVariable = varExprRe.test(typedValue);
+    if (!hasVariable) {
+      return value;
+    }
+    const isVariable = varStrictExprRe.test(typedValue);
+    if (isVariable) {
+      return this._parse(this._prepareValue(typedValue), context);
+    }
+    
     const isJSLiteral = typedValue.includes('${');
     const isAPILiteral = !isJSLiteral && typedValue.includes('{');
     if (!isJSLiteral && !isAPILiteral) {
@@ -223,7 +234,7 @@ export class VariablesProcessor {
     if (parts.length > 1) {
       result = this._prepareMultilineValue(parts);
     } else {
-      result = this._prepareValue(value);
+      result = this._prepareValue(typedValue);
     }
     const { jexl } = this;
     if (Array.isArray(result)) {
@@ -242,9 +253,32 @@ export class VariablesProcessor {
       }
       return items.join('\n');
     }
+    // We can have a situation where the input is something like "{"test":true}".
+    // In this case we need to make sure that this is plain JSON without variables.
+    const isJsonObject = typedValue.startsWith('{') && typedValue.endsWith('}');
+    const isJsonArray = typedValue.startsWith('[') && typedValue.endsWith(']');
+    const isJson = isJsonObject || isJsonArray;
+    const innerString = isJson ? typedValue.substring(1, typedValue.length - 1) : '';
+    // On the other hand we can have a string like "{operation}" which should also be
+    // evaluated
+    if (isJson && !varExprRe.test(innerString) && !varValueRe.test(innerString)) {
+      return value;
+    }
+    return this._parse(result, context);
+    // let returnValue = result;
+    // try {
+    //   returnValue = await jexl.eval(result, context);
+    // } catch (e) {
+    //   // ...
+    // }
+    // return returnValue;
+  }
+
+  async _parse(value: string, context: Record<string, string>): Promise<string> {
+    const { jexl } = this;
     let returnValue = value;
     try {
-      returnValue = await jexl.eval(result, context);
+      returnValue = await jexl.eval(value, context);
     } catch (e) {
       // ...
     }

@@ -17,6 +17,7 @@ describe('Runtime', () => {
         Property.String('host', 'api'),
         Property.String('path', 'path'),
         Property.String('b46', 'other'),
+        Property.String('operation', 'GET'),
       ];
 
       describe('Variables processing', () => {
@@ -67,6 +68,10 @@ describe('Runtime', () => {
           ['https://{host}.domain.com', 'https://api.domain.com'],
           ['https://api.domain.com/a/{path}/b', 'https://api.domain.com/a/path/b'],
           [JSON.stringify({data: { complex: true }}, null, 2), '{\n  "data": {\n    "complex": true\n  }\n}'],
+          ['{"test":true}', '{"test":true}'],
+          ['[{"test":true}]', '[{"test":true}]'],
+          ['{operation}', 'GET'],
+          ['{test {operation}}', '{test {operation}}'],
         ].forEach(([src, value]) => {
           it(`${src}`, async () => {
             const ctx = VariablesProcessor.createContextFromProperties(variables);
