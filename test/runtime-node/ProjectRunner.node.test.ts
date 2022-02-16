@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import chai, { assert } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import sinon from 'sinon';
 import getConfig from '../helpers/getSetup.js';
 import { 
   ProjectRunner, 
@@ -39,7 +40,7 @@ describe('Runtime', () => {
           folder.addRequest(request);
           const runner = new ProjectRunner(project);
           runner.logger = logger;
-          const result = await runner.run(folder.key);
+          const result = await runner.run({ parent: folder.key });
           
           assert.typeOf(result, 'array', 'returns an array');
           assert.lengthOf(result, 1, 'has a single result');
@@ -74,7 +75,7 @@ describe('Runtime', () => {
           });
           const runner = new ProjectRunner(project);
           runner.logger = logger;
-          const result = await runner.run(folder.key);
+          const result = await runner.run({ parent: folder.key });
           
           assert.typeOf(result, 'array', 'returns an array');
           assert.lengthOf(result, 2, 'has both results');
@@ -119,7 +120,7 @@ describe('Runtime', () => {
           });
           const runner = new ProjectRunner(project);
           runner.logger = logger;
-          const result = await runner.run(folder1.key);
+          const result = await runner.run({ parent: folder1.key });
           
           assert.typeOf(result, 'array', 'returns an array');
           assert.lengthOf(result, 1, 'has a single result');
@@ -148,7 +149,7 @@ describe('Runtime', () => {
           const folder = project.addFolder();
           const runner = new ProjectRunner(project);
           runner.logger = logger;
-          const result = await runner.run(folder.key);
+          const result = await runner.run({ parent: folder.key });
           
           assert.typeOf(result, 'array', 'returns an array');
           assert.lengthOf(result, 0, 'has no results');
@@ -158,7 +159,59 @@ describe('Runtime', () => {
           const project = new HttpProject();
           const runner = new ProjectRunner(project);
           runner.logger = logger;
-          await assert.isRejected(runner.run('test'), `Folder not found: test`);
+          await assert.isRejected(runner.run({ parent: 'test' }), `Folder not found: test`);
+        });
+
+        it('runs selected requests only', async () => {
+          const project = new HttpProject();
+          const request1 = ProjectRequest.fromHttpRequest({
+            url: `http://localhost:${httpPort}/v1/get`,
+            method: 'GET',
+            headers: 'x-test: true',
+          }, project);
+          project.addRequest(request1);
+          const request2 = ProjectRequest.fromHttpRequest({
+            url: `http://localhost:${httpPort}/v1/get`,
+            method: 'GET',
+            headers: 'x-test: false',
+          }, project);
+          request2.info.name = 'included request';
+          project.addRequest(request2);
+          const request3 = ProjectRequest.fromHttpRequest({
+            url: `http://localhost:${httpPort}/v1/get`,
+            method: 'GET',
+            headers: 'x-test: false',
+          }, project);
+          project.addRequest(request3);
+          const runner = new ProjectRunner(project);
+          runner.logger = logger;
+          const result = await runner.run({ requests: [request1.key, 'included request'] });
+          
+          assert.typeOf(result, 'array', 'returns an array');
+          assert.lengthOf(result, 2, 'has both results');
+        });
+      });
+
+      describe('Events', () => {
+        it('dispatches the lifecycle events', async () => {
+          const project = new HttpProject();
+          const request1 = ProjectRequest.fromHttpRequest({
+            url: `http://localhost:${httpPort}/v1/get`,
+            method: 'GET',
+            headers: 'x-test: true',
+          }, project);
+          project.addRequest(request1);
+          const runner = new ProjectRunner(project);
+          runner.logger = logger;
+          const requestSpy = sinon.spy();
+          const responseSpy = sinon.spy();
+          runner.on('request', requestSpy);
+          runner.on('response', responseSpy);
+          
+          await runner.run();
+          
+          assert.equal(requestSpy.callCount, 1);
+          assert.equal(responseSpy.callCount, 1);
         });
       });
 
@@ -178,7 +231,7 @@ describe('Runtime', () => {
           });
           const runner = new ProjectRunner(project);
           runner.logger = logger;
-          const result = await runner.run(folder.key);
+          const result = await runner.run({ parent: folder.key });
           
           assert.typeOf(result, 'array', 'returns an array');
           assert.lengthOf(result, 1, 'has a single result');
@@ -208,7 +261,7 @@ describe('Runtime', () => {
           });
           const runner = new ProjectRunner(project);
           runner.logger = logger;
-          const result = await runner.run(folder.key);
+          const result = await runner.run({ parent: folder.key });
           
           assert.typeOf(result, 'array', 'returns an array');
           assert.lengthOf(result, 1, 'has a single result');
@@ -240,7 +293,7 @@ describe('Runtime', () => {
           });
           const runner = new ProjectRunner(project);
           runner.logger = logger;
-          const result = await runner.run(folder.key);
+          const result = await runner.run({ parent: folder.key });
           
           assert.typeOf(result, 'array', 'returns an array');
           assert.lengthOf(result, 1, 'has a single result');
@@ -276,7 +329,7 @@ describe('Runtime', () => {
           });
           const runner = new ProjectRunner(project);
           runner.logger = logger;
-          const result = await runner.run(folder.key);
+          const result = await runner.run({ parent: folder.key });
 
           const [report] = result;
 
@@ -304,7 +357,7 @@ describe('Runtime', () => {
 
           const runner = new ProjectRunner(project, masterEnvironment);
           runner.logger = logger;
-          const result = await runner.run(folder.key);
+          const result = await runner.run({ parent: folder.key });
           
           assert.typeOf(result, 'array', 'returns an array');
           assert.lengthOf(result, 1, 'has a single result');

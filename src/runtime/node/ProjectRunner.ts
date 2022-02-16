@@ -31,6 +31,19 @@ export interface RunResult {
   log?: IRequestLog;
 }
 
+export interface ProjectRunnerRunOptions {
+  /**
+   * The parent folder key or name. When not set it runs project root requests.
+   */
+  parent?: string
+
+  /**
+   * When set it limits the number of requests to execute from the current folder to the one defined in this option.
+   * It is an array of request keys or names.
+   */
+  requests?: string[];
+}
+
 export interface ProjectRunner {
   /**
    * The request object is prepared and about to be sent to the HTTP engine
@@ -97,6 +110,7 @@ export class ProjectRunner extends EventEmitter {
    * This enables storing variables inside variables.
    */
   protected envContext: Record<string, string> = {};
+  protected prepared = false;
 
   /**
    * @param project The project to execute the requests from.
@@ -110,23 +124,56 @@ export class ProjectRunner extends EventEmitter {
   }
 
   /**
+   * To be called when all properties are set, before calling the `run()` function.
+   * It prepares the execution context.
+   * 
+   * This is called automatically when the `run()` function is called without calling this function beforehand.
+   * This can be used to obtain a reference to the processed environment variables before executing the request.
+   */
+  async prepare(): Promise<void> {
+    await this.prepareEnvironment();
+    this.prepared = true;
+  }
+
+  /**
+   * @returns a direct reference to the environment variables.
+   */
+  variablesReference(): Record<string, string> {
+    return this.envContext;
+  }
+
+  /**
    * Runs the request from the project root or a specified folder.
-   * @param folder The optional folder key or name.
+   * @param options Run options.
    * @returns A promise with the run result.
    */
-  async run(folder?: string): Promise<RunResult[]> {
+  async run(options: ProjectRunnerRunOptions = {}): Promise<RunResult[]> {
+    const { parent, requests } = options;
     this.executed = [];
-    const root = folder ? this.project.findFolder(folder) : this.project;
+    const root = parent ? this.project.findFolder(parent) : this.project;
     if (!root) {
-      throw new Error(`Folder not found: ${folder}`);
+      throw new Error(`Folder not found: ${parent}`);
     }
-    const items = root.listRequests();
+    let items = root.listRequests();
     if (!items.length) {
       return [];
     }
+    if (Array.isArray(requests)) {
+      items = items.filter((i) => {
+        if (requests.includes(i.key)) {
+          return true;
+        }
+        if (!i.info.name) {
+          return false;
+        }
+        return requests.includes(i.info.name);
+      });
+    }
     this.root = root;
     this.queue = items;
-    await this.prepareEnvironment();
+    if (!this.prepared) {
+      await this.prepare();
+    }
     return new Promise((resolve, reject) => {
       this.mainResolver = resolve;
       this.mainRejecter = reject;
