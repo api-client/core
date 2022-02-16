@@ -52,6 +52,14 @@
         "browser": true,
         "node": false
       }
+    },
+    {
+      "files": [
+        "**/*.ts"
+      ],
+      "rules": {
+        "no-redeclare": "off"
+      }
     }
   ],
   "settings": {

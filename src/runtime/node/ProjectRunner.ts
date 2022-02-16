@@ -1,4 +1,6 @@
+import { EventEmitter } from 'events';
 import { HttpProject } from '../../models/HttpProject.js';
+import { IHttpRequest } from '../../models/HttpRequest.js';
 import { ProjectRequest } from '../../models/ProjectRequest.js';
 import { ProjectFolder, Kind as ProjectFolderKind } from '../../models/ProjectFolder.js';
 import { Environment } from '../../models/Environment.js';
@@ -29,14 +31,42 @@ export interface RunResult {
   log?: IRequestLog;
 }
 
+export interface ProjectRunner {
+  /**
+   * The request object is prepared and about to be sent to the HTTP engine
+   */
+  on(event: 'request', listener: (request: IHttpRequest) => void): this;
+  /**
+   * The response is ready.
+   */
+  on(event: 'response', listener: (request: IHttpRequest, log: IRequestLog) => void): this;
+  /**
+   * There was a general error during the request
+   */
+  on(event: 'request-error', listener: (request: IHttpRequest, message: string) => void): this;
+  /**
+   * The request object is prepared and about to be sent to the HTTP engine
+   */
+  once(event: 'request', listener: (request: IHttpRequest) => void): this;
+  /**
+   * The response is ready.
+   */
+  once(event: 'response', listener: (request: IHttpRequest, log: IRequestLog) => void): this;
+  /**
+   * There was a general error during the request
+   */
+  once(event: 'request-error', listener: (request: IHttpRequest, message: string) => void): this;
+}
+
 /**
  * A NodeJS runtime class that runs requests from a project.
  * It allows to select a specific folder and run the requests one-by-one using ARC's HTTP runtime.
  */
-export class ProjectRunner {
+export class ProjectRunner extends EventEmitter {
   eventTarget = new EventTarget();
   logger?: Logger;
   project: HttpProject;
+
   protected queue: ProjectRequest[] = [];
   protected executed: RunResult[] = [];
   protected mainResolver?: (value: RunResult[] | PromiseLike<RunResult[]>) => void;
@@ -74,6 +104,7 @@ export class ProjectRunner {
    * When this is set then the environment option from the `run()` function is ignored.
    */
   constructor(project: HttpProject, environment?: Environment) {
+    super();
     this.project = project;
     this.masterEnvironment = environment;
   }
@@ -217,15 +248,19 @@ export class ProjectRunner {
     const info: RunResult = {
       key: item.key,
     };
-    const requestData = { ...item.expects };
+    const requestData = { ...item.expects.toJSON() };
     requestData.url = this.prepareRequestUrl(requestData.url);
+    const evCopy = { ...requestData };
+    this.emit('request', evCopy);
     try {
       const log = await factory.run(requestData);
       item.setLog(log);
       info.log = log;
+      this.emit('response', evCopy, { ...log });
     } catch (e) {
       info.error = true;
       info.errorMessage = (e as Error).message;
+      this.emit('request-error', evCopy, info.errorMessage);
     }
     this.executed.push(info);
     setTimeout(() => this.next(), 1);

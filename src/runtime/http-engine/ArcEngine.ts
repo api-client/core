@@ -828,6 +828,7 @@ export class ArcEngine extends HttpEngine {
       data = Buffer.concat([this.responseInfo.chunk, data], this.responseInfo.chunk.length + data.length);
       this.responseInfo.chunk = undefined;
     }
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       if (this.responseInfo.chunkSize === 0 && data.indexOf(nlNlBuffer) === 0) {
         this._reportResponse();
