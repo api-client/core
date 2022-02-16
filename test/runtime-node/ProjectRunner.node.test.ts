@@ -195,12 +195,12 @@ describe('Runtime', () => {
       describe('Events', () => {
         it('dispatches the lifecycle events', async () => {
           const project = new HttpProject();
-          const request1 = ProjectRequest.fromHttpRequest({
+          const r1 = ProjectRequest.fromHttpRequest({
             url: `http://localhost:${httpPort}/v1/get`,
             method: 'GET',
             headers: 'x-test: true',
           }, project);
-          project.addRequest(request1);
+          const request = project.addRequest(r1);
           const runner = new ProjectRunner(project);
           runner.logger = logger;
           const requestSpy = sinon.spy();
@@ -212,6 +212,18 @@ describe('Runtime', () => {
           
           assert.equal(requestSpy.callCount, 1);
           assert.equal(responseSpy.callCount, 1);
+
+          const requestKey = requestSpy.args[0][0];
+          const requestObj = requestSpy.args[0][1];
+          assert.equal(requestKey, request.key, 'the request event has the key');
+          assert.deepEqual(requestObj, r1.expects.toJSON(), 'the request event has the HTTP request object');
+
+          const responseKey = responseSpy.args[0][0];
+          const responseRequestObj = responseSpy.args[0][1];
+          const responseObj = responseSpy.args[0][2];
+          assert.equal(responseKey, request.key, 'the response event has the key');
+          assert.deepEqual(responseRequestObj, r1.expects.toJSON(), 'the response event has the HTTP request object');
+          assert.typeOf(responseObj, 'object', 'the response event has the log');
         });
       });
 

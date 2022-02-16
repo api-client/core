@@ -48,27 +48,27 @@ export interface ProjectRunner {
   /**
    * The request object is prepared and about to be sent to the HTTP engine
    */
-  on(event: 'request', listener: (request: IHttpRequest) => void): this;
+  on(event: 'request', listener: (key: string, request: IHttpRequest) => void): this;
   /**
    * The response is ready.
    */
-  on(event: 'response', listener: (request: IHttpRequest, log: IRequestLog) => void): this;
+  on(event: 'response', listener: (key: string, request: IHttpRequest, log: IRequestLog) => void): this;
   /**
    * There was a general error during the request
    */
-  on(event: 'request-error', listener: (request: IHttpRequest, message: string) => void): this;
+  on(event: 'error', listener: (key: string, request: IHttpRequest, message: string) => void): this;
   /**
    * The request object is prepared and about to be sent to the HTTP engine
    */
-  once(event: 'request', listener: (request: IHttpRequest) => void): this;
+  once(event: 'request', listener: (key: string, request: IHttpRequest) => void): this;
   /**
    * The response is ready.
    */
-  once(event: 'response', listener: (request: IHttpRequest, log: IRequestLog) => void): this;
+  once(event: 'response', listener: (key: string, request: IHttpRequest, log: IRequestLog) => void): this;
   /**
    * There was a general error during the request
    */
-  once(event: 'request-error', listener: (request: IHttpRequest, message: string) => void): this;
+  once(event: 'error', listener: (key: string, request: IHttpRequest, message: string) => void): this;
 }
 
 /**
@@ -298,16 +298,16 @@ export class ProjectRunner extends EventEmitter {
     const requestData = { ...item.expects.toJSON() };
     requestData.url = this.prepareRequestUrl(requestData.url);
     const evCopy = { ...requestData };
-    this.emit('request', evCopy);
+    this.emit('request', item.key, evCopy);
     try {
       const log = await factory.run(requestData);
       item.setLog(log);
       info.log = log;
-      this.emit('response', evCopy, { ...log });
+      this.emit('response', item.key, evCopy, { ...log });
     } catch (e) {
       info.error = true;
       info.errorMessage = (e as Error).message;
-      this.emit('request-error', evCopy, info.errorMessage);
+      this.emit('error', item.key, evCopy, info.errorMessage);
     }
     this.executed.push(info);
     setTimeout(() => this.next(), 1);
