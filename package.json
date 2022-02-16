@@ -87,7 +87,7 @@
   "dependencies": {
     "@metrichor/jmespath": "^0.3.1",
     "@pawel-up/jexl": "^3.0.0",
-    "@xmldom/xmldom": "^0.7.5",
+    "@xmldom/xmldom": "^0.8.1",
     "form-data": "^4.0.0",
     "xpath": "^0.0.32"
   },
