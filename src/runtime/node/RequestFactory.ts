@@ -17,8 +17,6 @@ import { ExecutionResponse } from '../modules/ExecutionResponse.js';
 import { Events } from '../../events/Events.js';
 import { Logger } from '../../lib/logging/Logger.js';
 
-export const prepareEnvironmentSymbol = Symbol('prepareEnvironment');
-
 /**
  * The main class to make HTTP requests in the API Client / ARC.
  * This factory includes all logic components to perform the entire HTTP request lifecycle. This includes:
@@ -106,14 +104,14 @@ export class RequestFactory {
    * @returns The execution log.
    */
   async run(request: IHttpRequest): Promise<IRequestLog> {
-    await this[prepareEnvironmentSymbol]();
+    await this.prepareEnvironment();
     const requestCopy = await this.processRequest(request);
     const result = await this.executeRequest(requestCopy);
     await this.processResponse(result);
     return result;
   }
 
-  async [prepareEnvironmentSymbol](): Promise<void> {
+  async prepareEnvironment(): Promise<void> {
     const { variables } = this;
     if (!variables) {
       return;
@@ -202,17 +200,33 @@ export class RequestFactory {
    * @returns the copy of the request object.
    */
   async processRequest(request: IHttpRequest): Promise<IHttpRequest> {
+    const copy = await this.processRequestVariables(request);
+    await this.processRequestLogic(copy);
+    return copy;
+  }
+
+  /**
+   * Runs the request through the variables processor.
+   * @returns A copy of the passed request with possibly changed values.
+   */
+  async processRequestVariables(request: IHttpRequest): Promise<IHttpRequest> {
     const { variables, variablesProcessor } = this;
     let copy: IHttpRequest = { ...request };
     if (variables) {
       copy = await variablesProcessor.evaluateVariablesWithContext(copy, variables);
     }
+    return copy;
+  }
+
+  /**
+   * Executes the request actions and modules.
+   */
+  async processRequestLogic(request: IHttpRequest): Promise<void> {
     const actions = await this.readActions('request');
     if (Array.isArray(actions) && actions.length) {
-      await this.processRequestActions(copy, actions);
+      await this.processRequestActions(request, actions);
     }
-    await this.processRequestModules(copy);
-    return copy;
+    await this.processRequestModules(request);
   }
 
   /**

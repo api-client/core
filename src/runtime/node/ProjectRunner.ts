@@ -52,7 +52,7 @@ export interface ProjectRunner {
   /**
    * The response is ready.
    */
-  on(event: 'response', listener: (key: string, request: IHttpRequest, log: IRequestLog) => void): this;
+  on(event: 'response', listener: (key: string, log: IRequestLog) => void): this;
   /**
    * There was a general error during the request
    */
@@ -64,7 +64,7 @@ export interface ProjectRunner {
   /**
    * The response is ready.
    */
-  once(event: 'response', listener: (key: string, request: IHttpRequest, log: IRequestLog) => void): this;
+  once(event: 'response', listener: (key: string, log: IRequestLog) => void): this;
   /**
    * There was a general error during the request
    */
@@ -295,19 +295,26 @@ export class ProjectRunner extends EventEmitter {
     const info: RunResult = {
       key: item.key,
     };
-    const requestData = { ...item.expects.toJSON() };
+    const requestData = item.expects.toJSON();
     requestData.url = this.prepareRequestUrl(requestData.url);
-    const evCopy = { ...requestData };
-    this.emit('request', item.key, evCopy);
     try {
+      // Below replaces the single call to the `run()` function of the factory to 
+      // report via the events a request object that has evaluated with the Jexl library.
+      await factory.prepareEnvironment();
+      const requestCopy = await factory.processRequestVariables(requestData);
+      this.emit('request', item.key, { ...requestCopy });
+      await factory.processRequestLogic(requestCopy);
+      const result = await factory.executeRequest(requestCopy);
+      await factory.processResponse(result);
+
       const log = await factory.run(requestData);
       item.setLog(log);
       info.log = log;
-      this.emit('response', item.key, evCopy, { ...log });
+      this.emit('response', item.key, { ...log });
     } catch (e) {
       info.error = true;
       info.errorMessage = (e as Error).message;
-      this.emit('error', item.key, evCopy, info.errorMessage);
+      this.emit('error', item.key, { ...requestData }, info.errorMessage);
     }
     this.executed.push(info);
     setTimeout(() => this.next(), 1);
