@@ -1,7 +1,7 @@
 {
   "name": "@advanced-rest-client/core",
   "description": "The ARC core client library. Works in NodeJS and in a ES enabled browser.",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "license": "Apache-2.0",
   "main": "build/index.js",
   "module": "build/index.js",
