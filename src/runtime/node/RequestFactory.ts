@@ -60,6 +60,7 @@ export class RequestFactory {
   certificates?: IRequestCertificate[];
   /**
    * The cumulative list of all variables to be applied to the request and other properties.
+   * The variables must be already processed fir variables in values (evaluated).
    */
   variables?: Record<string, string>;
   /**

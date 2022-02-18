@@ -1,20 +1,51 @@
 import { EventEmitter } from 'events';
-import { HttpProject } from '../../models/HttpProject.js';
-import { IHttpRequest } from '../../models/HttpRequest.js';
-import { ProjectRequest } from '../../models/ProjectRequest.js';
-import { ProjectFolder, Kind as ProjectFolderKind } from '../../models/ProjectFolder.js';
 import { Environment } from '../../models/Environment.js';
-import { Property } from '../../models/Property.js';
-import { IRequestLog } from '../../models/RequestLog.js';
-import { VariablesProcessor } from '../variables/VariablesProcessor.js';
-import { RequestFactory } from '../node/RequestFactory.js';
 import { Logger } from '../../lib/logging/Logger.js';
+import { IRequestLog } from '../../models/RequestLog.js';
+import { Property } from '../../models/Property.js';
+import { ProjectFolder, Kind as ProjectFolderKind } from '../../models/ProjectFolder.js';
+import { ProjectRequest } from '../../models/ProjectRequest.js';
+import { IHttpRequest } from '../../models/HttpRequest.js';
+import { HttpProject, IProjectRequestIterator } from '../../models/HttpProject.js';
+import { VariablesStore } from './VariablesStore.js';
+import { VariablesProcessor } from '../variables/VariablesProcessor.js';
+import { RequestFactory } from './RequestFactory.js';
+
+export interface ProjectRunnerOptions {
+  /**
+   * When provided it overrides any project / folder defined environment.
+   */
+  environment?: Environment;
+  /**
+   * Additional variables to pass to the selected environment.
+   * This can be use to pass system variables, when needed.
+   * 
+   * To use system variables tou can use `init.variables = process.env`;
+   */
+  variables?: Record<string, string>;
+  /**
+   * Overrides the default logger (console).
+   */
+  logger?: Logger;
+  /**
+   * The event target to use.
+   * By default it creates its own target.
+   */
+  eventTarget?: EventTarget;
+}
+
+export interface ProjectRunnerRunOptions extends IProjectRequestIterator {
+}
 
 export interface RunResult {
   /**
    * The key of the request from the HttpProject that was executed.
    */
   key: string;
+  /**
+   * The key of parent folder of the executed request.
+   */
+  parent?: string;
   /**
    * Set when a fatal error occurred so the request couldn't be executed.
    * This is not the same as error reported during a request. The log's response can still be IResponseError.
@@ -29,19 +60,6 @@ export interface RunResult {
    * Always set when the `error` is `false`.
    */
   log?: IRequestLog;
-}
-
-export interface ProjectRunnerRunOptions {
-  /**
-   * The parent folder key or name. When not set it runs project root requests.
-   */
-  parent?: string
-
-  /**
-   * When set it limits the number of requests to execute from the current folder to the one defined in this option.
-   * It is an array of request keys or names.
-   */
-  requests?: string[];
 }
 
 export interface ProjectRunner {
@@ -72,74 +90,32 @@ export interface ProjectRunner {
 }
 
 /**
- * A NodeJS runtime class that runs requests from a project.
- * It allows to select a specific folder and run the requests one-by-one using ARC's HTTP runtime.
+ * Runs requests in a project.
+ * Developers can run the entire project with the `recursive` flag set. They can also 
+ * set the starting point with the `parent` options.
+ * 
+ * Requests are executed in order defined in the folder.
  */
 export class ProjectRunner extends EventEmitter {
-  eventTarget = new EventTarget();
+  eventTarget;
   logger?: Logger;
   project: HttpProject;
 
-  protected queue: ProjectRequest[] = [];
-  protected executed: RunResult[] = [];
-  protected mainResolver?: (value: RunResult[] | PromiseLike<RunResult[]>) => void;
-  protected mainRejecter?: (reason?: Error) => void;
-  protected root?: HttpProject | ProjectFolder;
   protected masterEnvironment?: Environment;
-  /**
-   * The base URI to use with the requests fo fill up the relative URLs.
-   */
-  protected baseUri?: string;
-  /**
-   * The list of variables collected from the project to apply to the requests.
-   */
-  protected variables: Property[] = [];
-  /**
-   * The list of system variables to apply.
-   */
-  protected systemVariables: Record<string, string> = {};
+  protected extraVariables?: Record<string, string>;
 
   /**
    * The variables processor instance.
    */
-  variablesProcessor = new VariablesProcessor();
+  protected variablesProcessor = new VariablesProcessor();
 
-  /**
-   * After reading the environment data this is populated
-   * with evaluated by the `VariablesProcessor` context.
-   * This enables storing variables inside variables.
-   */
-  protected envContext: Record<string, string> = {};
-  protected prepared = false;
-
-  /**
-   * @param project The project to execute the requests from.
-   * @param environment Optional environment that overrides any other environment definition in the project.
-   * When this is set then the environment option from the `run()` function is ignored.
-   */
-  constructor(project: HttpProject, environment?: Environment) {
+  constructor(project: HttpProject, opts: ProjectRunnerOptions = {}) {
     super();
     this.project = project;
-    this.masterEnvironment = environment;
-  }
-
-  /**
-   * To be called when all properties are set, before calling the `run()` function.
-   * It prepares the execution context.
-   * 
-   * This is called automatically when the `run()` function is called without calling this function beforehand.
-   * This can be used to obtain a reference to the processed environment variables before executing the request.
-   */
-  async prepare(): Promise<void> {
-    await this.prepareEnvironment();
-    this.prepared = true;
-  }
-
-  /**
-   * @returns a direct reference to the environment variables.
-   */
-  variablesReference(): Record<string, string> {
-    return this.envContext;
+    this.logger = opts.logger;
+    this.eventTarget = opts.eventTarget || new EventTarget();
+    this.masterEnvironment = opts.environment;
+    this.extraVariables = opts.variables;
   }
 
   /**
@@ -147,69 +123,94 @@ export class ProjectRunner extends EventEmitter {
    * @param options Run options.
    * @returns A promise with the run result.
    */
-  async run(options: ProjectRunnerRunOptions = {}): Promise<RunResult[]> {
-    const { parent, requests } = options;
-    this.executed = [];
-    const root = parent ? this.project.findFolder(parent) : this.project;
-    if (!root) {
-      throw new Error(`Folder not found: ${parent}`);
+  async run(options?: ProjectRunnerRunOptions): Promise<RunResult[]> {
+    const { project } = this;
+    const executed: RunResult[] = [];
+    for (const request of project.requestIterator(options)) {
+      const parent = request.getParent() || project;
+      let variables: Record<string, string>;
+      if (VariablesStore.has(parent)) {
+        variables = VariablesStore.get(parent);
+      } else {
+        variables = await this.getVariables(parent);
+        VariablesStore.set(parent, variables);
+      }
+      const info = await this.execute(request, variables);
+      executed.push(info);
     }
-    let items = root.listRequests();
-    if (!items.length) {
-      return [];
-    }
-    if (Array.isArray(requests)) {
-      items = items.filter((i) => {
-        if (requests.includes(i.key)) {
-          return true;
-        }
-        if (!i.info.name) {
-          return false;
-        }
-        return requests.includes(i.info.name);
-      });
-    }
-    this.root = root;
-    this.queue = items;
-    if (!this.prepared) {
-      await this.prepare();
-    }
-    return new Promise((resolve, reject) => {
-      this.mainResolver = resolve;
-      this.mainRejecter = reject;
-      this.next();  
-    });
+    return executed;
   }
 
-  /**
-   * Reads the environment information from the current folder or a project
-   */
-  async prepareEnvironment(nameOrKey?: string): Promise<void> {
-    this.prepareSystemVariables();
-    const env = await this.readEnvironments(nameOrKey);
-    this.applyVariables(env);
+  protected async execute(request: ProjectRequest, variables: Record<string, string>): Promise<RunResult> {
+    const config = request.getConfig();
+    const factory = new RequestFactory(this.eventTarget);
 
-    await this.prepareExecutionContext();
+    factory.variables = variables;
+    if (request.authorization) {
+      factory.authorization = request.authorization.map(i => i.toJSON());
+    }
+    if (request.actions) {
+      factory.actions = request.actions.toJSON();
+    }
+    if (request.clientCertificate) {
+      factory.certificates = [request.clientCertificate];
+    }
+    if (config.enabled !== false) {
+      factory.config = config.toJSON();
+    }
+    if (this.logger) {
+      factory.logger = this.logger;
+    }
+    const info: RunResult = {
+      key: request.key,
+    };
+    const requestData = request.expects.toJSON();
+    requestData.url = this.prepareRequestUrl(requestData.url, variables);
+    try {
+      // Below replaces the single call to the `run()` function of the factory to 
+      // report via the events a request object that has evaluated with the Jexl library.
+      await factory.prepareEnvironment();
+      const requestCopy = await factory.processRequestVariables(requestData);
+      this.emit('request', request.key, { ...requestCopy });
+      await factory.processRequestLogic(requestCopy);
+      const result = await factory.executeRequest(requestCopy);
+      await factory.processResponse(result);
+      const log = await factory.run(requestData);
+      request.setLog(log);
+      info.log = log;
+      this.emit('response', request.key, { ...log });
+    } catch (e) {
+      info.error = true;
+      info.errorMessage = (e as Error).message;
+      this.emit('error', request.key, { ...requestData }, info.errorMessage);
+    }
+    return info;
+  }
+
+  protected async getVariables(parent: HttpProject | ProjectFolder): Promise<Record<string, string>> {
+    if (this.masterEnvironment) {
+      return this.applyVariables([this.masterEnvironment]);
+    }
+    return this.createEnvironment(parent);
+  }
+
+  protected async createEnvironment(parent: HttpProject | ProjectFolder): Promise<Record<string, string>> {
+    const envs = await this.readEnvironments(parent);
+    return this.applyVariables(envs);
   }
 
   /**
    * Reads the list of the environments to apply to this runtime.
    */
-  async readEnvironments(nameOrKey?: string): Promise<Environment[]> {
-    let env: Environment[] = [];
-    if (this.masterEnvironment) {
-      env = [this.masterEnvironment];
-    } else {
-      const folderKey = this.root?.kind === ProjectFolderKind ? (this.root as ProjectFolder).key : undefined;
-      env = await this.project.readEnvironments({ nameOrKey, folderKey });
-    }
-    return env;
+  protected async readEnvironments(parent: HttpProject | ProjectFolder): Promise<Environment[]> {
+    const folderKey = parent.kind === ProjectFolderKind ? (parent as ProjectFolder).key : undefined;
+    return this.project.readEnvironments({ folderKey });
   }
 
   /**
    * Reads the variables and the base URI from the passed environments.
    */
-  applyVariables(environments: Environment[]): void {
+  protected applyVariables(environments: Environment[]): Record<string, string> {
     let baseUri = '';
     const variables: Property[] = [];
     environments.forEach((environment) => {
@@ -228,130 +229,24 @@ export class ProjectRunner extends EventEmitter {
         });
       }
     });
-    if (baseUri) {
-      this.baseUri = baseUri;
-    } else {
-      this.baseUri = undefined;
-    }
-    this.variables = variables;
-  }
-
-  /**
-   * Re-sets the `systemVariables` property with the current system variables.
-   */
-  prepareSystemVariables(): void {
-    this.systemVariables = {};
-    Object.keys(process.env).forEach(key => {
-      const value = process.env[key];
-      if (value) {
-        this.systemVariables[key] = value;
-      }
-    });
-  }
-
-  /**
-   * Sets the `envContext` with the variables that are finally passed to the request executor.
-   */
-  async prepareExecutionContext(): Promise<void> {
-    const { variables, systemVariables, baseUri } = this;
+    const { extraVariables } = this;
     const ctx = VariablesProcessor.createContextFromProperties(variables);
-    Object.keys(systemVariables).forEach((key) => {
-      if (!(key in ctx)) {
-        ctx[key] = systemVariables[key];
-      }
-    });
+    if (extraVariables) {
+      Object.keys(extraVariables).forEach((key) => {
+        ctx[key] = extraVariables[key];
+      });
+    }
     // the `baseUri` is reserved and always set to the environment's `baseUri`.
     ctx.baseUri = baseUri || '';
-    this.envContext = await this.variablesProcessor.buildContext(ctx);
-  }
-
-  /**
-   * Executes the next item in the queue.
-   */
-  protected async next(): Promise<void> {
-    const item = this.queue.shift();
-    if (!item) {
-      await this.finalize();
-      return;
-    }
-    const config = item.getConfig();
-    const factory = new RequestFactory(this.eventTarget);
-    factory.variables = this.envContext;
-    if (item.authorization) {
-      factory.authorization = item.authorization.map(i => i.toJSON());
-    }
-    if (item.actions) {
-      factory.actions = item.actions.toJSON();
-    }
-    if (item.clientCertificate) {
-      factory.certificates = [item.clientCertificate];
-    }
-    if (config.enabled !== false) {
-      factory.config = config.toJSON();
-    }
-    if (this.logger) {
-      factory.logger = this.logger;
-    }
-    const info: RunResult = {
-      key: item.key,
-    };
-    const requestData = item.expects.toJSON();
-    requestData.url = this.prepareRequestUrl(requestData.url);
-    try {
-      // Below replaces the single call to the `run()` function of the factory to 
-      // report via the events a request object that has evaluated with the Jexl library.
-      await factory.prepareEnvironment();
-      const requestCopy = await factory.processRequestVariables(requestData);
-      this.emit('request', item.key, { ...requestCopy });
-      await factory.processRequestLogic(requestCopy);
-      const result = await factory.executeRequest(requestCopy);
-      await factory.processResponse(result);
-
-      const log = await factory.run(requestData);
-      item.setLog(log);
-      info.log = log;
-      this.emit('response', item.key, { ...log });
-    } catch (e) {
-      info.error = true;
-      info.errorMessage = (e as Error).message;
-      this.emit('error', item.key, { ...requestData }, info.errorMessage);
-    }
-    this.executed.push(info);
-    setTimeout(() => this.next(), 1);
-  }
-
-  /**
-   * Resolves the main promise and cleans-up.
-   */
-  protected async finalize(): Promise<void> {
-    if (!this.mainResolver) {
-      return;
-    }
-    
-    this.mainResolver(this.executed);
-    this.mainResolver = undefined;
-    this.mainRejecter = undefined;
-  }
-
-  /**
-   * Rejects the main promise with the passed error and cleans-up.
-   */
-  protected async error(error: Error): Promise<void> {
-    if (!this.mainRejecter) {
-      return;
-    }
-    this.mainRejecter(error);
-    this.mainResolver = undefined;
-    this.mainRejecter = undefined;
-    this.queue = [];
+    return ctx;
   }
 
   /**
    * When defined it applies the serve's base URI to relative URLs.
    * @param currentUrl The URL to process.
    */
-  prepareRequestUrl(currentUrl: string): string {
-    const { baseUri } = this;
+  protected prepareRequestUrl(currentUrl: string, variables: Record<string, string>): string {
+    const { baseUri } = variables;
     if (!baseUri) {
       return currentUrl;
     }

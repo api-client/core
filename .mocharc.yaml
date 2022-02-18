@@ -2,7 +2,7 @@ extension:
   - ts
 spec: 
   - test/**/*.node.test.ts
-  # - test/runtime-project-runner/ProjectRunner.node.test.ts
+  # - test/runtime-node/ProjectRunner.node.test.ts
   # - test/runtime-variables/VariablesProcessor.node.test.ts
   # - test/data/XmlReader.node.test.ts
   # - test/runtime-node/RequestFactory.node.test.ts
@@ -10,4 +10,7 @@ require: ts-node/register
 loader: ts-node/esm
 watch-files:
   - src
+  - test
+watch-ignore:
+  - test/express.lock
 timeout: 5000

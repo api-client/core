@@ -159,7 +159,7 @@ describe('Runtime', () => {
           const project = new HttpProject();
           const runner = new ProjectRunner(project);
           runner.logger = logger;
-          await assert.isRejected(runner.run({ parent: 'test' }), `Folder not found: test`);
+          await assert.isRejected(runner.run({ parent: 'test' }), `The parent folder not found: test`);
         });
 
         it('runs selected requests only', async () => {
@@ -367,8 +367,11 @@ describe('Runtime', () => {
           const masterEnvironment = Environment.fromName('master');
           masterEnvironment.addVariable('httpPort', httpPort);
 
-          const runner = new ProjectRunner(project, masterEnvironment);
+          const runner = new ProjectRunner(project, {
+            environment: masterEnvironment,
+          });
           runner.logger = logger;
+          runner.on('error', () => {});
           const result = await runner.run({ parent: folder.key });
           
           assert.typeOf(result, 'array', 'returns an array');

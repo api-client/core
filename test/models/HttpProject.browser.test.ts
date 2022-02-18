@@ -1808,5 +1808,180 @@ describe('Models', () => {
         assert.lengthOf(result, 2);
       });
     });
+
+    describe('requestIterator()', () => {
+      it('iterates over requests in the project', () => {
+        const project = new HttpProject();
+        const r1 = project.addRequest('r1');
+        const r2 = project.addRequest('r2');
+        const r3 = project.addRequest('r3');
+
+        const result: ProjectRequest[] = [];
+
+        for (const request of project.requestIterator()) {
+          result.push(request);
+        }
+
+        assert.deepEqual(result, [r1, r2, r3]);
+      });
+
+      it('iterates over requests in a folder (parent option)', () => {
+        const project = new HttpProject();
+        const f1 = project.addFolder('f1');
+        const r1 = f1.addRequest('r1');
+        const r2 = f1.addRequest('r2');
+        const r3 = f1.addRequest('r3');
+
+        const result: ProjectRequest[] = [];
+
+        for (const request of project.requestIterator({ parent: f1.key })) {
+          result.push(request);
+        }
+
+        assert.deepEqual(result, [r1, r2, r3]);
+      });
+
+      it('iterates over requests in the project and a folder (recursive)', () => {
+        const project = new HttpProject();
+        const r1 = project.addRequest('r1');
+        const f1 = project.addFolder('f1');
+        const r2 = f1.addRequest('r2');
+        const r3 = f1.addRequest('r3');
+        const result: ProjectRequest[] = [];
+        for (const request of project.requestIterator({ recursive: true })) {
+          result.push(request);
+        }
+        assert.deepEqual(result, [r1, r2, r3]);
+      });
+
+      it('respects the recursive order', () => {
+        const project = new HttpProject();
+        const r1 = project.addRequest('r1');
+        const f1 = project.addFolder('f1');
+        const r2 = f1.addRequest('r2');
+        const r3 = project.addRequest('r3');
+        const result: ProjectRequest[] = [];
+        for (const request of project.requestIterator({ recursive: true })) {
+          result.push(request);
+        }
+        assert.deepEqual(result, [r1, r2, r3]);
+      });
+
+      it('iterates over a deep structure', () => {
+        const project = new HttpProject();
+        const r1 = project.addRequest('r1');
+        const f1 = project.addFolder('f1');
+        const f2 = f1.addFolder('f2');
+        const r2 = f1.addRequest('r2');
+        const r3 = f2.addRequest('r3');
+        const result: ProjectRequest[] = [];
+        for (const request of project.requestIterator({ recursive: true })) {
+          result.push(request);
+        }
+        assert.deepEqual(result, [r1, r3, r2]);
+      });
+
+      it('respects the ignore option with a request name', () => {
+        const project = new HttpProject();
+        const r1 = project.addRequest('r1');
+        r1.info.name = 'r1name'
+        const r2 = project.addRequest('r2');
+        const r3 = project.addRequest('r3');
+        const result: ProjectRequest[] = [];
+        for (const request of project.requestIterator({ ignore: ['r1name'] })) {
+          result.push(request);
+        }
+        assert.deepEqual(result, [r2, r3]);
+      });
+
+      it('respects the ignore option with a request key', () => {
+        const project = new HttpProject();
+        const r1 = project.addRequest('r1');
+        const r2 = project.addRequest('r2');
+        const r3 = project.addRequest('r3');
+        const result: ProjectRequest[] = [];
+        for (const request of project.requestIterator({ ignore: [r1.key] })) {
+          result.push(request);
+        }
+        assert.deepEqual(result, [r2, r3]);
+      });
+
+      it('ignores entire folders with the key', () => {
+        const project = new HttpProject();
+        const r1 = project.addRequest('r1');
+        const f1 = project.addFolder('f1');
+        f1.addRequest('r2');
+        f1.addRequest('r3');
+        const result: ProjectRequest[] = [];
+        for (const request of project.requestIterator({ ignore: [f1.key], recursive: true })) {
+          result.push(request);
+        }
+        assert.deepEqual(result, [r1]);
+      });
+
+      it('ignores entire folders with the name', () => {
+        const project = new HttpProject();
+        const r1 = project.addRequest('r1');
+        const f1 = project.addFolder('f1');
+        f1.addRequest('r2');
+        f1.addRequest('r3');
+        const result: ProjectRequest[] = [];
+        for (const request of project.requestIterator({ ignore: ['f1'], recursive: true })) {
+          result.push(request);
+        }
+        assert.deepEqual(result, [r1]);
+      });
+
+      it('includes only requested items from the project root by name', () => {
+        const project = new HttpProject();
+        const r1 = project.addRequest('r1');
+        r1.info.name = 'r1name';
+        project.addRequest('r2');
+        project.addRequest('r3');
+        const result: ProjectRequest[] = [];
+        for (const request of project.requestIterator({ requests: ['r1name'] })) {
+          result.push(request);
+        }
+        assert.deepEqual(result, [r1]);
+      });
+
+      it('includes only requested items from the project root by key', () => {
+        const project = new HttpProject();
+        const r1 = project.addRequest('r1');
+        project.addRequest('r2');
+        project.addRequest('r3');
+        const result: ProjectRequest[] = [];
+        for (const request of project.requestIterator({ requests: [r1.key] })) {
+          result.push(request);
+        }
+        assert.deepEqual(result, [r1]);
+      });
+
+      it('includes only requested items recursive', () => {
+        const project = new HttpProject();
+        const r1 = project.addRequest('r1');
+        const f1 = project.addFolder('f1');
+        const r2 = f1.addRequest('r2');
+        project.addRequest('r3');
+        const result: ProjectRequest[] = [];
+        for (const request of project.requestIterator({ requests: [r1.key, r2.key], recursive: true })) {
+          result.push(request);
+        }
+        assert.deepEqual(result, [r1, r2]);
+      });
+
+      it('recursively iterates the project object', () => {
+        const project = new HttpProject();
+        const r1 = project.addRequest('r1');
+        const f1 = project.addFolder('f1');
+        const r2 = f1.addRequest('r2');
+        const r3 = project.addRequest('r3');
+        const result: ProjectRequest[] = [];
+        for (const request of project) {
+          result.push(request);
+        }
+        assert.deepEqual(result, [r1, r2, r3]);
+      });
+    });
   });
 });

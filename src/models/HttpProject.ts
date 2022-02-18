@@ -144,6 +144,28 @@ export interface ISchemaAddOptions {
   index?: number;
 }
 
+export interface IProjectRequestIterator {
+  /**
+   * The parent folder key or name. Sets the starting point to iterate over the requests.
+   */
+  parent?: string
+  /**
+   * When set it includes requests in the current folder and sub-folder according to the order
+   * defined in the folder.
+   */
+  recursive?: boolean;
+  /**
+   * Limits the number of requests to include in the iterator.
+   * It is an array of request keys or names.
+   */
+  requests?: string[];
+  /**
+   * The opposite of the `requests`. The list of names or keys of requests or folders to ignore.
+   * Note, ignore is tested before the `requests`.
+   */
+  ignore?: string[];
+}
+
 /**
  * The new definition of a project in ARC.
  * Note, this is not the same as future `ApiProject` which is reserved for building APIs
@@ -1296,5 +1318,59 @@ export class HttpProject extends ProjectParent {
       return [];
     }
     return this.schemas;
+  }
+
+  /**
+   * Iterates over requests in the project,
+   */
+  * requestIterator(opts: IProjectRequestIterator = {}): Generator<ProjectRequest> {
+    const { definitions=[] } = this;
+    const { ignore=[], parent, recursive, requests=[] } = opts;
+    const root = parent ? this.findFolder(parent) : this;
+    if (!root) {
+      throw new Error(`The parent folder not found: ${parent}.`);
+    }
+    const items = root.items;
+    if (!items || !items.length) {
+      return;
+    }
+    for (const item of items) {
+      if (ignore.includes(item.key)) {
+        continue;
+      }
+      const def = definitions.find(i => i.key === item.key);
+      if (item.kind === ProjectRequestKind) {
+        const request = def as ProjectRequest;
+        const name = request.info.name || '';
+        if (ignore.includes(name)) {
+          continue;
+        }
+        if (requests.length && !requests.includes(item.key) && !requests.includes(name)) {
+          continue;
+        }
+        yield request;
+      } else if (recursive && item.kind === ProjectFolderKind) {
+        const folder = def as ProjectFolder;
+        const name = folder.info.name || '';
+        if (ignore.includes(name)) {
+          continue;
+        }
+        const it = this.requestIterator({
+          parent: item.key,
+          recursive,
+          ignore,
+          requests,
+        });
+        for (const request of it) {
+          yield request;
+        }
+      }
+    }
+  }
+
+  [Symbol.iterator](): Generator<ProjectRequest> {
+    return this.requestIterator({
+      recursive: true,
+    });
   }
 }

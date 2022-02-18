@@ -61,6 +61,7 @@ export * as UUID from './src/lib/uuid.js';
 export { VariablesProcessor } from './src/runtime/variables/VariablesProcessor.js';
 export { ProjectRunner } from './src/runtime/node/ProjectRunner.js';
 export { RequestFactory } from './src/runtime/node/RequestFactory.js';
+export { VariablesStore } from './src/runtime/node/VariablesStore.js';
 
 // 
 // HTTP engine
