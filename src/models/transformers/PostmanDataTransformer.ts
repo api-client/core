@@ -10,7 +10,11 @@ import { HttpProject } from '../HttpProject.js';
  * into an HTTP Project (or projects for data export).
  */
 export class PostmanDataTransformer {
-  transform(data: any): Promise<HttpProject|HttpProject[]> {
+  static transform(init: any): Promise<HttpProject|HttpProject[]> {
+    let data = init;
+    if (typeof init === 'string') {
+      data = JSON.parse(init);
+    }
     const version = this.recognizeVersion(data);
     let instance: PostmanTransformer;
     switch (version) {
@@ -28,7 +32,7 @@ export class PostmanDataTransformer {
     return instance.transform();
   }
 
-  recognizeVersion(data: any): string | undefined {
+  static recognizeVersion(data: any): string | undefined {
     if (data.version) {
       return 'backup';
     }

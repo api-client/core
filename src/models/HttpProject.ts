@@ -13,6 +13,7 @@ import v4 from '../lib/uuid.js';
 import * as PatchUtils from './PatchUtils.js';
 import { ARCSavedRequest, ARCHistoryRequest } from './legacy/request/ArcRequest.js';
 import { ArcLegacyProject, ARCProject } from './legacy/models/ArcLegacyProject.js';
+import { PostmanDataTransformer } from './transformers/PostmanDataTransformer.js';
 
 export type HttpProjectKind = 'ARC#HttpProject';
 export const Kind = 'ARC#HttpProject';
@@ -284,6 +285,19 @@ export class HttpProject extends ProjectParent {
       await Promise.allSettled(promises);
     }
     return result;
+  }
+
+  /**
+   * Creates an HTTP project from a Postman collection
+   * @param init The postman collection object or a string that can be parsed to one.
+   */
+  static async fromPostman(init: any): Promise<HttpProject> { 
+    const result = await PostmanDataTransformer.transform(init);
+    if (Array.isArray(result) && result.length > 1) {
+      throw new Error(`Unable to process postman data. It contains multiple collections.`);
+    }
+    const project = Array.isArray(result) ? result[0] : result;
+    return project;
   }
 
   /**

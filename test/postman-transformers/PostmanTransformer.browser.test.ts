@@ -10,8 +10,7 @@ describe('Postman transformers', () => {
     before(async () => {
       const response = await DataTestHelper.getFile('Backup.postman_dump.json');
       const jsonData = JSON.parse(response);
-      const transformer = new PostmanDataTransformer();
-      projects = await transformer.transform(jsonData) as HttpProject[];
+      projects = await PostmanDataTransformer.transform(jsonData) as HttpProject[];
     });
 
     it('creates a project', () => {
@@ -160,8 +159,7 @@ describe('Postman transformers', () => {
     before(async () => {
       const response = await DataTestHelper.getFile('HTTPBin.postman_collection-2.0.json');
       const jsonData = JSON.parse(response);
-      const transformer = new PostmanDataTransformer();
-      project = await transformer.transform(jsonData) as HttpProject;
+      project = await PostmanDataTransformer.transform(jsonData) as HttpProject;
     });
 
     it('creates a project', () => {
@@ -296,8 +294,7 @@ describe('Postman transformers', () => {
     before(async () => {
       const response = await DataTestHelper.getFile('HTTPBin.postman_collection-2.1.json');
       const jsonData = JSON.parse(response);
-      const transformer = new PostmanDataTransformer();
-      project = await transformer.transform(jsonData) as HttpProject;
+      project = await PostmanDataTransformer.transform(jsonData) as HttpProject;
     });
 
     it('creates a project', () => {
