@@ -10,6 +10,7 @@ import { HttpProject, IProjectRequestIterator } from '../../models/HttpProject.j
 import { VariablesStore } from './VariablesStore.js';
 import { VariablesProcessor } from '../variables/VariablesProcessor.js';
 import { RequestFactory } from './RequestFactory.js';
+import { EventTypes } from '../../events/EventTypes.js';
 
 export interface ProjectRunnerOptions {
   /**
@@ -97,7 +98,7 @@ export interface ProjectRunner {
  * Requests are executed in order defined in the folder.
  */
 export class ProjectRunner extends EventEmitter {
-  eventTarget;
+  eventTarget: EventTarget;
   logger?: Logger;
   project: HttpProject;
 
@@ -166,24 +167,37 @@ export class ProjectRunner extends EventEmitter {
     };
     const requestData = request.expects.toJSON();
     requestData.url = this.prepareRequestUrl(requestData.url, variables);
+
+    function variableHandler(e: CustomEvent): void {
+      if (e.defaultPrevented) {
+        return;
+      }
+      const { name, value } = e.detail;
+      variables[name] = value;
+      e.preventDefault();
+      e.detail.result = Promise.resolve();
+    }
+
+    this.eventTarget.addEventListener(EventTypes.Environment.set, variableHandler as any);
+
     try {
       // Below replaces the single call to the `run()` function of the factory to 
       // report via the events a request object that has evaluated with the Jexl library.
-      await factory.prepareEnvironment();
       const requestCopy = await factory.processRequestVariables(requestData);
       this.emit('request', request.key, { ...requestCopy });
       await factory.processRequestLogic(requestCopy);
       const result = await factory.executeRequest(requestCopy);
       await factory.processResponse(result);
-      const log = await factory.run(requestData);
-      request.setLog(log);
-      info.log = log;
-      this.emit('response', request.key, { ...log });
+      request.setLog(result);
+      info.log = result;
+      this.emit('response', request.key, { ...result });
     } catch (e) {
       info.error = true;
       info.errorMessage = (e as Error).message;
       this.emit('error', request.key, { ...requestData }, info.errorMessage);
     }
+
+    this.eventTarget.removeEventListener(EventTypes.Environment.set, variableHandler as any);
     return info;
   }
 
@@ -210,7 +224,7 @@ export class ProjectRunner extends EventEmitter {
   /**
    * Reads the variables and the base URI from the passed environments.
    */
-  protected applyVariables(environments: Environment[]): Record<string, string> {
+  protected async applyVariables(environments: Environment[]): Promise<Record<string, string>> {
     let baseUri = '';
     const variables: Property[] = [];
     environments.forEach((environment) => {
@@ -238,7 +252,7 @@ export class ProjectRunner extends EventEmitter {
     }
     // the `baseUri` is reserved and always set to the environment's `baseUri`.
     ctx.baseUri = baseUri || '';
-    return ctx;
+    return this.variablesProcessor.buildContext(ctx);
   }
 
   /**

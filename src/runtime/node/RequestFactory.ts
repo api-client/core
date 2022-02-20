@@ -60,7 +60,10 @@ export class RequestFactory {
   certificates?: IRequestCertificate[];
   /**
    * The cumulative list of all variables to be applied to the request and other properties.
-   * The variables must be already processed fir variables in values (evaluated).
+   * The variables must be already processed for variables in values (evaluated).
+   * 
+   * These variables are passed by reference. Changes made anywhere to the variables will result 
+   * with updating this list.
    */
   variables?: Record<string, string>;
   /**
@@ -105,19 +108,10 @@ export class RequestFactory {
    * @returns The execution log.
    */
   async run(request: IHttpRequest): Promise<IRequestLog> {
-    await this.prepareEnvironment();
     const requestCopy = await this.processRequest(request);
     const result = await this.executeRequest(requestCopy);
     await this.processResponse(result);
     return result;
-  }
-
-  async prepareEnvironment(): Promise<void> {
-    const { variables } = this;
-    if (!variables) {
-      return;
-    }
-    this.variables = await this.variablesProcessor.buildContext(variables);
   }
 
   /**
