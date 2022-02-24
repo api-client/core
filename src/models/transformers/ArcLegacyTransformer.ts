@@ -4,9 +4,6 @@ import {
   ArcExportObject,
   ExportArcProjects,
   ExportArcSavedRequest,
-  ExportArcHistoryRequest,
-  ExportArcClientCertificateData,
-  ExportArcVariable,
 } from '../legacy/DataExport.js';
 
 interface LegacyExport {

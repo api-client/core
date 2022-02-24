@@ -22,7 +22,7 @@ describe('Postman transformers', () => {
     });
 
     it('creates an environment', () => {
-      const { environments } = projects[0];
+      const { environments } = projects[0].definitions;
       assert.typeOf(environments, 'array', 'has the array');
       assert.lengthOf(environments, 1, 'has the environment');
       assert.equal(environments[0].info.name, 'Default', 'has the name');
@@ -169,7 +169,7 @@ describe('Postman transformers', () => {
     });
 
     it('creates an environment', () => {
-      const { environments } = project;
+      const { environments } = project.definitions;
       assert.typeOf(environments, 'array', 'has the array');
       assert.lengthOf(environments, 1, 'has the environment');
       assert.equal(environments[0].info.name, 'Default', 'has the name');
@@ -241,10 +241,8 @@ describe('Postman transformers', () => {
     it('creates requests on a sub-folder', () => {
       const folders = project.listFolders();
       const [, f2] = folders;
-      
       const sub = f2.listFolders();
       const requests = sub[0].listRequests();
-      assert.lengthOf(requests, 1, 'has all requests');
       const [request] = requests;
       
       assert.equal(request.info.name, 'PUT status');
@@ -304,7 +302,7 @@ describe('Postman transformers', () => {
     });
 
     it('creates an environment', () => {
-      const { environments } = project;
+      const { environments } = project.definitions;
       assert.typeOf(environments, 'array', 'has the array');
       assert.lengthOf(environments, 1, 'has the environment');
       assert.equal(environments[0].info.name, 'Default', 'has the name');

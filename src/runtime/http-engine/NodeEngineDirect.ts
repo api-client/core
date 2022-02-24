@@ -11,9 +11,6 @@ import { ArcResponse } from '../../models/ArcResponse.js';
 import { Headers } from '../../lib/headers/Headers.js';
 import { PayloadSupport } from './PayloadSupport.js';
 import { addContentLength, getPort } from './RequestUtils.js';
-import { NetError } from './Errors.js';
-import { INtlmAuthorization } from '../../models/Authorization.js';
-import { NtlmAuth, INtlmAuthConfig } from './ntlm/NtlmAuth.js';
 
 interface IHttpOutputData {
   data: string | Buffer;

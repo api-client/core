@@ -2,7 +2,7 @@
 import { assert } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { Kind as HttpProjectKind, HttpProject, IHttpProject } from '../../src/models/HttpProject.js';
-import { Kind as ProjectFolderKind, ProjectFolder } from '../../src/models/ProjectFolder.js';
+import { Kind as ProjectFolderKind } from '../../src/models/ProjectFolder.js';
 import { ProjectRequest } from '../../src/models/ProjectRequest.js';
 import { Kind as ThingKind } from '../../src/models/Thing.js';
 import { Kind as ProviderKind } from '../../src/models/Provider.js';
@@ -23,7 +23,11 @@ describe('Models', () => {
         it('initializes a default project', () => {
           const result = new HttpProject();
           assert.equal(result.kind, HttpProjectKind, 'sets the kind property');
-          assert.deepEqual(result.definitions, [], 'sets the definitions property');
+          assert.typeOf(result.definitions, 'object', 'sets the definitions property');
+          assert.deepEqual(result.definitions.environments, [], 'sets the definitions.environments property');
+          assert.deepEqual(result.definitions.folders, [], 'sets the definitions.folders property');
+          assert.deepEqual(result.definitions.requests, [], 'sets the definitions.requests property');
+          assert.deepEqual(result.definitions.schemas, [], 'sets the definitions.schemas property');
           assert.deepEqual(result.environments, [], 'sets the environments property');
           assert.deepEqual(result.items, [], 'sets the items property');
           const { info } = result;
@@ -57,22 +61,24 @@ describe('Models', () => {
 
         it('passed in constructor environments override project environments', () => {
           const schema = new HttpProject({
-            definitions: [],
-            environments: [
-              {
-                key: 'b',
-                kind: 'ARC#Environment',
-                info: {
-                  kind: 'ARC#Thing',
-                  name: 'test b',
-                },
-                variables: [],
-                server: {
-                  kind: 'ARC#Server',
-                  uri: 'https://domain.com',
+            definitions: {
+              environments: [
+                {
+                  key: 'b',
+                  kind: 'ARC#Environment',
+                  info: {
+                    kind: 'ARC#Thing',
+                    name: 'test b',
+                  },
+                  variables: [],
+                  server: {
+                    kind: 'ARC#Server',
+                    uri: 'https://domain.com',
+                  }
                 }
-              }
-            ],
+              ]
+            },
+            environments: ['b'],
             info: {
               kind: 'ARC#Thing',
               name: 'Project',
@@ -108,7 +114,7 @@ describe('Models', () => {
           base = {
             kind: HttpProjectKind,
             key: 'abc',
-            definitions: [],
+            definitions: {},
             environments: [],
             items: [],
             info: {
@@ -167,11 +173,16 @@ describe('Models', () => {
 
         it('sets the environments', () => {
           const env = Environment.fromName('test environment');
-          const init: IHttpProject = { ...base, ...{ environments: [env.toJSON()]}};
+          const init: IHttpProject = { ...base, ...{ environments: [env.key]}};
+          init.definitions = { ...init.definitions };
+          init.definitions.environments = [env.toJSON()];
           const project = new HttpProject(init);
-          const { environments } = project;
-          assert.typeOf(environments, 'array', 'has the environments')
-          assert.lengthOf(environments, 1, 'has a single environments')
+          const { environments: environmentKeys } = project;
+          assert.typeOf(environmentKeys, 'array', 'has the environment keys')
+          assert.lengthOf(environmentKeys, 1, 'has a single environment key')
+          const { environments } = project.definitions;
+          assert.typeOf(environments, 'array', 'has the environment definitions')
+          assert.lengthOf(environments, 1, 'has a single environment definition')
           const [item] = environments;
           assert.equal(item.kind, EnvironmentKind, 'sets the item.kind property');
           assert.equal(item.info.name, env.info.name, 'sets the item.info.name property');
@@ -191,38 +202,40 @@ describe('Models', () => {
           assert.equal(item.key, '123456', 'sets the item.key property');
         });
 
-        it('sets the missingDefinitions property', () => {
-          const init: IHttpProject = { ...base, ...{ items: [{
-            kind: ProjectFolderKind,
-            key: '123456',
-          }]}};
-          const project = new HttpProject(init);
-          const { missingDefinitions } = project;
-          assert.typeOf(missingDefinitions, 'array', 'has the items')
-          assert.lengthOf(missingDefinitions, 1, 'has a single item')
-          const [item] = missingDefinitions;
-          assert.equal(item, '123456', 'has the missing definition id');
-        });
-
-        it('sets the definitions', () => {
-          const init: IHttpProject = { ...base, ...{ definitions: [{
-            key: '123456',
-            kind: ProjectFolderKind,
-            created: 1234567,
-            updated: 98765,
-            info: {
-              kind: ThingKind,
-              name: 'test'
-            },
-            items: [],
-          }]}};
+        it('sets the definitions.folders', () => {
+          const init: IHttpProject = { ...base, ...{ definitions: {
+            folders: [{
+              key: '123456',
+              kind: ProjectFolderKind,
+              created: 1234567,
+              updated: 98765,
+              info: {
+                kind: ThingKind,
+                name: 'test'
+              },
+              items: [],
+            }]
+          }}};
           const project = new HttpProject(init);
           const { definitions } = project;
-          assert.typeOf(definitions, 'array', 'has the items')
-          assert.lengthOf(definitions, 1, 'has a single item')
-          const [item] = definitions;
+          assert.typeOf(definitions.folders, 'array', 'has the items')
+          assert.lengthOf(definitions.folders, 1, 'has a single item')
+          const [item] = definitions.folders;
           assert.equal(item.kind, ProjectFolderKind, 'sets the item.kind property');
           assert.equal(item.key, '123456', 'sets the item.key property');
+        });
+
+        it('sets the definitions.requests', () => {
+          const request = ProjectRequest.fromUrl('https://api.com', new HttpProject());
+          const init: IHttpProject = { ...base, ...{ definitions: {
+            requests: [request.toJSON()]
+          }}};
+          const project = new HttpProject(init);
+          const { definitions } = project;
+          assert.typeOf(definitions.requests, 'array', 'has the items')
+          assert.lengthOf(definitions.requests, 1, 'has a single item')
+          const [item] = definitions.requests;
+          assert.equal(item.key, request.key, 'sets the request instance');
         });
       });
 
@@ -246,7 +259,10 @@ describe('Models', () => {
         it('creates an empty project with a name', () => {
           const project = HttpProject.fromName('Test project');
           assert.equal(project.kind, HttpProjectKind, 'sets the kind property');
-          assert.deepEqual(project.definitions, [], 'sets the definitions property');
+          assert.deepEqual(project.definitions.environments, [], 'sets the definitions.environments property');
+          assert.deepEqual(project.definitions.folders, [], 'sets the definitions.folders property');
+          assert.deepEqual(project.definitions.requests, [], 'sets the definitions.requests property');
+          assert.deepEqual(project.definitions.schemas, [], 'sets the definitions.schemas property');
           assert.deepEqual(project.environments, [], 'sets the environments property');
           assert.deepEqual(project.items, [], 'sets the items property');
           const { info } = project;
@@ -355,8 +371,8 @@ describe('Models', () => {
         const project = new HttpProject();
         const created = project.addFolder('A folder');
         const { definitions } = project;
-        assert.lengthOf(definitions, 1, 'has the definition');
-        const folder = project.definitions[0] as ProjectFolder;
+        assert.lengthOf(definitions.folders, 1, 'has the definition');
+        const folder = definitions.folders[0];
         
         assert.equal(folder.kind, ProjectFolderKind, 'has the kind');
         assert.equal(folder.key, created.key, 'has the key');
@@ -391,9 +407,9 @@ describe('Models', () => {
         const folder = project.findFolder(created1.key);
         const created2 = folder.addFolder('inception');
         assert.lengthOf(project.items, 1, 'project has a single item');
-        assert.lengthOf(project.definitions, 2, 'project has a two definitions');
+        assert.lengthOf(project.definitions.folders, 2, 'project has a two definitions');
         
-        const theFolder = project.definitions[1] as ProjectFolder;
+        const theFolder = project.definitions.folders[1];
         assert.equal(theFolder.key, created2.key, 'adds the sub folder definition to the project');
         assert.equal(theFolder.info.name, 'inception', 'sub-folder has the name');
       });
@@ -477,10 +493,10 @@ describe('Models', () => {
         const name = 'abc';
         const project = new HttpProject();
         const created = project.addFolder(name);
-        assert.lengthOf(project.definitions, 1, 'has a definition');
+        assert.lengthOf(project.definitions.folders, 1, 'has a definition');
         project.removeFolder(created.key);
         project.findFolder(name);
-        assert.deepEqual(project.definitions, [], 'the definitions is empty');
+        assert.deepEqual(project.definitions.folders, [], 'the definitions is empty');
       });
 
       it('removes the folder from a parent folder', () => {
@@ -509,10 +525,10 @@ describe('Models', () => {
         const project = new HttpProject();
         const parent = project.addFolder('parent');
         const created = project.addFolder(name, { parent: parent.key });
-        assert.lengthOf(project.definitions, 2, 'has 2 definitions');
+        assert.lengthOf(project.definitions.folders, 2, 'has 2 definitions');
         project.removeFolder(created.key);
         project.findFolder(name);
-        assert.lengthOf(project.definitions, 1, 'has 1 definition');
+        assert.lengthOf(project.definitions.folders, 1, 'has 1 definition');
       });
 
       it('throws an error when folder is not found', () => {
@@ -545,7 +561,7 @@ describe('Models', () => {
         parent.remove();
 
         assert.deepEqual(project.items, []);
-        assert.deepEqual(project.definitions, []);
+        assert.deepEqual(project.definitions.folders, []);
       });
 
       it('removes folders from the folder', () => {
@@ -556,7 +572,7 @@ describe('Models', () => {
         parent.remove();
 
         assert.deepEqual(project.items, []);
-        assert.deepEqual(project.definitions, []);
+        assert.deepEqual(project.definitions.folders, []);
       });
 
       it('deeply removes folders and request from the folder', () => {
@@ -571,7 +587,8 @@ describe('Models', () => {
         const otherRequest = project.addRequest('r3');
 
         assert.lengthOf(project.items, 2, 'has the remaining items');
-        assert.deepEqual(project.definitions, [otherFolder, otherRequest]);
+        assert.deepEqual(project.definitions.folders, [otherFolder]);
+        assert.deepEqual(project.definitions.requests, [otherRequest]);
       });
     });
 
@@ -808,8 +825,8 @@ describe('Models', () => {
         const created = project.addRequest(request);
         assert.deepEqual(created, request);
 
-        assert.lengthOf(project.definitions, 1, 'has one definition');
-        assert.deepEqual(project.definitions[0], created, 'inserts the definition into project\'s definitions');
+        assert.lengthOf(project.definitions.requests, 1, 'has one definition');
+        assert.deepEqual(project.definitions.requests[0], created, 'inserts the definition into project\'s definitions');
         assert.equal(project.items[0].key, created.key, 'the project has the item');
 
         assert.equal(created.getParent().kind, HttpProjectKind, 'the request has the parent as the project');
@@ -823,8 +840,8 @@ describe('Models', () => {
         
         assert.deepEqual(created, request);
 
-        assert.lengthOf(project.definitions, 1, 'has one definition');
-        assert.deepEqual(project.definitions[0], created, 'inserts the definition into project\'s definitions');
+        assert.lengthOf(project.definitions.requests, 1, 'has one definition');
+        assert.deepEqual(project.definitions.requests[0], created, 'inserts the definition into project\'s definitions');
         assert.equal(project.items[0].key, created.key, 'the project has the item');
         
         assert.equal(created.getParent().kind, HttpProjectKind, 'the request has the parent as the project');
@@ -837,8 +854,8 @@ describe('Models', () => {
         const request = ProjectRequest.fromName('test', project);
         const created = project.addRequest(request, { parent: folder.key });
         
-        assert.lengthOf(project.definitions, 2, 'has two definitions');
-        assert.deepEqual(project.definitions[1], created, 'inserts the definition into project\'s definitions');
+        assert.lengthOf(project.definitions.requests, 1, 'has the request definition');
+        assert.deepEqual(project.definitions.requests[0], created, 'inserts the definition into project\'s definitions');
         assert.lengthOf(folder.items, 1, 'the folder has a single item');
         assert.equal(folder.items[0].key, created.key, 'the folder has the item');
 
@@ -947,9 +964,9 @@ describe('Models', () => {
         const project = new HttpProject();
         const created = ProjectRequest.fromName('test', project);
         project.addRequest(created);
-        assert.lengthOf(project.definitions, 1, 'has a definition');
+        assert.lengthOf(project.definitions.requests, 1, 'has a definition');
         project.removeRequest(created.key);
-        assert.deepEqual(project.definitions, [], 'the definitions is empty');
+        assert.deepEqual(project.definitions.requests, [], 'the definitions is empty');
       });
 
       it('removes the request from a parent folder', () => {
@@ -980,9 +997,9 @@ describe('Models', () => {
         const parent = project.addFolder('parent');
         const created = ProjectRequest.fromName(name, project);
         project.addRequest(created, { parent: parent.key });
-        assert.lengthOf(project.definitions, 2, 'has 2 definitions');
+        assert.lengthOf(project.definitions.requests, 1, 'has 1 definition');
         project.removeRequest(created.key);
-        assert.lengthOf(project.definitions, 1, 'has 1 definition');
+        assert.lengthOf(project.definitions.requests, 0, 'has 0 definitions');
       });
 
       it('throws an error when the request is not found', () => {
@@ -1115,9 +1132,9 @@ describe('Models', () => {
         const request = generator.http.history();
         const created = await project.addLegacyRequest(request);
         assert.ok(created, 'returns the created request');
-        assert.lengthOf(project.definitions, 1, 'has one definition');
+        assert.lengthOf(project.definitions.requests, 1, 'has one definition');
 
-        assert.deepEqual(project.definitions[0], created, 'inserts the definition into project\'s definitions');
+        assert.deepEqual(project.definitions.requests[0], created, 'inserts the definition into project\'s definitions');
         assert.equal(project.items[0].key, created.key, 'the project has the item');
 
         assert.equal(created.getParent().kind, HttpProjectKind, 'the request has the parent as the project');
@@ -1131,9 +1148,9 @@ describe('Models', () => {
         const request = generator.http.saved();
         const created = await project.addLegacyRequest(request);
         assert.ok(created, 'returns the created request');
-        assert.lengthOf(project.definitions, 1, 'has one definition');
+        assert.lengthOf(project.definitions.requests, 1, 'has one definition');
 
-        assert.deepEqual(project.definitions[0], created, 'inserts the definition into project\'s definitions');
+        assert.deepEqual(project.definitions.requests[0], created, 'inserts the definition into project\'s definitions');
         assert.equal(project.items[0].key, created.key, 'the project has the item');
 
         assert.equal(created.getParent().kind, HttpProjectKind, 'the request has the parent as the project');
@@ -1479,17 +1496,17 @@ describe('Models', () => {
         const env = project.addEnvironment('test');
         const copy = project.clone();
 
-        assert.typeOf(copy.environments[0].key, 'string');
-        assert.notEqual(copy.environments[0].key, env.key);
+        assert.typeOf(copy.definitions.environments[0].key, 'string');
+        assert.notEqual(copy.definitions.environments[0].key, env.key);
       });
 
       it('updates keys for schemas', () => {
         const schema = ProjectSchema.fromName('s1');
-        project.schemas.push(schema);
+        project.definitions.schemas.push(schema);
         const copy = project.clone();
 
-        assert.typeOf(copy.schemas[0].key, 'string');
-        assert.notEqual(copy.schemas[0].key, schema.key);
+        assert.typeOf(copy.definitions.schemas[0].key, 'string');
+        assert.notEqual(copy.definitions.schemas[0].key, schema.key);
       });
 
       it('does not update keys when configured', () => {
@@ -1497,16 +1514,16 @@ describe('Models', () => {
         const r = project.addRequest('https://domain.com');
         const env = project.addEnvironment('test');
         const schema = ProjectSchema.fromName('s1');
-        project.schemas.push(schema);
+        project.definitions.schemas.push(schema);
         const copy = project.clone({ withoutRevalidate: true });
 
         assert.equal(copy.key, project.key);
-        assert.equal(copy.schemas[0].key, schema.key);
+        assert.equal(copy.definitions.schemas[0].key, schema.key);
         const [folder] = copy.listFolders();
         assert.equal(folder.key, f.key);
         const [request] = copy.listRequests();
         assert.equal(request.key, r.key);
-        assert.equal(copy.environments[0].key, env.key);
+        assert.equal(copy.definitions.environments[0].key, env.key);
       });
     });
 
@@ -1535,8 +1552,8 @@ describe('Models', () => {
         const created = project.addSchema(schema);
         assert.deepEqual(created, schema);
 
-        assert.lengthOf(project.schemas, 1, 'has one schema');
-        assert.equal(project.schemas[0].key, created.key, 'the project has the schema');
+        assert.lengthOf(project.definitions.schemas, 1, 'has one schema');
+        assert.equal(project.definitions.schemas[0].key, created.key, 'the project has the schema');
       });
 
       it('adds by a schema', () => {
@@ -1545,8 +1562,8 @@ describe('Models', () => {
         const created = project.addSchema(schema.toJSON());
         assert.deepEqual(created, schema);
 
-        assert.lengthOf(project.schemas, 1, 'has one schema');
-        assert.equal(project.schemas[0].key, created.key, 'the project has the schema');
+        assert.lengthOf(project.definitions.schemas, 1, 'has one schema');
+        assert.equal(project.definitions.schemas[0].key, created.key, 'the project has the schema');
       });
 
       it('adds by name', () => {
@@ -1554,8 +1571,8 @@ describe('Models', () => {
         const created = project.addSchema('test schema');
         assert.equal(created.name, 'test schema');
 
-        assert.lengthOf(project.schemas, 1, 'has one schema');
-        assert.equal(project.schemas[0].key, created.key, 'the project has the schema');
+        assert.lengthOf(project.definitions.schemas, 1, 'has one schema');
+        assert.equal(project.definitions.schemas[0].key, created.key, 'the project has the schema');
       });
 
       it('inserts schema at position', () => {
@@ -1563,14 +1580,14 @@ describe('Models', () => {
         project.addSchema('schema 1');
         project.addSchema('schema 2');
         const key = project.addSchema('schema 3', { index: 1 }).key;
-        assert.equal(project.schemas[1].key, key);
+        assert.equal(project.definitions.schemas[1].key, key);
       });
     });
 
     describe('listSchemas()', () => {
       it('returns empty array when no schemas', () => {
         const project = new HttpProject();
-        delete project.schemas;
+        delete project.definitions.schemas;
         const result = project.listSchemas();
         assert.deepEqual(result, []);
       });

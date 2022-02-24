@@ -411,7 +411,7 @@ describe('Models', () => {
         const r = project.addRequest('https://api.com');
         r.remove();
         assert.deepEqual(project.items, []);
-        assert.deepEqual(project.definitions, []);
+        assert.deepEqual(project.definitions.requests, []);
       });
 
       it('removes from a folder', () => {
@@ -421,8 +421,7 @@ describe('Models', () => {
         assert.deepEqual(folder.items, [], 'folder has no items');
         assert.lengthOf(project.items, 1, 'projects has a single item');
         assert.lengthOf(project.items.filter(i => i.kind === ProjectFolderKind), 1, 'projects has only folder items');
-        assert.lengthOf(project.definitions, 1, 'projects has a single definition');
-        assert.lengthOf(project.definitions.filter(i => i.kind === ProjectFolderKind), 1, 'projects has only folder definition');
+        assert.lengthOf(project.definitions.requests, 0, 'projects has no request definitions');
       });
     });
 
@@ -440,8 +439,8 @@ describe('Models', () => {
           assert.notEqual(result.key, r.key, 'has a different key');
           assert.lengthOf(project.items, 2, 'project has a new item');
           assert.isTrue(project.items.some(i => i.key === result.key), 'the project has the new item');
-          assert.lengthOf(project.definitions, 2, 'project has a new definition');
-          assert.isTrue(project.definitions.some(i => i.key === result.key), 'the project has the new definition');
+          assert.lengthOf(project.definitions.requests, 2, 'project has a new definition');
+          assert.isTrue(project.definitions.requests.some(i => i.key === result.key), 'the project has the new definition');
         });
 
         it('does not change the key', () => {
@@ -456,8 +455,8 @@ describe('Models', () => {
           
           assert.lengthOf(project.items, 1, 'project has no new items');
           assert.isFalse(project.items.some(i => i.key === result.key), 'the project has the new item');
-          assert.lengthOf(project.definitions, 1, 'project has no new definitions');
-          assert.isFalse(project.definitions.some(i => i.key === result.key), 'the project has no new definitions');
+          assert.lengthOf(project.definitions.requests, 1, 'project has no new definitions');
+          assert.isFalse(project.definitions.requests.some(i => i.key === result.key), 'the project has no new definitions');
         });
 
         it('copies a request from one project to another', () => {
@@ -467,7 +466,7 @@ describe('Models', () => {
           target.addRequest(result);
           assert.isTrue(result.getProject() === target, 'the request has a new project');
           assert.lengthOf(target.items, 1);
-          assert.lengthOf(target.definitions, 1);
+          assert.lengthOf(target.definitions.requests, 1);
         });
       });
 
@@ -486,8 +485,8 @@ describe('Models', () => {
           assert.lengthOf(project.items, 1, 'project has still a single item');
           assert.lengthOf(folder.items, 2, 'folder has a new item');
           assert.isTrue(folder.items.some(i => i.key === result.key), 'the folder has the new item');
-          assert.lengthOf(project.definitions, 3, 'project has a new definition');
-          assert.isTrue(project.definitions.some(i => i.key === result.key), 'the project has the new definition');
+          assert.lengthOf(project.definitions.requests, 2, 'project has a new definition');
+          assert.isTrue(project.definitions.requests.some(i => i.key === result.key), 'the project has the new definition');
         });
 
         it('copies a request from one project to another', () => {
@@ -496,7 +495,7 @@ describe('Models', () => {
           target.addRequest(result);
           assert.isTrue(result.getProject() === target, 'the request has a new project');
           assert.lengthOf(target.items, 1);
-          assert.lengthOf(target.definitions, 1);
+          assert.lengthOf(target.definitions.requests, 1);
         });
       });
     });
@@ -515,8 +514,8 @@ describe('Models', () => {
         assert.notEqual(result.key, request.key, 'has a different key');
         assert.lengthOf(project.items, 2, 'project has a new item');
         assert.isTrue(project.items.some(i => i.key === result.key), 'the project has the new item');
-        assert.lengthOf(project.definitions, 2, 'project has a new definition');
-        assert.isTrue(project.definitions.some(i => i.key === result.key), 'the project has the new definition');
+        assert.lengthOf(project.definitions.requests, 2, 'project has a new definition');
+        assert.isTrue(project.definitions.requests.some(i => i.key === result.key), 'the project has the new definition');
       });
     });
   });

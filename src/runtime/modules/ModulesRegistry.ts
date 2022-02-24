@@ -78,9 +78,9 @@ export type ResponseModule = 'response';
  * A registry for modules.
  */
 export class ModulesRegistry {
-  static get request(): RequestModule { return 'request' };
+  static get request(): RequestModule { return 'request' }
 
-  static get response(): ResponseModule { return 'response' };
+  static get response(): ResponseModule { return 'response' }
 
   /**
    * Registers a new request or response module in the registry.

@@ -17,7 +17,7 @@ export abstract class ProjectParent implements ProjectDefinitionProperty {
    * The environments defined for this project.
    * If not set it is inherited from the parent.
    */
-  environments: Environment[] = [];
+  environments: string[] = [];
   /**
    * The ordered list of HTTP requests / folders in the projects.
    * The UI uses this to manipulate the view without changing the definitions.
@@ -29,7 +29,22 @@ export abstract class ProjectParent implements ProjectDefinitionProperty {
   info: Thing = new Thing({ kind: ThingKind, name: '' });
 
   get effectiveEnvironments(): Environment[] {
-    return this.environments;
+    const { environments } = this;
+    if (!environments.length) {
+      return [];
+    }
+    const project = this.getProject();
+    if (!project.definitions.environments) {
+      return [];
+    }
+    const result: Environment[] = [];
+    environments.forEach((key) => {
+      const env = project.definitions.environments.find(i => i.key === key);
+      if (env) {
+        result.push(env);
+      }
+    });
+    return result;
   }
 
   abstract attachedCallback(): void;
@@ -83,7 +98,12 @@ export abstract class ProjectParent implements ProjectDefinitionProperty {
     if (!finalEnv.key) {
       finalEnv.key = v4();
     }
-    this.environments.push(finalEnv);
+    const project = this.getProject();
+    if (!project.definitions.environments) {
+      project.definitions.environments = [];
+    }
+    project.definitions.environments.push(finalEnv);
+    this.environments.push(finalEnv.key);
     return finalEnv;
   }
 }

@@ -1,6 +1,5 @@
 import { ProjectParent } from './ProjectParent.js';
 import { IProjectDefinitionProperty } from './ProjectDefinitionProperty.js';
-import { Environment, IEnvironment } from './Environment.js';
 import { ProjectItem, IProjectItem } from './ProjectItem.js';
 import { ProjectRequest, Kind as ProjectRequestKind, IProjectRequest } from './ProjectRequest.js';
 import { HttpProject } from './HttpProject.js';
@@ -63,7 +62,7 @@ export interface IProjectFolder extends IProjectDefinitionProperty {
    * The environments defined for this project.
    * If not set it is inherited from the parent.
    */
-  environments?: IEnvironment[];
+  environments?: string[];
   /**
    * Timestamp when the folder was last updated.
    */
@@ -149,7 +148,7 @@ export class ProjectFolder extends ProjectParent {
       this.info = new Thing({ kind: ThingKind, name: DefaultFolderName });
     }
     if (Array.isArray(environments)) {
-      this.environments = environments.map(i => new Environment(i));
+      this.environments = environments;
     } else {
       this.environments = [];
     }
@@ -180,7 +179,7 @@ export class ProjectFolder extends ProjectParent {
       result.items = this.items.map(i => i.toJSON());
     }
     if (Array.isArray(this.environments)) {
-      result.environments = this.environments.map(i => i.toJSON());
+      result.environments = this.environments;
     }
     return result;
   }

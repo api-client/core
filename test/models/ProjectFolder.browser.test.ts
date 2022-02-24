@@ -104,11 +104,12 @@ describe('Models', () => {
 
       it('sets the stored items', () => {
         const env = Environment.fromName('a-key');
-        base.environments = [env.toJSON()];
+        project.definitions.environments = [env];
+        base.environments = [env.key];
         const serialized = JSON.stringify(base);
         const result = new ProjectFolder(project, serialized);
         assert.lengthOf(result.environments, 1, 'has a single item');
-        assert.equal(result.environments[0].key, env.key, 'has the serialized item');
+        assert.equal(result.environments[0], env.key, 'has the serialized item');
       });
     });
 
@@ -194,11 +195,10 @@ describe('Models', () => {
       });
 
       it('serializes the environments', () => {
-        const env = Environment.fromName('a-key');
-        const init: IProjectFolder = { ...base, ...{ environments: [env.toJSON()] } };
+        const init: IProjectFolder = { ...base, ...{ environments: ['test-123'] } };
         const folder = new ProjectFolder(project, init);
         const result = folder.toJSON();
-        assert.lengthOf(result.environments, 1);
+        assert.deepEqual(result.environments, ['test-123']);
       });
     });
 
@@ -502,7 +502,7 @@ describe('Models', () => {
 
       it('removes the folder from the project definitions', () => {
         folder.remove();
-        assert.deepEqual(project.definitions, []);
+        assert.deepEqual(project.definitions.folders, []);
       });
 
       it('removes the folder from the project items', () => {
@@ -518,9 +518,9 @@ describe('Models', () => {
 
       it('removes the sub-folder from the project definitions', () => {
         const sub = folder.addFolder('sub');
-        assert.lengthOf(project.definitions, 2, 'has 2 definitions');
+        assert.lengthOf(project.definitions.folders, 2, 'has 2 definitions');
         sub.remove();
-        assert.lengthOf(project.definitions, 1, 'has 1 definition');
+        assert.lengthOf(project.definitions.folders, 1, 'has 1 definition');
       });
     });
 
@@ -582,15 +582,15 @@ describe('Models', () => {
 
       it('adds the copy to the project definitions (project root)', () => {
         const copy = folder.clone();
-        assert.lengthOf(project.definitions, 2, 'has 2 definitions');
-        assert.isTrue(project.definitions.some(i => i.key === copy.key), 'has the folder definition');
+        assert.lengthOf(project.definitions.folders, 2, 'has 2 definitions');
+        assert.isTrue(project.definitions.folders.some(i => i.key === copy.key), 'has the folder definition');
       });
 
       it('adds the copy to the project definitions (folder root)', () => {
         const sub = folder.addFolder('sub');
         const copy = sub.clone();
-        assert.lengthOf(project.definitions, 3, 'has 3 definitions');
-        assert.isTrue(project.definitions.some(i => i.key === copy.key), 'has the folder definition');
+        assert.lengthOf(project.definitions.folders, 3, 'has 3 definitions');
+        assert.isTrue(project.definitions.folders.some(i => i.key === copy.key), 'has the folder definition');
       });
 
       it('adds the copy to the project items (project root)', () => {
@@ -620,9 +620,11 @@ describe('Models', () => {
         folder.addRequest('https://copy.com');
         folder.clone();
         
-        assert.lengthOf(project.definitions, 4, 'the project has 4 definitions');
+        assert.lengthOf(project.definitions.requests, 2, 'the project has 2 request definitions');
+        assert.lengthOf(project.definitions.requests, 2, 'the project has 2 folder definitions');
         
-        const [f1, r1, f2, r2] = project.definitions;
+        const [f1, f2] = project.definitions.folders;
+        const [r1, r2] = project.definitions.requests;
 
         assert.notEqual(f1.key, f2.key, 'folder keys are different');
         assert.notEqual(r1.key, r2.key, 'request keys are different');
@@ -630,11 +632,11 @@ describe('Models', () => {
 
       it('quietly ignores missing requests', () => {
         const r = folder.addRequest('https://copy.com');
-        const i = project.definitions.findIndex(i => i.key === r.key);
-        project.definitions.splice(i, 1);
+        const i = project.definitions.requests.findIndex(i => i.key === r.key);
+        project.definitions.requests.splice(i, 1);
         folder.clone();
-        assert.lengthOf(project.definitions, 2, 'the project has 2 definitions');
-        const [f1, f2] = project.definitions;
+        assert.lengthOf(project.definitions.folders, 2, 'the project has 2 definitions');
+        const [f1, f2] = project.definitions.folders;
         assert.notEqual(f1.key, f2.key, 'folder keys are different');
       });
 
@@ -650,24 +652,24 @@ describe('Models', () => {
       it('adds a sub-folder of the copied folder to the project definitions', () => {
         folder.addFolder('sub orig');
         folder.clone();
-
-        assert.lengthOf(project.definitions, 4, 'the project has 4 definitions');
         
-        const [f1, s1, f2, s2] = project.definitions;
-
-        assert.notEqual(f1.key, f2.key, 'folder keys are different');
-        assert.equal(f1.info.name, f2.info.name, 'folder 1 names match');
-        assert.notEqual(s1.key, s2.key, 'request keys are different');
-        assert.equal(s2.info.name, s2.info.name, 'folder 2 names match');
+        assert.lengthOf(project.definitions.folders, 4, 'the project has 4 folder definitions');
+        
+        const [f1, f2, c1, c2] = project.definitions.folders;
+        
+        assert.notEqual(f1.key, c1.key, 'folder keys are different');
+        assert.equal(f1.info.name, c1.info.name, 'folder 1 names match');
+        assert.notEqual(f2.key, c2.key, 'request keys are different');
+        assert.equal(c2.info.name, c2.info.name, 'folder 2 names match');
       });
 
       it('quietly ignores missing folders', () => {
         const sub = folder.addFolder('sub');
-        const i = project.definitions.findIndex(i => i.key === sub.key);
-        project.definitions.splice(i, 1);
+        const i = project.definitions.folders.findIndex(i => i.key === sub.key);
+        project.definitions.folders.splice(i, 1);
         folder.clone();
-        assert.lengthOf(project.definitions, 2, 'the project has 2 definitions');
-        const [f1, f2] = project.definitions;
+        assert.lengthOf(project.definitions.folders, 2, 'the project has 2 definitions');
+        const [f1, f2] = project.definitions.folders;
         assert.notEqual(f1.key, f2.key, 'folder keys are different');
       });
 
@@ -751,7 +753,8 @@ describe('Models', () => {
         assert.deepEqual(project.toJSON(), origSnapshot, 'the original project is not changed');
 
         // the target folder has 1 folder + copied 2 folders + copied 1 request
-        assert.lengthOf(targetProject.definitions, 4, 'has the copied definitions');
+        assert.lengthOf(targetProject.definitions.folders, 3, 'has the copied folder definitions');
+        assert.lengthOf(targetProject.definitions.requests, 1, 'has the copied requests definitions');
 
         const rootFolders = targetFolder.listFolders();
         assert.lengthOf(rootFolders, 1, 'the target folder has a root folder from the originating project');

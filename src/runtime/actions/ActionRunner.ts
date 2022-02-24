@@ -52,9 +52,9 @@ export class ActionRunner {
       return;
     }
     switch (config.kind) {
-      case DeleteCookieKind: return new DeleteCookieRunnable(config.toJSON(), eventTarget); break;
-      case SetCookieKind: return new SetCookieRunnable(config.toJSON(), eventTarget); break;
-      case SetVariableKind: return new SetVariableRunnable(config.toJSON(), eventTarget); break;
+      case DeleteCookieKind: return new DeleteCookieRunnable(config.toJSON(), eventTarget);
+      case SetCookieKind: return new SetCookieRunnable(config.toJSON(), eventTarget);
+      case SetVariableKind: return new SetVariableRunnable(config.toJSON(), eventTarget);
     }
   }
 

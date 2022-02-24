@@ -3,7 +3,6 @@ import { Cookies } from '../../lib/cookies/Cookies.js';
 import { Headers } from '../../lib/headers/Headers.js';
 import { IHttpRequest } from '../../models/HttpRequest.js';
 import { ExecutionContext } from './ModulesRegistry.js';
-import { ISentRequest } from '../../models/SentRequest.js';
 import { IResponseRedirect } from '../../models/ResponseRedirect.js';
 import { IArcResponse } from '../../models/ArcResponse.js';
 import { IErrorResponse } from '../../models/ErrorResponse.js';

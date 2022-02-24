@@ -186,25 +186,34 @@ export interface IHttpProject extends IProjectDefinitionProperty {
    */
   provider?: IProvider;
   /**
-   * The environments defined for this project.
-   */
-  environments: IEnvironment[];
-  /**
    * The ordered list of HTTP requests / folders in the projects.
    * The UI uses this to manipulate the view without changing the definitions.
    */
   items: IProjectItem[];
   /**
-   * The list of all requests stored in this project.
-   * Note, this is not used to visualized the request in the UI.
-   * This is just the source of data.
-   * The `items` property is used to build the view.
+   * The project definitions.
+   * This is where all the data are stored.
    */
-  definitions: (IProjectRequest | IProjectFolder)[];
+  definitions: IHttpProjectDefinitions;
   /**
-   * The list of schemas in the HTTP project.
+   * The list of environment keys to apply to the project.
+   * Each key references an environment in the `definitions.environments` array.
    */
+  environments?: string[];
+}
+
+export interface IHttpProjectDefinitions {
+  requests?: IProjectRequest[];
+  folders?: IProjectFolder[];
   schemas?: IProjectSchema[];
+  environments?: IEnvironment[];
+}
+
+interface HttpProjectDefinitions {
+  requests: ProjectRequest[];
+  folders: ProjectFolder[];
+  schemas: ProjectSchema[];
+  environments: Environment[];
 }
 
 /**
@@ -227,21 +236,17 @@ export class HttpProject extends ProjectParent {
    * This is just the source of data.
    * The `items` property is used to build the view.
    */
-  definitions: (ProjectRequest | ProjectFolder)[] = [];
-  /**
-   * May be set post project loading. THe list of items id that have no corresponding definitions.
-   */
-  missingDefinitions?: string[];
-  /**
-   * The list of schemas in the HTTP project.
-   */
-  schemas: ProjectSchema[] = [];
+  definitions: HttpProjectDefinitions = HttpProject.defaultDefinitions();
+
+  static defaultDefinitions(): HttpProjectDefinitions {
+    return { environments: [], folders: [], requests: [], schemas: [] };
+  }
 
   get effectiveEnvironments(): Environment[] {
     if (Array.isArray(this.initEnvironments)) {
       return this.initEnvironments;
     }
-    return this.environments;
+    return this.definitions.environments || [];
   }
 
   /**
@@ -328,8 +333,7 @@ export class HttpProject extends ProjectParent {
       init = {
         kind: Kind,
         key: v4(),
-        definitions: [],
-        environments: [],
+        definitions: {},
         items: [],
         info: {
           kind: ThingKind,
@@ -346,14 +350,14 @@ export class HttpProject extends ProjectParent {
    * Note, this throws an error when the project is not an ARC project.
    */
   new(init: IHttpProject): void {
-    if (!init || !init.definitions || !init.environments || !init.items) {
+    if (!init || !init.definitions || !init.items) {
       throw new Error(`Not an ARC project.`);
     }
-    const { key = v4(), definitions, environments, items, info, license, provider, schemas } = init;
+    const { key = v4(), definitions = {}, items, info, license, provider, environments } = init;
     this.key = key;
     this.environments = [];
     if (Array.isArray(environments)) {
-      this.environments = environments.map(i => new Environment(i));
+      this.environments = environments;
     }
     if (license) {
       this.license = new License(license);
@@ -374,45 +378,26 @@ export class HttpProject extends ProjectParent {
     if (Array.isArray(items)) {
       this.items = items.map(i => new ProjectItem(this, i));
     }
-    this.definitions = [];
-    if (Array.isArray(definitions)) {
-      definitions.forEach((item) => {
-        if (ProjectFolder.isProjectFolder(item)) {
-          const instance = new ProjectFolder(this, item as IProjectFolder);
-          this.definitions.push(instance);
-          instance.attachedCallback();
-        } else if (ProjectRequest.isProjectRequest(item)) {
-          const instance = new ProjectRequest(this, item as IProjectRequest);
-          this.definitions.push(instance);
-          instance.attachedCallback();
-        } else {
-          console.warn('Unknown definition', item);
-        }
+    this.definitions = HttpProject.defaultDefinitions();
+    if (Array.isArray(definitions.environments)) {
+      this.definitions.environments = definitions.environments.map(i => new Environment(i));
+    }
+    if (Array.isArray(definitions.requests)) {
+      this.definitions.requests = definitions.requests.map(i => {
+        const instance = new ProjectRequest(this, i);
+        instance.attachedCallback();
+        return instance;
       });
     }
-    this.schemas = [];
-    if (Array.isArray(schemas)) {
-      this.schemas = schemas.map(i => new ProjectSchema(i));
+    if (Array.isArray(definitions.folders)) {
+      this.definitions.folders = definitions.folders.map(i => {
+        const instance = new ProjectFolder(this, i);
+        instance.attachedCallback();
+        return instance;
+      });
     }
-    this.postCreate();
-  }
-
-  /**
-   * A function that can be overwritten and is called when the project was created.
-   */
-  postCreate(): void {
-    const { items, definitions } = this;
-    const missingDefinitions: string[] = [];
-    items.forEach((i) => {
-      const definition = definitions.find(d => d.key === i.key);
-      if (!definition) {
-        missingDefinitions.push(i.key);
-      }
-    });
-    if (missingDefinitions.length) {
-      this.missingDefinitions = missingDefinitions;
-    } else {
-      this.missingDefinitions = undefined;
+    if (Array.isArray(definitions.schemas)) {
+      this.definitions.schemas = definitions.schemas.map(i => new ProjectSchema(i));
     }
   }
 
@@ -420,22 +405,28 @@ export class HttpProject extends ProjectParent {
     const result: IHttpProject = {
       kind: Kind,
       key: this.key,
-      definitions: [],
+      definitions: {},
       environments: [],
       items: [],
       info: this.info.toJSON(),
     };
-    if (Array.isArray(this.definitions) && this.definitions.length) {
-      result.definitions = this.definitions.map(i => i.toJSON());
+    if (Array.isArray(this.definitions.environments) && this.definitions.environments.length) {
+      result.definitions.environments = this.definitions.environments.map(i => i.toJSON());
+    }
+    if (Array.isArray(this.definitions.requests) && this.definitions.requests.length) {
+      result.definitions.requests = this.definitions.requests.map(i => i.toJSON());
+    }
+    if (Array.isArray(this.definitions.folders) && this.definitions.folders.length) {
+      result.definitions.folders = this.definitions.folders.map(i => i.toJSON());
+    }
+    if (Array.isArray(this.definitions.schemas) && this.definitions.schemas.length) {
+      result.definitions.schemas = this.definitions.schemas.map(i => i.toJSON());
     }
     if (Array.isArray(this.environments) && this.environments.length) {
-      result.environments = this.environments.map(i => i.toJSON());
+      result.environments = this.environments;
     }
     if (Array.isArray(this.items) && this.items.length) {
       result.items = this.items.map(i => i.toJSON());
-    }
-    if (Array.isArray(this.schemas) && this.schemas.length) {
-      result.schemas = this.schemas.map(i => i.toJSON());
     }
     if (this.provider) {
       result.provider = this.provider.toJSON();
@@ -460,20 +451,14 @@ export class HttpProject extends ProjectParent {
    * @returns The parent or undefine when not found.
    */
   findParent(key: string): ProjectFolder | HttpProject | undefined {
-    const { definitions = [], items = [] } = this;
+    const { definitions, items = [] } = this;
     const projectItemsIndex = items.findIndex(i => i.key === key);
     if (projectItemsIndex > -1) {
       return this;
     }
-    const definition = definitions.find(i => {
-      if (i.kind === ProjectFolderKind) {
-        const project = (i as ProjectFolder);
-        return project.items.some(item => item.key === key);
-      }
-      return false;
-    });
+    const definition = definitions.folders.find(i => i.items.some(item => item.key === key));
     if (definition) {
-      return definition as ProjectFolder;
+      return definition;
     }
     return undefined;
   }
@@ -521,8 +506,8 @@ export class HttpProject extends ProjectParent {
     if (!Array.isArray(this.items)) {
       this.items = [];
     }
-    if (!Array.isArray(this.definitions)) {
-      this.definitions = [];
+    if (!Array.isArray(this.definitions.folders)) {
+      this.definitions.folders = [];
     }
     const { skipExisting, parent } = opts;
     let root: ProjectFolder | HttpProject;
@@ -553,7 +538,7 @@ export class HttpProject extends ProjectParent {
       }
     }
 
-    this.definitions.push(definition);
+    this.definitions.folders.push(definition);
     const item = ProjectItem.projectFolder(this, definition.key);
     if (!Array.isArray(root.items)) {
       root.items = [];
@@ -575,8 +560,8 @@ export class HttpProject extends ProjectParent {
    * @returns Found project folder or undefined.
    */
   findFolder(nameOrKey: string, opts: IFolderSearchOptions = {}): ProjectFolder | undefined {
-    const { definitions = [] } = this;
-    const item = definitions.find((i) => {
+    const { definitions } = this;
+    const item = definitions.folders.find((i) => {
       if (i.kind !== ProjectFolderKind) {
         return false;
       }
@@ -601,7 +586,7 @@ export class HttpProject extends ProjectParent {
    * @returns The removed folder definition or undefined when not removed.
    */
   removeFolder(key: string, opts: IFolderDeleteOptions = {}): ProjectFolder | undefined {
-    const { definitions = [] } = this;
+    const { definitions } = this;
     const folder = this.findFolder(key, { keyOnly: true });
     if (!folder) {
       if (opts.safe) {
@@ -623,8 +608,8 @@ export class HttpProject extends ProjectParent {
     folders.forEach(f => f.remove());
 
     const itemIndex = parent.items.findIndex(i => i.key === key);
-    const definitionIndex = definitions.findIndex(i => i.key === key);
-    definitions.splice(definitionIndex, 1);
+    const definitionIndex = definitions.folders.findIndex(i => i.key === key);
+    definitions.folders.splice(definitionIndex, 1);
     folder.detachedCallback();
     if (itemIndex >= 0) {
       parent.items.splice(itemIndex, 1);
@@ -733,15 +718,15 @@ export class HttpProject extends ProjectParent {
    * @returns The inserted into the definitions request.
    */
   addRequest(request: IProjectRequest | ProjectRequest | string, opts: IRequestAddOptions = {}): ProjectRequest {
-    if (!Array.isArray(this.definitions)) {
-      this.definitions = [];
+    if (!Array.isArray(this.definitions.requests)) {
+      this.definitions.requests = [];
     }
 
     // the request can be already added to the project as the same method is used to refresh a request after 
     // a store update. From the system perspective it is the same event.
 
     if (typeof request === 'object' && request.key) {
-      const existing = this.definitions.find(i => i.key === request.key) as ProjectRequest | undefined;
+      const existing = this.definitions.requests.find(i => i.key === request.key);
       if (existing) {
         existing.new(request as IProjectRequest);
         return existing;
@@ -788,7 +773,7 @@ export class HttpProject extends ProjectParent {
       }
     }
 
-    this.definitions.push(finalRequest);
+    this.definitions.requests.push(finalRequest);
     const item = ProjectItem.projectRequest(this, finalRequest.key);
 
     if (typeof opts.index === 'number') {
@@ -820,12 +805,8 @@ export class HttpProject extends ProjectParent {
    * @returns Found project request or undefined.
    */
   findRequest(nameOrKey: string, opts: IRequestSearchOptions = {}): ProjectRequest | undefined {
-    const { definitions = [] } = this;
-    const item = definitions.find((i) => {
-      if (i.kind !== ProjectRequestKind) {
-        return false;
-      }
-      const request = (i as ProjectRequest);
+    const { definitions } = this;
+    const item = definitions.requests.find((request) => {
       if (request.key === nameOrKey) {
         return true;
       }
@@ -848,7 +829,7 @@ export class HttpProject extends ProjectParent {
    * @returns The removed request definition or undefined when not removed.
    */
   removeRequest(key: string, opts: IRequestDeleteOptions = {}): ProjectRequest | undefined {
-    const { definitions = [] } = this;
+    const { definitions } = this;
     const request = this.findRequest(key, { keyOnly: true });
     if (!request) {
       if (opts.safe) {
@@ -864,8 +845,8 @@ export class HttpProject extends ProjectParent {
       throw new Error(`Unable to find a parent of the request ${key}`);
     }
     const itemIndex = parent.items.findIndex(i => i.key === key);
-    const definitionIndex = definitions.findIndex(i => i.key === key);
-    definitions.splice(definitionIndex, 1);
+    const definitionIndex = definitions.requests.findIndex(i => i.key === key);
+    definitions.requests.splice(definitionIndex, 1);
     request.detachedCallback();
     if (itemIndex >= 0) {
       parent.items.splice(itemIndex, 1);
@@ -951,9 +932,9 @@ export class HttpProject extends ProjectParent {
     const result: ProjectFolder[] = [];
     const { definitions } = this;
     items.forEach((i) => {
-      const definition = definitions.find(d => i.key === d.key);
+      const definition = definitions.folders.find(d => i.key === d.key);
       if (definition) {
-        result.push(definition as ProjectFolder);
+        result.push(definition);
       }
     });
     return result;
@@ -978,9 +959,9 @@ export class HttpProject extends ProjectParent {
     const result: ProjectRequest[] = [];
     const { definitions } = this;
     items.forEach((i) => {
-      const definition = definitions.find(d => i.key === d.key);
+      const definition = definitions.requests.find(d => i.key === d.key);
       if (definition) {
-        result.push(definition as ProjectRequest);
+        result.push(definition);
       }
     });
     return result;
@@ -990,7 +971,7 @@ export class HttpProject extends ProjectParent {
    * Lists definitions for the `items` of the project or a folder.
    * @param folder Optionally the folder name to list the definitions for.
    */
-  listDefinitions(folder?: string): (ProjectFolder | ProjectRequest)[] {
+  listDefinitions(folder?: string): (ProjectFolder | ProjectRequest | Environment)[] {
     let root;
     if (folder) {
       const parent = this.findFolder(folder);
@@ -1001,15 +982,28 @@ export class HttpProject extends ProjectParent {
     } else {
       root = this;
     }
-    const result: (ProjectFolder | ProjectRequest)[] = [];
+    const result: (ProjectFolder | ProjectRequest | Environment)[] = [];
     const { items = [] } = root;
-    const { definitions = [] } = this;
+    const { definitions } = this;
     items.forEach((item) => {
-      const definition = definitions.find(d => item.key === d.key);
+      let definition: ProjectFolder | ProjectRequest | undefined;
+      if (item.kind === ProjectFolderKind) {
+        definition = definitions.folders.find(d => item.key === d.key);
+      } else if (item.kind === ProjectRequestKind) {
+        definition = definitions.requests.find(d => item.key === d.key);
+      }
       if (definition) {
         result.push(definition);
       }
     });
+    if (Array.isArray(root.environments)) {
+      root.environments.map((id) => {
+        const definition = definitions.environments.find(d => d.key === id);
+        if (definition) {
+          result.push(definition);
+        }
+      });
+    }
     return result;
   }
 
@@ -1114,40 +1108,54 @@ export class HttpProject extends ProjectParent {
    * @param src The project instance to re-generate keys for.
    */
   static regenerateKeys(src: HttpProject): void {
-    const { items = [], definitions = [], schemas = [], environments = [] } = src;
-
+    const { items = [], definitions } = src;
     // create a flat list of all "items" in the project and all folders.
     let flatItems = [...items];
-    definitions.forEach((item) => {
-      if (item.kind === ProjectFolderKind) {
-        const folder = (item as ProjectFolder);
-        if (Array.isArray(folder.items) && folder.items.length) {
-          flatItems = flatItems.concat(folder.items);
-        }
+    (definitions.folders || []).forEach((folder) => {
+      if (Array.isArray(folder.items) && folder.items.length) {
+        flatItems = flatItems.concat(folder.items);
       }
     });
-
-    // iterates over definitions and changes the keys in the definition and the related "item".
-    definitions.forEach((item) => {
-      const oldKey = item.key;
-      if (!oldKey) {
-        return;
+    const withEnvironments: (HttpProject | ProjectFolder)[] = [];
+    if (Array.isArray(src.environments) && src.environments.length) {
+      withEnvironments.push(src);
+    }
+    (definitions.folders || []).forEach((folder) => {
+      if (Array.isArray(folder.environments) && folder.environments.length) {
+        withEnvironments.push(folder);
       }
+      const oldKey = folder.key;
       const indexObject = flatItems.find(i => i.key === oldKey);
       if (!indexObject) {
         return;
       }
       const newKey = v4();
       indexObject.key = newKey;
-      item.key = newKey;
+      folder.key = newKey;
     });
-
-    environments.forEach((env) => {
-      env.key = v4();
+    (definitions.requests || []).forEach((request) => {
+      const oldKey = request.key;
+      const indexObject = flatItems.find(i => i.key === oldKey);
+      if (!indexObject) {
+        return;
+      }
+      const newKey = v4();
+      indexObject.key = newKey;
+      request.key = newKey;
     });
-
-    schemas.forEach((env) => {
-      env.key = v4();
+    (definitions.schemas || []).forEach((schema) => {
+      schema.key = v4();
+    });
+    (definitions.environments || []).forEach((environment) => {
+      // project or folder that has the environment.
+      const parent = withEnvironments.find(item => item.environments.includes(environment.key));
+      const oldKey = environment.key;
+      const newKey = v4();
+      environment.key = newKey;
+      if (parent) {
+        const index = parent.environments.indexOf(oldKey);
+        parent.environments[index] = newKey;
+      }
     });
   }
 
@@ -1176,13 +1184,13 @@ export class HttpProject extends ProjectParent {
    * @returns The inserted into the schemas schema.
    */
   addSchema(schema: IProjectSchema | ProjectSchema | string, opts: ISchemaAddOptions = {}): ProjectSchema {
-    if (!Array.isArray(this.schemas)) {
-      this.schemas = [];
+    if (!Array.isArray(this.definitions.schemas)) {
+      this.definitions.schemas = [];
     }
 
     // this renews existing schema
     if (typeof schema === 'object' && schema.key) {
-      const existing = this.schemas.find(i => i.key === schema.key) as ProjectSchema | undefined;
+      const existing = this.definitions.schemas.find(i => i.key === schema.key) as ProjectSchema | undefined;
       if (existing) {
         existing.new(schema as IProjectSchema);
         return existing;
@@ -1202,15 +1210,15 @@ export class HttpProject extends ProjectParent {
     }
     const { index } = opts;
     const hasIndex = typeof index === 'number';
-    if (hasIndex && this.schemas.length > index) {
+    if (hasIndex && this.definitions.schemas.length > index) {
       // comparing to the `.length` and not `.length - 1` in case we are adding at the end.
-      const maxIndex = Math.max(this.schemas.length, 0);
+      const maxIndex = Math.max(this.definitions.schemas.length, 0);
       if (index > maxIndex) {
         throw new RangeError(`Index out of bounds. Maximum index is ${maxIndex}.`);
       }
-      this.schemas.splice(index, 0, finalSchema);
+      this.definitions.schemas.splice(index, 0, finalSchema);
     } else {
-      this.schemas.push(finalSchema);
+      this.definitions.schemas.push(finalSchema);
     }
     return finalSchema;
   }
@@ -1219,17 +1227,17 @@ export class HttpProject extends ProjectParent {
    * @returns The current list of schemas in the project.
    */
   listSchemas(): ProjectSchema[] {
-    if (!Array.isArray(this.schemas)) {
+    if (!Array.isArray(this.definitions.schemas)) {
       return [];
     }
-    return this.schemas;
+    return this.definitions.schemas;
   }
 
   /**
    * Iterates over requests in the project,
    */
   * requestIterator(opts: IProjectRequestIterator = {}): Generator<ProjectRequest> {
-    const { definitions=[] } = this;
+    const { definitions } = this;
     const { ignore=[], parent, recursive, requests=[] } = opts;
     const root = parent ? this.findFolder(parent) : this;
     if (!root) {
@@ -1243,9 +1251,11 @@ export class HttpProject extends ProjectParent {
       if (ignore.includes(item.key)) {
         continue;
       }
-      const def = definitions.find(i => i.key === item.key);
       if (item.kind === ProjectRequestKind) {
-        const request = def as ProjectRequest;
+        const request = definitions.requests.find(i => i.key === item.key);
+        if (!request) {
+          continue;
+        }
         const name = request.info.name || '';
         if (ignore.includes(name)) {
           continue;
@@ -1255,7 +1265,10 @@ export class HttpProject extends ProjectParent {
         }
         yield request;
       } else if (recursive && item.kind === ProjectFolderKind) {
-        const folder = def as ProjectFolder;
+        const folder = definitions.folders.find(i => i.key === item.key);
+        if (!folder) {
+          continue;
+        }
         const name = folder.info.name || '';
         if (ignore.includes(name)) {
           continue;

@@ -33,9 +33,9 @@ describe('Models', () => {
       it('the project has requests and corresponding items', () => {
         const { definitions, items } = projects[0];
         assert.lengthOf(items, 1);
-        assert.lengthOf(definitions, 1);
+        assert.lengthOf(definitions.requests, 1);
         const [item] = items;
-        const [def] = definitions;
+        const [def] = definitions.requests;
         
         assert.equal(item.kind, 'ARC#ProjectRequest');
         assert.equal(item.key, def.key);
@@ -121,20 +121,22 @@ describe('Models', () => {
 
         // check request exists in project 1
         assert.ok(p1);
-        const r1 = p1.definitions.find(i => i.key === _id);
+        const r1 = p1.definitions.requests.find(i => i.key === _id);
         assert.ok(r1);
 
         // check request exists in project 2
         assert.ok(p2);
-        const r2 = p2.definitions.find(i => i.key === _id);
+        const r2 = p2.definitions.requests.find(i => i.key === _id);
         assert.ok(r2);
       });
 
       it('adds environments to the generated projects', () => {
         const [project] = result;
-        const {environments} = project.toJSON();
+        const { environments: envIds, definitions } = project.toJSON();
+        const { environments } = definitions;
         
-        assert.lengthOf(environments, 3, 'has all environments');
+        assert.lengthOf(envIds, 3, 'has all environment ids');
+        assert.lengthOf(environments, 3, 'has all environment definitions');
         const [env] = environments;
         const [variable] = generatedVariables;
         assert.equal(env.info.name, variable.environment, 'sets the environment name');

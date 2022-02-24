@@ -1,4 +1,4 @@
-import { Kind as FolderKind, ProjectFolder } from './ProjectFolder.js';
+import { Kind as ProjectFolderKind, ProjectFolder } from './ProjectFolder.js';
 import { Kind as ProjectRequestKind, ProjectRequest } from './ProjectRequest.js';
 import { HttpProject } from './HttpProject.js';
 
@@ -6,7 +6,7 @@ export interface IProjectItem {
   /**
    * The kind of the item.
    */
-  kind: typeof FolderKind | typeof ProjectRequestKind;
+  kind: typeof ProjectFolderKind | typeof ProjectRequestKind;
   /**
    * The identifier in the `definitions` array of the project.
    */
@@ -17,7 +17,7 @@ export class ProjectItem {
   /**
    * The kind of the item.
    */
-  kind: typeof FolderKind | typeof ProjectRequestKind = ProjectRequestKind;
+  kind: typeof ProjectFolderKind | typeof ProjectRequestKind = ProjectRequestKind;
   /**
    * The identifier of the object in the `definitions` array of the project.
    */
@@ -32,7 +32,7 @@ export class ProjectItem {
    */
   static isProjectItem(input: unknown): boolean {
     const typed = input as IProjectItem;
-    if (!input || ![FolderKind, ProjectRequestKind].includes(typed.kind)) {
+    if (!input || ![ProjectFolderKind, ProjectRequestKind].includes(typed.kind)) {
       return false;
     }
     return true;
@@ -54,7 +54,7 @@ export class ProjectItem {
    */
   static projectFolder(project: HttpProject, key: string) : ProjectItem {
     const item = new ProjectItem(project, {
-      kind: FolderKind,
+      kind: ProjectFolderKind,
       key,
     });
     return item;
@@ -75,7 +75,7 @@ export class ProjectItem {
         };
       } else if (input === 'folder') {
         init = {
-          kind: FolderKind,
+          kind: ProjectFolderKind,
           key: '',
         };
       } else {
@@ -115,9 +115,14 @@ export class ProjectItem {
    * @returns The instance of the definition associated with this item.
    */
   getItem(): ProjectFolder | ProjectRequest| undefined {
-    const { project, key } = this;
+    const { project, key, kind } = this;
     const { definitions } = project;
-    return definitions.find(i => i.key === key);
+    if (kind === ProjectRequestKind) {
+      return definitions.requests.find(i => i.key === key);
+    }
+    if (kind === ProjectFolderKind) {
+      return definitions.folders.find(i => i.key === key);
+    }
   }
 
   /**

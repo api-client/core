@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { PostmanTransformer, dataValue, paramValue } from './PostmanTransformer.js';
 import { HttpProject, IHttpProject, Kind as ProjectKind } from '../HttpProject.js';
 import { ProjectFolder } from '../ProjectFolder.js';
@@ -143,7 +144,7 @@ export class PostmanBackupTransformer extends PostmanTransformer {
     const { description, id, name } = collection;
     const init: IHttpProject = {
       kind: ProjectKind,
-      definitions: [],
+      definitions: {},
       environments: [],
       info: {
         kind: 'ARC#Thing',
