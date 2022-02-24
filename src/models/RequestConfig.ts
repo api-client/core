@@ -113,10 +113,42 @@ export class RequestConfig {
    */
   defaultHeaders?: boolean;
   /**
+   * Default `user-agent` header to be used with request when `defaultHeaders`
+   * is set.
+   *
+   * @default api-client
+   */
+  defaultUserAgent?: string;
+  /**
+   * Default `accept` header to be used with request when `defaultHeaders`
+   * is set.
+   * @default *\/*
+   */
+  defaultAccept?: string;
+  /**
    * A list of variables to use with the request.
    * Note, request variables override application and workspace variables.
    */
   variables?: Property[];
+  /**
+   * The proxy URI to connect to when making the connection.
+   * It should contain the host and port. Default port is 80.
+   */
+  proxy?: string;
+  /**
+   * The proxy authorization username value.
+   */
+  proxyUsername?: string;
+  /**
+   * The proxy authorization password value.
+   */
+  proxyPassword?: string;
+  /**
+   * A limit of characters to include into the `sentHttpMessage` property
+   * of the request object. 0 to disable limit. Default to 2048.
+   * @default 2048
+   */
+  sentMessageLimit?: number;
 
   static withDefaults(): RequestConfig {
     return new RequestConfig({
@@ -177,7 +209,10 @@ export class RequestConfig {
    * Note, this throws an error when the object is not an ARC request configuration. 
    */
   new(init: IRequestConfig): void {
-    const { enabled, followRedirects, ignoreSessionCookies, validateCertificates, defaultHeaders, timeout, hosts, variables } = init;
+    const { 
+      enabled, followRedirects, ignoreSessionCookies, validateCertificates, defaultHeaders, timeout, hosts, variables,
+      defaultAccept, defaultUserAgent, proxy, proxyPassword, proxyUsername, sentMessageLimit,
+    } = init;
     this.kind = Kind;
     if (typeof enabled === 'boolean') {
       this.enabled = enabled;
@@ -218,6 +253,36 @@ export class RequestConfig {
       this.variables = variables.map(i => new Property(i))
     } else {
       this.variables = [];
+    }
+    if (typeof defaultAccept === 'string') {
+      this.defaultAccept = defaultAccept;
+    } else {
+      this.defaultAccept = undefined;
+    }
+    if (typeof defaultUserAgent === 'string') {
+      this.defaultUserAgent = defaultUserAgent;
+    } else {
+      this.defaultUserAgent = undefined;
+    }
+    if (typeof proxy === 'string') {
+      this.proxy = proxy;
+    } else {
+      this.proxy = undefined;
+    }
+    if (typeof proxyUsername === 'string') {
+      this.proxyUsername = proxyUsername;
+    } else {
+      this.proxyUsername = undefined;
+    }
+    if (typeof proxyPassword === 'string') {
+      this.proxyPassword = proxyPassword;
+    } else {
+      this.proxyPassword = undefined;
+    }
+    if (typeof sentMessageLimit === 'number') {
+      this.sentMessageLimit = sentMessageLimit;
+    } else {
+      this.sentMessageLimit = undefined;
     }
   }
 

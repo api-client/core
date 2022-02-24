@@ -1,5 +1,3 @@
-import * as PatchUtils from './PatchUtils.js';
-
 /**
  * An interface describing a provider of a thing.
  */
@@ -96,71 +94,5 @@ export class Provider {
       result.name = this.name;
     }
     return result;
-  }
-
-  /**
-   * Patches the Provider.
-   * @param operation The operation to perform.
-   * @param path The path to the value to update.
-   * @param value Optional, the value to set.
-   */
-  patch(operation: PatchUtils.PatchOperation, path: string, value?: unknown): any {
-    if (!PatchUtils.patchOperations.includes(operation)) {
-      throw new Error(`Unknown operation: ${operation}`);
-    }
-    if (PatchUtils.valueRequiredOperations.includes(operation) && typeof value === 'undefined') {
-      throw new Error(PatchUtils.TXT_value_required);
-    }
-
-    const parts = path.split('.');
-    this.validatePatch(operation, parts, value);
-    const root: keyof IProvider = parts[0] as keyof IProvider;
-    switch (operation) {
-      case 'append': return this.patchAppend(root);
-      case 'delete': return this.patchDelete(root);
-      case 'set': return this.patchSet(root, value);
-    }
-  }
-
-  protected patchDelete(property: keyof IProvider): any {
-    const props = ['name', 'url', 'email'];
-    if (!props.includes(property)) {
-      throw new Error(PatchUtils.TXT_unknown_property);
-    }
-    const old = this[property];
-    delete this[property];
-    return old;
-  }
-
-  protected patchSet(property: keyof IProvider, value: unknown): any {
-    const props = ['name', 'url', 'email'];
-    if (!props.includes(property)) {
-      throw new Error(PatchUtils.TXT_unknown_property);
-    }
-    const old = this[property];
-    this[property] = String(value);
-    return old;
-  }
-
-  protected patchAppend(property: keyof IProvider): any {
-    throw new Error(`Unable to "append" to the "${property}" property. Did you mean "set"?`);
-  }
-
-  validatePatch(operation: PatchUtils.PatchOperation, path: string[], value?: unknown): void {
-    if (path.length !== 1) {
-      throw new Error(PatchUtils.TXT_unknown_path);
-    }
-    const root: keyof IProvider = path[0] as keyof IProvider;
-    switch (root) {
-      case 'name':
-      case 'url':
-      case 'email':
-        PatchUtils.validateTextInput(operation, value);
-        break;
-      case 'kind':
-        throw new Error(PatchUtils.TXT_delete_kind);
-      default:
-        throw new Error(PatchUtils.TXT_unknown_path);
-    }
   }
 }

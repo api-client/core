@@ -1,6 +1,5 @@
 import { assert } from '@esm-bundle/chai';
 import { Provider, IProvider, Kind as ProviderKind } from '../../src/models/Provider.js';
-import * as PatchUtils from '../../src/models/PatchUtils.js';
 
 describe('Models', () => {
   describe('Provider', () => {
@@ -120,65 +119,6 @@ describe('Models', () => {
         instance.name = 'test'
         const result = instance.toJSON();
         assert.equal(result.name, 'test');
-      });
-    });
-
-    describe('patch()', () => {
-      const properties: (keyof Provider)[] = [
-        'name',
-        'url',
-        'email'
-      ];
-
-      properties.forEach((property) => {
-        it(`updates the value of the ${property} property`, () => {
-          const license = new Provider();
-          license.patch('set', property, 'test');
-          assert.equal(license[property], 'test');
-        });
-
-        it(`deletes the value of the ${property} property`, () => {
-          const license = new Provider();
-          license.patch('set', property, 'test');
-          license.patch('delete', property);
-          assert.isUndefined(license[property]);
-        });
-
-        it(`throws when trying to append to ${property}`, () => {
-          const folder = new Provider();
-          assert.throws(() => {
-            folder.patch('append', property, 'test');
-          }, Error, `Unable to "append" to the "${property}" property. Did you mean "set"?`);
-        });
-      });
-
-      it(`throws when accessing an unknown property`, () => {
-        const license = new Provider();
-        assert.throws(() => {
-          license.patch('set', `some`, 'a');
-        }, Error, PatchUtils.TXT_unknown_path);
-      });
-
-      it(`throws when accessing the kind`, () => {
-        const license = new Provider();
-        assert.throws(() => {
-          license.patch('set', `kind`, 'a');
-        }, Error, PatchUtils.TXT_delete_kind);
-      });
-
-      it(`throws when accessing an unknown operation`, () => {
-        const license = new Provider();
-        assert.throws(() => {
-          // @ts-ignore
-          license.patch('other', `name`, 'a');
-        }, Error, `Unknown operation: other`);
-      });
-
-      it(`throws when not providing a value when required`, () => {
-        const license = new Provider();
-        assert.throws(() => {
-          license.patch('set', `name`, undefined);
-        }, Error, PatchUtils.TXT_value_required);
       });
     });
   });

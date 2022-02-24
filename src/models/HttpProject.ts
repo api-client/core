@@ -10,7 +10,6 @@ import { IProjectRequest, ProjectRequest, Kind as ProjectRequestKind } from './P
 import { ProjectSchema, IProjectSchema } from './ProjectSchema.js';
 import { Request } from './Request.js';
 import v4 from '../lib/uuid.js';
-import * as PatchUtils from './PatchUtils.js';
 import { ARCSavedRequest, ARCHistoryRequest } from './legacy/request/ArcRequest.js';
 import { ArcLegacyProject, ARCProject } from './legacy/models/ArcLegacyProject.js';
 import { PostmanDataTransformer } from './transformers/PostmanDataTransformer.js';
@@ -544,7 +543,6 @@ export class HttpProject extends ProjectParent {
     } else {
       definition = new ProjectFolder(this, init);
     }
-
     if (skipExisting) {
       const folders = root.listFolderItems();
       for (const item of folders) {
@@ -662,9 +660,10 @@ export class HttpProject extends ProjectParent {
     if (!target) {
       throw new Error(`Unable to locate the new parent folder ${parent}`);
     }
-
-    if (typeof index === 'number') {
-      const maxIndex = Math.max(target.items.length - 1, 0);
+    const hasIndex = typeof index === 'number';
+    if (hasIndex) {
+      // comparing to the `.length` and not `.length - 1` in case we are adding at the end.
+      const maxIndex = Math.max(target.items.length, 0);
       if (index > maxIndex) {
         throw new RangeError(`Index out of bounds. Maximum index is ${maxIndex}.`);
       }
@@ -674,7 +673,7 @@ export class HttpProject extends ProjectParent {
     const item = parentFolder.items.splice(itemIndex, 1)[0];
     movedFolder.detachedCallback();
 
-    if (typeof index === 'number') {
+    if (hasIndex && target.items.length > index) {
       target.items.splice(index, 0, item);
     } else {
       target.items.push(item);
@@ -896,9 +895,10 @@ export class HttpProject extends ProjectParent {
     if (!target) {
       throw new Error(`Unable to locate the new parent folder ${parent}`);
     }
-
-    if (typeof index === 'number') {
-      const maxIndex = Math.max(target.items.length - 1, 0);
+    const hasIndex = typeof index === 'number';
+    if (hasIndex) {
+      // comparing to the `.length` and not `.length - 1` in case we are adding at the end.
+      const maxIndex = Math.max(target.items.length, 0);
       if (index > maxIndex) {
         throw new RangeError(`Index out of bounds. Maximum index is ${maxIndex}.`);
       }
@@ -908,7 +908,7 @@ export class HttpProject extends ProjectParent {
     const item = parentFolder.items.splice(itemIndex, 1)[0];
     request.detachedCallback();
 
-    if (typeof index === 'number') {
+    if (hasIndex && target.items.length > index) {
       target.items.splice(index, 0, item);
     } else {
       target.items.push(item);
@@ -1011,117 +1011,6 @@ export class HttpProject extends ProjectParent {
       }
     });
     return result;
-  }
-
-  /**
-   * Patches the project.
-   * @param operation The operation to perform.
-   * @param path The path to the value to update.
-   * @param value Optional, the value to set.
-   */
-  patch(operation: PatchUtils.PatchOperation, path: string, value?: unknown): PatchUtils.StorePatchResult | undefined {
-    if (!PatchUtils.patchOperations.includes(operation)) {
-      throw new Error(`Unknown operation: ${operation}.`);
-    }
-    if (PatchUtils.valueRequiredOperations.includes(operation) && typeof value === 'undefined') {
-      throw new Error(PatchUtils.TXT_value_required);
-    }
-    const parts = path.split('.');
-    this.validatePatch(parts);
-    // const root: keyof HttpProject = parts[0] as keyof HttpProject;
-    const root: string = parts[0];
-
-    let oldValue: unknown | undefined;
-    if (root === 'info') {
-      oldValue = this.info.patch(operation, parts.slice(1).join('.'), value);
-    } else if (root === 'license') {
-      oldValue = this.patchLicense(operation, parts.slice(1).join('.'), value);
-    } else if (root === 'provider') {
-      oldValue = this.patchProvider(operation, parts.slice(1).join('.'), value);
-    } else if (root === 'requests') {
-      oldValue = this.patchRequest(operation, value);
-    }
-    return {
-      path,
-      time: Date.now(),
-      operation,
-      oldValue,
-      value,
-      id: this.key,
-      kind: Kind,
-    };
-  }
-
-  validatePatch(path: string[]): void {
-    if (!path.length) {
-      throw new Error(PatchUtils.TXT_unknown_path);
-    }
-    // const root: keyof HttpProject = path[0] as keyof HttpProject;
-    const root: string = path[0];
-    switch (root) {
-      case 'items':
-      case 'environments':
-      case 'definitions':
-        throw new Error(PatchUtils.TXT_use_command_instead);
-      case 'kind':
-        throw new Error(PatchUtils.TXT_delete_kind);
-      case 'info':
-      case 'license':
-      case 'provider':
-        // they have their own validators.
-        return;
-      case 'requests':
-        // allowed for now
-        return;
-      default:
-        throw new Error(PatchUtils.TXT_unknown_path);
-    }
-  }
-
-  /**
-   * Shortcut to read provider info, create it if missing, and calling patch on the provider.
-   */
-  patchProvider(operation: PatchUtils.PatchOperation, path: string, value?: unknown): any | undefined {
-    return this.ensureProvider().patch(operation, path, value);
-  }
-
-  /**
-   * Shortcut to read license info, create it if missing, and calling patch on the license.
-   */
-  patchLicense(operation: PatchUtils.PatchOperation, path: string, value?: unknown): any | undefined {
-    return this.ensureLicense().patch(operation, path, value);
-  }
-
-  /**
-   * Performs the PATCH operation on a request.
-   * 
-   * @returns The old value, if applicable.
-   */
-  patchRequest(operation: PatchUtils.PatchOperation, value: unknown): any | undefined {
-    if (operation === 'append') {
-      if (!value) {
-        throw new Error(`The value for the "append" operation must be set.`);
-      }
-      const pr = value as IProjectRequest;
-      if (!pr.key) {
-        // this will pass this by-reference to the caller so the changelog
-        // is created with the key.
-        pr.key = v4();
-      }
-      this.addRequest(value as IProjectRequest);
-      // old value does not exist
-      return undefined;
-    }
-    if (operation === 'delete') {
-      const request = this.findRequest(value as string, { keyOnly: true });
-      if (!request) {
-        throw new Error(`Unable to find a request identified by ${value}.`);
-      }
-      const oldValue = request.toJSON();
-      request.remove();
-      return oldValue;
-    }
-    throw new Error(`Unsupported operation: ${operation}`);
   }
 
   /**
@@ -1311,13 +1200,15 @@ export class HttpProject extends ProjectParent {
     if (!finalSchema.key) {
       finalSchema.key = v4();
     }
-
-    if (typeof opts.index === 'number') {
-      const maxIndex = Math.max(this.schemas.length - 1, 0);
-      if (opts.index > maxIndex) {
+    const { index } = opts;
+    const hasIndex = typeof index === 'number';
+    if (hasIndex && this.schemas.length > index) {
+      // comparing to the `.length` and not `.length - 1` in case we are adding at the end.
+      const maxIndex = Math.max(this.schemas.length, 0);
+      if (index > maxIndex) {
         throw new RangeError(`Index out of bounds. Maximum index is ${maxIndex}.`);
       }
-      this.schemas.splice(opts.index, 0, finalSchema);
+      this.schemas.splice(index, 0, finalSchema);
     } else {
       this.schemas.push(finalSchema);
     }

@@ -53,35 +53,5 @@ describe('Models', () => {
         assert.equal(result.url, 'https://');
       });
     });
-
-    describe('patch()', () => {
-      const properties: (keyof License)[] = [
-        'name',
-        'url',
-        'content'
-      ];
-
-      properties.forEach((property) => {
-        it(`updates the value of the ${property} property`, () => {
-          const license = new License();
-          license.patch('set', property, 'test');
-          assert.equal(license[property], 'test');
-        });
-
-        it(`deletes the value of the ${property} property`, () => {
-          const license = new License();
-          license.patch('set', property, 'test');
-          license.patch('delete', property);
-          assert.isUndefined(license[property]);
-        });
-
-        it(`throws when trying to append to ${property}`, () => {
-          const folder = new License();
-          assert.throws(() => {
-            folder.patch('append', property, 'test');
-          }, Error, `Unable to "append" to the "${property}" property. Did you mean "set"?`);
-        });
-      });
-    });
   });
 });

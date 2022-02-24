@@ -6,7 +6,6 @@ import { ProjectRequest, Kind as ProjectRequestKind, IProjectRequest } from './P
 import { HttpProject } from './HttpProject.js';
 import { IThing, Thing, Kind as ThingKind } from './Thing.js';
 import v4 from '../lib/uuid.js';
-import * as PatchUtils from './PatchUtils.js';
 
 export const Kind = 'ARC#ProjectFolder';
 export const DefaultFolderName = 'New folder';
@@ -301,72 +300,6 @@ export class ProjectFolder extends ProjectParent {
    */
   listRequests(): ProjectRequest[] {
     return this.project.listRequests(this.key);
-  }
-
-  /**
-   * Patches the folder.
-   * @param operation The operation to perform.
-   * @param path The path to the value to update.
-   * @param value Optional, the value to set.
-   */
-  patch(operation: PatchUtils.PatchOperation, path: string, value?: unknown): void {
-    if (!PatchUtils.patchOperations.includes(operation)) {
-      throw new Error(`Unknown operation: ${operation}.`);
-    }
-    if (PatchUtils.valueRequiredOperations.includes(operation) && typeof value === 'undefined') {
-      throw new Error(PatchUtils.TXT_value_required);
-    }
-    const parts = path.split('.');
-    this.validatePatch(operation, parts, value);
-    const root: keyof IProjectFolder = parts[0] as keyof IProjectFolder;
-    if (root === 'info') {
-      this.info.patch(operation, parts.slice(1).join('.'), value);
-      return;
-    }
-    if (['created', 'updated'].includes(root)) {
-      switch (operation) {
-        case 'append': this.patchAppend(root); break;
-        case 'set': this.patchSet(root, value); break;
-      }
-    }
-  }
-
-  protected patchSet(property: keyof IProjectFolder, value: unknown): void {
-    switch (property) {
-      case 'created':
-      case 'updated':
-        this[property] = Number(value);
-        break;
-    }
-  }
-
-  protected patchAppend(property: keyof IProjectFolder): void {
-    throw new Error(`Unable to "append" to the "${property}" property. Did you mean "set"?`);
-  }
-
-  validatePatch(operation: PatchUtils.PatchOperation, path: string[], value?: unknown): void {
-    if (!path.length) {
-      throw new Error(PatchUtils.TXT_unknown_path);
-    }
-    const root: keyof IProjectFolder = path[0] as keyof IProjectFolder;
-    switch (root) {
-      case 'created':
-      case 'updated':
-        PatchUtils.validateDateInput(operation, value);
-        break;
-      case 'items':
-      case 'environments':
-        throw new Error(PatchUtils.TXT_use_command_instead);
-      case 'kind':
-        throw new Error(PatchUtils.TXT_delete_kind);
-      case 'info':
-        // the "info" has it's own validator.
-        break;
-      case 'key':
-        throw new Error(PatchUtils.TXT_key_is_immutable);
-      default:
-        throw new Error(PatchUtils.TXT_unknown_path);
-    }
   }
 
   /**

@@ -3,12 +3,11 @@ import { assert } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { Kind as HttpProjectKind, HttpProject, IHttpProject } from '../../src/models/HttpProject.js';
 import { Kind as ProjectFolderKind, ProjectFolder } from '../../src/models/ProjectFolder.js';
-import { ProjectRequest, IProjectRequest } from '../../src/models/ProjectRequest.js';
+import { ProjectRequest } from '../../src/models/ProjectRequest.js';
 import { Kind as ThingKind } from '../../src/models/Thing.js';
 import { Kind as ProviderKind } from '../../src/models/Provider.js';
 import { Kind as LicenseKind } from '../../src/models/License.js';
 import { Kind as EnvironmentKind, Environment } from '../../src/models/Environment.js';
-import * as PatchUtils from '../../src/models/PatchUtils.js';
 import { ProjectSchema } from '../../src/models/ProjectSchema.js';
 import { ArcLegacyProject } from '../../src/models/legacy/models/ArcLegacyProject.js';
 import { ARCSavedRequest } from '../../src/models/legacy/request/ArcRequest.js';
@@ -686,8 +685,8 @@ describe('Models', () => {
       it('throws when moving into a position that is out of bounds', () => {
         const moved = project.findFolder('folder3');
         assert.throws(() => {
-          project.moveFolder(moved.key, { index: 3 });
-        }, RangeError, 'Index out of bounds. Maximum index is 2.');
+          project.moveFolder(moved.key, { index: 5 });
+        }, RangeError, 'Index out of bounds. Maximum index is 3.');
       });
 
       it('throws when the folder is not found', () => {
@@ -1092,7 +1091,7 @@ describe('Models', () => {
         const moved = project.findRequest('request2');
         const parent = project.findFolder('folder3');
         assert.throws(() => {
-          project.moveRequest(moved.key, { parent: parent.key, index: 3 });
+          project.moveRequest(moved.key, { parent: parent.key, index: 5 });
         }, RangeError, 'Index out of bounds. Maximum index is 0.');
       });
 
@@ -1311,230 +1310,6 @@ describe('Models', () => {
         assert.lengthOf(result, 2, 'has both definitions');
         assert.equal(result[0].key, request.key, 'has the request');
         assert.equal(result[1].key, sub.key, 'has the folder');
-      });
-    });
-
-    describe('patch()', () => {
-      it('calls the Thing.patch() when manipulating the info object', () => {
-        const project = new HttpProject();
-        const spy = sinon.spy(project.info, 'patch');
-        project.patch('set', 'info.name', 'new');
-        assert.isTrue(spy.calledOnce, 'the patch was called');
-
-        assert.equal(spy.args[0][0], 'set', 'passes the operation');
-        assert.equal(spy.args[0][1], 'name', 'passes the path');
-        assert.equal(spy.args[0][2], 'new', 'passes the value');
-
-        assert.equal(project.info.name, 'new', 'updates the value');
-      });
-
-      it('calls the License.patch() when manipulating the license object', () => {
-        const project = new HttpProject();
-        const license = project.ensureLicense();
-        const spy = sinon.spy(license, 'patch');
-        project.patch('set', 'license.name', 'new');
-        assert.isTrue(spy.calledOnce, 'the patch was called');
-
-        assert.equal(spy.args[0][0], 'set', 'passes the operation');
-        assert.equal(spy.args[0][1], 'name', 'passes the path');
-        assert.equal(spy.args[0][2], 'new', 'passes the value');
-
-        assert.equal(project.license.name, 'new', 'updates the value');
-      });
-
-      it('calls the Provider.patch() when manipulating the provider object', () => {
-        const project = new HttpProject();
-        const provider = project.ensureProvider();
-        const spy = sinon.spy(provider, 'patch');
-        project.patch('set', 'provider.name', 'new');
-        assert.isTrue(spy.calledOnce, 'the patch was called');
-
-        assert.equal(spy.args[0][0], 'set', 'passes the operation');
-        assert.equal(spy.args[0][1], 'name', 'passes the path');
-        assert.equal(spy.args[0][2], 'new', 'passes the value');
-
-        assert.equal(project.provider.name, 'new', 'updates the value');
-      });
-
-      it('creates the license when doesn\'t exists', () => {
-        const project = new HttpProject();
-        project.patch('set', 'license.name', 'new');
-
-        assert.equal(project.license.name, 'new', 'updates the value');
-      });
-
-      it('creates the provider when doesn\'t exists', () => {
-        const project = new HttpProject();
-        project.patch('set', 'provider.name', 'new');
-
-        assert.equal(project.provider.name, 'new', 'updates the value');
-      });
-
-      it('appends a request', () => {
-        const project = new HttpProject();
-        const request = ProjectRequest.fromUrl('api.com', project);
-        const record = project.patch('append', 'requests', request.toJSON());
-
-        assert.equal(record.path, 'requests', 'returns the path');
-        assert.typeOf(record.time, 'number', 'has the time');
-        assert.equal(record.operation, 'append', 'has the operation');
-        assert.isUndefined(record.oldValue, 'has no oldValue');
-        assert.deepEqual(record.value, request.toJSON());
-        assert.equal(record.id, project.key, 'has the id');
-        assert.equal(record.kind, project.kind, 'has the kind');
-      });
-
-      it('appends a request with auto-generated key', () => {
-        const project = new HttpProject();
-        const request = ProjectRequest.fromUrl('api.com', project);
-        const schema = request.toJSON();
-        delete schema.key;
-        const record = project.patch('append', 'requests', schema);
-
-        assert.typeOf((record.value as IProjectRequest).key, 'string');
-      });
-
-      it('throws when appending a request without a value', () => {
-        const project = new HttpProject();
-        assert.throws(() => {
-          project.patch('append', 'requests');
-        });
-      });
-
-      it('deletes a request', () => {
-        const project = new HttpProject();
-        const request = project.addRequest('api.com');
-        const record = project.patch('delete', 'requests', request.key);
-
-        assert.equal(record.path, 'requests', 'returns the path');
-        assert.typeOf(record.time, 'number', 'has the time');
-        assert.equal(record.operation, 'delete', 'has the operation');
-        assert.deepEqual(record.oldValue, request.toJSON());
-        assert.deepEqual(record.value, request.key);
-        assert.equal(record.id, project.key, 'has the id');
-        assert.equal(record.kind, project.kind, 'has the kind');
-      });
-
-      it('throws when deleting an unknown request', () => {
-        const project = new HttpProject();
-        assert.throws(() => {
-          project.patch('delete', 'requests', 'something');
-        });
-      });
-
-      it('throws when unknown request operation', () => {
-        const project = new HttpProject();
-        assert.throws(() => {
-          project.patch('move', 'requests');
-        });
-      });
-
-      it('throws when unknown operation', () => {
-        const project = new HttpProject();
-        assert.throws(() => {
-          // @ts-ignore
-          project.patch('unknown', 'provider.name', 'new');
-        }, Error, 'Unknown operation: unknown.');
-      });
-
-      it('throws when not providing a value when required', () => {
-        const project = new HttpProject();
-        assert.throws(() => {
-          project.patch('set', 'provider.name');
-        }, Error, 'This operation requires the "value" option.');
-      });
-
-      [
-        'items',
-        'environments',
-        'definitions',
-      ].forEach((property) => {
-        it(`throws when accessing ${property}`, () => {
-          const project = new HttpProject();
-          assert.throws(() => {
-            project.patch('set', `${property}.name`, 'a');
-          }, Error, PatchUtils.TXT_use_command_instead);
-        });
-      });
-
-      it(`throws when accessing the kind`, () => {
-        const project = new HttpProject();
-        assert.throws(() => {
-          project.patch('set', `kind`, 'a');
-        }, Error, PatchUtils.TXT_delete_kind);
-      });
-
-      it(`throws when accessing an unknown property`, () => {
-        const project = new HttpProject();
-        assert.throws(() => {
-          project.patch('set', `some`, 'a');
-        }, Error, PatchUtils.TXT_unknown_path);
-      });
-    });
-
-    describe('patchRequest()', () => {
-      describe('unknown operation', () => {
-        let project: HttpProject;
-        beforeEach(() => {
-          project = new HttpProject();
-        });
-
-        it('throws when unknown operation', () => {
-          assert.throws(() => {
-            project.patchRequest('set', '');
-          }, 'Unsupported operation: set');
-        });
-      });
-
-      describe('append', () => {
-        let project: HttpProject;
-        beforeEach(() => {
-          project = new HttpProject();
-        });
-
-        it('throws when no value', () => {
-          assert.throws(() => {
-            project.patchRequest('append', undefined);
-          }, 'The value for the "append" operation must be set.');
-        });
-
-        it('adds the request', () => {
-          const request = ProjectRequest.fromUrl('api.com', project);
-          const oldValue = project.patchRequest('append', request.toJSON());
-
-          assert.isUndefined(oldValue, 'does not return a value');
-          assert.ok(project.findRequest(request.key), 'project has the request');
-        });
-
-        it('generates the key when missing', () => {
-          const request = ProjectRequest.fromUrl('api.com', project);
-          const schema = request.toJSON();
-          delete schema.key;
-          project.patchRequest('append', schema);
-          assert.typeOf(schema.key, 'string');
-        });
-      });
-
-      describe('delete', () => {
-        let project: HttpProject;
-        let request: ProjectRequest;
-        beforeEach(() => {
-          project = new HttpProject();
-          request = project.addRequest('https://api.com');
-        });
-
-        it('throws when request not found', () => {
-          assert.throws(() => {
-            project.patchRequest('delete', 'something');
-          }, 'Unable to find a request identified by something.');
-        });
-
-        it('removes the request', () => {
-          const oldValue = project.patchRequest('delete', request.key);
-
-          assert.deepEqual(oldValue, request.toJSON(), 'returns the old value');
-          assert.notOk(project.findRequest(request.key), 'the request is removed');
-        });
       });
     });
 

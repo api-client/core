@@ -40,7 +40,6 @@ export { Thing, IThing, Kind as ThingKind } from './src/models/Thing.js';
 export { Url, IUrl } from './src/models/Url.js';
 export { WebApi, IWebApi, ILegacyRestApi } from './src/models/WebApi.js';
 export { WebApiIndex, IWebApiIndex, ILegacyWebApiIndex } from './src/models/WebApiIndex.js';
-export * as PatchUtils from './src/models/PatchUtils.js';
 
 //
 // Libs
