@@ -54,9 +54,10 @@ describe('Models', () => {
               }
             }
           ]);
-          assert.typeOf(result.effectiveEnvironments, 'array');
-          assert.lengthOf(result.effectiveEnvironments, 1);
-          assert.equal(result.effectiveEnvironments[0].info.name, 'test');
+          const envs = result.getEnvironments();
+          assert.typeOf(envs, 'array');
+          assert.lengthOf(envs, 1);
+          assert.equal(envs[0].info.name, 'test');
         });
 
         it('passed in constructor environments override project environments', () => {
@@ -102,9 +103,10 @@ describe('Models', () => {
               }
             }
           ]);
-          assert.typeOf(result.effectiveEnvironments, 'array');
-          assert.lengthOf(result.effectiveEnvironments, 1);
-          assert.equal(result.effectiveEnvironments[0].info.name, 'test');
+          const envs = result.getEnvironments();
+          assert.typeOf(envs, 'array');
+          assert.lengthOf(envs, 1);
+          assert.equal(envs[0].info.name, 'test');
         });
       });
 
@@ -1598,6 +1600,40 @@ describe('Models', () => {
         project.addSchema('s2');
         const result = project.listSchemas();
         assert.lengthOf(result, 2);
+      });
+    });
+
+    describe('getEnvironments()', () => {
+      it('returns class initialization environments', () => {
+        const result = new HttpProject(undefined, [
+          {
+            key: 'a',
+            kind: 'ARC#Environment',
+            info: {
+              kind: 'ARC#Thing',
+              name: 'test',
+            },
+            variables: [],
+            server: {
+              kind: 'ARC#Server',
+              uri: 'https://api.com',
+            }
+          }
+        ]);
+        const envs = result.getEnvironments();
+        assert.typeOf(envs, 'array');
+        assert.lengthOf(envs, 1);
+        assert.equal(envs[0].info.name, 'test');
+      });
+
+      it('returns environments defined in the project only', () => {
+        const project = new HttpProject();
+        const f1 = project.addFolder('f1');
+        f1.addEnvironment('e1');
+        const e2 = project.addEnvironment('e2');
+
+        const result = project.getEnvironments();
+        assert.deepEqual(result, [e2]);
       });
     });
 

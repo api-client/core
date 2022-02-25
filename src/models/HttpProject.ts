@@ -242,13 +242,6 @@ export class HttpProject extends ProjectParent {
     return { environments: [], folders: [], requests: [], schemas: [] };
   }
 
-  get effectiveEnvironments(): Environment[] {
-    if (Array.isArray(this.initEnvironments)) {
-      return this.initEnvironments;
-    }
-    return this.definitions.environments || [];
-  }
-
   /**
    * Creates a new HTTP project from a name.
    * @param {string} name The name to set.
@@ -1067,9 +1060,9 @@ export class HttpProject extends ProjectParent {
 
     let current: HttpProject | ProjectFolder | undefined = root;
     while (current) {
-      const { effectiveEnvironments } = current;
-      if (Array.isArray(effectiveEnvironments) && effectiveEnvironments.length) {
-        const selected = nameOrKey ? effectiveEnvironments.find(i => i.key === nameOrKey || i.info.name === nameOrKey) : effectiveEnvironments[0];
+      const environments = current.getEnvironments();
+      if (environments.length) {
+        const selected = nameOrKey ? environments.find(i => i.key === nameOrKey || i.info.name === nameOrKey) : environments[0];
         if (selected) {
           result.push(selected);
           if (selected.encapsulated) {
@@ -1231,6 +1224,13 @@ export class HttpProject extends ProjectParent {
       return [];
     }
     return this.definitions.schemas;
+  }
+
+  getEnvironments(): Environment[] {
+    if (Array.isArray(this.initEnvironments)) {
+      return this.initEnvironments;
+    }
+    return super.getEnvironments();
   }
 
   /**

@@ -28,25 +28,6 @@ export abstract class ProjectParent implements ProjectDefinitionProperty {
    */
   info: Thing = new Thing({ kind: ThingKind, name: '' });
 
-  get effectiveEnvironments(): Environment[] {
-    const { environments } = this;
-    if (!environments.length) {
-      return [];
-    }
-    const project = this.getProject();
-    if (!project.definitions.environments) {
-      return [];
-    }
-    const result: Environment[] = [];
-    environments.forEach((key) => {
-      const env = project.definitions.environments.find(i => i.key === key);
-      if (env) {
-        result.push(env);
-      }
-    });
-    return result;
-  }
-
   abstract attachedCallback(): void;
 
   abstract detachedCallback(): void;
@@ -105,5 +86,28 @@ export abstract class ProjectParent implements ProjectDefinitionProperty {
     project.definitions.environments.push(finalEnv);
     this.environments.push(finalEnv.key);
     return finalEnv;
+  }
+
+  /**
+   * 
+   * @returns The list of environments defined in this folder.
+   */
+  getEnvironments(): Environment[] {
+    const { environments } = this;
+    if (!environments.length) {
+      return [];
+    }
+    const project = this.getProject();
+    if (!project.definitions.environments) {
+      return [];
+    }
+    const result: Environment[] = [];
+    environments.forEach((key) => {
+      const env = project.definitions.environments.find(i => i.key === key);
+      if (env) {
+        result.push(env);
+      }
+    });
+    return result;
   }
 }
