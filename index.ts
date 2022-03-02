@@ -44,7 +44,7 @@ export { Url, IUrl } from './src/models/Url.js';
 export { IAccessControl, IEmail, IUserPicture, IUser, IUserSpaces, AccessControlLevel, Kind as UserKind } from './src/models/User.js';
 export { WebApi, IWebApi, ILegacyRestApi } from './src/models/WebApi.js';
 export { WebApiIndex, IWebApiIndex, ILegacyWebApiIndex } from './src/models/WebApiIndex.js';
-export { IWorkspace, IUserWorkspace, Kind as WorkspaceKind } from './src/models/Workspace.js';
+export { IWorkspace, IUserWorkspace, Workspace, Kind as WorkspaceKind, DefaultOwner } from './src/models/Workspace.js';
 
 //
 // Libs

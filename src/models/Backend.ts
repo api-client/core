@@ -9,14 +9,13 @@ export interface IBackendInfo {
 
 export interface IBackendCommand {
   /**
-   * The request path. It is an URI to the data.
-   * It should include identifier when necessary.
+   * Optional path. When not set the path is the URL of the web socket channel.
    */
-  path: string;
+  path?: string;
   /**
    * The operation to perform
    */
-  operation: 'read' | 'list' | 'delete' | 'patch' | 'create';
+  operation: 'delete' | 'patch' | 'create';
   /**
    * The command data.
    */

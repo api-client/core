@@ -86,7 +86,7 @@ export class Environment {
   
   /**
    * Creates a new Environment object from a name.
-   * @param project The top-most project.
+   * 
    * @param name The name to set.
    */
   static fromName(name: string): Environment {

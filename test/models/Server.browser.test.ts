@@ -16,7 +16,7 @@ describe('Models', () => {
     });
 
     describe('constructor()', () => {
-      it('creates an empty Thing', () => {
+      it('creates an empty Server', () => {
         const result = new Server();
         assert.equal(result.kind, ServerKind);
         assert.equal(result.uri, '');
@@ -25,7 +25,7 @@ describe('Models', () => {
         assert.isUndefined(result.basePath);
       });
 
-      it('creates a Thing from the schema values', () => {
+      it('creates a Server from the schema values', () => {
         const schema: IServer = {
           kind: ServerKind,
           uri: 'dot.com',
@@ -41,7 +41,7 @@ describe('Models', () => {
         assert.equal(result.basePath, '/api');
       });
 
-      it('creates a Thing from the JSON schema string', () => {
+      it('creates a Server from the JSON schema string', () => {
         const schema: IServer = {
           kind: ServerKind,
           uri: 'dot.com',
@@ -67,52 +67,52 @@ describe('Models', () => {
     });
 
     describe('toJSON()', () => {
-      let thing: Server;
+      let server: Server;
       beforeEach(() => {
-        thing = new Server();
+        server = new Server();
       });
 
       it('serializes the kind', () => {
-        const result = thing.toJSON();
+        const result = server.toJSON();
         assert.equal(result.kind, ServerKind);
       });
 
       it('serializes the name', () => {
-        thing.uri = 'dot.com';
-        const result = thing.toJSON();
+        server.uri = 'dot.com';
+        const result = server.toJSON();
         assert.equal(result.uri, 'dot.com');
       });
 
       it('serializes the description', () => {
-        thing.description = 'a description';
-        const result = thing.toJSON();
+        server.description = 'a description';
+        const result = server.toJSON();
         assert.equal(result.description, 'a description');
       });
 
       it('does not serialize description when missing', () => {
-        const result = thing.toJSON();
+        const result = server.toJSON();
         assert.isUndefined(result.description);
       });
 
       it('serializes the protocol', () => {
-        thing.protocol = 'a protocol';
-        const result = thing.toJSON();
+        server.protocol = 'a protocol';
+        const result = server.toJSON();
         assert.equal(result.protocol, 'a protocol');
       });
 
       it('does not serialize protocol when missing', () => {
-        const result = thing.toJSON();
+        const result = server.toJSON();
         assert.isUndefined(result.protocol);
       });
 
       it('serializes the basePath', () => {
-        thing.basePath = 'a basePath';
-        const result = thing.toJSON();
+        server.basePath = 'a basePath';
+        const result = server.toJSON();
         assert.equal(result.basePath, 'a basePath');
       });
 
       it('does not serialize basePath when missing', () => {
-        const result = thing.toJSON();
+        const result = server.toJSON();
         assert.isUndefined(result.basePath);
       });
     });
