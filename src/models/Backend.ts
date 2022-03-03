@@ -42,7 +42,7 @@ export interface IBackendEvent extends IBackendMessage {
    * Note, `updated` is when the entire object must be revalidated in the opposite
    * to `patch` where the patch should be applied to the object.
    */
-  operation: 'created' | 'updated' | 'patch' | 'deleted';
+  operation: 'created' | 'updated' | 'patch' | 'deleted' | 'access-granted' | 'access-removed';
   /**
    * The kind of data that has been changed.
    */
@@ -51,4 +51,16 @@ export interface IBackendEvent extends IBackendMessage {
    * For update events it is the key of the updated object.
    */
   id?: string;
+}
+
+export interface IListResponse {
+  /**
+   * The cursor to use with the next query.
+   * Not set when no more results.
+   */
+  cursor?: string;
+  /**
+   * The list of objects returned from the store.
+   */
+  data: unknown[];
 }

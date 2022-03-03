@@ -6,7 +6,7 @@
 export { ArcResponse, IArcResponse, Kind as ArcResponseKind } from './src/models/ArcResponse.js';
 export { IAuthorizationSettingsUnion, IApiKeyAuthorization, IAuthorizationParams, IBasicAuthorization, IBearerAuthorization, ICCAuthorization, IDigestAuthorization, INtlmAuthorization, IOAuth1Authorization, IOAuth2Authorization, IOAuth2AuthorizationRequestCustomData, IOAuth2CustomData, IOAuth2CustomParameter, IOAuth2TokenRequestCustomData, IOauth2GrantType, IOauth2ResponseType, IOidcAuthorization, IOidcTokenError, IOidcTokenInfo, IPassThroughAuthorization, IRamlCustomAuthorization, ITokenError, ITokenInfo, ITokenRemoveOptions, OAuth2DeliveryMethod } from './src/models/Authorization.js';
 export { AuthorizationData, IAuthorizationData } from './src/models/AuthorizationData.js';
-export { IBackendInfo, IBackendCommand, IBackendEvent } from './src/models/Backend.js';
+export { IBackendInfo, IBackendCommand, IBackendEvent, IListResponse } from './src/models/Backend.js';
 export { CertificateType, ICertificate, ICertificateIndex, IClientCertificate, IRequestCertificate } from './src/models/ClientCertificate.js';
 export { Environment, IEnvironment, Kind as EnvironmentKind } from './src/models/Environment.js';
 export { ErrorResponse, IErrorResponse } from './src/models/ErrorResponse.js';
@@ -15,7 +15,7 @@ export { HistoryRequest, Kind as HistoryRequestKind } from './src/models/History
 export { IHostRule, HostRule, Kind as HostRuleKind } from './src/models/HostRule.js';
 export { IHttpCookie, HttpCookie, CookieChangeReason, CookieSameSiteType } from './src/models/HttpCookie.js';
 export { HttpProject, IHttpProject, Kind as HttpProjectKind, IFolderCreateOptions, IFolderDeleteOptions, IFolderSearchOptions, IProjectMoveOptions, IRequestAddOptions, IRequestDeleteOptions, IRequestSearchOptions } from './src/models/HttpProject.js';
-export { IHttpProjectListItem } from './src/models/HttpProjectListItem.js';
+export { IHttpProjectListItem, Kind as HttpProjectListItemKind } from './src/models/HttpProjectListItem.js';
 export { IHttpRequest, HttpRequest, Kind as HttpRequestKind } from './src/models/HttpRequest.js';
 export { HttpResponse, IHttpResponse, Kind as HttpResponseKind } from './src/models/HttpResponse.js';
 export { License, ILicense, Kind as LicenseKind } from './src/models/License.js';
@@ -41,7 +41,7 @@ export { SerializablePayload } from './src/models/SerializablePayload.js';
 export { Server, IServer, Kind as ServerKind } from './src/models/Server.js';
 export { Thing, IThing, Kind as ThingKind } from './src/models/Thing.js';
 export { Url, IUrl } from './src/models/Url.js';
-export { IAccessControl, IEmail, IUserPicture, IUser, IUserSpaces, AccessControlLevel } from './src/models/User.js';
+export { IAccessControl, IEmail, IUserPicture, IUser, IUserSpaces, AccessControlLevel, UserAccessOperation, IUserAccessAddOperation, IUserAccessRemoveOperation, Kind as UserKind } from './src/models/User.js';
 export { WebApi, IWebApi, ILegacyRestApi } from './src/models/WebApi.js';
 export { WebApiIndex, IWebApiIndex, ILegacyWebApiIndex } from './src/models/WebApiIndex.js';
 export { IWorkspace, IUserWorkspace, Workspace, Kind as WorkspaceKind, DefaultOwner } from './src/models/Workspace.js';

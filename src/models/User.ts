@@ -1,6 +1,30 @@
 export type AccessControlLevel = 'read' | 'comment' | 'write' | 'admin' | 'owner';
 
 /**
+ * This is used in the communication with the backend to add/change user's access to the resource.
+ */
+export interface IUserAccessOperation {
+  /**
+   * The user id.
+   */
+  uid: string;
+}
+
+export interface IUserAccessAddOperation extends IUserAccessOperation {
+  op: "add";
+  /**
+   * The level that the user has access to.
+   */
+  value: AccessControlLevel;
+}
+
+export interface IUserAccessRemoveOperation extends IUserAccessOperation {
+  op: "remove";
+}
+
+export type UserAccessOperation = IUserAccessAddOperation | IUserAccessRemoveOperation;
+
+/**
  * The definition of an access control.
  * The user may have access to a workspace so this is the object describing the level of the workspace.
  */
