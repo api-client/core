@@ -16,4 +16,8 @@ export interface IHttpProjectListItem {
    * May be used by an UI to add projects to favourites.
    */
   favourite?: boolean;
+  /**
+   * The timestamp when the project was last updated.
+   */
+  updated: number;
 }
