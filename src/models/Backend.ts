@@ -1,10 +1,20 @@
+export type BackendMode = 'single-user' | 'multi-user';
+
 export interface IBackendInfo {
   /**
-   * Whether the application storage support authentication.
-   * When true the implementations turns into the user support mode.
-   * Otherwise it is treated as installed on the localhost only.
+   * The model the store is on.
+   * 
+   * The `single-user` mode is the default mode where external user authentication is not required
+   * (but clients must use the auth token issued by the session endpoint).
+   * 
+   * In the `multi-user` model the authentication configuration is required and the user must 
+   * authenticate through an external identity provider (by default Open ID Connect is supported).
+   * After that the client has to create an authenticated session in the store service and use
+   * the token with the API calls.
+   * 
+   * @default single-user
    */
-  hasAuthentication: boolean;
+  mode: BackendMode;
 }
 
 export interface IBackendCommand {
