@@ -13,7 +13,7 @@ Using these models ensures:
 Each model implements the `toJSON()` function so it is safe to serialize a model with the `JSON.stringify()` function. Model serialized this way is easy to store in a key-value data store and then restored again.
 
 ```ts
-import { HttpProject } from '@advanced-rest-client/core';
+import { HttpProject } from '@api-client/core';
 
 const project = HttpProject.fromName('My project');
 const request = project.addRequest('https://api.com');

@@ -2,13 +2,13 @@
 
 This is available in: **browser** and **node**.
 
-The library contains a base definition of loggers used in the Advanced REST Client / API Client ecosystem.
+The library contains a base definition of loggers used in the API Client ecosystem.
 You can use them to create own loggers, use a default one, or use a dummy to prevent logging output.
 
 ## The default logger
 
 ```ts
-import { DefaultLogger } from '@advanced-rest-client/core';
+import { DefaultLogger } from '@api-client/core';
 
 const logger = new DefaultLogger(); // uses the default `console`
 
@@ -19,7 +19,7 @@ factory.logger = logger;
 ## The dummy logger
 
 ```ts
-import { DummyLogger } from '@advanced-rest-client/core';
+import { DummyLogger } from '@api-client/core';
 
 const logger = new DummyLogger(); // no output
 
@@ -30,7 +30,7 @@ factory.logger = logger;
 ### Defining custom logger
 
 ```ts
-import { Logger } from '@advanced-rest-client/core';
+import { Logger } from '@api-client/core';
 
 class FileLogger extends Logger {
   file: string;

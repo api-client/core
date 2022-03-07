@@ -196,7 +196,7 @@ interface BaseOAuth2Authorization {
 }
 
 /**
- * OAuth 2 configuration object used in Advanced REST Client and API Components.
+ * OAuth 2 configuration object used in API Client and API Components.
  * @deprecated
  */
 export interface OAuth2Authorization extends BaseOAuth2Authorization {
@@ -479,7 +479,7 @@ export interface Oauth2ResponseType {
 }
 
 /**
- * OpenID Connect configuration object used in Advanced REST Client and API Components.
+ * OpenID Connect configuration object used in API Client and API Components.
  * @deprecated
  */
 export interface OidcAuthorization extends OAuth2Authorization {

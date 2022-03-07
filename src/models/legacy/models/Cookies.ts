@@ -1,5 +1,5 @@
 /**
- * A model of a cookie object used by the Advanced REST Client.
+ * A model of a cookie object used by the API Client.
  * @deprecated
  */
 export interface ARCCookie {

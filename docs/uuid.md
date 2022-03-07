@@ -3,7 +3,7 @@
 This is available in: **browser** and **node**.
 
 ```ts
-import { UUID } from '@advanced-rest-client/core';
+import { UUID } from '@api-client/core';
 
 const token = UUID.v4();
 ```

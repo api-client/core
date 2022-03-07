@@ -1,6 +1,6 @@
-# Advanced REST Client Core Library
+# API Client Core Library
 
-The core library of the Advanced REST Client application. Targeted release: ARC v18.
+The core library of the API Client application. This build on top of the experience of Advanced REST Client.
 
 Contains the core models, events, and logic related to ARC. This replaces the `events`, `lib`, and parts of `base` libraries.
 
@@ -48,5 +48,4 @@ Tasks planned for the future releases.
 
 - [ ] Add support for AMF parser to parse HTTP project data
 - [ ] Add client certificate class logic
-- [ ] Add patch operation for the remaining models
 - [ ] Add HTTP project mocking class

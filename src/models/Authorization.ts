@@ -137,7 +137,7 @@ declare interface IBaseOAuth2Authorization {
 }
 
 /**
- * OAuth 2 configuration object used in Advanced REST Client and API Components.
+ * OAuth 2 configuration object used in the API Client and API Components.
  */
 export interface IOAuth2Authorization extends IBaseOAuth2Authorization {
   /**
@@ -396,7 +396,7 @@ export interface IOauth2ResponseType {
 }
 
 /**
- * OpenID Connect configuration object used in Advanced REST Client and API Components.
+ * OpenID Connect configuration object used in API Client and API Components.
  */
 export interface IOidcAuthorization extends IOAuth2Authorization {
   /**

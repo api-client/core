@@ -18,7 +18,7 @@
         "creator": {
           "comment": "ARC for Google Chrome.",
           "version": "5.0.5-test",
-          "name": "Advanced REST client"
+          "name": "API client"
         },
         "browser": {
           "version": "63.0.3218.0",
@@ -102,7 +102,7 @@
         "creator": {
           "comment": "ARC for Google Chrome.",
           "version": "5.0.5-test",
-          "name": "Advanced REST client"
+          "name": "API client"
         },
         "browser": {
           "version": "63.0.3218.0",

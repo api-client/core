@@ -9,17 +9,6 @@ import {
   ExportArcVariable,
 } from '../legacy/DataExport.js';
 
-/** @typedef {import('@advanced-rest-client/events').DataExport.ArcExportObject} ArcExportObject */
-/** @typedef {import('@advanced-rest-client/events').DataExport.ExportArcSavedRequest} ExportArcSavedRequest */
-/** @typedef {import('@advanced-rest-client/events').DataExport.ExportArcHistoryRequest} ExportArcHistoryRequest */
-/** @typedef {import('@advanced-rest-client/events').DataExport.ExportArcProjects} ExportArcProjects */
-/** @typedef {import('@advanced-rest-client/events').DataExport.ExportArcWebsocketUrl} ExportArcWebsocketUrl */
-/** @typedef {import('@advanced-rest-client/events').DataExport.ExportArcUrlHistory} ExportArcUrlHistory */
-/** @typedef {import('@advanced-rest-client/events').DataExport.ExportArcHostRule} ExportArcHostRule */
-/** @typedef {import('@advanced-rest-client/events').DataExport.ExportArcVariable} ExportArcVariable */
-/** @typedef {import('@advanced-rest-client/events').DataExport.ExportArcAuthData} ExportArcAuthData */
-/** @typedef {import('@advanced-rest-client/events').DataExport.ExportArcClientCertificateData} ExportArcClientCertificateData */
-
 /**
  * Updates `updated` property and ensures `created` property
  * @param item An item to updated

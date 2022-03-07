@@ -1,5 +1,5 @@
 {
-  "name": "@advanced-rest-client/core",
+  "name": "@api-client/core",
   "description": "The ARC core client library. Works in NodeJS and in a ES enabled browser.",
   "version": "0.2.5",
   "license": "Apache-2.0",
@@ -16,10 +16,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/advanced-rest-client/core.git"
+    "url": "git://github.com/api-client/core.git"
   },
   "bugs": {
-    "url": "https://github.com/advanced-rest-client/core/issues",
+    "url": "https://github.com/api-client/core/issues",
     "email": "arc@mulesoft.com"
   },
   "devDependencies": {

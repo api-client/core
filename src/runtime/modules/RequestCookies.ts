@@ -10,16 +10,6 @@ import { IRequestLog } from '../../models/RequestLog.js';
 import { HttpCookie } from '../../models/HttpCookie.js';
 import { Cookie } from '../../lib/cookies/Cookie.js';
 
-/** @typedef {import('@advanced-rest-client/events').ArcRequest.ArcEditorRequest} ArcEditorRequest */
-/** @typedef {import('@advanced-rest-client/events').ArcRequest.ArcBaseRequest} ArcBaseRequest */
-/** @typedef {import('@advanced-rest-client/events').ArcResponse.Response} Response */
-/** @typedef {import('@advanced-rest-client/events').ArcResponse.ErrorResponse} ErrorResponse */
-/** @typedef {import('@advanced-rest-client/events').ArcResponse.ResponseRedirect} ResponseRedirect */
-/** @typedef {import('@advanced-rest-client/events').ArcRequest.TransportRequest} TransportRequest */
-/** @typedef {import('@advanced-rest-client/events').Cookies.ARCCookie} ARCCookie */
-/** @typedef {import('../lib/Cookie').Cookie} Cookie */
-/** @typedef {import('../types').ExecutionContext} ExecutionContext */
-
 /**
  * Get cookies header value for given URL.
  *

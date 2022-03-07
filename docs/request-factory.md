@@ -13,7 +13,7 @@ An example of such context-store is Electron's cookie service. YOu can create a 
 In the most basic scenario you can use a simple `EventTarget` class to initialize the factory class.
 
 ```ts
-import { RequestFactory, EventTypes } from '@advanced-rest-client/core';
+import { RequestFactory, EventTypes } from '@api-client/core';
 
 const target = new EventTarget(); // since Node v15.4.0
 
@@ -35,7 +35,7 @@ const factory = new RequestFactory(target);
 To send a request simply call the `run()` function with the `IHttpRequest` object as an argument. Depending on the configuration the factory performs different tasks.
 
 ```ts
-import { RequestFactory, EventTypes, IHttpRequest } from '@advanced-rest-client/core';
+import { RequestFactory, EventTypes, IHttpRequest } from '@api-client/core';
 
 const target = new EventTarget();
 const factory = new RequestFactory(target);
@@ -66,7 +66,7 @@ factory.config = {
 Set the `authorization` property to configure the authorization. Note, to apply the authorization data register the `RequestAuthorizationModule` HTTP module. Otherwise these data are ignored.
 
 ```ts
-import { RequestFactory, RequestAuthorizationModule, RegistryPermission } from '@advanced-rest-client/core';
+import { RequestFactory, RequestAuthorizationModule, RegistryPermission } from '@api-client/core';
 
 ModulesRegistry.register('request', 'request/auth', RequestAuthorizationModule.default, [RegistryPermission.events]);
 
@@ -87,7 +87,7 @@ factory.authorization = {
 Set the `actions` property to the request's request and response actions.
 
 ```ts
-import { RequestFactory, Condition } from '@advanced-rest-client/core';
+import { RequestFactory, Condition } from '@api-client/core';
 
 const factory = new RequestFactory(target);
 factory.actions = {
@@ -146,7 +146,7 @@ factory.variables = {
 Set the `logger` property to use the passed logger
 
 ```ts
-import { RequestFactory, DummyLogger } from '@advanced-rest-client/core';
+import { RequestFactory, DummyLogger } from '@api-client/core';
 const factory = new RequestFactory(target);
 factory.logger = new DummyLogger();
 ```

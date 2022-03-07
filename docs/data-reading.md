@@ -156,7 +156,7 @@ The config object corresponds to the `IDataSource` definition.
 ### Body reading configuration
 
 ```ts
-import { ActionEnums, IDataSource } from '@advanced-rest-client/core';
+import { ActionEnums, IDataSource } from '@api-client/core';
 
 const config: IDataSource = {
   type: ActionEnums.ActionTypeEnum.response,
@@ -170,7 +170,7 @@ Which translates to: take the `response` object, then in the `body` search for a
 ## Headers reading configuration
 
 ```ts
-import { ActionEnums, IDataSource } from '@advanced-rest-client/core';
+import { ActionEnums, IDataSource } from '@api-client/core';
 
 const config: IDataSource = {
   type: ActionEnums.ActionTypeEnum.response,
@@ -184,7 +184,7 @@ Note, this always returns a string even when multiple headers were set in the re
 ## URL reading configuration
 
 ```ts
-import { ActionEnums, IDataSource } from '@advanced-rest-client/core';
+import { ActionEnums, IDataSource } from '@api-client/core';
 
 const config: IDataSource = {
   type: ActionEnums.ActionTypeEnum.response,
@@ -196,7 +196,7 @@ const config: IDataSource = {
 ## HTTP status reading configuration
 
 ```ts
-import { ActionEnums, IDataSource } from '@advanced-rest-client/core';
+import { ActionEnums, IDataSource } from '@api-client/core';
 
 const config: IDataSource = {
   type: ActionEnums.ActionTypeEnum.response,
@@ -209,7 +209,7 @@ Returned value is a **string**. It is only available for the response type.
 ## HTTP method reading configuration
 
 ```ts
-import { ActionEnums, IDataSource } from '@advanced-rest-client/core';
+import { ActionEnums, IDataSource } from '@api-client/core';
 
 const config: IDataSource = {
   type: ActionEnums.ActionTypeEnum.request,

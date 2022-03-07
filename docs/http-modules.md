@@ -21,7 +21,7 @@ The registry also accepts the 4th argument which is the list of permissions the 
 The callback function takes two arguments: the request object and the execution context.
 
 ```ts
-import { IHttpRequest, ExecutionContext } from '@advanced-rest-client/core';
+import { IHttpRequest, ExecutionContext } from '@api-client/core';
 
 async function processRequestCookies(request: IHttpRequest, context: ExecutionContext): Promise<void> {
   // do fun stuff
@@ -45,7 +45,7 @@ The registry also accepts the 4th argument which is the list of permissions the 
 The callback function takes two arguments: the log object and the execution context.
 
 ```ts
-import { IRequestLog, ExecutionContext } from '@advanced-rest-client/core';
+import { IRequestLog, ExecutionContext } from '@api-client/core';
 
 async function processRequestCookies(log: IRequestLog, context: ExecutionContext): Promise<void> {
   // do fun stuff
@@ -107,7 +107,7 @@ The executions events are:
 Note, depending on the environment and the configuration not all events may be supported. For example a CLI tool may not be able to store cookies or environment data but the API Client does.
 
 ```ts
-import { IHttpRequest, ExecutionContext, ExecutionResponse, RequestAuthorizationModule, RegistryPermission } from '@advanced-rest-client/core';
+import { IHttpRequest, ExecutionContext, ExecutionResponse, RequestAuthorizationModule, RegistryPermission } from '@api-client/core';
 
 async function handleAuth(request: IHttpRequest, context: ExecutionContext): Promise<number> {
   const cert = await context.Events.ClientCertificate.read(context.eventsTarget, 'cert-id');
@@ -129,7 +129,7 @@ ModulesRegistry.register('request', 'request/auth', handleAuth, [RegistryPermiss
 This permission gives you access to the current environment variables. Note, this list may contains secrets. **Do not log any values from the environment**.
 
 ```ts
-import { IHttpRequest, ExecutionContext, ExecutionResponse, RequestAuthorizationModule, RegistryPermission } from '@advanced-rest-client/core';
+import { IHttpRequest, ExecutionContext, ExecutionResponse, RequestAuthorizationModule, RegistryPermission } from '@api-client/core';
 
 async function handleRequest(request: IHttpRequest, context: ExecutionContext): Promise<number> {
   const { MY_TOKEN } = context.variables;

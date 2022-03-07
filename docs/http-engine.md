@@ -23,7 +23,7 @@ This module comes with own implementation of an HTTP engine. It is so to cover a
 ## Base request
 
 ```ts
-import { ArcEngine, IHttpRequest, ArcResponse, IArcResponse, Headers } from '@advanced-rest-client/core';
+import { ArcEngine, IHttpRequest, ArcResponse, IArcResponse, Headers } from '@api-client/core';
 
 const request: IHttpRequest = {
   url: 'https://google.com',
@@ -41,7 +41,7 @@ const headers = new Headers(response.headers);
 ## No logging output
 
 ```ts
-import { ArcEngine, IHttpRequest, DummyLogger } from '@advanced-rest-client/core';
+import { ArcEngine, IHttpRequest, DummyLogger } from '@api-client/core';
 
 const logger = new DummyLogger();
 const request: IHttpRequest = {
@@ -57,7 +57,7 @@ const engine = new ArcEngine(request, {
 ## PEM certificates
 
 ```ts
-import { ArcEngine, IHttpRequest } from '@advanced-rest-client/core';
+import { ArcEngine, IHttpRequest } from '@api-client/core';
 
 const request: IHttpRequest = {
   url: 'https://api.com/certs',
@@ -80,7 +80,7 @@ const log = await request.send();
 ## P12 certificates
 
 ```ts
-import { ArcEngine, IHttpRequest } from '@advanced-rest-client/core';
+import { ArcEngine, IHttpRequest } from '@api-client/core';
 
 const request: IHttpRequest = {
   url: 'https://api.com/certs',
@@ -102,7 +102,7 @@ const log = await request.send();
 ## Certificates validation
 
 ```ts
-import { ArcEngine, IHttpRequest } from '@advanced-rest-client/core';
+import { ArcEngine, IHttpRequest } from '@api-client/core';
 
 const request: IHttpRequest = {
   url: 'https://expired.badssl.com',
@@ -118,7 +118,7 @@ const log = await request.send();
 ## Sending body
 
 ```ts
-import { ArcEngine, IHttpRequest } from '@advanced-rest-client/core';
+import { ArcEngine, IHttpRequest } from '@api-client/core';
 
 const request: IHttpRequest = {
   url: 'https://api.com',
@@ -133,7 +133,7 @@ const log = await request.send();
 ## Aborting the request
 
 ```ts
-import { ArcEngine, IHttpRequest } from '@advanced-rest-client/core';
+import { ArcEngine, IHttpRequest } from '@api-client/core';
 
 const request: IHttpRequest = {
   url: 'https://api.com',
@@ -148,7 +148,7 @@ promise.then(log => { ... });
 ## Virtual hosts
 
 ```ts
-import { ArcEngine, IHttpRequest } from '@advanced-rest-client/core';
+import { ArcEngine, IHttpRequest } from '@api-client/core';
 
 const request: IHttpRequest = {
   url: 'https://virtual.com/resource?a=b',
@@ -171,7 +171,7 @@ const log = await request.send();
 ## NTLM authorization
 
 ```ts
-import { ArcEngine, IHttpRequest } from '@advanced-rest-client/core';
+import { ArcEngine, IHttpRequest } from '@api-client/core';
 
 const request: IHttpRequest = {
   url: 'https://api.com/ntlm',
@@ -199,7 +199,7 @@ const log = await request.send();
 ## HTTP proxy
 
 ```ts
-import { ArcEngine, IHttpRequest } from '@advanced-rest-client/core';
+import { ArcEngine, IHttpRequest } from '@api-client/core';
 
 const request: IHttpRequest = {
   url: 'https://api.com/resource',

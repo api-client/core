@@ -8,7 +8,7 @@ Per Fetch object specification authors cannot set or read some headers. Because 
 To overcome this issue and be compatible with standards this module contains an implementation of the `Headers` class according to the Fetch specification. This implementation does not limit setting or reading of the data.
 
 ```ts
-import { Headers } from '@advanced-rest-client/core';
+import { Headers } from '@api-client/core';
 
 const headers = new Headers(`set-cookie: a=b;c=d`);
 const cookies = headers.get('set-cookie');
