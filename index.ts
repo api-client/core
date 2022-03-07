@@ -57,7 +57,7 @@ export { Headers } from './src/lib/headers/Headers.js';
 export { Cookie, CookieOptions } from './src/lib/cookies/Cookie.js';
 export { Cookies } from './src/lib/cookies/Cookies.js';
 export * as TransformerUtils from './src/lib/transformers/Utils.js';
-export * as UUID from './src/lib/uuid.js';
+export { default as uuidV4 } from './src/lib/uuid.js';
 
 //
 // Runtime
