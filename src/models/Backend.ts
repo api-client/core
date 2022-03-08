@@ -82,3 +82,26 @@ export interface IListResponse {
    */
   data: unknown[];
 }
+
+export interface IListOptions {
+  /**
+   * Page cursor to use with the query.
+   */
+  cursor?: string;
+  /**
+   * Number of items in the result.
+   * Ignored when `cursor` is set.
+   * 
+   * Note, when changing the number of items in the result
+   * you need to start listing over again.
+   */
+  limit?: number;
+  /**
+   * Supported by some endpoints. When set it performs a query on the data store.
+   */
+  query?: string;
+  /**
+   * Only with the `query` property. Tells the system in which fields to search for the query term.
+   */
+  queryField?: string[];
+}

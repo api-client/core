@@ -6,7 +6,7 @@
 export { ArcResponse, IArcResponse, Kind as ArcResponseKind } from './src/models/ArcResponse.js';
 export { IAuthorizationSettingsUnion, IApiKeyAuthorization, IAuthorizationParams, IBasicAuthorization, IBearerAuthorization, ICCAuthorization, IDigestAuthorization, INtlmAuthorization, IOAuth1Authorization, IOAuth2Authorization, IOAuth2AuthorizationRequestCustomData, IOAuth2CustomData, IOAuth2CustomParameter, IOAuth2TokenRequestCustomData, IOauth2GrantType, IOauth2ResponseType, IOidcAuthorization, IOidcTokenError, IOidcTokenInfo, IPassThroughAuthorization, IRamlCustomAuthorization, ITokenError, ITokenInfo, ITokenRemoveOptions, OAuth2DeliveryMethod } from './src/models/Authorization.js';
 export { AuthorizationData, IAuthorizationData } from './src/models/AuthorizationData.js';
-export { IBackendInfo, IBackendCommand, IBackendEvent, IListResponse } from './src/models/Backend.js';
+export { IBackendInfo, IBackendCommand, IBackendEvent, IListResponse, IListOptions } from './src/models/Backend.js';
 export { CertificateType, ICertificate, ICertificateIndex, IClientCertificate, IRequestCertificate } from './src/models/ClientCertificate.js';
 export { Environment, IEnvironment, Kind as EnvironmentKind } from './src/models/Environment.js';
 export { ErrorResponse, IErrorResponse } from './src/models/ErrorResponse.js';
@@ -87,7 +87,7 @@ export { RequestDataExtractor } from './src/data/RequestDataExtractor.js';
 // 
 // HTTP store
 // 
-export { StoreSdk } from './src/runtime/store/StoreSdk.js';
+export { StoreSdk, IStoreTokenInfo } from './src/runtime/store/StoreSdk.js';
 
 // 
 // Events
