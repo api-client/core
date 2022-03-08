@@ -30,6 +30,7 @@ export interface IWorkspace {
   owner: string;
   /**
    * The list of project keys added to the workspace.
+   * @deprecated This is not actually used.
    */
   projects: string[];
 }
@@ -70,6 +71,7 @@ export class Workspace {
   owner = '';
   /**
    * The list of keys of projects added to the workspace.
+   * @deprecated This is not actually used.
    */
   projects: string[] = [];
   /**

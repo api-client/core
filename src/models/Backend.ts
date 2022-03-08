@@ -15,6 +15,14 @@ export interface IBackendInfo {
    * @default single-user
    */
   mode: BackendMode;
+  /**
+   * Optional, the store base path when set on the configuration.
+   */
+  prefix?: string;
+  /**
+   * The path to the authentication endpoint.
+   */
+  authPath: string;
 }
 
 export interface IBackendCommand {

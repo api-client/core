@@ -85,6 +85,11 @@ export { UrlEncodedReader } from './src/data/UrlEncodedReader.js';
 export { RequestDataExtractor } from './src/data/RequestDataExtractor.js';
 
 // 
+// HTTP store
+// 
+export { StoreSdk } from './src/runtime/store/StoreSdk.js';
+
+// 
 // Events
 // 
 export { Events } from './src/events/Events.js';
