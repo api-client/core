@@ -8,10 +8,10 @@ import { HttpEngine, HttpEngineOptions, ResponseErrorInit, HeadersReceivedDetail
 import { IHttpRequest } from '../../models/HttpRequest.js';
 import { ArcResponse } from '../../models/ArcResponse.js';
 import { IRequestLog } from '../../models/RequestLog.js';
+import { SerializableError } from '../../models/SerializableError.js';
 import { Headers } from '../../lib/headers/Headers.js';
 import { PayloadSupport } from './PayloadSupport.js';
 import { addContentLength, getPort } from './RequestUtils.js';
-import { NetError } from './Errors.js';
 import { INtlmAuthorization } from '../../models/Authorization.js';
 import { NtlmAuth, INtlmAuthConfig } from './ntlm/NtlmAuth.js';
 
@@ -59,9 +59,14 @@ export class NodeEngine extends HttpEngine {
           request.setTimeout(timeout);
         }
       }
-    } catch (e) {
-      console.warn(e);
-      this.finalizeRequest(e as Error);
+    } catch (cause) {
+      console.warn(cause);
+      const e = cause as any;
+      const err = new SerializableError(e.message, { cause: e });
+      if (e.code || e.code === 0) {
+        err.code = e.code as string;
+      }
+      this.finalizeRequest(e);
     }
   }
 
@@ -593,7 +598,7 @@ export class NodeEngine extends HttpEngine {
           });
         } else {
           connectRequest.destroy();
-          const e = new NetError('A tunnel connection through the proxy could not be established.', 111);
+          const e = new SerializableError('A tunnel connection through the proxy could not be established', 111);
           reject(e);
         }
       });

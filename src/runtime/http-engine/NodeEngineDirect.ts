@@ -9,6 +9,7 @@ import { IRequestLog } from 'src/models/RequestLog.js';
 import { IHttpRequest } from '../../models/HttpRequest.js';
 import { ArcResponse } from '../../models/ArcResponse.js';
 import { Headers } from '../../lib/headers/Headers.js';
+import { SerializableError } from '../../models/SerializableError.js';
 import { PayloadSupport } from './PayloadSupport.js';
 import { addContentLength, getPort } from './RequestUtils.js';
 
@@ -85,9 +86,14 @@ export class NodeEngineDirect extends HttpEngine {
       if (timeout > 0) {
         request.setTimeout(timeout);
       }
-    } catch (e) {
-      console.warn(e);
-      this.finalizeRequest(e as Error);
+    } catch (cause) {
+      console.warn(cause);
+      const e = cause as any;
+      const err = new SerializableError(e.message, { cause: e });
+      if (e.code || e.code === 0) {
+        err.code = e.code as string;
+      }
+      this.finalizeRequest(e);
     }
   }
 
