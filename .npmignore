@@ -2,7 +2,6 @@
 coverage/
 docs/
 scripts/
-src/
 test/
 cli.md
 commitlint.config.cjs
