@@ -2,25 +2,26 @@ import { IHttpResponse, HttpResponse, Kind } from './HttpResponse.js';
 import { ErrorResponse as LegacyErrorResponse } from './legacy/request/ArcResponse.js';
 import { PayloadSerializer } from '../lib/transformers/PayloadSerializer.js';
 import { Normalizer } from './legacy/Normalizer.js';
+import { SerializableError, ISerializedError } from './SerializableError.js';
 
 export interface IErrorResponse extends IHttpResponse {
   /**
    * An error associated with the response
    */
-  error: string | Error;
+  error: string | ISerializedError;
 }
 
 export class ErrorResponse extends HttpResponse {
   /**
    * An error associated with the response
    */
-  error = new Error('Unknown error');
+  error = new SerializableError('Unknown error');
 
   /**
    * @returns The same Error or new Error instance when passed string.
    */
-  static ensureError(error: string | Error): Error {
-    return typeof error === 'string' ? new Error(error) : error;
+  static ensureError(error: string | Error): SerializableError {
+    return typeof error === 'string' ? new SerializableError(error) : new SerializableError(error);
   }
 
   /**
@@ -39,7 +40,7 @@ export class ErrorResponse extends HttpResponse {
     const init: IErrorResponse = {
       kind: Kind,
       status: input.status || 0,
-      error: input.error ? ErrorResponse.ensureError(input.error) : new Error('Unknown error'),
+      error: input.error ? ErrorResponse.ensureError(input.error) : new SerializableError('Unknown error'),
     };
     if (input.headers) {
       init.headers = input.headers;
@@ -70,7 +71,7 @@ export class ErrorResponse extends HttpResponse {
       init = {
         kind: Kind,
         status: 0,
-        error: new Error('Unknown error'),
+        error: new SerializableError('Unknown error'),
       };
     }
     this.new(init);
@@ -84,7 +85,12 @@ export class ErrorResponse extends HttpResponse {
   new(init: IErrorResponse): void {
     super.new(init);
     if (init.error) {
-      this.error = ErrorResponse.ensureError(init.error);
+      if (typeof init.error === 'string') {
+        this.error = new SerializableError(init.error);
+      } else {
+        this.error = new SerializableError();
+        this.error.new(init.error);
+      }
     }
   }
 

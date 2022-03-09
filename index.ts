@@ -37,6 +37,7 @@ export { ResponseAuthorization, IResponseAuthorization, Kind as ResponseAuthoriz
 export { ResponseRedirect, IResponseRedirect, Kind as ResponseRedirectKind } from './src/models/ResponseRedirect.js';
 export { IRevisionInfo, Kind as RevisionInfoKind } from './src/models/RevisionInfo.js';
 export { ISentRequest, SentRequest, IBaseSentRequest } from './src/models/SentRequest.js';
+export { SerializableError, ISerializedError } from './src/models/SerializableError.js';
 export { SerializablePayload } from './src/models/SerializablePayload.js';
 export { Server, IServer, Kind as ServerKind } from './src/models/Server.js';
 export { Thing, IThing, Kind as ThingKind } from './src/models/Thing.js';

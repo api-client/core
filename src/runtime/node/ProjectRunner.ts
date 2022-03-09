@@ -1,12 +1,14 @@
 import { EventEmitter } from 'events';
 import { Environment } from '../../models/Environment.js';
 import { Logger } from '../../lib/logging/Logger.js';
-import { IRequestLog } from '../../models/RequestLog.js';
+import { IRequestLog, RequestLog } from '../../models/RequestLog.js';
 import { Property } from '../../models/Property.js';
 import { ProjectFolder, Kind as ProjectFolderKind } from '../../models/ProjectFolder.js';
 import { ProjectRequest } from '../../models/ProjectRequest.js';
 import { IHttpRequest } from '../../models/HttpRequest.js';
 import { HttpProject, IProjectRequestIterator } from '../../models/HttpProject.js';
+import { SentRequest } from '../..//models/SentRequest.js';
+import { ErrorResponse } from '../../models/ErrorResponse.js';
 import { VariablesStore } from './VariablesStore.js';
 import { VariablesProcessor } from '../variables/VariablesProcessor.js';
 import { RequestFactory } from './RequestFactory.js';
@@ -75,7 +77,7 @@ export interface ProjectRunner {
   /**
    * There was a general error during the request
    */
-  on(event: 'error', listener: (key: string, request: IHttpRequest, message: string) => void): this;
+  on(event: 'error', listener: (key: string, log: IRequestLog, message: string) => void): this;
   /**
    * The request object is prepared and about to be sent to the HTTP engine
    */
@@ -87,7 +89,7 @@ export interface ProjectRunner {
   /**
    * There was a general error during the request
    */
-  once(event: 'error', listener: (key: string, request: IHttpRequest, message: string) => void): this;
+  once(event: 'error', listener: (key: string, log: IRequestLog, message: string) => void): this;
 }
 
 /**
@@ -192,9 +194,13 @@ export class ProjectRunner extends EventEmitter {
       info.log = result;
       this.emit('response', request.key, { ...result });
     } catch (e) {
+      const cause = e as Error;
       info.error = true;
-      info.errorMessage = (e as Error).message;
-      this.emit('error', request.key, { ...requestData }, info.errorMessage);
+      info.errorMessage = cause.message;
+      const sent = new SentRequest({ ...requestData, startTime: 0, endTime: 0, });
+      const response = ErrorResponse.fromError(info.errorMessage);
+      const log = RequestLog.fromRequestResponse(sent.toJSON(), response.toJSON()).toJSON();
+      this.emit('error', request.key, log, info.errorMessage);
     }
 
     this.eventTarget.removeEventListener(EventTypes.Environment.set, variableHandler as any);
