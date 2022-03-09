@@ -25,7 +25,6 @@ import {
   IErrorResponse,
   IHostRule,
   ErrorResponse,
-  NetError,
 } from '../../index.js';
 
 const logger = new DummyLogger();
@@ -930,7 +929,7 @@ describe('http-engine', () => {
           assert.ok(response, 'has the response');
           assert.isTrue(ErrorResponse.isErrorResponse(response), 'is the errored response');
           const errored = response as ErrorResponse;
-          const error = errored.error as NetError;
+          const error = errored.error;
           assert.equal(error.code, code, 'has the error code');
         });
       });

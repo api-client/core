@@ -73,7 +73,6 @@ export { VariablesStore } from './src/runtime/node/VariablesStore.js';
 // 
 export { HttpEngine, HttpEngineOptions, RequestStats, HeadersReceivedDetail, BeforeRedirectDetail, ResponseErrorInit, IRequestAuthState } from './src/runtime/http-engine/HttpEngine.js';
 export { ArcEngine, RequestState } from './src/runtime/http-engine/ArcEngine.js';
-export { NetError } from './src/runtime/http-engine/Errors.js';
 
 // 
 // Data processing

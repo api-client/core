@@ -20,14 +20,20 @@ export class ErrorResponse extends HttpResponse {
   /**
    * @returns The same Error or new Error instance when passed string.
    */
-  static ensureError(error: string | Error): SerializableError {
-    return typeof error === 'string' ? new SerializableError(error) : new SerializableError(error);
+  static ensureError(error: string | Error | SerializableError): SerializableError {
+    if (typeof error === 'string') {
+      return new SerializableError(error);
+    }
+    if (error.name === 'SerializableError') {
+      return error as SerializableError;
+    }
+    return new SerializableError(error);
   }
 
   /**
    * @param error The error message or Error object to use.
    */
-  static fromError(error: Error | string): ErrorResponse {
+  static fromError(error: Error | SerializableError | string): ErrorResponse {
     const err = ErrorResponse.ensureError(error);
     return new ErrorResponse({
       kind: Kind,

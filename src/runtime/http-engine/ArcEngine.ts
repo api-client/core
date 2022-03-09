@@ -6,10 +6,10 @@ import { HttpEngine, HttpEngineOptions, HeadersReceivedDetail } from './HttpEngi
 import { IRequestLog } from 'src/models/RequestLog.js';
 import { IHttpRequest } from '../../models/HttpRequest.js';
 import { ArcResponse } from '../../models/ArcResponse.js';
+import { SerializableError } from '../../models/SerializableError.js';
 import { Headers } from '../../lib/headers/Headers.js';
 import { PayloadSupport } from './PayloadSupport.js';
 import { addContentLength, getPort } from './RequestUtils.js';
-import { NetError } from './Errors.js';
 import { INtlmAuthorization } from '../../models/Authorization.js';
 import { NtlmAuth, INtlmAuthConfig } from './ntlm/NtlmAuth.js';
 import { PayloadSerializer } from '../../lib/transformers/PayloadSerializer.js';
@@ -80,7 +80,11 @@ export class ArcEngine extends HttpEngine {
       const message = await this.prepareMessage();
       await this.writeMessage(message);
     } catch (cause) {
-      const err = cause as NetError;
+      const e = cause as any;
+      const err = new SerializableError(e.message, { cause: e });
+      if (e.code || e.code === 0) {
+        err.code = e.code as string;
+      }
       this.abort();
       this._errorRequest({
         message: err.message,
@@ -459,7 +463,7 @@ export class ArcEngine extends HttpEngine {
         if (!this.currentResponse) {
           this.logger.error(`Connection closed without receiving any data.`);
           // The parser haven't found the end of message so there was no message!
-          const e = new NetError('Connection closed without receiving any data', 100);
+          const e = new SerializableError('Connection closed without receiving any data', 100);
           this._errorRequest(e);
         } else {
           // There is an issue with the response. Size mismatch? Anyway,
@@ -1012,7 +1016,7 @@ export class ArcEngine extends HttpEngine {
         } else if (res.statusCode !== 200) {
           this.logger.debug(`The proxy tunnel ended with ${res.statusCode} status code. Erroring request.`);
           connectRequest.destroy();
-          const e = new NetError('A tunnel connection through the proxy could not be established.', 111);
+          const e = new SerializableError('A tunnel connection through the proxy could not be established', 111);
           reject(e);
         } else {
           this.logger.debug(`Established a proxy tunnel.`);

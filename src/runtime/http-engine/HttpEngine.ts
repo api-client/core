@@ -19,6 +19,7 @@ import { HttpResponse } from '../../models/HttpResponse.js';
 import { ResponseRedirect } from '../../models/ResponseRedirect.js';
 import { RequestLog, IRequestLog } from '../../models/RequestLog.js';
 import { RequestTime } from '../../models/RequestTime.js';
+import { SerializableError } from '../../models/SerializableError.js';
 import { ResponseAuthorization } from '../../models/ResponseAuthorization.js';
 import { DefaultLogger } from '../../lib/logging/DefaultLogger.js';
 import { ILogger, Logger } from '../../lib/logging/Logger.js';
@@ -26,7 +27,6 @@ import { Headers } from '../../lib/headers/Headers.js';
 import * as RequestUtils from './RequestUtils.js';
 import { Cookies } from '../../lib/cookies/Cookies.js';
 import { HttpErrorCodes } from './HttpErrorCodes.js';
-import { NetError } from './Errors.js';
 
 export interface HttpEngineOptions extends IRequestBaseConfig {
   /**
@@ -188,7 +188,7 @@ export abstract class HttpEngine extends EventEmitter {
   auth?: IRequestAuthState;
 
   protected mainResolver?: (log: IRequestLog) => void;
-  protected mainRejecter?: (err: NetError) => void;
+  protected mainRejecter?: (err: SerializableError) => void;
   [mainPromiseSymbol]?: Promise<IRequestLog>;
 
   constructor(request: IHttpRequest, opts: HttpEngineOptions = {}) {
@@ -562,7 +562,7 @@ Check your request parameters.`);
       message = opts.message;
     }
     message = message || 'Unknown error occurred';
-    const error = new NetError(message, opts.code);
+    const error = new SerializableError(message, opts.code);
     const log = RequestLog.fromRequest(this.sentRequest);
     const response = ErrorResponse.fromError(error);
     log.response = response;
@@ -855,14 +855,14 @@ Check your request parameters.`);
    * 
    * @param log Either the request execution log or an error.
    */
-  protected finalizeRequest(log: RequestLog | NetError): void {
+  protected finalizeRequest(log: RequestLog | SerializableError): void {
     const { mainRejecter, mainResolver } = this;
     if (!mainRejecter || !mainResolver) {
       // console.error(`Trying to finalize the request but the main resolver is not set.`);
       return;
     }
     
-    if (log instanceof Error) {
+    if (log instanceof SerializableError) {
       mainRejecter(log);
     } else {
       mainResolver(log.toJSON());

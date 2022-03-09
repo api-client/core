@@ -5,6 +5,7 @@ interface IErrorOptions {
 export interface ISerializedError {
   message: string;
   stack?: string;
+  code?: string | number;
 }
 
 /**
@@ -15,17 +16,23 @@ export interface ISerializedError {
  */
 export class SerializableError {
   message: string;
+  code?: number | string;
   private stackValue?: string;
   get stack(): string | undefined {
     return this.stackValue;
+  }
+
+  get name(): string {
+    return 'SerializableError';
   }
 
   constructor();
   constructor(error: Error);
   constructor(message: string);
   constructor(message: string, options: IErrorOptions);
+  constructor(message: string, code?: number | string);
 
-  constructor(message?: string | Error, options: IErrorOptions = {}) {
+  constructor(message?: string | Error, options: IErrorOptions | number | string = {}) {
     if (typeof message === 'string') {
       this.message = message;
     } else if (message) {
@@ -34,7 +41,9 @@ export class SerializableError {
     } else {
       this.message = '';
     }
-    if (options.cause && options.cause.stack) {
+    if (typeof options === 'string' || typeof options === 'number') {
+      this.code = options;
+    } else if (options.cause && options.cause.stack) {
       this.stackValue = options.cause.stack;
     }
   }
@@ -46,15 +55,21 @@ export class SerializableError {
     if (values.stack) {
       this.stackValue = values.stack;
     }
+    if (values.code || values.code === 0) {
+      this.code = values.code;
+    }
   }
 
   toJSON(): ISerializedError {
-    const { message, stackValue: stack } = this;
+    const { message, stackValue: stack, code } = this;
     const result: ISerializedError = {
       message,
     };
     if (stack) {
       result.stack = stack;
+    }
+    if (code || code === 0) {
+      result.code = code;
     }
     return result;
   }
