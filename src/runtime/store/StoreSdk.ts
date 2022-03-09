@@ -214,10 +214,9 @@ class AuthSdk extends SdkBase {
    * @returns The JWT for unauthenticated user.
    */
   async createSession(): Promise<IStoreTokenInfo> {
-    const { baseUri } = this.sdk;
-    const url = `${baseUri}/sessions`;
+    const url = this.sdk.getUrl('/sessions');
     // console.log('Create session: ', url);
-    const result = await this.sdk.http.post(url);
+    const result = await this.sdk.http.post(url.toString());
     this.inspectCommonStatusCodes(result.status);
     if (result.status !== 200) {
       throw new Error(`Unable to create the session. Invalid response status: ${result.status}`);
@@ -241,9 +240,8 @@ class AuthSdk extends SdkBase {
    * @returns The location of the authorization endpoint.
    */
   async createAuthSession(token?: string, loginPath = '/auth/login'): Promise<string> {
-    const { baseUri } = this.sdk;
-    const url = `${baseUri}${loginPath}`;
-    const result = await this.sdk.http.post(url, { token });
+    const url = this.sdk.getUrl(loginPath);
+    const result = await this.sdk.http.post(url.toString(), { token });
     this.inspectCommonStatusCodes(result.status);
     const loc = result.headers.location;
     if (!loc) {
@@ -258,9 +256,8 @@ class AuthSdk extends SdkBase {
    * @param token Optional token to use.
    */
   async listenAuth(authPath: string, token?: string): Promise<void> {
-    const { baseUri, basePath='' } = this.sdk;
-    const authUrl = new URL(`${basePath}${authPath}`, baseUri);
-    const client = await this.sdk.ws.createAndConnect(authUrl.toString(), token);
+    const url = this.sdk.getUrl(authPath);
+    const client = await this.sdk.ws.createAndConnect(url.toString(), token);
     return new Promise((resolve, reject) => {
       client.on('message', (data: Buffer) => {
         const message = JSON.parse(data.toString());
@@ -282,10 +279,9 @@ class AuthSdk extends SdkBase {
    * @returns 
    */
   async renewToken(token = this.sdk.token): Promise<IStoreTokenInfo> {
-    const { baseUri, basePath='' } = this.sdk;
     const authPath = '/sessions/renew';
-    const url = new URL(`${basePath}${authPath}`, baseUri).toString();
-    const result = await this.sdk.http.post(url, { token });
+    const url = this.sdk.getUrl(authPath);
+    const result = await this.sdk.http.post(url.toString(), { token });
     this.inspectCommonStatusCodes(result.status);
     if (result.status !== 200) {
       throw new Error(`Unable to renew the token. Invalid response status: ${result.status}`);
@@ -309,9 +305,8 @@ class BackendSdk extends SdkBase {
    * @returns Client information about the store configuration.
    */
   async getInfo(): Promise<IBackendInfo> {
-    const { baseUri } = this.sdk;
-    const url = `${baseUri}/store`;
-    const result = await this.sdk.http.get(url);
+    const url = this.sdk.getUrl('/store');
+    const result = await this.sdk.http.get(url.toString());
     this.inspectCommonStatusCodes(result.status);
     if (result.status !== 200) {
       throw new Error(`Invalid store response. Expected 200 status and ${result.status} received.`);
