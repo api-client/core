@@ -76,6 +76,16 @@ export { UrlEncodedReader } from './src/data/UrlEncodedReader.js';
 export { RequestDataExtractor } from './src/data/RequestDataExtractor.js';
 
 // 
+// Execution reporters
+// 
+export { Reporter, IProjectExecutionLog, IProjectExecutionIteration } from './src/runtime/reporters/Reporter.js';
+
+// 
+// Mocking
+// 
+export * from './src/mocking/ProjectMock.js';
+
+// 
 // Events
 // 
 export { Events } from './src/events/Events.js';

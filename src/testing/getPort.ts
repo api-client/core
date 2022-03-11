@@ -1,7 +1,9 @@
 import net from 'net';
 import os from 'os';
 
-export interface Options extends Omit<net.ListenOptions, 'port'> {
+/* global NodeJS */
+
+export interface IGetPortOptions extends Omit<net.ListenOptions, 'port'> {
 	/**
 	A preferred port or an iterable of preferred ports to use.
 	*/
@@ -115,7 +117,7 @@ console.log(await getPort({port: [3000, 3001, 3002]}));
 // Will use any element in the preferred ports array if available, otherwise fall back to a random port
 ```
 */
-export default async function getPort(options?: Options): Promise<number> {
+export async function getPort(options?: IGetPortOptions): Promise<number> {
 	let ports: number[] | Iterable<number> = [];
 
 	if (options) {

@@ -59,6 +59,7 @@ export { Cookie, CookieOptions } from './src/lib/cookies/Cookie.js';
 export { Cookies } from './src/lib/cookies/Cookies.js';
 export * as TransformerUtils from './src/lib/transformers/Utils.js';
 export { default as uuidV4 } from './src/lib/uuid.js';
+export * as fs from './src/lib/fs/Fs.js';
 
 //
 // Runtime
@@ -67,6 +68,15 @@ export { VariablesProcessor } from './src/runtime/variables/VariablesProcessor.j
 export { ProjectRequestRunner } from './src/runtime/node/ProjectRequestRunner.js';
 export { RequestFactory } from './src/runtime/node/RequestFactory.js';
 export { VariablesStore } from './src/runtime/node/VariablesStore.js';
+export { ProjectSerialRunner } from './src/runtime/node/ProjectSerialRunner.js';
+export { ProjectParallelRunner, IWorkerInfo } from './src/runtime/node/ProjectParallelRunner.js';
+export { IProjectRunnerOptions, ProjectRunner } from './src/runtime/node/ProjectRunner.js';
+
+// 
+// Execution reporters
+// 
+export { Reporter, IProjectExecutionLog, IProjectExecutionIteration } from './src/runtime/reporters/Reporter.js';
+export { ProjectRunCliReporter } from './src/runtime/reporters/ProjectRunCliReporter.js';
 
 // 
 // HTTP engine
@@ -88,6 +98,18 @@ export { RequestDataExtractor } from './src/data/RequestDataExtractor.js';
 // HTTP store
 // 
 export { StoreSdk, IStoreTokenInfo } from './src/runtime/store/StoreSdk.js';
+
+// 
+// Testing
+// 
+export * from './src/testing/TestCliHelper.js';
+export * from './src/testing/getPort.js';
+
+// 
+// Mocking
+// 
+export * from './src/mocking/ProjectMock.js';
+
 
 // 
 // Events

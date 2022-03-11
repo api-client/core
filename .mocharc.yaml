@@ -2,7 +2,7 @@ extension:
   - ts
 spec: 
   - test/**/*.node.test.ts
-  # - test/lib-http-engine/ArcEngine.node.test.ts
+  # - test/reporters/ProjectRunCliReporter.node.test.ts
 require: ts-node/register
 loader: ts-node/esm
 watch-files:

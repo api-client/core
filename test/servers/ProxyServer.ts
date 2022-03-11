@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import getPort, { portNumbers } from '../helpers/getPort.js';
+import { getPort, portNumbers } from '../../src/testing/getPort.js';
 import http from 'http';
 import https from 'https';
 import path from 'path';

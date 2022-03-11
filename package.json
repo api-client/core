@@ -1,7 +1,7 @@
 {
   "name": "@api-client/core",
   "description": "The ARC core client library. Works in NodeJS and in a ES enabled browser.",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "license": "Apache-2.0",
   "main": "build/index.js",
   "module": "build/index.js",
@@ -89,6 +89,7 @@
     "@metrichor/jmespath": "^0.3.1",
     "@pawel-up/jexl": "^3.0.0",
     "@xmldom/xmldom": "^0.8.1",
+    "console-table-printer": "^2.10.0",
     "form-data": "^4.0.0",
     "json8-patch": "^1.0.6",
     "ws": "^8.5.0",
