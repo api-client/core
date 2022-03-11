@@ -4,7 +4,7 @@ import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
 import getConfig from '../helpers/getSetup.js';
 import { 
-  ProjectRunner, 
+  ProjectRequestRunner, 
   HttpProject, 
   IRequestLog, 
   ProjectRequest, 
@@ -27,7 +27,7 @@ describe('Runtime', () => {
       httpPort = cnf.httpPort;
     });
 
-    describe('ProjectRunner', () => {
+    describe('ProjectRequestRunner', () => {
       describe('Base runs', () => {
         it('runs a request from a folder', async () => {
           const project = new HttpProject();
@@ -38,7 +38,7 @@ describe('Runtime', () => {
             headers: 'x-test: true',
           }, project);
           folder.addRequest(request);
-          const runner = new ProjectRunner(project);
+          const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
           const result = await runner.run({ parent: folder.key });
           
@@ -73,7 +73,7 @@ describe('Runtime', () => {
           project.addRequest(request2, {
             parent: folder.key,
           });
-          const runner = new ProjectRunner(project);
+          const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
           const result = await runner.run({ parent: folder.key });
           
@@ -118,7 +118,7 @@ describe('Runtime', () => {
           project.addRequest(request2, {
             parent: folder2.key,
           });
-          const runner = new ProjectRunner(project);
+          const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
           const result = await runner.run({ parent: folder1.key });
           
@@ -136,7 +136,7 @@ describe('Runtime', () => {
   
         it('returns empty array when the project has no requests', async () => {
           const project = new HttpProject();
-          const runner = new ProjectRunner(project);
+          const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
           const result = await runner.run();
           
@@ -147,7 +147,7 @@ describe('Runtime', () => {
         it('returns empty array when the folder has no requests', async () => {
           const project = new HttpProject();
           const folder = project.addFolder();
-          const runner = new ProjectRunner(project);
+          const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
           const result = await runner.run({ parent: folder.key });
           
@@ -157,7 +157,7 @@ describe('Runtime', () => {
   
         it('throws when folder not found', async () => {
           const project = new HttpProject();
-          const runner = new ProjectRunner(project);
+          const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
           await assert.isRejected(runner.run({ parent: 'test' }), `The parent folder not found: test`);
         });
@@ -183,7 +183,7 @@ describe('Runtime', () => {
             headers: 'x-test: false',
           }, project);
           project.addRequest(request3);
-          const runner = new ProjectRunner(project);
+          const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
           const result = await runner.run({ requests: [request1.key, 'included request'] });
           
@@ -201,7 +201,7 @@ describe('Runtime', () => {
             headers: 'x-test: true',
           }, project);
           const request = project.addRequest(r1);
-          const runner = new ProjectRunner(project);
+          const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
           const requestSpy = sinon.spy();
           const responseSpy = sinon.spy();
@@ -241,7 +241,7 @@ describe('Runtime', () => {
           project.addRequest(request, {
             parent: folder.key,
           });
-          const runner = new ProjectRunner(project);
+          const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
           const result = await runner.run({ parent: folder.key });
           
@@ -271,7 +271,7 @@ describe('Runtime', () => {
           project.addRequest(request, {
             parent: folder.key,
           });
-          const runner = new ProjectRunner(project);
+          const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
           const result = await runner.run({ parent: folder.key });
           
@@ -303,7 +303,7 @@ describe('Runtime', () => {
           project.addRequest(request, {
             parent: folder.key,
           });
-          const runner = new ProjectRunner(project);
+          const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
           const result = await runner.run({ parent: folder.key });
           
@@ -339,7 +339,7 @@ describe('Runtime', () => {
           project.addRequest(request, {
             parent: folder.key,
           });
-          const runner = new ProjectRunner(project);
+          const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
           const result = await runner.run({ parent: folder.key });
 
@@ -367,7 +367,7 @@ describe('Runtime', () => {
           const masterEnvironment = Environment.fromName('master');
           masterEnvironment.addVariable('httpPort', httpPort);
 
-          const runner = new ProjectRunner(project, {
+          const runner = new ProjectRequestRunner(project, {
             environment: masterEnvironment,
           });
           runner.logger = logger;
@@ -399,7 +399,7 @@ describe('Runtime', () => {
             headers: 'x-test: true',
           }, project);
           project.addRequest(request);
-          const runner = new ProjectRunner(project);
+          const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
           const result = await runner.run();
           
@@ -426,7 +426,7 @@ describe('Runtime', () => {
             headers: 'x-test: true',
           }, project);
           project.addRequest(request);
-          const runner = new ProjectRunner(project);
+          const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
           const result = await runner.run();
           

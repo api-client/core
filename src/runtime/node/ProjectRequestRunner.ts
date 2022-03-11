@@ -7,7 +7,7 @@ import { ProjectFolder, Kind as ProjectFolderKind } from '../../models/ProjectFo
 import { ProjectRequest } from '../../models/ProjectRequest.js';
 import { IHttpRequest } from '../../models/HttpRequest.js';
 import { HttpProject, IProjectRequestIterator } from '../../models/HttpProject.js';
-import { SentRequest } from '../..//models/SentRequest.js';
+import { SentRequest } from '../../models/SentRequest.js';
 import { ErrorResponse } from '../../models/ErrorResponse.js';
 import { VariablesStore } from './VariablesStore.js';
 import { VariablesProcessor } from '../variables/VariablesProcessor.js';
@@ -65,7 +65,7 @@ export interface RunResult {
   log?: IRequestLog;
 }
 
-export interface ProjectRunner {
+export interface ProjectRequestRunner {
   /**
    * The request object is prepared and about to be sent to the HTTP engine
    */
@@ -99,7 +99,7 @@ export interface ProjectRunner {
  * 
  * Requests are executed in order defined in the folder.
  */
-export class ProjectRunner extends EventEmitter {
+export class ProjectRequestRunner extends EventEmitter {
   eventTarget: EventTarget;
   logger?: Logger;
   project: HttpProject;

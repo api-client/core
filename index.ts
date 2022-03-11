@@ -64,7 +64,7 @@ export { default as uuidV4 } from './src/lib/uuid.js';
 // Runtime
 //
 export { VariablesProcessor } from './src/runtime/variables/VariablesProcessor.js';
-export { ProjectRunner } from './src/runtime/node/ProjectRunner.js';
+export { ProjectRequestRunner } from './src/runtime/node/ProjectRequestRunner.js';
 export { RequestFactory } from './src/runtime/node/RequestFactory.js';
 export { VariablesStore } from './src/runtime/node/VariablesStore.js';
 
