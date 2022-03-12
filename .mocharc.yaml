@@ -10,4 +10,4 @@ watch-files:
   - test
 watch-ignore:
   - test/express.lock
-timeout: 10000
+timeout: 20000
