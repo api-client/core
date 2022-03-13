@@ -1,7 +1,7 @@
 {
   "name": "@api-client/core",
   "description": "The ARC core client library. Works in NodeJS and in a ES enabled browser.",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "license": "Apache-2.0",
   "main": "build/index.js",
   "module": "build/index.js",
@@ -26,7 +26,6 @@
     "@commitlint/cli": "^16.2.1",
     "@commitlint/config-conventional": "^16.2.1",
     "@esm-bundle/chai": "^4.3.4-fix.0",
-    "@pawel-up/data-mock": "^0.1.7",
     "@types/chai": "^4.2.22",
     "@types/chai-as-promised": "^7.1.5",
     "@types/cors": "^2.8.12",
@@ -88,6 +87,7 @@
   "dependencies": {
     "@metrichor/jmespath": "^0.3.1",
     "@pawel-up/jexl": "^3.0.0",
+    "@pawel-up/data-mock": "^0.1.7",
     "@xmldom/xmldom": "^0.8.1",
     "console-table-printer": "^2.10.0",
     "form-data": "^4.0.0",
