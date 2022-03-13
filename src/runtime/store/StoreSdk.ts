@@ -474,6 +474,36 @@ class SpacesSdk extends SdkBase {
       throw new Error(`${E_PREFIX}${E_RESPONSE_STATUS}${result.status}`);
     }
   }
+
+  /**
+   * Lists uses having access to the user space.
+   * 
+   * @param key The user space key
+   */
+  async listUsers(key: string): Promise<IListResponse> {
+    const { token } = this.sdk;
+    const url = this.sdk.getUrl(`/spaces/${key}/users`);
+    const result = await this.sdk.http.get(url.toString(), { token });
+    this.inspectCommonStatusCodes(result.status);
+    const E_PREFIX = 'Unable to list users in the space. ';
+    if (result.status !== 200) {
+      this.logInvalidResponse(result);
+      throw new Error(`${E_PREFIX}${E_RESPONSE_STATUS}${result.status}`);
+    }
+    if (!result.body) {
+      throw new Error(`${E_PREFIX}${E_RESPONSE_NO_VALUE}`);
+    }
+    let data: IListResponse;
+    try {
+      data = JSON.parse(result.body);
+    } catch (e) {
+      throw new Error(`${E_PREFIX}${E_INVALID_JSON}.`);
+    }
+    if (!Array.isArray(data.data)) {
+      throw new Error(`${E_PREFIX}${E_RESPONSE_UNKNOWN}.`);
+    }
+    return data;
+  }
 }
 
 class HttpClient extends SdkBase {
@@ -832,6 +862,33 @@ class UsersSdk extends SdkBase {
     }
     if (!Array.isArray(data.data)) {
       throw new Error(`${E_PREFIX}${E_RESPONSE_UNKNOWN}.`);
+    }
+    return data;
+  }
+
+  /**
+   * Reads a user information from the store.
+   * @param key The user key.
+   * @returns The user object
+   */
+  async read(key: string): Promise<IUser> {
+    const { token } = this.sdk;
+    const url = this.sdk.getUrl(`/users/${key}`);
+    const result = await this.sdk.http.get(url.toString(), { token });
+    this.inspectCommonStatusCodes(result.status);
+    const E_PREFIX = 'Unable to read the user info. ';
+    if (result.status !== 200) {
+      this.logInvalidResponse(result);
+      throw new Error(`${E_PREFIX}${E_RESPONSE_STATUS}${result.status}`);
+    }
+    if (!result.body) {
+      throw new Error(`${E_PREFIX}${E_RESPONSE_NO_VALUE}`);
+    }
+    let data: IUser;
+    try {
+      data = JSON.parse(result.body);
+    } catch (e) {
+      throw new Error(`${E_PREFIX}${E_INVALID_JSON}.`);
     }
     return data;
   }

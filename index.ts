@@ -42,7 +42,7 @@ export { SerializablePayload } from './src/models/SerializablePayload.js';
 export { Server, IServer, Kind as ServerKind } from './src/models/Server.js';
 export { Thing, IThing, Kind as ThingKind } from './src/models/Thing.js';
 export { Url, IUrl } from './src/models/Url.js';
-export { IAccessControl, IEmail, IUserPicture, IUser, IUserSpaces, AccessControlLevel, UserAccessOperation, IUserAccessAddOperation, IUserAccessRemoveOperation, Kind as UserKind } from './src/models/User.js';
+export { IAccessControl, IEmail, IUserPicture, IUser, IUserSpaces, ISpaceUser, AccessControlLevel, UserAccessOperation, IUserAccessAddOperation, IUserAccessRemoveOperation, Kind as UserKind } from './src/models/User.js';
 export { WebApi, IWebApi, ILegacyRestApi } from './src/models/WebApi.js';
 export { WebApiIndex, IWebApiIndex, ILegacyWebApiIndex } from './src/models/WebApiIndex.js';
 export { IWorkspace, IUserWorkspace, Workspace, Kind as WorkspaceKind, DefaultOwner } from './src/models/Workspace.js';
@@ -62,6 +62,7 @@ export { default as uuidV4 } from './src/lib/uuid.js';
 export * as fs from './src/lib/fs/Fs.js';
 export { UrlParser } from './src/lib/parsers/UrlParser.js';
 export { UrlEncoder } from './src/lib/parsers/UrlEncoder.js';
+export * as Timers from './src/lib/timers/Timers.js';
 
 //
 // Runtime
@@ -99,7 +100,7 @@ export { RequestDataExtractor } from './src/data/RequestDataExtractor.js';
 // 
 // HTTP store
 // 
-export { StoreSdk, IStoreTokenInfo } from './src/runtime/store/StoreSdk.js';
+export { StoreSdk, IStoreTokenInfo, IStoreResponse, IStoreRequestOptions } from './src/runtime/store/StoreSdk.js';
 
 // 
 // Testing

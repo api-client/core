@@ -1,7 +1,7 @@
 {
   "name": "@api-client/core",
   "description": "The ARC core client library. Works in NodeJS and in a ES enabled browser.",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "license": "Apache-2.0",
   "main": "build/index.js",
   "module": "build/index.js",

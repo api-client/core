@@ -64,15 +64,7 @@ export interface IUserPicture {
 
 export const Kind = 'ARC#User';
 
-/**
- * Represents a user in the system.
- * This can be embedded in various situations like project's revision history,
- * ACL, Authorization, etc.
- * 
- * Note, the store implementation may have additional fields that support external 
- * identity providers. However, this is not exposed to the user through the API.
- */
-export interface IUser {
+interface BaseUser {
   /**
    * Data store key of the user.
    */
@@ -104,6 +96,21 @@ export interface IUser {
 }
 
 /**
+ * Represents a user in the system.
+ * This can be embedded in various situations like project's revision history,
+ * ACL, Authorization, etc.
+ * 
+ * Note, the store implementation may have additional fields that support external 
+ * identity providers. However, this is not exposed to the user through the API.
+ */
+export interface IUser extends BaseUser {
+  /**
+   * Optional metadata related to the auth provider.
+   */
+  provider?: unknown;
+}
+
+/**
  * This object may be created for each user in the system.
  * It describes to which spaces user has access to.
  */
@@ -117,4 +124,14 @@ export interface IUserSpaces {
    * This is also the key of the entry.
    */
   user: string;
+}
+
+/**
+ * An abstract user object that contains access information to a space.
+ */
+export interface ISpaceUser extends BaseUser {
+  /**
+   * The level that the user has access to.
+   */
+  level: AccessControlLevel;
 }
