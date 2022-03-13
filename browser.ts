@@ -59,6 +59,8 @@ export { Cookie, CookieOptions } from './src/lib/cookies/Cookie.js';
 export { Cookies } from './src/lib/cookies/Cookies.js';
 export * as TransformerUtils from './src/lib/transformers/Utils.js';
 export { default as uuidV4 } from './src/lib/uuid.js';
+export { UrlParser } from './src/lib/parsers/UrlParser.js';
+export { UrlEncoder } from './src/lib/parsers/UrlEncoder.js';
 
 //
 // Runtime
@@ -84,6 +86,11 @@ export { Reporter, IProjectExecutionLog, IProjectExecutionIteration } from './sr
 // Mocking
 // 
 export * from './src/mocking/ProjectMock.js';
+
+//
+// Calculators
+//
+export { DataCalculator } from './src/lib/calculators/DataCalculator.js';
 
 // 
 // Events

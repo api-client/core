@@ -60,6 +60,8 @@ export { Cookies } from './src/lib/cookies/Cookies.js';
 export * as TransformerUtils from './src/lib/transformers/Utils.js';
 export { default as uuidV4 } from './src/lib/uuid.js';
 export * as fs from './src/lib/fs/Fs.js';
+export { UrlParser } from './src/lib/parsers/UrlParser.js';
+export { UrlEncoder } from './src/lib/parsers/UrlEncoder.js';
 
 //
 // Runtime
@@ -110,6 +112,10 @@ export * from './src/testing/getPort.js';
 // 
 export * from './src/mocking/ProjectMock.js';
 
+//
+// Calculators
+//
+export { DataCalculator } from './src/lib/calculators/DataCalculator.js';
 
 // 
 // Events

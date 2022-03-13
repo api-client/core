@@ -4,6 +4,12 @@ export interface ITestRunCommandOptions {
 }
 
 export class TestCliHelper {
+  /**
+   * The globally set test timeout.
+   * @default 2000 The mocha default test timeout.
+   */
+  static testTimeout = 2000;
+
   static cleanTerminalOutput(s: string): string {
     let result = s.trim();
     result = result.replace(/[^\x20-\x7E\n]/gm, '');
@@ -37,9 +43,10 @@ export class TestCliHelper {
    * ```
    * 
    * @param fn The function to execute.
+   * @param timeout The test timeout. After this time the output is reset.
    * @returns The terminal output.
    */
-  static async grabOutput(fn: () => Promise<void>): Promise<string> {
+  static async grabOutput(fn: () => Promise<void>, timeout=TestCliHelper.testTimeout): Promise<string> {
     const messages: string[] = [];
     function noop(): void {
       //
@@ -64,11 +71,15 @@ export class TestCliHelper {
     process.stderr.write = messageHandler;
     console.clear = noop;
 
+    const handle = setTimeout(() => stop(), timeout);
+
     try {
       await fn();
       stop();
+      clearTimeout(handle);
     } catch (e) {
       stop();
+      clearTimeout(handle);
       throw e;
     }
     return messages.join('');
