@@ -148,7 +148,7 @@ export class ProjectFolder extends ProjectParent {
       this.info = new Thing({ kind: ThingKind, name: DefaultFolderName });
     }
     if (Array.isArray(environments)) {
-      this.environments = environments;
+      this.environments = [...environments];
     } else {
       this.environments = [];
     }
@@ -179,7 +179,7 @@ export class ProjectFolder extends ProjectParent {
       result.items = this.items.map(i => i.toJSON());
     }
     if (Array.isArray(this.environments)) {
-      result.environments = this.environments;
+      result.environments = [...this.environments];
     }
     return result;
   }

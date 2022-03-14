@@ -350,7 +350,7 @@ export class HttpProject extends ProjectParent {
     this.key = key;
     this.environments = [];
     if (Array.isArray(environments)) {
-      this.environments = environments;
+      this.environments = [...environments];
     }
     if (license) {
       this.license = new License(license);
@@ -416,7 +416,7 @@ export class HttpProject extends ProjectParent {
       result.definitions.schemas = this.definitions.schemas.map(i => i.toJSON());
     }
     if (Array.isArray(this.environments) && this.environments.length) {
-      result.environments = this.environments;
+      result.environments = [...this.environments];
     }
     if (Array.isArray(this.items) && this.items.length) {
       result.items = this.items.map(i => i.toJSON());

@@ -144,7 +144,7 @@ export class Workspace {
       this.info = new Thing({ kind: ThingKind, name: '' });
     }
     if (Array.isArray(users)) {
-      this.users = users;
+      this.users = [...users];
     } else {
       this.users = [];
     }
@@ -175,7 +175,7 @@ export class Workspace {
       owner,
     };
     if (Array.isArray(users) && users.length) {
-      result.users = users;
+      result.users = [...users];
     }
     return result;
   }
