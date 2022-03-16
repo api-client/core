@@ -57,7 +57,7 @@ describe('Parse cookies', () => {
     const parser = new Cookies(str);
     const future = Date.now() + 100000;
     const cookie = parser.cookies[0];
-    assert.approximately(cookie.expires, future, 10);
+    assert.approximately(cookie.expires, future, 100);
     assert.isTrue(cookie.persistent, 'The persistent flag is not set to true');
     cookie.maxAge = 0;
     assert.equal(

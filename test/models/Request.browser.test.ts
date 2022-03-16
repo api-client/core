@@ -104,7 +104,7 @@ describe('Models', () => {
           name: 'test',
           url: 'https://dot.com',
         });
-        assert.approximately(instance.created, now, 2);
+        assert.approximately(instance.created, now, 100);
       });
 
       it('sets the default updated', async () => {
@@ -481,7 +481,7 @@ describe('Models', () => {
         const instance = new Request();
         const now = Date.now();
         instance.created = undefined;
-        assert.approximately(instance.created, now, 10);
+        assert.approximately(instance.created, now, 100);
       });
     });
 
@@ -539,8 +539,8 @@ describe('Models', () => {
         assert.typeOf(instance.created, 'number');
         assert.typeOf(instance.updated, 'number');
 
-        assert.approximately(instance.created, now, 2);
-        assert.approximately(instance.updated, now, 2);
+        assert.approximately(instance.created, now, 100);
+        assert.approximately(instance.updated, now, 100);
 
         const { expects, info } = instance;
         assert.typeOf(expects, 'object', 'sets the expects');
@@ -796,7 +796,7 @@ describe('Models', () => {
         const schema = instance.toJSON();
         delete schema.created;
         instance.new(schema);
-        assert.approximately(instance.created, now, 2);
+        assert.approximately(instance.created, now, 100);
       });
 
       it('sets the updated', () => {
@@ -1097,7 +1097,7 @@ describe('Models', () => {
           kind: ThingKind,
           name: 'test',
         });
-        assert.approximately(instance.updated, now, 2);
+        assert.approximately(instance.updated, now, 100);
       });
     });
 
@@ -1169,7 +1169,7 @@ describe('Models', () => {
         const instance = new Request();
         instance.setLog(schema);
 
-        assert.approximately(instance.updated, now, 2);
+        assert.approximately(instance.updated, now, 100);
       });
     });
   });

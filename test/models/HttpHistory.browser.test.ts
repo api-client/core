@@ -16,7 +16,7 @@ describe('Models', () => {
         const instance = new HttpHistory();
         const now = Date.now();
         instance.created = undefined;
-        assert.approximately(instance.created, now, 10);
+        assert.approximately(instance.created, now, 100);
       });
     });
 
@@ -50,7 +50,7 @@ describe('Models', () => {
         const instance = new HttpHistory();
         assert.equal(instance.kind, HttpRequestKind);
         assert.typeOf(instance.created, 'number');
-        assert.approximately(instance.created, now, 2);
+        assert.approximately(instance.created, now, 100);
         const { log } = instance;
         assert.typeOf(log, 'object', 'sets the log');
         assert.isUndefined(instance.app);
@@ -257,7 +257,7 @@ describe('Models', () => {
         const schema = instance.toJSON();
         delete schema.created;
         instance.new(schema);
-        assert.approximately(instance.created, now, 2);
+        assert.approximately(instance.created, now, 100);
       });
 
       it('sets the midnight', () => {

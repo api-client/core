@@ -225,8 +225,8 @@ describe('Models', () => {
 
       it('generates the created/updated', () => {
         const result = ProjectFolder.fromName(project, 'a name');
-        assert.approximately(result.updated, Date.now(), 2);
-        assert.approximately(result.created, Date.now(), 2);
+        assert.approximately(result.updated, Date.now(), 100);
+        assert.approximately(result.created, Date.now(), 100);
       });
 
       it('adds empty items', () => {
