@@ -7,19 +7,29 @@ export const midnightSymbol = Symbol('midnight');
 export interface IHttpHistory {
   kind: typeof Kind;
   /**
-   * The application code. The same as used in `Application#code`.
-   * Optional.
+   * The data store key. Only present when the object was already inserted into the data store.
+   * In majority of cases this value is set. It is not set when generating the history object before sending it to the store.
+   * 
+   * Note for data store implementations. This must be a URL-safe value so the id should be encoded if needed.
    */
-  app?: string;
+  key?: string;
   /**
-   * The user project the request belongs to.
-   * Optional. Also note, the project may not exist anymore in the store or the request has been removed from the project.
+   * Optional user space id. Must be set when the originating request belongs to a user space.
+   */
+  space?: string;
+  /**
+   * Optional project id. Must be set when the originating request belongs to a user space.
    */
   project?: string;
   /**
-   * The optional user id that made that request.
+   * Optional application id. Must be set when the application that created this record does not use the concept of a user space.
    */
-  user?: string;
+  app?: string;
+  /**
+   * The user id that made that request.
+   * Note, the default API Client's store automatically adds the user information to the record overriding any pre-set user id.
+   */
+  user: string;
   /**
    * The optional request id in the project that generated this log.
    */
@@ -41,9 +51,6 @@ export interface IHttpHistory {
 /**
  * An HTTP history is an object containing an information of a request and response
  * made with the application.
- * It consist of the RequestLog and optional information about the application that made that request and the HTTP project
- * the request belongs to as well as the id of the request.
- * However, this object may not contain these information for general purpose of the history store.
  * 
  * Note, history object are not mutable. Can only be created or deleted.
  */
@@ -52,19 +59,29 @@ export class HttpHistory {
   [midnightSymbol]: number;
   kind = Kind;
   /**
-   * The application code. The same as used in `Application#code`.
-   * Optional.
+   * The data store key. Only present when the object was already inserted into the data store.
+   * In majority of cases this value is set. It is not set when generating the history object before sending it to the store.
+   * 
+   * Note for data store implementations. This must be a URL-safe value so the id should be encoded if needed.
    */
-  app?: string;
+  key?: string;
   /**
-   * The user project the request belongs to.
-   * Optional. Also note, the project may not exist anymore in the store or the request has been removed from the project.
+   * Optional user space id. Must be set when the originating request belongs to a user space.
+   */
+  space?: string;
+  /**
+   * Optional project id. Must be set when the originating request belongs to a user space.
    */
   project?: string;
   /**
-   * The optional user id that made that request.
+   * Optional application id. Must be set when the application that created this record does not use the concept of a user space.
    */
-  user?: string;
+  app?: string;
+  /**
+   * The user id that made that request.
+   * Note, the default API Client's store automatically adds the user information to the record overriding any pre-set user id.
+   */
+  user = '';
   /**
    * The optional request id in the project that generated this log.
    */
@@ -84,7 +101,7 @@ export class HttpHistory {
       this[createdSymbol] = value;
     }
     const d = new Date(this[createdSymbol]);
-    d.setHours(0, 0, 0, 0)
+    d.setHours(0, 0, 0, 0);
     this[midnightSymbol] = d.getTime();
   }
 
@@ -127,6 +144,7 @@ export class HttpHistory {
       init = {
         kind: Kind,
         created: now,
+        user: '',
         log: {
           kind: RequestLogKind,
         },
@@ -136,16 +154,26 @@ export class HttpHistory {
   }
 
   new(init: IHttpHistory): void {
-    const { log, created = Date.now(), midnight, app, project, request, user } = init;
+    const { log, created = Date.now(), midnight, space, project, request, user, key, app } = init;
     this.log = new RequestLog(log);
     this.created = created;
-    if (midnight) {
-      this.midnight = midnight;
+    if (key) {
+      this.key = key;
+    } else {
+      this.key = undefined;
     }
     if (app) {
       this.app = app;
     } else {
       this.app = undefined;
+    }
+    if (midnight) {
+      this.midnight = midnight;
+    }
+    if (space) {
+      this.space = space;
+    } else {
+      this.space = undefined;
     }
     if (project) {
       this.project = project;
@@ -160,7 +188,7 @@ export class HttpHistory {
     if (user) {
       this.user = user;
     } else {
-      this.user = undefined;
+      this.user = '';
     }
   }
 
@@ -170,9 +198,13 @@ export class HttpHistory {
       created: this.created,
       midnight: this.midnight,
       log: this.log.toJSON(),
+      user: this.user,
     };
-    if (this.app) {
-      result.app = this.app;
+    if (this.key) {
+      result.key = this.key;
+    }
+    if (this.space) {
+      result.space = this.space;
     }
     if (this.project) {
       result.project = this.project;
@@ -180,8 +212,8 @@ export class HttpHistory {
     if (this.request) {
       result.request = this.request;
     }
-    if (this.user) {
-      result.user = this.user;
+    if (this.app) {
+      result.app = this.app;
     }
     return result;
   }

@@ -1,3 +1,4 @@
+/* eslint-disable import/export */
 export type BackendMode = 'single-user' | 'multi-user';
 
 export interface IBackendInfo {
@@ -104,4 +105,96 @@ export interface IListOptions {
    * Only with the `query` property. Tells the system in which fields to search for the query term.
    */
   queryField?: string[];
+  type?: string;
+}
+
+export interface ICursorOptions {
+  /**
+   * Page cursor to use with the query.
+   */
+  cursor?: string;
+}
+
+/**
+ * Listing options for the HTTP history.
+ */
+export type HistoryListOptions = IHistorySpaceListOptions | IHistoryProjectListOptions | IHistoryRequestListOptions | IHistoryUserListOptions | IHistoryAppListOptions;
+
+/**
+ * Query options to list history for a user space.
+ * The user has to have access to the user space to read / create / delete the history.
+ */
+export interface IHistorySpaceListOptions extends IListOptions {
+  type: 'space';
+  /**
+   * The id of the space.
+   */
+  id: string;
+  /**
+   * Whether to limit the list of results to the history that belongs to the current user.
+   */
+  user?: boolean;
+}
+
+/**
+ * Query options to list history for an HTTP project.
+ * The user has to have access to the parent user space to read / create / delete the history.
+ */
+export interface IHistoryProjectListOptions extends IListOptions {
+  type: 'project';
+  /**
+   * The id of the space containing the project.
+   * The access to the history records for the project is tested against the user space.
+   */
+  space: string;
+  /**
+   * The id of the project.
+   */
+  id: string;
+  /**
+   * Whether to limit the list of results to the history that belongs to the current user.
+   */
+  user?: boolean;
+}
+
+/**
+ * Query options to list history for a request in a project.
+ * The user has to have access to the parent user space to read / create / delete the history.
+ */
+export interface IHistoryRequestListOptions extends IListOptions {
+  type: 'request';
+  /**
+   * The id of the space containing the project that contains the request.
+   * The access to the history records for the request is tested against the user space.
+   */
+  space: string;
+  /**
+   * The id of the request.
+   */
+  id: string;
+  /**
+   * Whether to limit the list of results to the history that belongs to the current user.
+   */
+  user?: boolean;
+}
+
+/**
+ * Query options to list history for a user. This targets lists all user history. If you need to 
+ * filter the user history use other interfaces with the `user` flag set.
+ */
+export interface IHistoryUserListOptions extends IListOptions {
+  type: 'user';
+}
+
+/**
+ * Query options to list history for a history object that was created by an application that has no concept
+ * of user spaces. In this case the queries are always made against the current user.
+ */
+export interface IHistoryAppListOptions extends IListOptions {
+  type: 'app';
+  /**
+   * The id of the application.
+   * These queries are always made for a user.
+   */
+  id: string;
 }

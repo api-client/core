@@ -53,9 +53,9 @@ describe('Models', () => {
         assert.approximately(instance.created, now, 100);
         const { log } = instance;
         assert.typeOf(log, 'object', 'sets the log');
-        assert.isUndefined(instance.app);
+        assert.equal(instance.user, '');
+        assert.isUndefined(instance.space);
         assert.isUndefined(instance.project);
-        assert.isUndefined(instance.user);
         assert.isUndefined(instance.request);
       });
 
@@ -65,7 +65,7 @@ describe('Models', () => {
           kind: HttpRequestKind,
           created: now,
           user: 'u1',
-          app: 'a1',
+          space: 'a1',
           project: 'p1',
           request: 'r1',
           log: {
@@ -84,7 +84,7 @@ describe('Models', () => {
         assert.equal(instance.kind, HttpRequestKind);
         assert.equal(instance.created, now);
         assert.equal(instance.user, 'u1');
-        assert.equal(instance.app, 'a1');
+        assert.equal(instance.space, 'a1');
         assert.equal(instance.project, 'p1');
         assert.equal(instance.project, 'p1');
         assert.equal(instance.request, 'r1');
@@ -103,7 +103,7 @@ describe('Models', () => {
           kind: HttpRequestKind,
           created: now,
           user: 'u1',
-          app: 'a1',
+          space: 'a1',
           project: 'p1',
           request: 'r1',
           log: {
@@ -122,7 +122,7 @@ describe('Models', () => {
         assert.equal(instance.kind, HttpRequestKind);
         assert.equal(instance.created, now);
         assert.equal(instance.user, 'u1');
-        assert.equal(instance.app, 'a1');
+        assert.equal(instance.space, 'a1');
         assert.equal(instance.project, 'p1');
         assert.equal(instance.project, 'p1');
         assert.equal(instance.request, 'r1');
@@ -167,6 +167,44 @@ describe('Models', () => {
         assert.isUndefined(log.request, 'has no log.request');
       });
 
+      it('sets the passed key', () => {
+        const instance = new HttpHistory();
+        const schema = instance.toJSON();
+        schema.key = 'a';
+        instance.new(schema);
+
+        assert.equal(instance.key, 'a');
+      });
+
+      it('sets the default key', () => {
+        const instance = new HttpHistory();
+        instance.key = 'test';
+        const schema = instance.toJSON();
+        delete schema.key;
+        instance.new(schema);
+
+        assert.isUndefined(instance.key);
+      });
+
+      it('sets the passed space', () => {
+        const instance = new HttpHistory();
+        const schema = instance.toJSON();
+        schema.space = 'a';
+        instance.new(schema);
+
+        assert.equal(instance.space, 'a');
+      });
+
+      it('sets the default space', () => {
+        const instance = new HttpHistory();
+        instance.space = 'test';
+        const schema = instance.toJSON();
+        delete schema.space;
+        instance.new(schema);
+
+        assert.isUndefined(instance.space);
+      });
+
       it('sets the passed app', () => {
         const instance = new HttpHistory();
         const schema = instance.toJSON();
@@ -202,7 +240,7 @@ describe('Models', () => {
         delete schema.user;
         instance.new(schema);
 
-        assert.isUndefined(instance.user);
+        assert.equal(instance.user, '');
       });
 
       it('sets the passed project', () => {
@@ -307,6 +345,32 @@ describe('Models', () => {
         assert.equal(result.midnight, 1234);
       });
 
+      it('sets the key', () => {
+        const instance = new HttpHistory();
+        instance.key = 'test';
+        const result = instance.toJSON();
+        assert.equal(result.key, 'test');
+      });
+
+      it('does not set the key when missing', () => {
+        const instance = new HttpHistory();
+        const result = instance.toJSON();
+        assert.isUndefined(result.key);
+      });
+      
+      it('sets the space', () => {
+        const instance = new HttpHistory();
+        instance.space = 'test';
+        const result = instance.toJSON();
+        assert.equal(result.space, 'test');
+      });
+
+      it('does not set the space when missing', () => {
+        const instance = new HttpHistory();
+        const result = instance.toJSON();
+        assert.isUndefined(result.space);
+      });
+
       it('sets the app', () => {
         const instance = new HttpHistory();
         instance.app = 'test';
@@ -340,10 +404,10 @@ describe('Models', () => {
         assert.equal(result.user, 'test');
       });
 
-      it('does not set the user when missing', () => {
+      it('sets the default user when missing', () => {
         const instance = new HttpHistory();
         const result = instance.toJSON();
-        assert.isUndefined(result.user);
+        assert.equal(result.user, '');
       });
 
       it('sets the request', () => {
