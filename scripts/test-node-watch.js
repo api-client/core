@@ -75,7 +75,7 @@ async function runMocha() {
 }
 
 async function watchMain() {
-  tmp = await mkdtemp(join(os.tmpdir(), 'arc-core-'));
+  tmp = await mkdtemp(join(os.tmpdir(), 'apic-core-'));
   await fs.copyFile('package.json', join(tmp, 'package.json'));
   console.info(`Created temporary directory: ${tmp}`);
   await promisify(exec)('npm install --ignore-scripts', {

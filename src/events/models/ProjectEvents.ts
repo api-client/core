@@ -198,7 +198,7 @@ class ProjectEnvironmentEvents {
 }
 
 /**
- * ARC's HTTP project events.
+ * API Client's HTTP project events.
  * 
  * Note, `id`s refers to datastore ids but `key`s are internal identifiers inside the project.
  * Whenever id is used it refers to the store's ids. When `key` is used it is the id of the project or any of its components.
@@ -328,4 +328,4 @@ export class ProjectEvents {
   static get Environment(): typeof ProjectEnvironmentEvents {
     return ProjectEnvironmentEvents;
   }
-};
+}

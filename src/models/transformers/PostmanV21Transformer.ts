@@ -6,6 +6,7 @@ import { ProjectRequest } from '../ProjectRequest.js';
 import { IMultipartBody } from '../../lib/transformers/PayloadSerializer.js';
 import v4 from '../../lib/uuid.js';
 import { Environment } from '../Environment.js';
+import { Kind as ThingKind } from '../Thing.js';
 
 export const currentItemValue = Symbol('currentItemValue');
 
@@ -134,7 +135,7 @@ export class PostmanV21Transformer extends PostmanTransformer {
       definitions: {},
       environments: [],
       info: {
-        kind: 'ARC#Thing',
+        kind: ThingKind,
         name: info.name || 'Unnamed Postman project',
       },
       items: [],

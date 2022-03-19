@@ -3,7 +3,7 @@ import { Payload, PayloadSerializer } from '../lib/transformers/PayloadSerialize
 import { HTTPResponse as LegacyHttpResponse } from './legacy/request/ArcResponse.js';
 import { Normalizer } from './legacy/Normalizer.js';
 
-export const Kind = 'ARC#HttpResponse';
+export const Kind = 'Core#HttpResponse';
 
 export interface IHttpResponse {
   kind?: string;
@@ -91,11 +91,11 @@ export class HttpResponse extends SerializablePayload {
   /**
    * Creates a new response clearing anything that is so far defined.
    * 
-   * Note, this throws an error when the object is not an ARC response.
+   * Note, this throws an error when the object is not a response.
    */
   new(init: IHttpResponse): void {
     if (!HttpResponse.isHttpResponse(init)) {
-      throw new Error(`Not an ARC response.`);
+      throw new Error(`Not a response.`);
     }
     const { status, statusText, headers, payload, kind=Kind } = init;
     this.kind = kind;

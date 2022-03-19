@@ -1,7 +1,7 @@
 import { Table } from 'console-table-printer';
 import chalk from 'chalk';
 import { ErrorResponse, IErrorResponse } from '../../models/ErrorResponse.js';
-import { IArcResponse } from '../../models/ArcResponse.js';
+import { IResponse } from '../../models/Response.js';
 import { ISerializedError } from '../../models/SerializableError.js';
 import { Reporter } from './Reporter.js';
 
@@ -70,7 +70,7 @@ export class ProjectRunCliReporter extends Reporter {
           process.stdout.write('Request not executed.\n');
           return;
         }
-        const response = log.response as IArcResponse;
+        const response = log.response as IResponse;
         process.stdout.write(`${prefix} Status code is: ${response.status}\n`);
       });
       process.stdout.write('\n\n');

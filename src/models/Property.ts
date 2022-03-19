@@ -3,7 +3,7 @@ import { ApiType } from './legacy/models/ApiTypes.js';
 export type PropertyType = 'string' | 'integer' | 'float' | 'nil' | 'boolean' | 'date' | 'datetime' | 'time' | 'int32' | 'int64' | 'uint32' | 'uint64' | 'sint32' | 'sint64' | 'fixed32' | 'fixed64' | 'sfixed32' | 'sfixed64' | 'double' | 'bytes';
 
 export interface IProperty {
-  kind: 'ARC#Property';
+  kind: typeof Kind;
   /**
    * Property name
    */
@@ -42,7 +42,7 @@ export interface IProperty {
   repeated?: boolean;
 }
 
-export const Kind = 'ARC#Property';
+export const Kind = 'Core#Property';
 
 /**
  * A property of an HTTP request.
@@ -358,13 +358,13 @@ export class Property {
   }
 
   /**
-   * Creates a new environment clearing anything that is so far defined.
+   * Creates a new property.
    * 
-   * Note, this throws an error when the property is not an ARC environment.
+   * Note, this throws an error when the property is not a property.
    */
   new(init: IProperty): void {
     if (!Property.isProperty(init)) {
-      throw new Error(`Not an ARC property.`);
+      throw new Error(`Not a property.`);
     }
     const { name, value, default: defaultValue, description, enabled, enum: enumValue, required, type, repeated } = init;
     this.kind = Kind;

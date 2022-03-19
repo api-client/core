@@ -86,7 +86,7 @@ export class ErrorResponse extends HttpResponse {
   /**
    * Creates a new request clearing anything that is so far defined.
    * 
-   * Note, this throws an error when the object is not an ARC request.
+   * Note, this throws an error when the object is not an API Client request.
    */
   new(init: IErrorResponse): void {
     super.new(init);

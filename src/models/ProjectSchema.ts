@@ -1,9 +1,9 @@
 import v4 from '../lib/uuid.js';
 import { Property, IProperty, PropertyType, Kind as PropertyKind } from './Property.js';
-export const Kind = 'ARC#ProjectSchema';
+export const Kind = 'Core#ProjectSchema';
 
 export interface IProjectSchema {
-  kind?: 'ARC#ProjectSchema';
+  kind?: typeof Kind;
   /**
    * The identifier of the environment.
    */

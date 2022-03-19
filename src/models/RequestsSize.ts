@@ -1,4 +1,4 @@
-export const Kind = 'ARC#ResponseSize';
+export const Kind = 'Core#ResponseSize';
 
 export interface IRequestsSize {
   kind?: typeof Kind;
@@ -44,8 +44,6 @@ export class RequestsSize {
 
   /**
    * Creates a new response size clearing anything that is so far defined.
-   * 
-   * Note, this throws an error when the object is not an ARC response size.
    */
   new(init: IRequestsSize): void {
     const { request, response } = init;

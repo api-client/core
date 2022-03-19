@@ -2,7 +2,7 @@
 
 This is available in the **node** only.
 
-Request factory is a utility class that performs all tasks described in the [Request architecture](request-architecture.md) document. It is not necessary to use it, but it is helpful in many use-cases of ARC / API Client.
+Request factory is a utility class that performs all tasks described in the [Request architecture](request-architecture.md) document. It is not necessary to use it, but it is helpful in many use-cases of API Client.
 
 ## Event bus and context stores
 
@@ -54,7 +54,7 @@ Set the `config` property to configure the behavior of the HTTP engine.
 ```ts
 const factory = new RequestFactory(target);
 factory.config = {
-  kind: 'ARC#RequestConfig',
+  kind: 'Core#RequestConfig',
   enabled: true,
   defaultHeaders: true,
   followRedirects: true,
@@ -72,7 +72,7 @@ ModulesRegistry.register('request', 'request/auth', RequestAuthorizationModule.d
 
 const factory = new RequestFactory(target);
 factory.authorization = {
-  kind: 'ARC#RequestAuthorization',
+  kind: 'Core#RequestAuthorization',
   config: {
     token: 'test123',
   },
@@ -93,13 +93,13 @@ const factory = new RequestFactory(target);
 factory.actions = {
   response: [
     {
-      kind: 'ARC#RunnableAction',
+      kind: 'Core#RunnableAction',
       enabled: true,
       condition: Condition.alwaysPass().toJSON(),
       actions: [{
-        kind: 'ARC#Action',
+        kind: 'Core#Action',
         config: {
-          kind: 'ARC#DeleteCookieAction',
+          kind: 'Core#DeleteCookieAction',
           url: 'https://api.com',
         }
       }]

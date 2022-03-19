@@ -2,7 +2,7 @@ import { Headers } from '../../lib/headers/Headers.js';
 import { IHttpRequest } from '../../models/HttpRequest.js';
 import { INtlmAuthorization, IBasicAuthorization } from '../../models/Authorization.js';
 import { ExecutionContext } from './ModulesRegistry.js';
-import { IRequestAuthorization } from '../../models/RequestAuthorization.js';
+import { IRequestAuthorization, Kind as RequestAuthorizationKind } from '../../models/RequestAuthorization.js';
 
 const cache: any = {};
 
@@ -89,16 +89,12 @@ export function applyRequestBasicAuthData(request: IHttpRequest, data: IBasicAut
  * but whole NTLM configuration object.
  *
  * Applied the `auth` object to the event's `detail.auth` object.
- *
- * @param {ArcBaseRequest} request The event's detail object. Changes made here will be propagated to
- * the event.
- * @param {NtlmAuthorization} values The authorization data to apply.
  */
 function applyRequestNtlmAuthData(authorization: IRequestAuthorization[], values: INtlmAuthorization): void {
   let ntlm: IRequestAuthorization | undefined = authorization.find(((method) => method.type === 'ntlm'));
   if (!ntlm) {
     ntlm = {
-      kind: '',
+      kind: RequestAuthorizationKind,
       enabled: true,
       type: 'ntlm',
       config: {},

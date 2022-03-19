@@ -1,8 +1,8 @@
 import { assert } from '@esm-bundle/chai';
 import { Action, IAction, Kind as ActionKind } from '../../src/models/actions/Action.js';
-import { ISetCookieAction, SetCookieAction } from '../../src/models/actions/runnable/SetCookieAction.js';
-import { DeleteCookieAction } from '../../src/models/actions/runnable/DeleteCookieAction.js';
-import { SetVariableAction } from '../../src/models/actions/runnable/SetVariableAction.js';
+import { ISetCookieAction, SetCookieAction, Kind as SetCookieActionKind } from '../../src/models/actions/runnable/SetCookieAction.js';
+import { DeleteCookieAction, Kind as DeleteCookieActionKind } from '../../src/models/actions/runnable/DeleteCookieAction.js';
+import { SetVariableAction, Kind as SetVariableActionKind } from '../../src/models/actions/runnable/SetVariableAction.js';
 import { SetCookieConfig, SetVariableConfig, DeleteCookieConfig } from '../../src/models/legacy/actions/Actions.js';
 
 describe('Models', () => {
@@ -82,7 +82,7 @@ describe('Models', () => {
         });
         // detailed tests in the `SetCookieAction` class
         assert.typeOf(result.config, 'object');
-        assert.equal(result.config.kind, 'ARC#SetCookieAction');
+        assert.equal(result.config.kind, SetCookieActionKind);
       });
 
       it('translates the set-variable action', () => {
@@ -97,7 +97,7 @@ describe('Models', () => {
         });
         // detailed tests in the `SetVariableAction` class
         assert.typeOf(result.config, 'object');
-        assert.equal(result.config.kind, 'ARC#SetVariableAction');
+        assert.equal(result.config.kind, SetVariableActionKind);
       });
 
       it('translates the delete-cookie action', () => {
@@ -111,7 +111,7 @@ describe('Models', () => {
         });
         // detailed tests in the `DeleteCookieAction` class
         assert.typeOf(result.config, 'object');
-        assert.equal(result.config.kind, 'ARC#DeleteCookieAction');
+        assert.equal(result.config.kind, DeleteCookieActionKind);
       });
     });
 
@@ -168,7 +168,7 @@ describe('Models', () => {
           kind: ActionKind,
           sync: false,
           config: {
-            kind: 'ARC#SetCookieAction',
+            kind: SetCookieActionKind,
             name: 'test cookie',
             source: { source: 'value' },
             useRequestUrl: true,
@@ -193,7 +193,7 @@ describe('Models', () => {
           kind: ActionKind,
           sync: false,
           config: {
-            kind: 'ARC#SetCookieAction',
+            kind: SetCookieActionKind,
             name: 'test cookie',
             source: { source: 'value' },
             useRequestUrl: true,
@@ -256,7 +256,7 @@ describe('Models', () => {
         const result = action.toJSON();
         assert.typeOf(result.config, 'object');
         const cnf = result.config as ISetCookieAction;
-        assert.equal(cnf.kind, 'ARC#SetCookieAction');
+        assert.equal(cnf.kind, SetCookieActionKind);
       });
     });
 
@@ -270,21 +270,21 @@ describe('Models', () => {
         const config = new DeleteCookieAction();
         action.setConfig(config.toJSON());
         assert.typeOf(action.config, 'object');
-        assert.equal(action.config.kind, 'ARC#DeleteCookieAction');
+        assert.equal(action.config.kind, DeleteCookieActionKind);
       });
 
       it('sets the set cookie config', () => {
         const config = new SetCookieAction();
         action.setConfig(config.toJSON());
         assert.typeOf(action.config, 'object');
-        assert.equal(action.config.kind, 'ARC#SetCookieAction');
+        assert.equal(action.config.kind, SetCookieActionKind);
       });
 
       it('sets the set variable config', () => {
         const config = new SetVariableAction();
         action.setConfig(config.toJSON());
         assert.typeOf(action.config, 'object');
-        assert.equal(action.config.kind, 'ARC#SetVariableAction');
+        assert.equal(action.config.kind, SetVariableActionKind);
       });
 
       it('throws when unknown action', () => {

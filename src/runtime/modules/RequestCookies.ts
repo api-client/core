@@ -4,10 +4,11 @@ import { Headers } from '../../lib/headers/Headers.js';
 import { IHttpRequest } from '../../models/HttpRequest.js';
 import { ExecutionContext } from './ModulesRegistry.js';
 import { IResponseRedirect } from '../../models/ResponseRedirect.js';
-import { IArcResponse } from '../../models/ArcResponse.js';
+import { IResponse } from '../../models/Response.js';
 import { IErrorResponse } from '../../models/ErrorResponse.js';
 import { IRequestLog } from '../../models/RequestLog.js';
 import { HttpCookie } from '../../models/HttpCookie.js';
+import { Kind as RequestConfigKind } from '../../models/RequestConfig.js';
 import { Cookie } from '../../lib/cookies/Cookie.js';
 
 /**
@@ -51,7 +52,7 @@ function applyCookieHeader(header: string, request: IHttpRequest): void {
  * @param redirects List of redirect responses 
  * @returns An object with `cookies` and `expired` arrays of cookies.
  */
-function extract(response: IArcResponse, url: string, redirects?: IResponseRedirect[]): Record<'expired'|'cookies', Cookie[]> {
+function extract(response: IResponse, url: string, redirects?: IResponseRedirect[]): Record<'expired'|'cookies', Cookie[]> {
   let expired: Cookie[] = [];
   let parser;
   let exp;
@@ -100,7 +101,7 @@ function extract(response: IArcResponse, url: string, redirects?: IResponseRedir
  * 
  * Unregister this module when the application settings change to not to use session storage.
  * 
- * In ARC electron the session storage is a chrome persistent partition with a session shared with the "log in to a web service".
+ * In electron the session storage is a chrome persistent partition with a session shared with the "log in to a web service".
  * This way cookies can be acquired in through the browser login and store in the application to use them with the request.
  */
 export async function processRequestCookies(request: IHttpRequest, context: ExecutionContext): Promise<void> {
@@ -126,7 +127,7 @@ export async function processResponseCookies(log: IRequestLog, context: Executio
     return;
   }
   const config = context.config || {
-    kind: 'ARC#RequestConfig',
+    kind: RequestConfigKind,
     enabled: false,
   };
   let ignore = false; 
@@ -137,7 +138,7 @@ export async function processResponseCookies(log: IRequestLog, context: Executio
   if (ignore) {
     return;
   }
-  const typedResponse = log.response as IArcResponse;
+  const typedResponse = log.response as IResponse;
   const result = extract(typedResponse, log.request.url, log.redirects);
   if (result.cookies.length) {
     await CookieEvents.updateBulk(context.eventsTarget, result.cookies.map(c => HttpCookie.fromCookieParser(c).toJSON()));

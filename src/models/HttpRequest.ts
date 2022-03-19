@@ -1,7 +1,7 @@
 import { SerializablePayload } from './SerializablePayload.js';
 import { Payload } from '../lib/transformers/PayloadSerializer.js';
 
-export const Kind = 'ARC#HttpRequest';
+export const Kind = 'Core#HttpRequest';
 
 export interface IBaseHttpRequest {
   /**
@@ -85,7 +85,7 @@ export class HttpRequest extends SerializablePayload {
   /**
    * Creates a new request clearing anything that is so far defined.
    * 
-   * Note, this throws an error when the object is not an ARC request.
+   * Note, this throws an error when the object is not a request.
    */
   new(init: IHttpRequest): void {
     const { url, method='GET', headers, payload, kind = Kind } = init;

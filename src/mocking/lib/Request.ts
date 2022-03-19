@@ -3,12 +3,12 @@ import { Http, Types, Lorem, Time, DataMockInit, HttpRequestInit } from '@pawel-
 import { IHttpRequest, Kind as HttpRequestKind } from '../../models/HttpRequest.js';
 import { IRequest, Kind as RequestKind } from '../../models/Request.js';
 import { ISentRequest } from '../../models/SentRequest.js';
-import { IRequestLog } from '../../models/RequestLog.js';
-import { IArcResponseInit, Response } from './Response.js';
+import { IRequestLog, Kind as RequestLogKind } from '../../models/RequestLog.js';
+import { IResponseInit, Response } from './Response.js';
 
 export interface IRequestLogInit {
   request?: HttpRequestInit;
-  response?: IArcResponseInit;
+  response?: IResponseInit;
   /**
    * When set it ignores size information
    */
@@ -66,13 +66,13 @@ export class Request {
 
   log(init: IRequestLogInit = {}): IRequestLog {
     const result: IRequestLog = {
-      kind: 'ARC#ResponseLog',
+      kind: RequestLogKind,
     };
     if (!init.noRequest) {
       result.request = this.sentRequest(init.request);
     }
     if (!init.noResponse) {
-      result.response = this.response.arcResponse(init.response);
+      result.response = this.response.response(init.response);
     }
     if (init.redirects) {
       result.redirects = this.response.redirects();

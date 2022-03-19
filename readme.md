@@ -2,17 +2,17 @@
 
 The core library of the API Client application. This build on top of the experience of Advanced REST Client.
 
-Contains the core models, events, and logic related to ARC. This replaces the `events`, `lib`, and parts of `base` libraries.
+Contains the core models, events, and logic related to API Client.
 
 ## Purpose
 
-The core library provides the libraries that ARC and related projects are re-using under the hood.
+The core library provides the libraries that API Client and related projects are re-using under the hood.
 
 The library is structured as follows:
 
-- models - the data model libraries providing the data schema definition for ARC and related projects and the common logic to manipulate the data
+- models - the data model libraries providing the data schema definition for API Client and related projects and the common logic to manipulate the data
 - runtime - the executable part of the library; contains classes that executes an HTTP request, runs a series of requests defined in a project, etc
-- utilities - helper libraries that can be shared across the ARC ecosystem
+- utilities - helper libraries that can be shared across the API Client ecosystem
 
 ## What it isn't
 
@@ -36,7 +36,7 @@ These libraries can be used, among others, to:
 
 ## Community driven
 
-The entire ARC project is community driven. We build tools for API developers to make them successful without investing into very expensive enterprise solutions. We are happy to hear from you. If your ideas can benefit the community we will implement them. That's on us. But you are welcome to clone the project, build your idea, and send us a PR. We will accept it if it won't influence the stability of the project and it's safe to marge with the main branch.
+The entire API Client project is community driven. We build tools for API developers to make them successful without investing into very expensive enterprise solutions. We are happy to hear from you. If your ideas can benefit the community we will implement them. That's on us. But you are welcome to clone the project, build your idea, and send us a PR. We will accept it if it won't influence the stability of the project and it's safe to marge with the main branch.
 
 ## Documentation
 

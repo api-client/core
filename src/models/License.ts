@@ -1,7 +1,7 @@
-export const Kind = 'ARC#License';
+export const Kind = 'Core#License';
 
 export interface ILicense {
-  kind: 'ARC#License'
+  kind: typeof Kind;
   /**
    * The URL to the license text.
    * Only `url` or `content` can be used at a time.
@@ -71,11 +71,11 @@ export class License {
   /**
    * Creates a new license clearing anything that is so far defined.
    * 
-   * Note, this throws an error when the license is not an ARC license object.
+   * Note, this throws an error when the license is not a license object.
    */
   new(init: ILicense): void {
     if (!License.isLicense(init)) {
-      throw new Error(`Not an ARC license.`);
+      throw new Error(`Not a license.`);
     }
     const { url, content, name } = init;
     this.kind = Kind;

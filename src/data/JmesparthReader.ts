@@ -5,7 +5,7 @@ import { DataReader } from './DataReader.js';
  * Reads the value from a JSON document using the the JmesPath notation.
  * See https://jmespath.org/
  * 
- * Note, after consideration this implementation is not used with ARC projects to extract 
+ * Note, after consideration this implementation is not used with API Client projects to extract 
  * request data. Instead, we use `JsonReader` that converts the JSON to XML so the same 
  * XPath can be used for both JSON and XML.
  */

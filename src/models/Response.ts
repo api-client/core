@@ -11,7 +11,7 @@ export { Kind };
 /**
  * An HTTP response object.
  */
-export interface IArcResponse extends IHttpResponse {
+export interface IResponse extends IHttpResponse {
   /**
    * The request timings. 
    * Some HTTP clients may not give this information.
@@ -27,7 +27,7 @@ export interface IArcResponse extends IHttpResponse {
   auth?: IResponseAuthorization;
 }
 
-export class ArcResponse extends HttpResponse {
+export class Response extends HttpResponse {
   /**
    * The request timings. 
    * Some HTTP clients may not give this information.
@@ -42,8 +42,8 @@ export class ArcResponse extends HttpResponse {
    */
   auth?: ResponseAuthorization;
 
-  static fromValues(status: number, statusText?: string, headers?: string): ArcResponse {
-    return new ArcResponse({
+  static fromValues(status: number, statusText?: string, headers?: string): Response {
+    return new Response({
       kind: Kind,
       status,
       statusText,
@@ -52,8 +52,8 @@ export class ArcResponse extends HttpResponse {
     });
   }
 
-  static async fromLegacy(input: LegacyResponse): Promise<ArcResponse> {
-    const init: IArcResponse = {
+  static async fromLegacy(input: LegacyResponse): Promise<Response> {
+    const init: IResponse = {
       kind: Kind,
       status: input.status || 0,
       loadingTime: input.loadingTime || 0,
@@ -83,15 +83,15 @@ export class ArcResponse extends HttpResponse {
     if (input.timings) {
       init.timings = new RequestTime(input.timings).toJSON();
     }
-    return new ArcResponse(init);
+    return new Response(init);
   }
 
   /**
    * @param input The response definition used to restore the state.
    */
-  constructor(input?: string|IArcResponse) {
+  constructor(input?: string|IResponse) {
     super();
-    let init: IArcResponse;
+    let init: IResponse;
     if (typeof input === 'string') {
       init = JSON.parse(input);
     } else if (typeof input === 'object') {
@@ -108,10 +108,8 @@ export class ArcResponse extends HttpResponse {
 
   /**
    * Creates a new response clearing anything that is so far defined.
-   * 
-   * Note, this throws an error when the object is not an ARC response.
    */
-  new(init: IArcResponse): void {
+  new(init: IResponse): void {
     super.new(init);
     const { loadingTime=0, timings, auth } = init;
     this.loadingTime = loadingTime;
@@ -127,8 +125,8 @@ export class ArcResponse extends HttpResponse {
     }
   }
 
-  toJSON(): IArcResponse {
-    const response = super.toJSON() as IArcResponse;
+  toJSON(): IResponse {
+    const response = super.toJSON() as IResponse;
     response.loadingTime = this.loadingTime;
     if (this.timings) {
       response.timings = this.timings.toJSON();

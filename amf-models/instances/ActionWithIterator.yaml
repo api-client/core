@@ -1,6 +1,6 @@
 #%Http Project Request 1.0
 
-kind: ARC#ProjectRequest
+kind: Core#ProjectRequest
 key: a-request-unique-key-2
 info:
   name: Data extraction
@@ -19,7 +19,7 @@ actions:
         - name: Set the right token
           failOnError: true
           config:
-            kind: ARC#SetVariableAction
+            kind: Core#SetVariableAction
             name: AUTH_TOKEN
             source:
               type: response

@@ -4,9 +4,9 @@ import WebSocket from 'ws';
 import { URL } from 'url';
 import { JsonPatch } from 'json8-patch';
 import { IBackendInfo, IListOptions, IListResponse } from '../../models/Backend.js';
-import { IWorkspace, IUserWorkspace, Workspace } from '../../models/Workspace.js';
+import { IWorkspace, IUserWorkspace, Workspace, Kind as WorkspaceKind } from '../../models/Workspace.js';
 import { UserAccessOperation, IUser } from '../../models/User.js';
-import { HttpProject, IHttpProject } from '../../models/HttpProject.js';
+import { HttpProject, IHttpProject, Kind as HttpProjectKind } from '../../models/HttpProject.js';
 
 export interface IStoreRequestOptions {
   method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
@@ -401,7 +401,7 @@ class SpacesSdk extends SdkBase {
     } catch (e) {
       throw new Error(`${E_PREFIX}${E_INVALID_JSON}.`);
     }
-    if (data.kind !== 'ARC#Space') {
+    if (data.kind !== WorkspaceKind) {
       throw new Error(`${E_PREFIX}${E_RESPONSE_UNKNOWN}.`);
     }
     return data;
@@ -719,7 +719,7 @@ class ProjectsSdk extends SdkBase {
     } catch (e) {
       throw new Error(`${E_PREFIX}${E_INVALID_JSON}.`);
     }
-    if (data.kind !== 'ARC#HttpProject') {
+    if (data.kind !== HttpProjectKind) {
       throw new Error(`${E_PREFIX}${E_RESPONSE_UNKNOWN}.`);
     }
     return data;

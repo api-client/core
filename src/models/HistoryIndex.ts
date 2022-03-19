@@ -1,8 +1,11 @@
+export const Kind = 'Core#HistoryIndex';
+
 /**
- * An object that is stored in ARCs internal store to build history navigation.
+ * An object that is stored in API Client's internal store to build history navigation.
  * It does not contain all the history data. Just the ones that are presented in the UI.
  */
 export interface IHistoryIndex {
+  kind: typeof Kind;
   /**
    * Timestamp when the request was last updated.
    */
@@ -47,6 +50,7 @@ export class HistoryIndex {
       init = input;
     } else {
       init = {
+        kind: Kind,
         updated: 0,
         midnight: 0,
         url: '',
@@ -66,6 +70,7 @@ export class HistoryIndex {
 
   toJSON(): IHistoryIndex {
     const result: IHistoryIndex = {
+      kind: Kind,
       updated: this.updated,
       midnight: this.midnight,
       url: this.url,

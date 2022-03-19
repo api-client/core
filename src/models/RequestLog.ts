@@ -1,17 +1,17 @@
 import { IResponseRedirect, ResponseRedirect  } from './ResponseRedirect.js';
 import { ISentRequest, SentRequest } from './SentRequest.js';
 import { IErrorResponse, ErrorResponse } from './ErrorResponse.js';
-import { IArcResponse, ArcResponse } from './ArcResponse.js';
+import { IResponse, Response } from './Response.js';
 import { IRequestsSize, RequestsSize } from './RequestsSize.js';
 import { ResponseRedirect as LegacyRedirect } from './legacy/request/ArcResponse.js';
 
-export const Kind = 'ARC#ResponseLog';
+export const Kind = 'Core#ResponseLog';
 
 /**
  * Describes a request / response pair associated with a request.
  */
 export interface IRequestLog {
-  kind: 'ARC#ResponseLog';
+  kind: typeof Kind;
   /**
    * Describes an HTTP request sent by the transport.
    */
@@ -19,7 +19,7 @@ export interface IRequestLog {
   /**
    * The last response made with this request, if any.
    */
-  response?: IArcResponse | IErrorResponse;
+  response?: IResponse | IErrorResponse;
   /**
    * The list of redirects, if any.
    */
@@ -42,7 +42,7 @@ export class RequestLog {
   /**
    * The last response made with this request, if any.
    */
-  response?: ArcResponse | ErrorResponse;
+  response?: Response | ErrorResponse;
   /**
    * The list of redirects, if any.
    */
@@ -59,7 +59,7 @@ export class RequestLog {
     });
   }
 
-  static fromRequestResponse(request: ISentRequest, response: IArcResponse | IErrorResponse): RequestLog {
+  static fromRequestResponse(request: ISentRequest, response: IResponse | IErrorResponse): RequestLog {
     return new RequestLog({
       kind: Kind,
       request,
@@ -86,8 +86,6 @@ export class RequestLog {
 
   /**
    * Creates a new response clearing anything that is so far defined.
-   * 
-   * Note, this throws an error when the object is not an ARC response.
    */
   new(init: IRequestLog): void {
     const { request, response, redirects, size } = init;
@@ -96,10 +94,10 @@ export class RequestLog {
       this.request = new SentRequest(request);
     }
     if (response) {
-      if (ArcResponse.isErrorResponse(response)) {
+      if (Response.isErrorResponse(response)) {
         this.response = new ErrorResponse(response as IErrorResponse);
       } else {
-        this.response = new ArcResponse(response as IArcResponse);
+        this.response = new Response(response as IResponse);
       }
     } else {
       this.response = undefined;

@@ -3,10 +3,10 @@ import { Runnable, IRunnable } from './Runnable.js';
 import { IDataSource } from '../Condition.js';
 import { RequestDataSourceEnum } from '../Enums.js';
 
-export const Kind = 'ARC#SetVariableAction';
+export const Kind = 'Core#SetVariableAction';
 
 export interface ISetVariableAction extends IRunnable {
-  kind?: 'ARC#SetVariableAction';
+  kind?: typeof Kind;
   /**
    * Name of the variable to set
    */

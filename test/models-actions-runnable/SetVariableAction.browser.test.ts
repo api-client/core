@@ -39,7 +39,7 @@ describe('Models', () => {
 
       it('creates an instance from the schema', () => {
         const schema: ISetVariableAction = {
-          kind: 'ARC#SetVariableAction',
+          kind: SetVariableActionKind,
           name: 'a name',
           source: { source: ResponseDataSourceEnum.status },
         };
@@ -52,7 +52,7 @@ describe('Models', () => {
 
       it('creates an instance from the JSON schema string', () => {
         const schema: ISetVariableAction = {
-          kind: 'ARC#SetVariableAction',
+          kind: SetVariableActionKind,
           name: 'a name',
           source: { source: ResponseDataSourceEnum.status },
         };
@@ -69,7 +69,7 @@ describe('Models', () => {
       let action: SetVariableAction;
       beforeEach(() => {
         schema = {
-          kind: 'ARC#SetVariableAction',
+          kind: SetVariableActionKind,
           name: 'a test',
           source: { source: ResponseDataSourceEnum.status },
         };
@@ -93,7 +93,7 @@ describe('Models', () => {
       let action: SetVariableAction;
       beforeEach(() => {
         action = new SetVariableAction({
-          kind: 'ARC#SetVariableAction',
+          kind: SetVariableActionKind,
           source: { source: ResponseDataSourceEnum.status },
           name: 'a name'
         });
@@ -119,7 +119,7 @@ describe('Models', () => {
     describe('isValid()', () => {
       it('returns false when no name', () => {
         const action = new SetVariableAction({
-          kind: 'ARC#SetVariableAction',
+          kind: SetVariableActionKind,
           source: { source: ResponseDataSourceEnum.status },
           name: ''
         });
@@ -128,7 +128,7 @@ describe('Models', () => {
 
       it('returns false when no source', () => {
         const action = new SetVariableAction({
-          kind: 'ARC#SetVariableAction',
+          kind: SetVariableActionKind,
           source: undefined,
           name: 'test'
         });
@@ -138,7 +138,7 @@ describe('Models', () => {
 
       it('returns true when a valid action', () => {
         const action = new SetVariableAction({
-          kind: 'ARC#SetVariableAction',
+          kind: SetVariableActionKind,
           source: { source: ResponseDataSourceEnum.status },
           name: 'test'
         });

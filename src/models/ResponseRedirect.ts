@@ -2,13 +2,13 @@ import { IHttpResponse, HttpResponse, Kind as ResponseKind } from './HttpRespons
 import { IRequestTime, RequestTime } from './RequestTime.js';
 import { ResponseRedirect as LegacyRedirect } from './legacy/request/ArcResponse.js';
 
-export const Kind = 'ARC#HttpResponseRedirect';
+export const Kind = 'Core#HttpResponseRedirect';
 
 /**
  * An information about a redirect
  */
 export interface IResponseRedirect {
-  kind: string;
+  kind: typeof Kind;
   /**
    * Redirection response
    */
@@ -33,7 +33,7 @@ export interface IResponseRedirect {
 
 
 export class ResponseRedirect {
-  kind = Kind;
+  kind: typeof Kind = Kind;
   /**
    * Redirection response
    */
@@ -119,8 +119,6 @@ export class ResponseRedirect {
 
   /**
    * Creates a new redirect clearing anything that is so far defined.
-   * 
-   * Note, this throws an error when the object is not an ARC redirect.
    */
   new(init: IResponseRedirect): void {
     const { response, timings, startTime=0, endTime=0, url='', kind=Kind } = init;

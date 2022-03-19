@@ -1,15 +1,16 @@
 import { assert } from '@esm-bundle/chai';
-import { Kind as ArcResponseKind, ArcResponse, IArcResponse } from '../../src/models/ArcResponse.js';
+import { Kind as ResponseKind, Response, IResponse } from '../../src/models/Response.js';
 import { ErrorResponse } from '../../src/models/ErrorResponse.js';
+import { Kind as ResponseAuthorizationKind } from '../../src/models/ResponseAuthorization.js';
 import { ISafePayload } from '../../src/lib/transformers/PayloadSerializer.js';
 
 describe('Models', () => {
-  describe('ArcResponse', () => {
+  describe('Response', () => {
     describe('Initialization', () => {
       describe('Default response initialization', () => {
         it('initializes a default project', () => {
-          const result = new ArcResponse();
-          assert.equal(result.kind, ArcResponseKind, 'sets the kind property');
+          const result = new Response();
+          assert.equal(result.kind, ResponseKind, 'sets the kind property');
           assert.equal(result.status, 0, 'sets the status property');
           assert.equal(result.loadingTime, 0, 'sets the loadingTime property');
           assert.isUndefined(result.statusText,'has no statusText property');
@@ -19,35 +20,35 @@ describe('Models', () => {
       });
 
       describe('From schema initialization', () => {
-        let base: IArcResponse;
+        let base: IResponse;
         beforeEach(() => {
           base = {
-            kind: ArcResponseKind,
+            kind: ResponseKind,
             status: 0,
             loadingTime: 0,
           }
         });
 
         it('sets the kind', () => {
-          const init: IArcResponse = { ...base };
-          const response = new ArcResponse(init);
-          assert.equal(response.kind, ArcResponseKind);
+          const init: IResponse = { ...base };
+          const response = new Response(init);
+          assert.equal(response.kind, ResponseKind);
         });
 
         it('sets the status', () => {
-          const init: IArcResponse = { ...base, ...{ status: 200 }};
-          const response = new ArcResponse(init);
+          const init: IResponse = { ...base, ...{ status: 200 }};
+          const response = new Response(init);
           assert.equal(response.status, 200);
         });
 
         it('sets the loadingTime', () => {
-          const init: IArcResponse = { ...base, ...{ loadingTime: 200 }};
-          const response = new ArcResponse(init);
+          const init: IResponse = { ...base, ...{ loadingTime: 200 }};
+          const response = new Response(init);
           assert.equal(response.loadingTime, 200);
         });
 
         it('sets the timings', () => {
-          const init: IArcResponse = { ...base, ...{ 
+          const init: IResponse = { ...base, ...{ 
             timings: {
               blocked: 1,
               connect: 2,
@@ -58,7 +59,7 @@ describe('Models', () => {
               ssl: 7,
             },
           }};
-          const response = new ArcResponse(init);
+          const response = new Response(init);
           assert.typeOf(response.timings, 'object');
           assert.equal(response.timings.blocked, 1);
           assert.equal(response.timings.connect, 2);
@@ -70,18 +71,18 @@ describe('Models', () => {
         });
 
         it('sets the auth', () => {
-          const init: IArcResponse = { ...base, ...{ 
+          const init: IResponse = { ...base, ...{ 
             auth: {
-              kind: 'ARC#ResponseAuthorization',
+              kind: ResponseAuthorizationKind,
               method: 'basic',
               state: 1,
               challengeHeader: 'abc',
               headers: 'a-header',
             },
           }};
-          const response = new ArcResponse(init);
+          const response = new Response(init);
           assert.typeOf(response.auth, 'object');
-          assert.equal(response.auth.kind, 'ARC#ResponseAuthorization');
+          assert.equal(response.auth.kind, ResponseAuthorizationKind);
           assert.equal(response.auth.method, 'basic');
           assert.equal(response.auth.state, 1);
           assert.equal(response.auth.challengeHeader, 'abc');
@@ -89,15 +90,15 @@ describe('Models', () => {
         });
 
         it('sets the values form serialized schema', () => {
-          const init: IArcResponse = { ...base, ...{
+          const init: IResponse = { ...base, ...{
             status: 200,
             loadingTime: 200,
             statusText: 'hello',
             headers: 'content-type: test',
             payload: 'test',
           }};
-          const response = new ArcResponse(JSON.stringify(init));
-          assert.equal(response.kind, ArcResponseKind, 'has the kind');
+          const response = new Response(JSON.stringify(init));
+          assert.equal(response.kind, ResponseKind, 'has the kind');
           assert.equal(response.status, 200, 'has the status');
           assert.equal(response.loadingTime, 200, 'has the loadingTime');
           assert.equal(response.statusText, 'hello', 'has the statusText');
@@ -109,31 +110,31 @@ describe('Models', () => {
 
     describe('toJSON()', () => {
       it('serializes the kind', () => {
-        const response = new ArcResponse();
+        const response = new Response();
         const result = response.toJSON();
-        assert.equal(result.kind, ArcResponseKind);
+        assert.equal(result.kind, ResponseKind);
       });
 
       it('serializes the status', () => {
-        const response = ArcResponse.fromValues(200);
+        const response = Response.fromValues(200);
         const result = response.toJSON();
         assert.equal(result.status, 200);
       });
 
       it('serializes the statusText', () => {
-        const response = ArcResponse.fromValues(200, 'hello');
+        const response = Response.fromValues(200, 'hello');
         const result = response.toJSON();
         assert.equal(result.statusText, 'hello');
       });
 
       it('serializes the headers', () => {
-        const response = ArcResponse.fromValues(200, 'hello', 'test');
+        const response = Response.fromValues(200, 'hello', 'test');
         const result = response.toJSON();
         assert.equal(result.headers, 'test');
       });
 
       it('serializes the timings', () => {
-        const response = ArcResponse.fromValues(200, 'hello', 'test');
+        const response = Response.fromValues(200, 'hello', 'test');
         response.setTimings({
           blocked: 1,
           connect: 2,
@@ -155,9 +156,9 @@ describe('Models', () => {
       });
 
       it('serializes the auth', () => {
-        const response = ArcResponse.fromValues(200, 'hello', 'test');
+        const response = Response.fromValues(200, 'hello', 'test');
         response.setAuth({
-          kind: 'ARC#ResponseAuthorization',
+          kind: ResponseAuthorizationKind,
           method: 'basic',
           state: 1,
           challengeHeader: 'abc',
@@ -165,7 +166,7 @@ describe('Models', () => {
         });
         const result = response.toJSON();
         assert.typeOf(result.auth, 'object');
-        assert.equal(result.auth.kind, 'ARC#ResponseAuthorization');
+        assert.equal(result.auth.kind, ResponseAuthorizationKind);
         assert.equal(result.auth.method, 'basic');
         assert.equal(result.auth.state, 1);
         assert.equal(result.auth.challengeHeader, 'abc');
@@ -179,7 +180,7 @@ describe('Models', () => {
     // 
     describe('fromLegacy()', () => {
       it('sets the status', async () => {
-        const response = await ArcResponse.fromLegacy({
+        const response = await Response.fromLegacy({
           status: 200,
           loadingTime: 123,
         });
@@ -187,7 +188,7 @@ describe('Models', () => {
       });
 
       it('sets the loadingTime', async () => {
-        const response = await ArcResponse.fromLegacy({
+        const response = await Response.fromLegacy({
           status: 200,
           loadingTime: 123,
         });
@@ -195,15 +196,15 @@ describe('Models', () => {
       });
 
       it('sets the kind', async () => {
-        const response = await ArcResponse.fromLegacy({
+        const response = await Response.fromLegacy({
           status: 200,
           loadingTime: 123,
         });
-        assert.equal(response.kind, ArcResponseKind);
+        assert.equal(response.kind, ResponseKind);
       });
 
       it('sets the statusText', async () => {
-        const response = await ArcResponse.fromLegacy({
+        const response = await Response.fromLegacy({
           status: 200,
           statusText: 'test',
           loadingTime: 123,
@@ -212,7 +213,7 @@ describe('Models', () => {
       });
 
       it('sets the headers', async () => {
-        const response = await ArcResponse.fromLegacy({
+        const response = await Response.fromLegacy({
           status: 200,
           headers: 'test',
           loadingTime: 123,
@@ -221,7 +222,7 @@ describe('Models', () => {
       });
 
       it('sets the payload from a string', async () => {
-        const response = await ArcResponse.fromLegacy({
+        const response = await Response.fromLegacy({
           status: 200,
           loadingTime: 123,
           payload: 'test',
@@ -233,7 +234,7 @@ describe('Models', () => {
         const encoder = new TextEncoder();
         const view = encoder.encode('test');
         
-        const response = await ArcResponse.fromLegacy({
+        const response = await Response.fromLegacy({
           status: 200,
           loadingTime: 123,
           payload: view.buffer,
@@ -248,7 +249,7 @@ describe('Models', () => {
         const encoder = new TextEncoder();
         const view = encoder.encode('test');
         
-        const response = await ArcResponse.fromLegacy({
+        const response = await Response.fromLegacy({
           status: 200,
           loadingTime: 123,
           payload: {
@@ -263,7 +264,7 @@ describe('Models', () => {
       });
 
       it('sets the payload from a Blob', async () => {
-        const response = await ArcResponse.fromLegacy({
+        const response = await Response.fromLegacy({
           status: 200,
           loadingTime: 123,
           blob: 'test'
@@ -275,7 +276,7 @@ describe('Models', () => {
       });
 
       it('sets the payload from a multipart', async () => {
-        const response = await ArcResponse.fromLegacy({
+        const response = await Response.fromLegacy({
           status: 200,
           loadingTime: 123,
           multipart: [
@@ -297,7 +298,7 @@ describe('Models', () => {
       });
 
       it('sets the timings', async () => {
-        const response = await ArcResponse.fromLegacy({
+        const response = await Response.fromLegacy({
           status: 200,
           loadingTime: 123,
           timings: {
@@ -321,7 +322,7 @@ describe('Models', () => {
       });
 
       it('sets the default status', async () => {
-        const response = await ArcResponse.fromLegacy({
+        const response = await Response.fromLegacy({
           status: undefined,
           loadingTime: 123,
         });
@@ -329,7 +330,7 @@ describe('Models', () => {
       });
 
       it('sets the default loadingTime', async () => {
-        const response = await ArcResponse.fromLegacy({
+        const response = await Response.fromLegacy({
           status: undefined,
           loadingTime: undefined,
         });
@@ -337,23 +338,23 @@ describe('Models', () => {
       });
     });
 
-    describe('ArcResponse.isErrorResponse()', () => {
+    describe('Response.isErrorResponse()', () => {
       it('returns true when is an error response', () => {
         const response = new ErrorResponse();
-        const result = ArcResponse.isErrorResponse(response);
+        const result = Response.isErrorResponse(response);
         assert.isTrue(result);
       });
 
       it('returns false when is not an error response', () => {
-        const response = new ArcResponse();
-        const result = ArcResponse.isErrorResponse(response);
+        const response = new Response();
+        const result = Response.isErrorResponse(response);
         assert.isFalse(result);
       });
     });
 
     describe('setTimings()', () => {
       it('sets the timings value', () => {
-        const response = new ArcResponse();
+        const response = new Response();
         response.setTimings({
           blocked: 1,
           connect: 2,

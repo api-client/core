@@ -6,7 +6,7 @@ import { IRequestAuthorization, RequestAuthorization } from './RequestAuthorizat
 import { IRequestLog, RequestLog, Kind as LogKind } from './RequestLog.js';
 import { SentRequest } from './SentRequest.js';
 import { ErrorResponse } from './ErrorResponse.js';
-import { ArcResponse } from './ArcResponse.js';
+import { Response } from './Response.js';
 import { RequestsSize } from './RequestsSize.js';
 import { IHttpRequest, HttpRequest, Kind as HttpRequestKind } from './HttpRequest.js';
 import { ARCSavedRequest, ARCHistoryRequest } from './legacy/request/ArcRequest.js';
@@ -14,13 +14,13 @@ import { ErrorResponse as LegacyErrorResponse, Response as LegacyResponse } from
 import { PayloadSerializer } from '../lib/transformers/PayloadSerializer.js';
 import { Normalizer } from './legacy/Normalizer.js';
 
-export const Kind = 'ARC#Request';
+export const Kind = 'Core#Request';
 export const createdSymbol = Symbol('created');
 export const updatedSymbol = Symbol('updated');
 export const midnightSymbol = Symbol('midnight');
 
 /**
- * The definition of a request object that functions inside ARC
+ * The definition of a request object that functions inside API Client
  * with the full configuration.
  */
 export interface IRequest {
@@ -228,7 +228,7 @@ export class Request {
         log.response = await ErrorResponse.fromLegacy(typedError);
       } else {
         const typedResponse = normalized.response as LegacyResponse;
-        log.response = await ArcResponse.fromLegacy(typedResponse);
+        log.response = await Response.fromLegacy(typedResponse);
         if (Array.isArray(typedResponse.redirects) && typedResponse.redirects.length) {
           const promises = typedResponse.redirects.map((redirect) => log.addLegacyRedirect(redirect));
           await Promise.allSettled(promises);

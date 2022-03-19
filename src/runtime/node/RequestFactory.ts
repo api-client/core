@@ -11,14 +11,14 @@ import { Action } from '../../models/actions/Action.js';
 import { RunnableCondition } from '../actions/RunnableCondition.js';
 import { ActionRunner } from '../actions/ActionRunner.js';
 import { HttpEngineOptions } from '../http-engine/HttpEngine.js';
-import { ArcEngine } from '../http-engine/ArcEngine.js';
+import { CoreEngine } from '../http-engine/CoreEngine.js';
 import { ModulesRegistry, RegisteredRequestModule, RegisteredResponseModule, ExecutionContext, RegistryPermission } from '../modules/ModulesRegistry.js';
 import { ExecutionResponse } from '../modules/ExecutionResponse.js';
 import { Events } from '../../events/Events.js';
 import { Logger } from '../../lib/logging/Logger.js';
 
 /**
- * The main class to make HTTP requests in the API Client / ARC.
+ * The main class to make HTTP requests in the API Client.
  * This factory includes all logic components to perform the entire HTTP request lifecycle. This includes:
  * 
  * - variables evaluation on the request object
@@ -294,7 +294,7 @@ export class RequestFactory {
    */
   async executeRequest(request: IHttpRequest): Promise<IRequestLog> {
     const opts = await this.prepareEngineConfig();
-    const engine = new ArcEngine(request, opts);
+    const engine = new CoreEngine(request, opts);
     return engine.send();
   }
 

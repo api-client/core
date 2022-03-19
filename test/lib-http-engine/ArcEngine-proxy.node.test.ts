@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { assert } from 'chai';
-import { ArcEngine, HttpEngineOptions, IHttpRequest, IArcResponse, ArcResponse, DummyLogger, RequestTime, ResponseRedirect } from '../../index.js';
+import { CoreEngine, HttpEngineOptions, IHttpRequest, IResponse, Response, DummyLogger, RequestTime, ResponseRedirect } from '../../index.js';
 import getConfig from '../helpers/getSetup.js';
 
 const logger = new DummyLogger();
 
 describe('http-engine', () => {
-  describe('ArcEngine', () => {
+  describe('CoreEngine', () => {
     describe('Proxying requests', () => {
       const httpOpts: HttpEngineOptions = {
         logger,
@@ -34,10 +34,10 @@ describe('http-engine', () => {
             method: 'GET',
             headers: 'x-custom: true',
           };
-          const request = new ArcEngine(config, httpOpts);
+          const request = new CoreEngine(config, httpOpts);
           const log = await request.send();
-          assert.ok(log, 'has the ARC response');
-          const response = new ArcResponse(log.response as IArcResponse);
+          assert.ok(log, 'has the response');
+          const response = new Response(log.response as IResponse);
           
           assert.strictEqual(response.status, 200, 'has the response status code');
           assert.strictEqual(response.statusText, 'OK', 'has the response status text');
@@ -75,10 +75,10 @@ describe('http-engine', () => {
             headers: `content-type: application/json\nx-custom: true`,
             payload: sentBody,
           };
-          const request = new ArcEngine(config, httpOpts);
+          const request = new CoreEngine(config, httpOpts);
           const log = await request.send();
-          assert.ok(log, 'has the ARC response');
-          const response = new ArcResponse(log.response as IArcResponse);
+          assert.ok(log, 'has the response');
+          const response = new Response(log.response as IResponse);
           assert.strictEqual(response.status, 200, 'has the response status code');
           assert.strictEqual(response.statusText, 'OK', 'has the response status text');
           assert.isNotEmpty(response.headers, 'has the response headers');
@@ -116,10 +116,10 @@ describe('http-engine', () => {
             method: 'GET',
             headers: `x-custom: true`,
           };
-          const request = new ArcEngine(config, httpOpts);
+          const request = new CoreEngine(config, httpOpts);
           const log = await request.send();
-          assert.ok(log, 'has the ARC response');
-          const response = new ArcResponse(log.response as IArcResponse);
+          assert.ok(log, 'has the response');
+          const response = new Response(log.response as IResponse);
 
           assert.strictEqual(response.status, 200, 'has the response status code');
           assert.strictEqual(response.statusText, 'OK', 'has the response status text');
@@ -154,10 +154,10 @@ describe('http-engine', () => {
             headers: `content-type: application/json\nx-custom: true`,
             payload: sentBody,
           };
-          const request = new ArcEngine(config, httpOpts);
+          const request = new CoreEngine(config, httpOpts);
           const log = await request.send();
-          assert.ok(log, 'has the ARC response');
-          const response = new ArcResponse(log.response as IArcResponse);
+          assert.ok(log, 'has the response');
+          const response = new Response(log.response as IResponse);
           assert.strictEqual(response.status, 200, 'has the response status code');
           assert.strictEqual(response.statusText, 'OK', 'has the response status text');
           assert.isNotEmpty(response.headers, 'has the response headers');
@@ -191,9 +191,9 @@ describe('http-engine', () => {
             method: 'GET',
             headers: 'x-custom: true',
           };
-          const request = new ArcEngine(config, httpOpts);
+          const request = new CoreEngine(config, httpOpts);
           const log = await request.send();
-          assert.ok(log, 'has the ARC response');
+          assert.ok(log, 'has the response');
 
           assert.typeOf(log.redirects!, 'array', 'has the redirects');
           assert.lengthOf(log.redirects!, 2, 'has both redirects');
@@ -217,11 +217,11 @@ describe('http-engine', () => {
             headers: 'x-custom: true',
           };
           const localOptions = { ...httpOpts, proxyUsername: 'proxy-name', proxyPassword: 'proxy-password' };
-          const request = new ArcEngine(config, localOptions);
+          const request = new CoreEngine(config, localOptions);
           
           const log = await request.send();
-          assert.ok(log, 'has the ARC response');
-          const response = new ArcResponse(log.response as IArcResponse);
+          assert.ok(log, 'has the response');
+          const response = new Response(log.response as IResponse);
           assert.strictEqual(response.status, 200, 'has the response status code');
           assert.strictEqual(response.statusText, 'OK', 'has the response status text');
           const payload = await response.readPayload() as Buffer;
@@ -240,10 +240,10 @@ describe('http-engine', () => {
             headers: 'x-custom: true',
           };
           const localOptions = { ...httpOpts, proxyUsername: 'some-name' };
-          const request = new ArcEngine(config, localOptions);
+          const request = new CoreEngine(config, localOptions);
           const log = await request.send();
-          assert.ok(log, 'has the ARC response');
-          const response = new ArcResponse(log.response as IArcResponse);
+          assert.ok(log, 'has the response');
+          const response = new Response(log.response as IResponse);
           assert.strictEqual(response.status, 401, 'has the response status code');
           assert.strictEqual(response.statusText, 'Unauthorized', 'has the response status text');
           const payload = await response.readPayload() as Buffer;
@@ -261,10 +261,10 @@ describe('http-engine', () => {
             method: 'GET',
             headers: 'x-custom: true',
           };
-          const request = new ArcEngine(config, httpsOpts);
+          const request = new CoreEngine(config, httpsOpts);
           const log = await request.send();
-          assert.ok(log, 'has the ARC response');
-          const response = new ArcResponse(log.response as IArcResponse);
+          assert.ok(log, 'has the response');
+          const response = new Response(log.response as IResponse);
 
           assert.strictEqual(response.status, 200, 'has the response status code');
           assert.strictEqual(response.statusText, 'OK', 'has the response status text');
@@ -302,10 +302,10 @@ describe('http-engine', () => {
             headers: `content-type: application/json\nx-custom: true`,
             payload: sentBody,
           };
-          const request = new ArcEngine(config, httpsOpts);
+          const request = new CoreEngine(config, httpsOpts);
           const log = await request.send();
-          assert.ok(log, 'has the ARC response');
-          const response = new ArcResponse(log.response as IArcResponse);
+          assert.ok(log, 'has the response');
+          const response = new Response(log.response as IResponse);
           assert.strictEqual(response.status, 200, 'has the response status code');
           assert.strictEqual(response.statusText, 'OK', 'has the response status text');
           assert.isNotEmpty(response.headers, 'has the response headers');
@@ -342,10 +342,10 @@ describe('http-engine', () => {
             method: 'GET',
             headers: 'x-custom: true',
           };
-          const request = new ArcEngine(config, httpsOpts);
+          const request = new CoreEngine(config, httpsOpts);
           const log = await request.send();
-          assert.ok(log, 'has the ARC response');
-          const response = new ArcResponse(log.response as IArcResponse);
+          assert.ok(log, 'has the response');
+          const response = new Response(log.response as IResponse);
 
           assert.strictEqual(response.status, 200, 'has the response status code');
           assert.strictEqual(response.statusText, 'OK', 'has the response status text');
@@ -380,11 +380,11 @@ describe('http-engine', () => {
             headers: `content-type: application/json\nx-custom: true`,
             payload: sentBody,
           };
-          const request = new ArcEngine(config, httpsOpts);
+          const request = new CoreEngine(config, httpsOpts);
           const log = await request.send();
-          assert.ok(log, 'has the ARC response');
+          assert.ok(log, 'has the response');
           
-          const response = new ArcResponse(log.response as IArcResponse);
+          const response = new Response(log.response as IResponse);
           assert.strictEqual(response.status, 200, 'has the response status code');
           assert.strictEqual(response.statusText, 'OK', 'has the response status text');
           assert.isNotEmpty(response.headers, 'has the response headers');
@@ -419,9 +419,9 @@ describe('http-engine', () => {
             method: 'GET',
             headers: 'x-custom: true',
           };
-          const request = new ArcEngine(config, httpOpts);
+          const request = new CoreEngine(config, httpOpts);
           const log = await request.send();
-          assert.ok(log, 'has the ARC response');
+          assert.ok(log, 'has the response');
           
           const redirects = log.redirects!.map(i => new ResponseRedirect(i))
 
@@ -443,10 +443,10 @@ describe('http-engine', () => {
             headers: 'x-custom: true',
           };
           const localOptions = { ...httpOpts, proxyUsername: 'proxy-name', proxyPassword: 'proxy-password' };
-          const request = new ArcEngine(config, localOptions);
+          const request = new CoreEngine(config, localOptions);
           const log = await request.send();
-          assert.ok(log, 'has the ARC response');
-          const response = new ArcResponse(log.response as IArcResponse);
+          assert.ok(log, 'has the response');
+          const response = new Response(log.response as IResponse);
           assert.strictEqual(response.status, 200, 'has the response status code');
           assert.strictEqual(response.statusText, 'OK', 'has the response status text');
 
@@ -461,11 +461,11 @@ describe('http-engine', () => {
             headers: 'x-custom: true',
           };
           const localOptions = { ...httpOpts, proxyUsername: 'some-name' };
-          const request = new ArcEngine(config, localOptions);
+          const request = new CoreEngine(config, localOptions);
           const log = await request.send();
 
-          assert.ok(log, 'has the ARC response');
-          const response = new ArcResponse(log.response as IArcResponse);
+          assert.ok(log, 'has the response');
+          const response = new Response(log.response as IResponse);
           assert.strictEqual(response.status, 401, 'has the response status code');
           assert.strictEqual(response.statusText, 'Unauthorized', 'has the response status text');
           const payload = await response.readPayload() as Buffer;
@@ -482,11 +482,11 @@ describe('http-engine', () => {
             headers: 'x-custom: true',
           };
           const localOptions = { ...httpOpts, proxyUsername: 'some-name' };
-          const request = new ArcEngine(config, localOptions);
+          const request = new CoreEngine(config, localOptions);
           const log = await request.send();
 
-          assert.ok(log, 'has the ARC response');
-          const response = new ArcResponse(log.response as IArcResponse);
+          assert.ok(log, 'has the response');
+          const response = new Response(log.response as IResponse);
           assert.strictEqual(response.status, 401, 'has the response status code');
           assert.strictEqual(response.statusText, 'Unauthorized', 'has the response status text');
           

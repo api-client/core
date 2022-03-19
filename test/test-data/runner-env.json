@@ -1,13 +1,13 @@
 {
-  "kind": "ARC#Environment",
+  "kind": "Core#Environment",
   "key": "173d0b76-abc3-4c92-804a-07c49acb609b",
   "info": {
-    "kind": "ARC#Thing",
+    "kind": "Core#Thing",
     "name": "other"
   },
   "variables": [
     {
-      "kind": "ARC#Property",
+      "kind": "Core#Property",
       "name": "CUSTOM",
       "value": "custom-value",
       "type": "string",

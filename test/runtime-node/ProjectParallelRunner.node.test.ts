@@ -5,10 +5,11 @@ import getConfig from '../helpers/getSetup.js';
 import { 
   ISentRequest,
   HttpProject,
-  IArcResponse,
+  IResponse,
   ProjectParallelRunner,
   ProjectRequest,
   ProjectFolder,
+  RequestLogKind,
 } from '../../index.js';
 import path from 'path';
 
@@ -67,11 +68,11 @@ describe('Runtime', () => {
           assert.lengthOf(item.executed, 1, 'executed all requests in the project');
           const [e1] = item.executed;
           
-          assert.equal(e1.kind, 'ARC#ResponseLog', 'has the log');
+          assert.equal(e1.kind, RequestLogKind, 'has the log');
           assert.typeOf(e1.request, 'object', 'has the log.request');
           assert.typeOf(e1.response, 'object', 'has the log.response');
           const request = e1.request as ISentRequest;
-          const response = e1.response as IArcResponse;
+          const response = e1.response as IResponse;
           assert.equal(request.url, `http://localhost:${httpPort}/v1/response/xml`, 'the factory evaluated variables');
           assert.equal(response.status, 200, 'has the response');
         });
@@ -86,7 +87,7 @@ describe('Runtime', () => {
           assert.lengthOf(item.executed, 3, 'executed all requests in the folder');
           const [e1] = item.executed;
           
-          assert.equal(e1.kind, 'ARC#ResponseLog', 'has the log');
+          assert.equal(e1.kind, RequestLogKind, 'has the log');
           assert.typeOf(e1.request, 'object', 'has the log.request');
           assert.typeOf(e1.response, 'object', 'has the log.response');
           const request = e1.request as ISentRequest;

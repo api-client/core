@@ -5,6 +5,7 @@ import { ProjectFolder } from '../ProjectFolder.js';
 import { ProjectRequest } from '../ProjectRequest.js';
 import { IMultipartBody } from '../../lib/transformers/PayloadSerializer.js';
 import { Environment } from '../Environment.js';
+import { Kind as ThingKind } from '../Thing.js';
 
 interface PostmanBackupV1 {
   version: number;
@@ -147,7 +148,7 @@ export class PostmanBackupTransformer extends PostmanTransformer {
       definitions: {},
       environments: [],
       info: {
-        kind: 'ARC#Thing',
+        kind: ThingKind,
         name,
       },
       items: [],

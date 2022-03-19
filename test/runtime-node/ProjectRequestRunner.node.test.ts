@@ -8,8 +8,8 @@ import {
   HttpProject, 
   IRequestLog, 
   ProjectRequest, 
-  ArcResponse, 
-  IArcResponse,
+  Response, 
+  IResponse,
   DummyLogger,
   Environment,
 } from '../../index.js';
@@ -88,12 +88,12 @@ describe('Runtime', () => {
           assert.isUndefined(report2.error, 'the report2 has no error');
   
           const log1 = report1.log as IRequestLog;
-          const payload1 = await ArcResponse.readPayloadAsString(log1.response as IArcResponse);
+          const payload1 = await Response.readPayloadAsString(log1.response as IResponse);
           const body1 = JSON.parse(payload1 as string);
           assert.equal(body1.headers['x-test'], 'true');
   
           const log2 = report2.log as IRequestLog;
-          const payload2 = await ArcResponse.readPayloadAsString(log2.response as IArcResponse);
+          const payload2 = await Response.readPayloadAsString(log2.response as IResponse);
           const body2 = JSON.parse(payload2 as string);
           assert.equal(body2.headers['x-test'], 'false');
         });
@@ -255,7 +255,7 @@ describe('Runtime', () => {
   
           const log = report.log as IRequestLog;
           assert.typeOf(log, 'object', 'has the log');
-          assert.typeOf(log.response as IArcResponse, 'object', 'has the log.response');
+          assert.typeOf(log.response as IResponse, 'object', 'has the log.response');
         });
 
         it('applies variables from a folder', async () => {
@@ -285,7 +285,7 @@ describe('Runtime', () => {
   
           const log = report.log as IRequestLog;
           assert.typeOf(log, 'object', 'has the log');
-          assert.typeOf(log.response as IArcResponse, 'object', 'has the log.response');
+          assert.typeOf(log.response as IResponse, 'object', 'has the log.response');
         });
 
         it('overrides variables from a parent', async () => {
@@ -317,7 +317,7 @@ describe('Runtime', () => {
   
           const log = report.log as IRequestLog;
           assert.typeOf(log, 'object', 'has the log');
-          assert.typeOf(log.response as IArcResponse, 'object', 'has the log.response');
+          assert.typeOf(log.response as IResponse, 'object', 'has the log.response');
         });
 
         it('respects the encapsulated flag', async () => {
@@ -346,7 +346,7 @@ describe('Runtime', () => {
           const [report] = result;
 
           const log = report.log as IRequestLog;
-          const payload = await ArcResponse.readPayloadAsString(log.response as IArcResponse);
+          const payload = await Response.readPayloadAsString(log.response as IResponse);
           const body = JSON.parse(payload as string);
           assert.equal(body.headers['x-included'], 'test2');
           assert.equal(body.headers['x-not-included'], 'undefined');
@@ -384,7 +384,7 @@ describe('Runtime', () => {
   
           const log = report.log as IRequestLog;
           assert.typeOf(log, 'object', 'has the log');
-          assert.typeOf(log.response as IArcResponse, 'object', 'has the log.response');
+          assert.typeOf(log.response as IResponse, 'object', 'has the log.response');
         });
       });
 
@@ -413,7 +413,7 @@ describe('Runtime', () => {
   
           const log = report.log as IRequestLog;
           assert.typeOf(log, 'object', 'has the log');
-          assert.typeOf(log.response as IArcResponse, 'object', 'has the log.response');
+          assert.typeOf(log.response as IResponse, 'object', 'has the log.response');
         });
 
         it('applies the base URI to the request from server\'s uri without a variable', async () => {
@@ -440,7 +440,7 @@ describe('Runtime', () => {
   
           const log = report.log as IRequestLog;
           assert.typeOf(log, 'object', 'has the log');
-          assert.typeOf(log.response as IArcResponse, 'object', 'has the log.response');
+          assert.typeOf(log.response as IResponse, 'object', 'has the log.response');
         });
       });
     });

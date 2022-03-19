@@ -21,7 +21,7 @@ export interface IBaseSentRequest extends IBaseHttpRequest {
 
 /**
  * An interface describing a request made by the HTTP transport.
- * Each transport used by ARC must return this structure in the response event.
+ * Each transport used by API Client must return this structure in the response event.
  * This is not a replacement for the editor request that also has to be returned.
  * 
  * Another difference is that this headers contains a final list of headers sent to the 
@@ -103,9 +103,7 @@ export class SentRequest extends HttpRequest {
   }
 
   /**
-   * Creates a new request clearing anything that is so far defined.
-   * 
-   * Note, this throws an error when the object is not an ARC request.
+   * Creates a new sent request clearing anything that is so far defined.
    */
   new(init: ISentRequest): void {
     super.new(init);

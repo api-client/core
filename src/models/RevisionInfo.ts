@@ -1,4 +1,4 @@
-export const Kind = 'ARC#Revision';
+export const Kind = 'Core#Revision';
 
 /**
  * The definition of a patch revision.

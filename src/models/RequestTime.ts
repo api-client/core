@@ -1,10 +1,10 @@
-export const Kind = 'ARC#RequestTime';
+export const Kind = 'Core#RequestTime';
 
 /**
- * Schema definition for ARC request timings. This is mostly consistent with HAR timings.
+ * Schema definition for API Client request timings. This is mostly consistent with HAR timings.
  */
 export interface IRequestTime {
-  kind?: 'ARC#RequestTime';
+  kind?: typeof Kind;
   connect: number;
   receive: number;
   send: number;
@@ -48,9 +48,7 @@ export class RequestTime {
   }
 
   /**
-   * Creates a new thing clearing anything that is so far defined.
-   * 
-   * Note, this throws an error when the server is not an ARC thing.
+   * Creates a new timing clearing anything that is so far defined.
    */
   new(init: IRequestTime): void {
     const { connect=-1, receive=-1, send=-1, wait=-1, blocked=-1, dns=-1, ssl=-1 } = init;

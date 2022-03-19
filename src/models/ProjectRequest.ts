@@ -6,10 +6,10 @@ import { HttpProject } from './HttpProject.js';
 import v4 from '../lib/uuid.js';
 import { IRequest, Request } from './Request.js';
 
-export const Kind = 'ARC#ProjectRequest';
+export const Kind = 'Core#ProjectRequest';
 
 export interface IProjectRequest extends IProjectDefinitionProperty, IRequest {
-  kind: 'ARC#ProjectRequest';
+  kind: typeof Kind;
   /**
    * The identifier of the request.
    */

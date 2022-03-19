@@ -2,7 +2,7 @@ import { ICondition, Condition } from './Condition.js';
 import { IAction, Action } from './Action.js';
 import { RunnableAction as LegacyRunnable } from '../legacy/actions/Actions.js';
 
-export const Kind = 'ARC#RunnableAction';
+export const Kind = 'Core#RunnableAction';
 
 /**
  * An interface representing a runnable set of action in a condition.

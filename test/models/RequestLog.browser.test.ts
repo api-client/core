@@ -1,8 +1,8 @@
 import { assert } from '@esm-bundle/chai';
 import { RequestLog, IRequestLog, Kind as RequestLogKind } from '../../src/models/RequestLog.js';
 import { ISentRequest } from '../../src/models/SentRequest.js';
-import { IArcResponse } from '../../src/models/ArcResponse.js';
-import { IResponseRedirect } from '../../src/models/ResponseRedirect.js';
+import { IResponse } from '../../src/models/Response.js';
+import { IResponseRedirect, Kind as HttpResponseRedirectKind } from '../../src/models/ResponseRedirect.js';
 import { ResponseRedirect as LegacyRedirect } from '../../src/models/legacy/request/ArcResponse.js';
 
 describe('Models', () => {
@@ -31,7 +31,7 @@ describe('Models', () => {
 
     describe('RequestLog.fromRequestResponse()', () => {
       let request: ISentRequest;
-      let response: IArcResponse;
+      let response: IResponse;
       beforeEach(() => {
         request = {
           startTime: 1234,
@@ -92,7 +92,7 @@ describe('Models', () => {
               response: {
                 status: 200,
               },
-              kind: 'ARC#HttpResponseRedirect',
+              kind: HttpResponseRedirectKind,
             }
           ],
           size: {
@@ -155,7 +155,7 @@ describe('Models', () => {
               response: {
                 status: 200,
               },
-              kind: 'ARC#HttpResponseRedirect',
+              kind: HttpResponseRedirectKind,
             }
           ],
           size: {
@@ -232,7 +232,7 @@ describe('Models', () => {
           response: {
             status: 200,
           },
-          kind: 'ARC#HttpResponseRedirect',
+          kind: HttpResponseRedirectKind,
         };
       });
 

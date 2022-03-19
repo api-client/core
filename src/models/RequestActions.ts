@@ -55,7 +55,7 @@ export class RequestActions {
   }
 
   /**
-   * @param input The provider definition used to restore the state.
+   * @param input The request actions definition used to restore the state.
    */
   constructor(input?: string | IRequestActions) {
     let init: IRequestActions;
@@ -70,9 +70,7 @@ export class RequestActions {
   }
 
   /**
-   * Creates a new provider clearing anything that is so far defined.
-   * 
-   * Note, this throws an error when the provider is not an ARC provider object.
+   * Creates a new request actions clearing anything that is so far defined.
    */
   new(init: IRequestActions): void {
     const { request, response } = init;

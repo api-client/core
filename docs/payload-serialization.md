@@ -22,7 +22,7 @@ const blob = await PayloadSerializer.deserialize(serialized);
 
 ### High-level API
 
-The high level API is available in all models that deal with payload which extends the `SerializablePayload` class: `DataReader`, `HttpRequest`, `HttpResponse`, `ArcResponse`, `ErrorResponse`, and `SentRequest`.
+The high level API is available in all models that deal with payload which extends the `SerializablePayload` class: `DataReader`, `HttpRequest`, `HttpResponse`, `Response`, `ErrorResponse`, and `SentRequest`.
 
 These classes inherit a number of method that allow to read or write the payload on the instance.
 

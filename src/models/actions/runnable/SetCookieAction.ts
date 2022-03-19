@@ -3,10 +3,10 @@ import { Runnable, IRunnable } from './Runnable.js';
 import { IDataSource } from '../Condition.js';
 import { RequestDataSourceEnum } from '../Enums.js';
 
-export const Kind = 'ARC#SetCookieAction';
+export const Kind = 'Core#SetCookieAction';
 
 export interface ISetCookieAction extends IRunnable {
-  kind?: 'ARC#SetCookieAction';
+  kind?: typeof Kind;
   /**
    * Name of the cookie
    */

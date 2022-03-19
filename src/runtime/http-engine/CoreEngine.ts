@@ -5,7 +5,7 @@ import https from 'https';
 import { HttpEngine, HttpEngineOptions, HeadersReceivedDetail } from './HttpEngine.js';
 import { IRequestLog } from 'src/models/RequestLog.js';
 import { IHttpRequest } from '../../models/HttpRequest.js';
-import { ArcResponse } from '../../models/ArcResponse.js';
+import { Response } from '../../models/Response.js';
 import { SerializableError } from '../../models/SerializableError.js';
 import { Headers } from '../../lib/headers/Headers.js';
 import { PayloadSupport } from './PayloadSupport.js';
@@ -34,11 +34,11 @@ interface ResponseInfo {
 }
 
 /**
- * ARC's HTTP engine.
+ * API Client's HTTP engine.
  * An HTTP 1.1 engine working directly on the socket. It communicates with the remote machine and 
  * collects stats about the request and response.
  */
-export class ArcEngine extends HttpEngine {
+export class CoreEngine extends HttpEngine {
   state = RequestState.Status;
   rawHeaders?: Buffer;
   _hostTestReg = /^\s*host\s*:/im;
@@ -119,7 +119,7 @@ export class ArcEngine extends HttpEngine {
   }
 
   /**
-   * Prepares an HTTP message from ARC's request object.
+   * Prepares an HTTP message from API Client's request object.
    *
    * @returns Resolved promise to an `ArrayBuffer`.
    */
@@ -539,7 +539,7 @@ export class ArcEngine extends HttpEngine {
    * @return Redirect response object
    */
   async _createRedirectResponse(location: string): Promise<ResponseRedirect> {
-    const { currentResponse = new ArcResponse() } = this;
+    const { currentResponse = new Response() } = this;
     this.currentResponse = currentResponse;
     if (!this.currentResponse.payload) {
       if (this._rawBody) {
@@ -626,7 +626,7 @@ export class ArcEngine extends HttpEngine {
     if (this.aborted) {
       return;
     }
-    const response = ArcResponse.fromValues(0);
+    const response = Response.fromValues(0);
     response.loadingTime = 0;
     this.currentResponse = response;
     if (!data) {
@@ -1000,7 +1000,7 @@ export class ArcEngine extends HttpEngine {
         }
         if (res.statusCode === 401) {
           this.currentHeaders = new Headers(res.headers);
-          const currentResponse = ArcResponse.fromValues(res.statusCode, res.statusMessage, this.currentHeaders.toString());
+          const currentResponse = Response.fromValues(res.statusCode, res.statusMessage, this.currentHeaders.toString());
           currentResponse.loadingTime = 0;
           this.currentResponse = currentResponse;
           if (head.length) {

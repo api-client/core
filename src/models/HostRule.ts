@@ -1,7 +1,7 @@
-export const Kind = 'ARC#HostRule';
+export const Kind = 'Core#HostRule';
 
 /**
- * ARC host rule definition.
+ * API Client host rule definition.
  */
 export interface IHostRule {
   kind?: typeof Kind;
@@ -74,11 +74,11 @@ export class HostRule {
   /**
    * Creates a new thing clearing anything that is so far defined.
    * 
-   * Note, this throws an error when the server is not an ARC thing.
+   * Note, this throws an error when the server is not an API Client thing.
    */
   new(init: IHostRule): void {
     if (!HostRule.isHostRule(init)) {
-      throw new Error(`Not an ARC HostRule.`);
+      throw new Error(`Not a HostRule.`);
     }
     const { from='', to='', enabled, comment } = init;
     this.kind = Kind;
@@ -138,7 +138,7 @@ export class HostRule {
   /**
    * Evaluates hosts rule and applies it to the `url`.
    * @param {string} url The URL to evaluate
-   * @param {HostRule} rule ARC rule definition
+   * @param {HostRule} rule The host rule definition
    * @return {string} Processed url.
    */
   static evaluateRule(url: string, rule: HostRule): string | undefined {

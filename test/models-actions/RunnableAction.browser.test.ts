@@ -1,7 +1,7 @@
 import { assert } from '@esm-bundle/chai';
 import { RunnableAction, IRunnableAction, Kind as RunnableActionKind } from '../../src/models/actions/RunnableAction.js';
-import { Condition } from '../../src/models/actions/Condition.js';
-import { Action, IAction } from '../../src/models/actions/Action.js';
+import { Condition, Kind as ConditionKind } from '../../src/models/actions/Condition.js';
+import { Action, IAction, Kind as ActionKind } from '../../src/models/actions/Action.js';
 
 describe('Models', () => {
   describe('RunnableAction', () => {
@@ -25,11 +25,11 @@ describe('Models', () => {
         assert.isTrue(instance.enabled, 'sets the enabled');
         // this is tested in details with the Condition class.
         assert.typeOf(instance.condition, 'object', 'sets the condition');
-        assert.equal(instance.condition.kind, 'ARC#Condition', 'sets the condition instance');
+        assert.equal(instance.condition.kind, ConditionKind, 'sets the condition instance');
         // this is tested in details with the Action class.
         assert.typeOf(instance.actions, 'array', 'sets the actions');
         assert.lengthOf(instance.actions, 1, 'has the action');
-        assert.equal(instance.actions[0].kind, 'ARC#Action', 'has the action instance');
+        assert.equal(instance.actions[0].kind, ActionKind, 'has the action instance');
       });
 
       it('sets empty actions when missing', () => {
@@ -69,10 +69,10 @@ describe('Models', () => {
         const schema: IRunnableAction = {
           actions: [],
           condition: {
-            kind: 'ARC#Condition',
+            kind: ConditionKind,
             source: 'value',
           },
-          kind: 'ARC#RunnableAction',
+          kind: RunnableActionKind,
         };
         const result = new RunnableAction(schema);
         assert.equal(result.kind, RunnableActionKind, 'sets the kind');
@@ -86,10 +86,10 @@ describe('Models', () => {
         const schema: IRunnableAction = {
           actions: [],
           condition: {
-            kind: 'ARC#Condition',
+            kind: ConditionKind,
             source: 'value',
           },
-          kind: 'ARC#RunnableAction',
+          kind: RunnableActionKind,
         };
         const result = new RunnableAction(JSON.stringify(schema));
         assert.equal(result.kind, RunnableActionKind, 'sets the kind');
@@ -132,10 +132,10 @@ describe('Models', () => {
         const schema: IRunnableAction = {
           actions: [],
           condition: {
-            kind: 'ARC#Condition',
+            kind: ConditionKind,
             source: 'value',
           },
-          kind: 'ARC#RunnableAction',
+          kind: RunnableActionKind,
         };
         delete schema.condition;
         runnable.new(schema);
@@ -146,10 +146,10 @@ describe('Models', () => {
         const schema: IRunnableAction = {
           actions: [],
           condition: {
-            kind: 'ARC#Condition',
+            kind: ConditionKind,
             source: 'value',
           },
-          kind: 'ARC#RunnableAction',
+          kind: RunnableActionKind,
         };
         delete schema.actions;
         runnable.new(schema);
@@ -208,7 +208,7 @@ describe('Models', () => {
       it('adds an action by the schema', () => {
         const schema: IAction = {
           enabled: true,
-          kind: 'ARC#Action',
+          kind: ActionKind,
           name: 'test',
           priority: 1,
         };
@@ -220,7 +220,7 @@ describe('Models', () => {
       it('adds an action by the instance', () => {
         const schema: IAction = {
           enabled: true,
-          kind: 'ARC#Action',
+          kind: ActionKind,
           name: 'test',
           priority: 1,
         };

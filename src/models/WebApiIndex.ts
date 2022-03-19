@@ -1,4 +1,4 @@
-export const Kind = 'ARC#WebApiIndex';
+export const Kind = 'Core#WebApiIndex';
 
 /**
  * @deprecated This was used in the old version of ARC.

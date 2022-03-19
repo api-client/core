@@ -2,7 +2,7 @@ import { AccessControlLevel } from "./User.js";
 import { IThing, Thing, Kind as ThingKind } from './Thing.js';
 import v4 from '../lib/uuid.js';
 
-export const Kind = 'ARC#Space';
+export const Kind = 'Core#Space';
 /**
  * A definition of the working space for users.
  * 
@@ -10,7 +10,7 @@ export const Kind = 'ARC#Space';
  * created by the system users, where they can store their projects and other data.
  */
 export interface IWorkspace {
-  kind: 'ARC#Space';
+  kind: typeof Kind;
   /**
    * The space identifier.
    */
@@ -75,7 +75,7 @@ export class Workspace {
    */
   projects: string[] = [];
   /**
-   * Only set when the object was created from the data received by the ARC backend.
+   * Only set when the object was created from the data received by the API Client backend.
    * Level access of the current user to the space.
    * Note, this information is never serialized with the object.
    */
@@ -127,11 +127,11 @@ export class Workspace {
   /**
    * Creates a new environment clearing anything that is so far defined.
    * 
-   * Note, this throws an error when the environment is not an ARC environment. 
+   * Note, this throws an error when the environment is not a space. 
    */
   new(init: IWorkspace | IUserWorkspace): void {
     if (!Workspace.isWorkspace(init)) {
-      throw new Error(`Not an ARC space.`);
+      throw new Error(`Not a space.`);
     }
     const { key = v4(), projects = [], info, owner = DefaultOwner, users } = init;
     this.kind = Kind;

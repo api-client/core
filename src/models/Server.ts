@@ -1,7 +1,7 @@
-export const Kind = 'ARC#Server';
+export const Kind = 'Core#Server';
 
 export interface IServer {
-  kind: 'ARC#Server';
+  kind: typeof Kind;
   /**
    * The base URI of the server.
    * 
@@ -85,11 +85,11 @@ export class Server {
   /**
    * Creates a new server clearing anything that is so far defined.
    * 
-   * Note, this throws an error when the server is not an ARC server.
+   * Note, this throws an error when the server is not a server.
    */
   new(init: IServer): void {
     if (!Server.isServer(init)) {
-      throw new Error(`Not an ARC server.`);
+      throw new Error(`Not a server.`);
     }
     const { uri, description, protocol, basePath } = init;
     this.kind = Kind;

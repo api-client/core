@@ -12,7 +12,7 @@ import { IRequestAuthorization } from '../../models/RequestAuthorization.js';
 import { HostRule } from '../../models/HostRule.js';
 import { IRequestCertificate } from '../../models/ClientCertificate.js';
 import { SentRequest } from '../../models/SentRequest.js';
-import { ArcResponse } from '../../models/ArcResponse.js';
+import { Response } from '../../models/Response.js';
 import { ErrorResponse } from '../../models/ErrorResponse.js';
 import { RequestsSize } from '../../models/RequestsSize.js';
 import { HttpResponse } from '../../models/HttpResponse.js';
@@ -154,7 +154,7 @@ export abstract class HttpEngine extends EventEmitter {
   /**
    * The response object build during the execution.
    */
-  currentResponse?: ArcResponse;
+  currentResponse?: Response;
 
   /**
    * @return True if following redirects is allowed.
@@ -470,7 +470,7 @@ export abstract class HttpEngine extends EventEmitter {
    * @return Redirect response object
    */
   async _createRedirectResponse(location: string): Promise<ResponseRedirect> {
-    const { currentResponse = new ArcResponse() } = this;
+    const { currentResponse = new Response() } = this;
 
     const response = HttpResponse.fromValues(
       currentResponse.status,
@@ -498,7 +498,7 @@ export abstract class HttpEngine extends EventEmitter {
    * 
    * @return A response object.
    */
-  async _createResponse(): Promise<ArcResponse | undefined> {
+  async _createResponse(): Promise<Response | undefined> {
     if (this.aborted) {
       return;
     }
@@ -513,36 +513,17 @@ It means that the successful connection wasn't made.
 Check your request parameters.`);
     }
     const body = await this.decompress(this._rawBody);
-    const response = ArcResponse.fromValues(
+    const response = Response.fromValues(
       status,
       currentResponse.statusText,
       currentResponse.headers,
     );
     response.timings = this._computeStats(this.stats);
     response.loadingTime = response.timings.total();
-
-    // const response = /** @type ArcResponse */ ({
-    //   size: {
-    //     request: 0,
-    //     response: 0,
-    //   },
-    // });
-    
     if (body) {
       await response.writePayload(body);
       currentResponse.payload = response.payload;
     }
-    // if (body) {
-    //   response.payload = body;
-    //   currentResponse.payload = body;
-    //   response.size.response = body.length;
-    // }
-    // if (this.sentRequest.httpMessage) {
-    //   response.size.request = Buffer.from(this.sentRequest.httpMessage).length;
-    // }
-    // if (opts.includeRedirects && this.redirects.length) {
-    //   response.redirects = Array.from(this.redirects);
-    // }
     if (status === 401) {
       response.auth = this._getAuth();
     }

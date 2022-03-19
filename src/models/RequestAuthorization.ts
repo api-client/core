@@ -1,13 +1,13 @@
 import { IAuthorizationSettingsUnion, AuthorizationType } from './Authorization.js';
 import { RequestAuthorization as LegacyAuthorization } from './legacy/request/ArcRequest.js';
 
-export const Kind = 'ARC#RequestAuthorization';
+export const Kind = 'Core#RequestAuthorization';
 
 /**
  * Authorization configuration for the request.
  */
 export interface IRequestAuthorization {
-  kind: string;
+  kind: typeof Kind;
   /**
    * Authorization configuration
    */
@@ -89,9 +89,7 @@ export class RequestAuthorization {
   }
 
   /**
-   * Creates a new provider clearing anything that is so far defined.
-   * 
-   * Note, this throws an error when the provider is not an ARC provider object.
+   * Creates a new request authorization clearing anything that is so far defined.
    */
   new(init: IRequestAuthorization): void {
     const { config, type, enabled, valid } = init;

@@ -6,7 +6,7 @@ export interface IAuthorizationData {
 
 
 /**
- * Represents an auth data stored in ARC's data store to be retrieved
+ * Represents an auth data stored in API Client's data store to be retrieved
  * when the response status is 401.
  * 
  * Each entry represent a Basic or NTLM authorization.
@@ -34,7 +34,7 @@ export class AuthorizationData {
   /**
    * Creates a new provider clearing anything that is so far defined.
    * 
-   * Note, this throws an error when the provider is not an ARC provider object.
+   * Note, this throws an error when the provider is not an API Client provider object.
    */
   new(init: IAuthorizationData): void {
     const { username, password, domain } = init;

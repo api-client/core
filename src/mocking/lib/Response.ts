@@ -1,10 +1,10 @@
 import { Http, Har, Types, Lorem, Time, DataMockInit, HttpResponseInit, HarTimingInit, Internet } from '@pawel-up/data-mock';
 import { IHttpResponse, Kind as HttpResponseKind } from '../../models/HttpResponse.js';
-import { IArcResponse, Kind as ArcResponseKind } from '../../models/ArcResponse.js';
+import { IResponse, Kind as ResponseKind } from '../../models/Response.js';
 import { IRequestsSize } from '../../models/RequestsSize.js';
 import { IResponseRedirect, Kind as ResponseRedirectKind  } from '../../models/ResponseRedirect.js';
 
-export interface IArcResponseInit extends HttpResponseInit, HarTimingInit {
+export interface IResponseInit extends HttpResponseInit, HarTimingInit {
   /**
    * When set it does not generate a response payload.
    */
@@ -36,7 +36,7 @@ export class Response {
     this.internet = new Internet(init);
   }
 
-  response(init: IArcResponseInit = {}): IHttpResponse {
+  httpResponse(init: IResponseInit = {}): IHttpResponse {
     const ct = init.noBody ? undefined : this.http.headers.contentType();
     const body = init.noBody ? undefined : this.http.payload.payload(ct);
     const headers = this.http.headers.headers('response', { mime: ct });
@@ -56,12 +56,12 @@ export class Response {
     return result;
   }
 
-  arcResponse(init: IArcResponseInit={}): IArcResponse {
-    const base = this.response(init);
+  response(init: IResponseInit={}): IResponse {
+    const base = this.httpResponse(init);
     const length = this.types.number({ min: 10, max: 4000 });
-    const result: IArcResponse = {
+    const result: IResponse = {
       ...base,
-      kind: ArcResponseKind,
+      kind: ResponseKind,
       loadingTime: length,
     };
     if (init.timings) {
@@ -78,7 +78,7 @@ export class Response {
     return result;
   }
 
-  redirect(init?: IArcResponseInit): IResponseRedirect {
+  redirect(init?: IResponseInit): IResponseRedirect {
     const start = this.time.timestamp();
     const end = this.time.timestamp({ min: start + 1 })
     const info: IResponseRedirect = {
@@ -86,12 +86,12 @@ export class Response {
       startTime: start,
       endTime: end,
       url: this.internet.uri(),
-      response: this.response({ ...init, statusGroup: 3}),
+      response: this.httpResponse({ ...init, statusGroup: 3}),
     };
     return info;
   }
 
-  redirects(size=1, init?: IArcResponseInit): IResponseRedirect[] {
+  redirects(size=1, init?: IResponseInit): IResponseRedirect[] {
     const result: IResponseRedirect[] = [];
     for (let i = 0; i < size; i++) {
       result.push(this.redirect(init));

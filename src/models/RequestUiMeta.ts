@@ -2,7 +2,7 @@ import { IProperty, Property } from './Property.js';
 import { IMultipartBody } from '../lib/transformers/PayloadSerializer.js';
 import { RequestUiMeta as LegacyRequestUiMeta } from './legacy/request/ArcRequest.js';
 
-export const Kind = 'ARC#RequestUiMeta';
+export const Kind = 'Core#RequestUiMeta';
 
 /**
  * URL editor meta data.
@@ -41,7 +41,7 @@ export interface IAuthMeta {
 
 export interface IActionsMeta {
   /**
-   * The index of the selected arc actions view.
+   * The index of the selected API Client actions view.
    */
   selected?: number;
 }
@@ -64,7 +64,7 @@ export interface IResponseUiMeta {
  */
 export interface IBodyMetaModel {
   /**
-   * The id of the editor. Each editor in ARC has own id.
+   * The id of the editor. Each editor in API Client has own id.
    */
   type: string;
   /**
@@ -124,7 +124,7 @@ export interface IRequestUiMeta {
    */
   authorization?: IAuthMeta;
   /**
-   * ARC request actions editor UI config.
+   * API Client request actions editor UI config.
    */
   actions?: IActionsMeta;
   /**
@@ -156,7 +156,7 @@ export class RequestUiMeta {
    */
   authorization?: IAuthMeta;
   /**
-   * ARC request actions editor UI config.
+   * API Client request actions editor UI config.
    */
   actions?: IActionsMeta;
   /**

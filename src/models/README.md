@@ -1,4 +1,4 @@
-# API Client/ARC models
+# API Client models
 
 ## Principles for designing a data model
 
@@ -13,7 +13,7 @@ We aim to be interoperable with AMF so when designing a data model first design 
 
 ### The "kind" as the object type identifier
 
-Each data object that can exist by itself or in multiple contexts' should contain the `kind` property that uniquely identifies the type. For example, the `HttpProject` class has the `ARC#HttpProject`. These kinds are used by other libraries to identify which data types they are given as the input.
+Each data object that can exist by itself or in multiple contexts' should contain the `kind` property that uniquely identifies the type. For example, the `HttpProject` class has the `Core#HttpProject`. These kinds are used by other libraries to identify which data types they are given as the input.
 
 ### Validation
 

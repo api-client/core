@@ -21,6 +21,15 @@ import {
   IHttpRequest, 
   IHttpCookie,
   DummyLogger,
+  RequestConfigKind,
+  RequestAuthorizationKind,
+  RequestLogKind,
+  ActionKind,
+  ConditionKind,
+  RunnableActionKind,
+  DeleteCookieActionKind,
+  SetCookieActionKind,
+  SetVariableActionKind,
 } from '../../index.js';
 import getConfig from '../helpers/getSetup.js';
 
@@ -50,7 +59,7 @@ describe('Runtime', () => {
           };
           const result = await factory.run(request);
           assert.typeOf(result, 'object', 'returns an object');
-          assert.equal(result.kind, 'ARC#ResponseLog', 'has the kind');
+          assert.equal(result.kind, RequestLogKind, 'has the kind');
           assert.typeOf(result.request, 'object', 'has the request');
           assert.typeOf(result.response, 'object', 'has the response');
           assert.typeOf(result.size, 'object', 'has the size');
@@ -134,7 +143,7 @@ describe('Runtime', () => {
           const factory = new RequestFactory(et);
           factory.logger = logger;
           factory.config = {
-            kind: 'ARC#RequestConfig',
+            kind: RequestConfigKind,
             enabled: true,
             defaultHeaders: true,
           };
@@ -160,13 +169,13 @@ describe('Runtime', () => {
             factory.actions = {
               request: [
                 {
-                  kind: 'ARC#RunnableAction',
+                  kind: RunnableActionKind,
                   enabled: false,
                   condition: Condition.alwaysPass().toJSON(),
                   actions: [{
-                    kind: 'ARC#Action',
+                    kind: ActionKind,
                     config: {
-                      kind: 'ARC#DeleteCookieAction',
+                      kind: DeleteCookieActionKind,
                       url: 'https://api.com',
                     }
                   }]
@@ -191,18 +200,18 @@ describe('Runtime', () => {
             factory.actions = {
               request: [
                 {
-                  kind: 'ARC#RunnableAction',
+                  kind: RunnableActionKind,
                   condition: {
-                    kind: 'ARC#Condition',
+                    kind: ConditionKind,
                     type: ActionTypeEnum.request,
                     source: RequestDataSourceEnum.method,
                     operator: OperatorEnum.equal,
                     value: 'POST',
                   },
                   actions: [{
-                    kind: 'ARC#Action',
+                    kind: ActionKind,
                     config: {
-                      kind: 'ARC#DeleteCookieAction',
+                      kind: DeleteCookieActionKind,
                       url: 'https://api.com',
                     }
                   }]
@@ -227,10 +236,10 @@ describe('Runtime', () => {
             factory.actions = {
               request: [
                 {
-                  kind: 'ARC#RunnableAction',
+                  kind: RunnableActionKind,
                   enabled: false,
                   condition: {
-                    kind: 'ARC#Condition',
+                    kind: ConditionKind,
                     type: ActionTypeEnum.request,
                     source: RequestDataSourceEnum.url,
                     operator: OperatorEnum.contains,
@@ -238,9 +247,9 @@ describe('Runtime', () => {
 
                   },
                   actions: [{
-                    kind: 'ARC#Action',
+                    kind: ActionKind,
                     config: {
-                      kind: 'ARC#DeleteCookieAction',
+                      kind: DeleteCookieActionKind,
                       url: 'https://api.com',
                     }
                   }]
@@ -267,13 +276,13 @@ describe('Runtime', () => {
             factory.actions = {
               request: [
                 {
-                  kind: 'ARC#RunnableAction',
+                  kind: RunnableActionKind,
                   enabled: true,
                   condition: Condition.alwaysPass().toJSON(),
                   actions: [{
-                    kind: 'ARC#Action',
+                    kind: ActionKind,
                     config: {
-                      kind: 'ARC#DeleteCookieAction',
+                      kind: DeleteCookieActionKind,
                       useRequestUrl: true,
                     }
                   }]
@@ -300,12 +309,12 @@ describe('Runtime', () => {
             factory.actions = {
               request: [
                 {
-                  kind: 'ARC#RunnableAction',
+                  kind: RunnableActionKind,
                   condition: Condition.alwaysPass().toJSON(),
                   actions: [{
-                    kind: 'ARC#Action',
+                    kind: ActionKind,
                     config: {
-                      kind: 'ARC#DeleteCookieAction',
+                      kind: DeleteCookieActionKind,
                       url: 'https://api.com',
                     }
                   }]
@@ -333,13 +342,13 @@ describe('Runtime', () => {
             factory.actions = {
               request: [
                 {
-                  kind: 'ARC#RunnableAction',
+                  kind: RunnableActionKind,
                   enabled: true,
                   condition: Condition.alwaysPass().toJSON(),
                   actions: [{
-                    kind: 'ARC#Action',
+                    kind: ActionKind,
                     config: {
-                      kind: 'ARC#DeleteCookieAction',
+                      kind: DeleteCookieActionKind,
                       useRequestUrl: true,
                       name: 'hello',
                     }
@@ -370,13 +379,13 @@ describe('Runtime', () => {
             factory.actions = {
               request: [
                 {
-                  kind: 'ARC#RunnableAction',
+                  kind: RunnableActionKind,
                   enabled: true,
                   condition: Condition.alwaysPass().toJSON(),
                   actions: [{
-                    kind: 'ARC#Action',
+                    kind: ActionKind,
                     config: {
-                      kind: 'ARC#SetCookieAction',
+                      kind: SetCookieActionKind,
                       useRequestUrl: true,
                       name: 'c1',
                       source: {
@@ -424,13 +433,13 @@ describe('Runtime', () => {
             factory.actions = {
               request: [
                 {
-                  kind: 'ARC#RunnableAction',
+                  kind: RunnableActionKind,
                   enabled: true,
                   condition: Condition.alwaysPass().toJSON(),
                   actions: [{
-                    kind: 'ARC#Action',
+                    kind: ActionKind,
                     config: {
-                      kind: 'ARC#SetCookieAction',
+                      kind: SetCookieActionKind,
                       name: 'c1',
                       url: 'https://api.com',
                       source: {
@@ -464,13 +473,13 @@ describe('Runtime', () => {
             factory.actions = {
               request: [
                 {
-                  kind: 'ARC#RunnableAction',
+                  kind: RunnableActionKind,
                   enabled: true,
                   condition: Condition.alwaysPass().toJSON(),
                   actions: [{
-                    kind: 'ARC#Action',
+                    kind: ActionKind,
                     config: {
-                      kind: 'ARC#SetCookieAction',
+                      kind: SetCookieActionKind,
                       name: 'c1',
                       url: 'https://api.com',
                       source: {
@@ -504,13 +513,13 @@ describe('Runtime', () => {
             factory.actions = {
               request: [
                 {
-                  kind: 'ARC#RunnableAction',
+                  kind: RunnableActionKind,
                   enabled: true,
                   condition: Condition.alwaysPass().toJSON(),
                   actions: [{
-                    kind: 'ARC#Action',
+                    kind: ActionKind,
                     config: {
-                      kind: 'ARC#SetVariableAction',
+                      kind: SetVariableActionKind,
                       name: 'var1',
                       source: {
                         source: 'value',
@@ -542,13 +551,13 @@ describe('Runtime', () => {
             factory.actions = {
               request: [
                 {
-                  kind: 'ARC#RunnableAction',
+                  kind: RunnableActionKind,
                   enabled: true,
                   condition: Condition.alwaysPass().toJSON(),
                   actions: [{
-                    kind: 'ARC#Action',
+                    kind: ActionKind,
                     config: {
-                      kind: 'ARC#SetVariableAction',
+                      kind: SetVariableActionKind,
                       name: 'var2',
                       source: {
                         source: RequestDataSourceEnum.headers,
@@ -671,7 +680,7 @@ describe('Runtime', () => {
             };
             factory.authorization = [
               {
-                kind: '',
+                kind: RequestAuthorizationKind,
                 config: {
                   token: 'test123',
                 },
@@ -695,7 +704,7 @@ describe('Runtime', () => {
             };
             factory.authorization = [
               {
-                kind: '',
+                kind: RequestAuthorizationKind,
                 config: {
                   accessToken: 'test123',
                 },
@@ -719,7 +728,7 @@ describe('Runtime', () => {
             };
             factory.authorization = [
               {
-                kind: '',
+                kind: RequestAuthorizationKind,
                 config: {
                   accessToken: 'test123',
                 },
@@ -743,7 +752,7 @@ describe('Runtime', () => {
             };
             factory.authorization = [
               {
-                kind: '',
+                kind: RequestAuthorizationKind,
                 config: {
                   accessToken: 'test123',
                   tokenType: 'test-type'
@@ -768,7 +777,7 @@ describe('Runtime', () => {
             };
             factory.authorization = [
               {
-                kind: '',
+                kind: RequestAuthorizationKind,
                 config: {
                   accessToken: 'test123',
                   deliveryName: 'x-auth'
@@ -793,7 +802,7 @@ describe('Runtime', () => {
             };
             factory.authorization = [
               {
-                kind: '',
+                kind: RequestAuthorizationKind,
                 config: {
                   accessToken: 'test123',
                   deliveryMethod: 'query',
@@ -819,7 +828,7 @@ describe('Runtime', () => {
             };
             factory.authorization = [
               {
-                kind: '',
+                kind: RequestAuthorizationKind,
                 config: {
                 },
                 enabled: true,
@@ -842,7 +851,7 @@ describe('Runtime', () => {
             };
             factory.authorization = [
               {
-                kind: '',
+                kind: RequestAuthorizationKind,
                 config: {
                   username: 'a',
                   password: 'b',
@@ -867,7 +876,7 @@ describe('Runtime', () => {
             };
             factory.authorization = [
               {
-                kind: '',
+                kind: RequestAuthorizationKind,
                 config: {
                   password: 'b',
                 },
@@ -892,13 +901,13 @@ describe('Runtime', () => {
             factory.actions = {
               response: [
                 {
-                  kind: 'ARC#RunnableAction',
+                  kind: RunnableActionKind,
                   enabled: false,
                   condition: Condition.alwaysPass().toJSON(),
                   actions: [{
-                    kind: 'ARC#Action',
+                    kind: ActionKind,
                     config: {
-                      kind: 'ARC#DeleteCookieAction',
+                      kind: DeleteCookieActionKind,
                       url: 'https://api.com',
                     }
                   }]
@@ -923,18 +932,18 @@ describe('Runtime', () => {
             factory.actions = {
               response: [
                 {
-                  kind: 'ARC#RunnableAction',
+                  kind: RunnableActionKind,
                   condition: {
-                    kind: 'ARC#Condition',
+                    kind: ConditionKind,
                     type: ActionTypeEnum.response,
                     source: ResponseDataSourceEnum.status,
                     operator: OperatorEnum.equal,
                     value: '400',
                   },
                   actions: [{
-                    kind: 'ARC#Action',
+                    kind: ActionKind,
                     config: {
-                      kind: 'ARC#DeleteCookieAction',
+                      kind: DeleteCookieActionKind,
                       url: 'https://api.com',
                     }
                   }]
@@ -959,18 +968,18 @@ describe('Runtime', () => {
             factory.actions = {
               response: [
                 {
-                  kind: 'ARC#RunnableAction',
+                  kind: RunnableActionKind,
                   condition: {
-                    kind: 'ARC#Condition',
+                    kind: ConditionKind,
                     type: ActionTypeEnum.response,
                     source: ResponseDataSourceEnum.status,
                     operator: OperatorEnum.equal,
                     value: '200',
                   },
                   actions: [{
-                    kind: 'ARC#Action',
+                    kind: ActionKind,
                     config: {
-                      kind: 'ARC#DeleteCookieAction',
+                      kind: DeleteCookieActionKind,
                       url: 'https://api.com',
                     }
                   }]
@@ -997,12 +1006,12 @@ describe('Runtime', () => {
             factory.actions = {
               response: [
                 {
-                  kind: 'ARC#RunnableAction',
+                  kind: RunnableActionKind,
                   condition: Condition.alwaysPass().toJSON(),
                   actions: [{
-                    kind: 'ARC#Action',
+                    kind: ActionKind,
                     config: {
-                      kind: 'ARC#DeleteCookieAction',
+                      kind: DeleteCookieActionKind,
                       useRequestUrl: true,
                     }
                   }]
@@ -1029,12 +1038,12 @@ describe('Runtime', () => {
             factory.actions = {
               response: [
                 {
-                  kind: 'ARC#RunnableAction',
+                  kind: RunnableActionKind,
                   condition: Condition.alwaysPass().toJSON(),
                   actions: [{
-                    kind: 'ARC#Action',
+                    kind: ActionKind,
                     config: {
-                      kind: 'ARC#DeleteCookieAction',
+                      kind: DeleteCookieActionKind,
                       url: 'https://api.com',
                     }
                   }]
@@ -1062,13 +1071,13 @@ describe('Runtime', () => {
             factory.actions = {
               response: [
                 {
-                  kind: 'ARC#RunnableAction',
+                  kind: RunnableActionKind,
                   enabled: true,
                   condition: Condition.alwaysPass().toJSON(),
                   actions: [{
-                    kind: 'ARC#Action',
+                    kind: ActionKind,
                     config: {
-                      kind: 'ARC#DeleteCookieAction',
+                      kind: DeleteCookieActionKind,
                       useRequestUrl: true,
                       name: 'hello',
                     }
@@ -1099,13 +1108,13 @@ describe('Runtime', () => {
             factory.actions = {
               response: [
                 {
-                  kind: 'ARC#RunnableAction',
+                  kind: RunnableActionKind,
                   enabled: true,
                   condition: Condition.alwaysPass().toJSON(),
                   actions: [{
-                    kind: 'ARC#Action',
+                    kind: ActionKind,
                     config: {
-                      kind: 'ARC#SetCookieAction',
+                      kind: SetCookieActionKind,
                       useRequestUrl: true,
                       name: 'c1',
                       source: {
@@ -1153,13 +1162,13 @@ describe('Runtime', () => {
             factory.actions = {
               response: [
                 {
-                  kind: 'ARC#RunnableAction',
+                  kind: RunnableActionKind,
                   enabled: true,
                   condition: Condition.alwaysPass().toJSON(),
                   actions: [{
-                    kind: 'ARC#Action',
+                    kind: ActionKind,
                     config: {
-                      kind: 'ARC#SetCookieAction',
+                      kind: SetCookieActionKind,
                       name: 'c1',
                       url: 'https://api.com',
                       source: {
@@ -1179,9 +1188,6 @@ describe('Runtime', () => {
             const spy = sinon.spy();
             et.addEventListener(EventTypes.Cookie.update, spy);
             await factory.run(request);
-            // const response = new ArcResponse(log.response as IArcResponse);
-            // const payload = await response.readPayload() as Buffer;
-            // const bodyStr = payload.toString('utf8');
             
             assert.isTrue(spy.calledOnce, 'the action called the event');
             const e = spy.args[0][0] as CustomEvent;
@@ -1225,7 +1231,7 @@ describe('Runtime', () => {
             const factory = new RequestFactory(et);
             factory.logger = logger;
             factory.config = {
-              kind: 'ARC#RequestConfig',
+              kind: RequestConfigKind,
               enabled: true,
               ignoreSessionCookies: true,
             };
@@ -1244,7 +1250,7 @@ describe('Runtime', () => {
             const factory = new RequestFactory(et);
             factory.logger = logger;
             factory.config = {
-              kind: 'ARC#RequestConfig',
+              kind: RequestConfigKind,
               enabled: false,
               ignoreSessionCookies: true,
             };

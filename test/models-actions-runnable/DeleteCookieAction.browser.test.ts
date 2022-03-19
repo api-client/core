@@ -53,7 +53,7 @@ describe('Models', () => {
 
       it('creates an instance from the schema', () => {
         const schema: IDeleteCookieAction = {
-          kind: 'ARC#DeleteCookieAction',
+          kind: DeleteCookieActionKind,
           name: 'a name',
           url: 'https://dot.com',
         };
@@ -65,7 +65,7 @@ describe('Models', () => {
 
       it('creates an instance from the JSON schema string', () => {
         const schema: IDeleteCookieAction = {
-          kind: 'ARC#DeleteCookieAction',
+          kind: DeleteCookieActionKind,
           name: 'a name',
           url: 'https://dot.com',
         };
@@ -81,7 +81,7 @@ describe('Models', () => {
       let action: DeleteCookieAction;
       beforeEach(() => {
         schema = {
-          kind: 'ARC#DeleteCookieAction',
+          kind: DeleteCookieActionKind,
           name: 'a test',
           url: 'https://dot.com',
           useRequestUrl: true,
@@ -130,7 +130,7 @@ describe('Models', () => {
       let action: DeleteCookieAction;
       beforeEach(() => {
         action = new DeleteCookieAction({
-          kind: 'ARC#DeleteCookieAction',
+          kind: DeleteCookieActionKind,
         });
       });
 

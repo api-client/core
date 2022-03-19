@@ -1,33 +1,33 @@
 import { assert } from 'chai';
-import { ArcResponseKind, ArcResponse, IArcResponse, RequestTime, IRequestTime, ResponseAuthorization, IResponseAuthorization } from '../../index.js';
+import { ResponseKind, Response, IResponse, RequestTime, IRequestTime, ResponseAuthorization, IResponseAuthorization, ResponseAuthorizationKind } from '../../index.js';
 
 //
-// Note, the actual unit tests are located in the `ArcResponse.browser.test.ts` file.
+// Note, the actual unit tests are located in the `Response.browser.test.ts` file.
 // This is to make sure that everything is working in the NodeJS module as well.
 //
 
 describe('Models', () => {
-  describe('ArcResponse', () => {
+  describe('Response', () => {
     describe('Initialization', () => {
       describe('Default response initialization', () => {
         it('initializes a default project', () => {
-          const result = new ArcResponse();
-          assert.equal(result.kind, ArcResponseKind, 'sets the kind property');
+          const result = new Response();
+          assert.equal(result.kind, ResponseKind, 'sets the kind property');
         });
       });
 
       describe('From schema initialization', () => {
-        let base: IArcResponse;
+        let base: IResponse;
         beforeEach(() => {
           base = {
-            kind: ArcResponseKind,
+            kind: ResponseKind,
             status: 0,
             loadingTime: 0,
           }
         });
 
         it('sets the timings', () => {
-          const init: IArcResponse = { ...base, ...{ 
+          const init: IResponse = { ...base, ...{ 
             timings: {
               blocked: 1,
               connect: 2,
@@ -38,7 +38,7 @@ describe('Models', () => {
               ssl: 7,
             },
           }};
-          const response = new ArcResponse(init);
+          const response = new Response(init);
           const timings = response.timings as RequestTime;
           assert.typeOf(timings, 'object');
           assert.equal(timings.blocked, 1);
@@ -51,19 +51,19 @@ describe('Models', () => {
         });
 
         it('sets the auth', () => {
-          const init: IArcResponse = { ...base, ...{ 
+          const init: IResponse = { ...base, ...{ 
             auth: {
-              kind: 'ARC#ResponseAuthorization',
+              kind: ResponseAuthorizationKind,
               method: 'basic',
               state: 1,
               challengeHeader: 'abc',
               headers: 'a-header',
             },
           }};
-          const response = new ArcResponse(init);
+          const response = new Response(init);
           const auth = response.auth as ResponseAuthorization;
           assert.typeOf(auth, 'object');
-          assert.equal(auth.kind, 'ARC#ResponseAuthorization');
+          assert.equal(auth.kind, ResponseAuthorizationKind);
           assert.equal(auth.method, 'basic');
           assert.equal(auth.state, 1);
           assert.equal(auth.challengeHeader, 'abc');
@@ -74,7 +74,7 @@ describe('Models', () => {
 
     describe('toJSON()', () => {
       it('serializes the timings', () => {
-        const response = ArcResponse.fromValues(200, 'hello', 'test');
+        const response = Response.fromValues(200, 'hello', 'test');
         response.setTimings({
           blocked: 1,
           connect: 2,
@@ -97,9 +97,9 @@ describe('Models', () => {
       });
 
       it('serializes the auth', () => {
-        const response = ArcResponse.fromValues(200, 'hello', 'test');
+        const response = Response.fromValues(200, 'hello', 'test');
         response.setAuth({
-          kind: 'ARC#ResponseAuthorization',
+          kind: ResponseAuthorizationKind,
           method: 'basic',
           state: 1,
           challengeHeader: 'abc',
@@ -108,7 +108,7 @@ describe('Models', () => {
         const result = response.toJSON();
         const auth = result.auth as IResponseAuthorization;
         assert.typeOf(auth, 'object');
-        assert.equal(auth.kind, 'ARC#ResponseAuthorization');
+        assert.equal(auth.kind, ResponseAuthorizationKind);
         assert.equal(auth.method, 'basic');
         assert.equal(auth.state, 1);
         assert.equal(auth.challengeHeader, 'abc');
@@ -122,7 +122,7 @@ describe('Models', () => {
     // 
     describe('fromLegacy()', () => {
       it('sets the timings', async () => {
-        const response = await ArcResponse.fromLegacy({
+        const response = await Response.fromLegacy({
           status: 200,
           loadingTime: 123,
           timings: {

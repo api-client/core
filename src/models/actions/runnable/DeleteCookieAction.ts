@@ -1,10 +1,10 @@
 import { DeleteCookieConfig } from '../../legacy/actions/Actions.js';
 import { Runnable, IRunnable } from './Runnable.js';
 
-export const Kind = 'ARC#DeleteCookieAction';
+export const Kind = 'Core#DeleteCookieAction';
 
 export interface IDeleteCookieAction extends IRunnable {
-  kind?: 'ARC#DeleteCookieAction';
+  kind?: typeof Kind;
   /**
    * When set it uses request URL instead of defined URL in the action.
    */

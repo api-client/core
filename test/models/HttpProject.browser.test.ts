@@ -12,6 +12,7 @@ import { ProjectSchema } from '../../src/models/ProjectSchema.js';
 import { ArcLegacyProject } from '../../src/models/legacy/models/ArcLegacyProject.js';
 import { ARCSavedRequest } from '../../src/models/legacy/request/ArcRequest.js';
 import { LegacyMock } from '../../src/mocking/LegacyMock.js';
+import { Kind as ServerKind } from '../../src/models/Server.js';
 
 describe('Models', () => {
   const generator = new LegacyMock();
@@ -42,14 +43,14 @@ describe('Models', () => {
           const result = new HttpProject(undefined, [
             {
               key: 'a',
-              kind: 'ARC#Environment',
+              kind: 'Core#Environment',
               info: {
-                kind: 'ARC#Thing',
+                kind: ThingKind,
                 name: 'test',
               },
               variables: [],
               server: {
-                kind: 'ARC#Server',
+                kind: ServerKind,
                 uri: 'https://api.com',
               }
             }
@@ -66,14 +67,14 @@ describe('Models', () => {
               environments: [
                 {
                   key: 'b',
-                  kind: 'ARC#Environment',
+                  kind: 'Core#Environment',
                   info: {
-                    kind: 'ARC#Thing',
+                    kind: ThingKind,
                     name: 'test b',
                   },
                   variables: [],
                   server: {
-                    kind: 'ARC#Server',
+                    kind: ServerKind,
                     uri: 'https://domain.com',
                   }
                 }
@@ -81,24 +82,24 @@ describe('Models', () => {
             },
             environments: ['b'],
             info: {
-              kind: 'ARC#Thing',
+              kind: ThingKind,
               name: 'Project',
             },
             items: [],
             key: 'abc',
-            kind: 'ARC#HttpProject',
+            kind: HttpProjectKind,
           }).toJSON();
           const result = new HttpProject(schema, [
             {
               key: 'a',
-              kind: 'ARC#Environment',
+              kind: 'Core#Environment',
               info: {
-                kind: 'ARC#Thing',
+                kind: ThingKind,
                 name: 'test',
               },
               variables: [],
               server: {
-                kind: 'ARC#Server',
+                kind: ServerKind,
                 uri: 'https://api.com',
               }
             }
@@ -1444,7 +1445,7 @@ describe('Models', () => {
         project.addFolder('test');
         const copy = project.clone();
 
-        assert.equal(copy.kind, 'ARC#HttpProject');
+        assert.equal(copy.kind, HttpProjectKind);
         assert.equal(copy.info.name, 'a project');
 
         assert.lengthOf(copy.listFolders(), 1, 'has the folder');
@@ -1608,14 +1609,14 @@ describe('Models', () => {
         const result = new HttpProject(undefined, [
           {
             key: 'a',
-            kind: 'ARC#Environment',
+            kind: 'Core#Environment',
             info: {
-              kind: 'ARC#Thing',
+              kind: ThingKind,
               name: 'test',
             },
             variables: [],
             server: {
-              kind: 'ARC#Server',
+              kind: ServerKind,
               uri: 'https://api.com',
             }
           }

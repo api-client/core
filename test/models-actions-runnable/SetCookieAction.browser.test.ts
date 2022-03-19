@@ -102,7 +102,7 @@ describe('Models', () => {
 
       it('creates an instance from the schema', () => {
         const schema: ISetCookieAction = {
-          kind: 'ARC#SetCookieAction',
+          kind: SetCookieActionKind,
           name: 'a name',
           source: { source: ResponseDataSourceEnum.status },
           expires: '2022-10-15',
@@ -125,7 +125,7 @@ describe('Models', () => {
 
       it('creates an instance from the JSON schema string', () => {
         const schema: ISetCookieAction = {
-          kind: 'ARC#SetCookieAction',
+          kind: SetCookieActionKind,
           name: 'a name',
           source: { source: ResponseDataSourceEnum.status },
           expires: '2022-10-15',
@@ -152,7 +152,7 @@ describe('Models', () => {
       let action: SetCookieAction;
       beforeEach(() => {
         schema = {
-          kind: 'ARC#SetCookieAction',
+          kind: SetCookieActionKind,
           name: 'a test',
           source: { source: ResponseDataSourceEnum.status },
         };
@@ -236,7 +236,7 @@ describe('Models', () => {
       let action: SetCookieAction;
       beforeEach(() => {
         action = new SetCookieAction({
-          kind: 'ARC#SetCookieAction',
+          kind: SetCookieActionKind,
           source: { source: ResponseDataSourceEnum.status },
           name: 'a name',
         });
@@ -339,7 +339,7 @@ describe('Models', () => {
     describe('isValid()', () => {
       it('returns false has no cookie target', () => {
         const action = new SetCookieAction({
-          kind: 'ARC#SetCookieAction',
+          kind: SetCookieActionKind,
           source: { source: ResponseDataSourceEnum.status },
           name: ''
         });
@@ -348,7 +348,7 @@ describe('Models', () => {
 
       it('returns false when no source', () => {
         const action = new SetCookieAction({
-          kind: 'ARC#SetCookieAction',
+          kind: SetCookieActionKind,
           source: undefined,
           name: 'test'
         });
@@ -358,7 +358,7 @@ describe('Models', () => {
 
       it('returns true when has useRequestUrl', () => {
         const action = new SetCookieAction({
-          kind: 'ARC#SetCookieAction',
+          kind: SetCookieActionKind,
           source: { source: ResponseDataSourceEnum.status },
           name: 'test',
           useRequestUrl: true,
@@ -368,7 +368,7 @@ describe('Models', () => {
 
       it('returns true when has url', () => {
         const action = new SetCookieAction({
-          kind: 'ARC#SetCookieAction',
+          kind: SetCookieActionKind,
           source: { source: ResponseDataSourceEnum.status },
           name: 'test',
           url: 'https://api.com',

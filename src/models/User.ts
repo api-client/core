@@ -62,9 +62,10 @@ export interface IUserPicture {
   data?: string;
 }
 
-export const Kind = 'ARC#User';
+export const Kind = 'Core#User';
 
 interface BaseUser {
+  kind: typeof Kind;
   /**
    * Data store key of the user.
    */

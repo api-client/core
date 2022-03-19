@@ -1,6 +1,7 @@
 import { assert } from '@esm-bundle/chai';
 import { RequestActions, IRequestActions } from '../../src/models/RequestActions.js';
-import { RunnableAction, IRunnableAction } from '../../src/models/actions/RunnableAction.js';
+import { RunnableAction, IRunnableAction, Kind as RunnableActionKind } from '../../src/models/actions/RunnableAction.js';
+import { Kind as ConditionKind } from '../../src/models/actions/Condition.js';
 
 describe('Models', () => {
   describe('RequestActions', () => {
@@ -138,10 +139,10 @@ describe('Models', () => {
         const schema: IRequestActions = {
           request: [
             {
-              kind: 'ARC#RunnableAction',
+              kind: RunnableActionKind,
               actions: [],
               condition: {
-                kind: 'ARC#Condition',
+                kind: ConditionKind,
                 source: 'value',
               },
             }
@@ -155,10 +156,10 @@ describe('Models', () => {
         const schema: IRequestActions = {
           response: [
             {
-              kind: 'ARC#RunnableAction',
+              kind: RunnableActionKind,
               actions: [],
               condition: {
-                kind: 'ARC#Condition',
+                kind: ConditionKind,
                 source: 'value',
               },
             }
@@ -180,10 +181,10 @@ describe('Models', () => {
         const result = new RequestActions({
           request: [
             {
-              kind: 'ARC#RunnableAction',
+              kind: RunnableActionKind,
               actions: [],
               condition: {
-                kind: 'ARC#Condition',
+                kind: ConditionKind,
                 source: 'value',
               },
               enabled: true,
@@ -191,10 +192,10 @@ describe('Models', () => {
           ],
           response: [
             {
-              kind: 'ARC#RunnableAction',
+              kind: RunnableActionKind,
               actions: [],
               condition: {
-                kind: 'ARC#Condition',
+                kind: ConditionKind,
                 source: 'value',
               },
               enabled: true,
@@ -211,10 +212,10 @@ describe('Models', () => {
         const str = JSON.stringify({
           request: [
             {
-              kind: 'ARC#RunnableAction',
+              kind: RunnableActionKind,
               actions: [],
               condition: {
-                kind: 'ARC#Condition',
+                kind: ConditionKind,
                 source: 'value',
               },
               enabled: true,
@@ -222,10 +223,10 @@ describe('Models', () => {
           ],
           response: [
             {
-              kind: 'ARC#RunnableAction',
+              kind: RunnableActionKind,
               actions: [],
               condition: {
-                kind: 'ARC#Condition',
+                kind: ConditionKind,
                 source: 'value',
               },
               enabled: true,
@@ -245,10 +246,10 @@ describe('Models', () => {
         const schema: IRequestActions = {
           request: [
             {
-              kind: 'ARC#RunnableAction',
+              kind: RunnableActionKind,
               actions: [],
               condition: {
-                kind: 'ARC#Condition',
+                kind: ConditionKind,
                 source: 'value',
               },
               enabled: true,
@@ -264,10 +265,10 @@ describe('Models', () => {
         const schema: IRequestActions = {
           request: [
             {
-              kind: 'ARC#RunnableAction',
+              kind: RunnableActionKind,
               actions: [],
               condition: {
-                kind: 'ARC#Condition',
+                kind: ConditionKind,
                 source: 'value',
               },
               enabled: true,
@@ -285,10 +286,10 @@ describe('Models', () => {
         const schema: IRequestActions = {
           response: [
             {
-              kind: 'ARC#RunnableAction',
+              kind: RunnableActionKind,
               actions: [],
               condition: {
-                kind: 'ARC#Condition',
+                kind: ConditionKind,
                 source: 'value',
               },
               enabled: true,
@@ -304,10 +305,10 @@ describe('Models', () => {
         const schema: IRequestActions = {
           response: [
             {
-              kind: 'ARC#RunnableAction',
+              kind: RunnableActionKind,
               actions: [],
               condition: {
-                kind: 'ARC#Condition',
+                kind: ConditionKind,
                 source: 'value',
               },
               enabled: true,
@@ -333,10 +334,10 @@ describe('Models', () => {
         const schema: IRequestActions = {
           request: [
             {
-              kind: 'ARC#RunnableAction',
+              kind: RunnableActionKind,
               actions: [],
               condition: {
-                kind: 'ARC#Condition',
+                kind: ConditionKind,
                 source: 'value',
               },
               enabled: true,
@@ -353,10 +354,10 @@ describe('Models', () => {
         const schema: IRequestActions = {
           response: [
             {
-              kind: 'ARC#RunnableAction',
+              kind: RunnableActionKind,
               actions: [],
               condition: {
-                kind: 'ARC#Condition',
+                kind: ConditionKind,
                 source: 'value',
               },
               enabled: true,
@@ -378,10 +379,10 @@ describe('Models', () => {
 
       it('adds a request action from the schema', () => {
         const schema: IRunnableAction = {
-          kind: 'ARC#RunnableAction',
+          kind: RunnableActionKind,
           actions: [],
           condition: {
-            kind: 'ARC#Condition',
+            kind: ConditionKind,
             source: 'value',
           }
         };
@@ -418,10 +419,10 @@ describe('Models', () => {
 
       it('adds a request action from the schema', () => {
         const schema: IRunnableAction = {
-          kind: 'ARC#RunnableAction',
+          kind: RunnableActionKind,
           actions: [],
           condition: {
-            kind: 'ARC#Condition',
+            kind: ConditionKind,
             source: 'value',
           }
         };

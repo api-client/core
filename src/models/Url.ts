@@ -41,7 +41,7 @@ export class Url {
   midnight?: number;
 
   /**
-   * @param input The environment definition used to restore the state.
+   * @param input The URL definition used to restore the state.
    */
   constructor(input: string|IUrl) {
     let init: IUrl;
@@ -60,9 +60,7 @@ export class Url {
   }
 
   /**
-   * Creates a new environment clearing anything that is so far defined.
-   * 
-   * Note, this throws an error when the environment is not an ARC environment. 
+   * Creates a new URL clearing anything that is so far defined.
    */
   new(init: IUrl): void {
     const { url='', cnt=0, time = Date.now(), midnight } = init;

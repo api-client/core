@@ -6,9 +6,9 @@ import zlib from 'zlib';
 import getConfig from '../helpers/getSetup.js';
 import net from 'net';
 import { 
-  ArcEngine, 
-  IArcResponse, 
-  ArcResponse, 
+  CoreEngine, 
+  IResponse, 
+  Response, 
   HttpEngineOptions, 
   IHttpRequest, 
   IRequestCertificate, 
@@ -25,12 +25,14 @@ import {
   IErrorResponse,
   IHostRule,
   ErrorResponse,
+  HostRuleKind,
+  RequestAuthorizationKind,
 } from '../../index.js';
 
 const logger = new DummyLogger();
 
 describe('http-engine', () => {
-  describe('ArcEngine', () => {
+  describe('CoreEngine', () => {
     let httpPort: number;
     let certPort: number;
     let chunkedHttpPort: number;
@@ -46,14 +48,14 @@ describe('http-engine', () => {
 
     describe('Unit tests', () => {
       describe('_connect()', () => {
-        let engine: ArcEngine;
+        let engine: CoreEngine;
         let request: IHttpRequest;
         const host = 'localhost';
         const opts: HttpEngineOptions = {
           timeout: 50000,
           followRedirects: false,
           hosts: [{
-            kind: 'ARC#HostRule',
+            kind: HostRuleKind,
             from: 'domain.com',
             to: 'test.com',
           }],
@@ -67,7 +69,7 @@ describe('http-engine', () => {
             headers: 'Host: test.com\nContent-Length: 0',
             payload: 'abc',
           };
-          engine = new ArcEngine(request, opts);
+          engine = new CoreEngine(request, opts);
         });
     
         it('returns HTTP server client', async () => {
@@ -85,14 +87,14 @@ describe('http-engine', () => {
       });
 
       describe('_connectTls()', () => {
-        let engine: ArcEngine;
+        let engine: CoreEngine;
         let request: IHttpRequest;
         const host = 'localhost';
         const opts: HttpEngineOptions = {
           timeout: 50000,
           followRedirects: false,
           hosts: [{
-            kind: 'ARC#HostRule',
+            kind: HostRuleKind,
             from: 'domain.com',
             to: 'test.com',
           }],
@@ -106,7 +108,7 @@ describe('http-engine', () => {
             headers: 'Host: test.com\nContent-Length: 0',
             payload: 'abc',
           };
-          engine = new ArcEngine(request, opts);
+          engine = new CoreEngine(request, opts);
         });
     
         it('returns HTTP server client', async () => {
@@ -126,7 +128,7 @@ describe('http-engine', () => {
       });
 
       describe('connect()', () => {
-        let engine: ArcEngine;
+        let engine: CoreEngine;
         let request: IHttpRequest;
         let opts: HttpEngineOptions;
         let createdClient: net.Socket | undefined;
@@ -141,13 +143,13 @@ describe('http-engine', () => {
             timeout: 50000,
             followRedirects: false,
             hosts: [{
-              kind: 'ARC#HostRule',
+              kind: HostRuleKind,
               from: 'domain.com',
               to: 'test.com',
             }],
             logger,
           };
-          engine = new ArcEngine(request, opts);
+          engine = new CoreEngine(request, opts);
         });
     
         afterEach(() => {
@@ -173,7 +175,7 @@ describe('http-engine', () => {
 
       describe('_authorizeNtlm()', () => {
         let headers: Headers;
-        let engine: ArcEngine;
+        let engine: CoreEngine;
         let request: IHttpRequest;
         let opts: HttpEngineOptions;
         let authConfig: INtlmAuthorization;
@@ -193,14 +195,14 @@ describe('http-engine', () => {
           opts = {
             logger,
             authorization: [{
-              kind: '',
+              kind: RequestAuthorizationKind,
               type: 'ntlm',
               enabled: true,
               valid: true,
               config: authConfig
             }],
           };
-          engine = new ArcEngine(request, opts);
+          engine = new CoreEngine(request, opts);
         });
     
         it('adds the authorization header', () => {
@@ -228,7 +230,7 @@ describe('http-engine', () => {
             followRedirects: false,
             logger,
           };
-          const engine = new ArcEngine(request, opts);
+          const engine = new CoreEngine(request, opts);
           const result = engine._prepareMessage(new Headers(''));
           assert.isTrue(result instanceof Buffer);
         });
@@ -245,7 +247,7 @@ describe('http-engine', () => {
             followRedirects: false,
             logger,
           };
-          const engine = new ArcEngine(request, opts);
+          const engine = new CoreEngine(request, opts);
           const result = engine._prepareMessage(new Headers('')).toString();
           assert.equal(result.split('\n')[0], 'POST /api/endpoint?query=param HTTP/1.1\r');
         });
@@ -259,7 +261,7 @@ describe('http-engine', () => {
           const opts: HttpEngineOptions = {
             logger,
           };
-          const engine = new ArcEngine(request, opts);
+          const engine = new CoreEngine(request, opts);
           const result = engine._prepareMessage(new Headers('')).toString();
           assert.equal(result.split('\n')[0],
             'GET /api/endpoint?query=param HTTP/1.1\r');
@@ -277,7 +279,7 @@ describe('http-engine', () => {
             followRedirects: false,
             logger,
           };
-          const engine = new ArcEngine(request, opts);
+          const engine = new CoreEngine(request, opts);
           const result = engine._prepareMessage(new Headers('')).toString();
           assert.equal(result.split('\n')[1], `Host: localhost:${httpPort}\r`);
         });
@@ -294,7 +296,7 @@ describe('http-engine', () => {
             followRedirects: false,
             logger,
           };
-          const engine = new ArcEngine(request, opts);
+          const engine = new CoreEngine(request, opts);
           const result = engine._prepareMessage(new Headers('content-type: text/plain')).toString();
           assert.equal(result.split('\n')[2], 'content-type: text/plain\r');
         });
@@ -309,7 +311,7 @@ describe('http-engine', () => {
           const opts: HttpEngineOptions = {
             logger,
           };
-          const engine = new ArcEngine(request, opts);
+          const engine = new CoreEngine(request, opts);
           const result = engine._prepareMessage(new Headers('content-type: text/plain')).toString();
           assert.equal(result.split('\n')[3], '\r');
         });
@@ -325,7 +327,7 @@ describe('http-engine', () => {
           const opts: HttpEngineOptions = {
             logger,
           };
-          const engine = new ArcEngine(request, opts);
+          const engine = new CoreEngine(request, opts);
           const headers = new Headers('content-type: text/plain');
           const result = engine._prepareMessage(headers, payloadBuffer).toString();
           assert.equal(result.split('\n')[4], 'test');
@@ -338,7 +340,7 @@ describe('http-engine', () => {
             method: 'GET',
             headers: '',
           }
-          const engine = new ArcEngine(request, { logger });
+          const engine = new CoreEngine(request, { logger });
           const result = engine._prepareMessage(new Headers('')).toString();
           assert.include(result, 'GET /v1/query-params?va=test-pa%C3%9Fword HTTP/1.1');
         });
@@ -352,7 +354,7 @@ describe('http-engine', () => {
             headers: 'Host: test.com\nContent-Length: 0',
             payload: 'abc',
           }
-          const engine = new ArcEngine(request, { logger });
+          const engine = new CoreEngine(request, { logger });
           const result = await engine.prepareMessage();
           assert.isTrue(result instanceof Buffer);
         });
@@ -364,7 +366,7 @@ describe('http-engine', () => {
             headers: 'Host: test.com\nContent-Length: 0',
             payload: 'abc',
           }
-          const engine = new ArcEngine(request, { logger });
+          const engine = new CoreEngine(request, { logger });
           const result = await engine.prepareMessage();
           assert.lengthOf(result.toString().split('\n'), 5);
         });
@@ -381,7 +383,7 @@ describe('http-engine', () => {
             followRedirects: false,
             logger,
           };
-          const engine = new ArcEngine(request, opts);
+          const engine = new CoreEngine(request, opts);
           const result = await engine.prepareMessage();
           assert.lengthOf(result.toString().split('\n'), 7);
         });
@@ -395,7 +397,7 @@ describe('http-engine', () => {
           const opts: HttpEngineOptions = {
             logger,
             authorization: [{
-              kind: '',
+              kind: RequestAuthorizationKind,
               type: 'ntlm',
               enabled: true,
               valid: true,
@@ -407,7 +409,7 @@ describe('http-engine', () => {
             }],
           };
 
-          const engine = new ArcEngine(request, opts);
+          const engine = new CoreEngine(request, opts);
           const result = await engine.prepareMessage();
           const headers = engine.request.headers as string;
           assert.equal(headers.indexOf('NTLM '), -1, 'Headers are not altered');
@@ -424,7 +426,7 @@ describe('http-engine', () => {
           const opts: HttpEngineOptions = {
             logger,
           };
-          const engine = new ArcEngine(request, opts);
+          const engine = new CoreEngine(request, opts);
           const result = await engine.prepareMessage();
           const headers = engine.sentRequest.headers as string;
           const search = headers.indexOf('content-length: 9');
@@ -443,7 +445,7 @@ describe('http-engine', () => {
             logger,
             defaultHeaders: true,
           };
-          const engine = new ArcEngine(request, opts);
+          const engine = new CoreEngine(request, opts);
           await engine.prepareMessage();
           
           assert.include(engine.sentRequest.headers, 'user-agent: api client', 'user-agent is set');
@@ -453,7 +455,7 @@ describe('http-engine', () => {
     
       describe('writeMessage()', () => {
         let message: Buffer;
-        let engine:ArcEngine;
+        let engine:CoreEngine;
         let createdClient: net.Socket | undefined;
     
         before(() => {
@@ -474,7 +476,7 @@ describe('http-engine', () => {
             logger,
           };
 
-          engine = new ArcEngine(request, opts);
+          engine = new CoreEngine(request, opts);
           createdClient = await engine.connect();
         });
     
@@ -510,7 +512,7 @@ describe('http-engine', () => {
       });
 
       describe('_parseHeaders()', () => {
-        let engine: ArcEngine;
+        let engine: CoreEngine;
         let headersStr: string;
         let headersBuf: Buffer;
         before(() => {
@@ -525,8 +527,8 @@ describe('http-engine', () => {
             logger,
           };
 
-          engine = new ArcEngine(request, opts);
-          const response = ArcResponse.fromValues(0);
+          engine = new CoreEngine(request, opts);
+          const response = Response.fromValues(0);
           response.loadingTime = 0;
           engine.currentResponse = response;
           headersStr = 'Content-Type: application/test\r\n';
@@ -609,14 +611,14 @@ describe('http-engine', () => {
         });
 
         it('adds default user-agent', () => {
-          const base = new ArcEngine(request, opts);
+          const base = new CoreEngine(request, opts);
           const headers = new Headers();
           base.prepareHeaders(headers);
           assert.equal(headers.get('user-agent'), 'api client');
         });
     
         it('adds default accept', () => {
-          const base = new ArcEngine(request, opts);
+          const base = new CoreEngine(request, opts);
           const headers = new Headers();
           base.prepareHeaders(headers);
           assert.equal(headers.get('accept'), '*/*');
@@ -624,7 +626,7 @@ describe('http-engine', () => {
     
         it('adds configured user-agent', () => {
           opts.defaultUserAgent = 'test';
-          const base = new ArcEngine(request, opts);
+          const base = new CoreEngine(request, opts);
           const headers = new Headers();
           base.prepareHeaders(headers);
           assert.equal(headers.get('user-agent'), 'test');
@@ -632,7 +634,7 @@ describe('http-engine', () => {
     
         it('adds configured accept', () => {
           opts.defaultAccept = 'test';
-          const base = new ArcEngine(request, opts);
+          const base = new CoreEngine(request, opts);
           const headers = new Headers();
           base.prepareHeaders(headers);
           assert.equal(headers.get('accept'), 'test');
@@ -640,7 +642,7 @@ describe('http-engine', () => {
     
         it('ignores adding headers when no config option', () => {
           opts.defaultHeaders = false;
-          const base = new ArcEngine(request, opts);
+          const base = new CoreEngine(request, opts);
           const headers = new Headers();
           base.prepareHeaders(headers);
           assert.isFalse(headers.has('user-agent'), 'user-agent is not set');
@@ -648,7 +650,7 @@ describe('http-engine', () => {
         });
     
         it('skips when user-agent header is set', () => {
-          const base = new ArcEngine(request, opts);
+          const base = new CoreEngine(request, opts);
           const headers = new Headers({
             'user-agent': 'test',
           });
@@ -657,7 +659,7 @@ describe('http-engine', () => {
         });
     
         it('skips when accept header is set', () => {
-          const base = new ArcEngine(request, opts);
+          const base = new CoreEngine(request, opts);
           const headers = new Headers({
             accept: 'test',
           });
@@ -677,21 +679,21 @@ describe('http-engine', () => {
         });
       
         it('parses the URL', () => {
-          const engine = new ArcEngine(request);
+          const engine = new CoreEngine(request);
           assert.typeOf(engine.uri, 'URL');
           assert.equal(engine.uri.hostname, 'domain.com');
         });
       
         it('changes uri', () => {
-          const engine = new ArcEngine(request);
+          const engine = new CoreEngine(request);
           const result = engine.readUrl('http://other.com');
           assert.typeOf(result, 'URL');
           assert.equal(result.hostname, 'other.com');
         });
       
         it('applies host rules', () => {
-          const hosts: IHostRule[] = [{ from: 'domain.com', to: 'other.com', kind: 'ARC#HostRule' }];
-          const engine = new ArcEngine(request, {
+          const hosts: IHostRule[] = [{ from: 'domain.com', to: 'other.com', kind: HostRuleKind }];
+          const engine = new CoreEngine(request, {
             hosts,
           });
           assert.equal(engine.uri.hostname, 'other.com');
@@ -700,7 +702,7 @@ describe('http-engine', () => {
     });
 
     describe('Events', () => {
-      let engine: ArcEngine;
+      let engine: CoreEngine;
       beforeEach(() => {
         const request: IHttpRequest = {
           url: `http://localhost:${chunkedHttpPort}/api/endpoint?query=param`,
@@ -711,7 +713,7 @@ describe('http-engine', () => {
         const opts: HttpEngineOptions = {
           logger,
         };
-        engine = new ArcEngine(request, opts);
+        engine = new CoreEngine(request, opts);
       });
   
       it('dispatches the "loadstart" event', async () => {
@@ -782,7 +784,7 @@ describe('http-engine', () => {
       });
   
       it('makes connection without a certificate', async () => {
-        const request = new ArcEngine({
+        const request = new CoreEngine({
           url: `https://localhost:${certPort}/`,
           method: 'GET',
           headers: 'host: localhost',
@@ -793,7 +795,7 @@ describe('http-engine', () => {
 
         const data = await request.send();
         assert.ok(data.response, 'has the response');
-        const response = new ArcResponse(data.response as IArcResponse);
+        const response = new Response(data.response as IResponse);
         const payload = await response.readPayload() as Buffer;
         
         const payloadString = payload.toString();
@@ -802,7 +804,7 @@ describe('http-engine', () => {
       });
 
       it('makes a connection with p12 client certificate', async () => {
-        const request = new ArcEngine({
+        const request = new CoreEngine({
           url: `https://localhost:${certPort}/`,
           method: 'GET',
           headers: 'host: localhost',
@@ -813,7 +815,7 @@ describe('http-engine', () => {
 
         const data = await request.send();
         assert.ok(data.response, 'has the response');
-        const response = new ArcResponse(data.response as IArcResponse);
+        const response = new Response(data.response as IResponse);
         const payload = await response.readPayload() as Buffer;
 
         const payloadString = payload.toString();
@@ -824,7 +826,7 @@ describe('http-engine', () => {
       });
 
       it('makes a connection with p12 client certificate and password', async () => {
-        const request = new ArcEngine({
+        const request = new CoreEngine({
           url: `https://localhost:${certPort}/`,
           method: 'GET',
           headers: 'host: localhost',
@@ -834,7 +836,7 @@ describe('http-engine', () => {
         });
         
         const data = await request.send();
-        const response = new ArcResponse(data.response as IArcResponse);
+        const response = new Response(data.response as IResponse);
         const payload = await response.readPayload() as Buffer;
 
         const payloadString = payload.toString();
@@ -845,7 +847,7 @@ describe('http-engine', () => {
       });
 
       it('ignores untrusted valid certificates', async () => {
-        const request = new ArcEngine({
+        const request = new CoreEngine({
           url: `https://localhost:${certPort}/`,
           method: 'GET',
           headers: 'host: localhost',
@@ -856,7 +858,7 @@ describe('http-engine', () => {
 
         const data = await request.send();
         
-        const response = new ArcResponse(data.response as IArcResponse);
+        const response = new Response(data.response as IResponse);
         const payload = await response.readPayload() as Buffer;
 
         const payloadString = payload.toString();
@@ -868,7 +870,7 @@ describe('http-engine', () => {
       });
 
       it('makes a connection with pem client certificate', async () => {
-        const request = new ArcEngine({
+        const request = new CoreEngine({
           url: `https://localhost:${certPort}/`,
           method: 'GET',
           headers: 'host: localhost',
@@ -879,7 +881,7 @@ describe('http-engine', () => {
         
         const data = await request.send();
         
-        const response = new ArcResponse(data.response as IArcResponse);
+        const response = new Response(data.response as IResponse);
         const payload = await response.readPayload() as Buffer;
 
         const payloadString = payload.toString();
@@ -903,7 +905,7 @@ describe('http-engine', () => {
       ].forEach((item) => {
         const [name, url, code] = item;
         it(`reads certificate: ${name}`, async () => {
-          const request = new ArcEngine({
+          const request = new CoreEngine({
             url,
             method: 'GET',
           }, {
@@ -911,13 +913,13 @@ describe('http-engine', () => {
             logger,
           });
           const log = await request.send();
-          const response = log.response as IArcResponse;
+          const response = log.response as IResponse;
           assert.isAbove(response.status, 199);
           assert.isBelow(response.status, 300);
         });
     
         it(`rejects ${name} cert with validation enabled`, async () => {
-          const request = new ArcEngine({
+          const request = new CoreEngine({
             url,
             method: 'GET',
           }, {
@@ -944,10 +946,10 @@ describe('http-engine', () => {
         const opts: HttpEngineOptions = {
           logger,
         };
-        const engine = new ArcEngine(request, opts);
+        const engine = new CoreEngine(request, opts);
         const log = await engine.send();
         assert.ok(log.response, 'has the response');
-        const response = new ArcResponse(log.response as IArcResponse);
+        const response = new Response(log.response as IResponse);
         const payload = await response.readPayload() as Buffer;
 
         const payloadString = payload.toString();
@@ -967,10 +969,10 @@ describe('http-engine', () => {
         const opts: HttpEngineOptions = {
           logger,
         };
-        const engine = new ArcEngine(request, opts);
+        const engine = new CoreEngine(request, opts);
         const log = await engine.send();
         assert.ok(log.response, 'has the response');
-        const response = new ArcResponse(log.response as IArcResponse);
+        const response = new Response(log.response as IResponse);
         const payload = await response.readPayload() as Buffer;
 
         const payloadString = payload.toString();
@@ -1000,9 +1002,9 @@ describe('http-engine', () => {
       it('sends a query parameter', async () => {
         const r: IHttpRequest = { ...requestData };
         r.url += '?a=b';
-        const request = new ArcEngine(r, opts);
+        const request = new CoreEngine(r, opts);
         const log = await request.send();
-        const response = new ArcResponse(log.response as IArcResponse);
+        const response = new Response(log.response as IResponse);
         const payload = await response.readPayload() as Buffer;
         const body = JSON.parse(payload.toString('utf8'));
         assert.deepEqual(body, { params: { query: { a: 'b' } } });
@@ -1011,9 +1013,9 @@ describe('http-engine', () => {
       it('sends a multiple query parameters', async () => {
         const r = { ...requestData };
         r.url += '?a=b&c=1&d=true';
-        const request = new ArcEngine(r, opts);
+        const request = new CoreEngine(r, opts);
         const log = await request.send();
-        const response = new ArcResponse(log.response as IArcResponse);
+        const response = new Response(log.response as IResponse);
         const payload = await response.readPayload() as Buffer;
         const body = JSON.parse(payload.toString('utf8'));
         assert.deepEqual(body, { params: {
@@ -1029,9 +1031,9 @@ describe('http-engine', () => {
       it('sends an array query parameters', async () => {
         const r = { ...requestData };
         r.url += '?a=b&a=c&a=d';
-        const request = new ArcEngine(r, opts);
+        const request = new CoreEngine(r, opts);
         const log = await request.send();
-        const response = new ArcResponse(log.response as IArcResponse);
+        const response = new Response(log.response as IResponse);
         const payload = await response.readPayload() as Buffer;
         const body = JSON.parse(payload.toString('utf8'));
         assert.deepEqual(body, { params: {
@@ -1045,9 +1047,9 @@ describe('http-engine', () => {
       it('sends an array query parameters with brackets', async () => {
         const r = { ...requestData };
         r.url += '?a[]=b&a[]=c&a[]=d';
-        const request = new ArcEngine(r, opts);
+        const request = new CoreEngine(r, opts);
         const log = await request.send();
-        const response = new ArcResponse(log.response as IArcResponse);
+        const response = new Response(log.response as IResponse);
         const payload = await response.readPayload() as Buffer;
         const body = JSON.parse(payload.toString('utf8'));
         assert.deepEqual(body, { params: {
@@ -1061,9 +1063,9 @@ describe('http-engine', () => {
       it('sends mixed query parameters', async () => {
         const r = { ...requestData };
         r.url += '?a[]=b&a[]=c&b=a&b=b&c=d';
-        const request = new ArcEngine(r, opts);
+        const request = new CoreEngine(r, opts);
         const log = await request.send();
-        const response = new ArcResponse(log.response as IArcResponse);
+        const response = new Response(log.response as IResponse);
         const payload = await response.readPayload() as Buffer;
         const body = JSON.parse(payload.toString('utf8'));
         assert.deepEqual(body, { params: {
@@ -1094,9 +1096,9 @@ describe('http-engine', () => {
       it('sends a header', async () => {
         const r = { ...request };
         r.headers = 'x-test-header: true';
-        const er = new ArcEngine(r, opts);
+        const er = new CoreEngine(r, opts);
         const log = await er.send();
-        const response = new ArcResponse(log.response as IArcResponse);
+        const response = new Response(log.response as IResponse);
         const payload = await response.readPayload() as Buffer;
         const body = JSON.parse(payload.toString('utf8'));
         assert.equal(body.headers['x-test-header'], 'true');
@@ -1105,9 +1107,9 @@ describe('http-engine', () => {
       it('sends multiple headers', async () => {
         const r = { ...request };
         r.headers = 'x-test-header: true\nAccept-CH: DPR, Viewport-Width';
-        const er = new ArcEngine(r, opts);
+        const er = new CoreEngine(r, opts);
         const log = await er.send();
-        const response = new ArcResponse(log.response as IArcResponse);
+        const response = new Response(log.response as IResponse);
         const payload = await response.readPayload() as Buffer;
         const body = JSON.parse(payload.toString('utf8'));
         assert.equal(body.headers['x-test-header'], 'true');
@@ -1117,9 +1119,9 @@ describe('http-engine', () => {
       it('sends array headers', async () => {
         const r = { ...request };
         r.headers = 'x-test-header: true, x-value';
-        const er = new ArcEngine(r, opts);
+        const er = new CoreEngine(r, opts);
         const log = await er.send();
-        const response = new ArcResponse(log.response as IArcResponse);
+        const response = new Response(log.response as IResponse);
         const payload = await response.readPayload() as Buffer;
         const body = JSON.parse(payload.toString('utf8'));
         assert.equal(body.headers['x-test-header'], 'true, x-value');
@@ -1136,7 +1138,7 @@ describe('http-engine', () => {
         const opts: HttpEngineOptions = {
           logger,
         };
-        const engine = new ArcEngine(request, opts);
+        const engine = new CoreEngine(request, opts);
         const log = await engine.send();
         const size = log.size as IRequestsSize;
         assert.equal(size.request, 90);
@@ -1151,7 +1153,7 @@ describe('http-engine', () => {
         const opts: HttpEngineOptions = {
           logger,
         };
-        const engine = new ArcEngine(request, opts);
+        const engine = new CoreEngine(request, opts);
         const log = await engine.send();
         const size = log.size as IRequestsSize;
         assert.equal(size.response, 81);
@@ -1177,48 +1179,48 @@ describe('http-engine', () => {
       });
 
       it('makes a POST request', async () => {
-        const engine = new ArcEngine(request, opts);
+        const engine = new CoreEngine(request, opts);
         const log = await engine.send();
         assert.ok(log);
       });
   
       it('response has stats', async () => {
-        const engine = new ArcEngine(request, opts);
+        const engine = new CoreEngine(request, opts);
         const log = await engine.send();
-        const response = new ArcResponse(log.response as IArcResponse);
+        const response = new Response(log.response as IResponse);
         assert.equal(response.status, 200);
       });
   
       it('response has statusText', async () => {
-        const engine = new ArcEngine(request, opts);
+        const engine = new CoreEngine(request, opts);
         const log = await engine.send();
-        const response = new ArcResponse(log.response as IArcResponse);
+        const response = new Response(log.response as IResponse);
         assert.equal(response.statusText, 'OK');
       });
   
       it('response has headers', async () => {
-        const engine = new ArcEngine(request, opts);
+        const engine = new CoreEngine(request, opts);
         const log = await engine.send();
-        const response = new ArcResponse(log.response as IArcResponse);
+        const response = new Response(log.response as IResponse);
         assert.typeOf(response.headers, 'string');
       });
   
       it('has response payload', async () => {
-        const engine = new ArcEngine(request, opts);
+        const engine = new CoreEngine(request, opts);
         const log = await engine.send();
-        const response = new ArcResponse(log.response as IArcResponse);
+        const response = new Response(log.response as IResponse);
         assert.ok(response.payload);
       });
   
       it('has the response timings object', async () => {
-        const engine = new ArcEngine(request, opts);
+        const engine = new CoreEngine(request, opts);
         const log = await engine.send();
-        const response = new ArcResponse(log.response as IArcResponse);
+        const response = new Response(log.response as IResponse);
         assert.typeOf(response.timings, 'object');
       });
   
       it('has response sentHttpMessage', async () => {
-        const engine = new ArcEngine(request, opts);
+        const engine = new CoreEngine(request, opts);
         const log = await engine.send();
         const sent = log.request as ISentRequest;
         assert.typeOf(sent.httpMessage, 'string');
@@ -1243,14 +1245,14 @@ describe('http-engine', () => {
       });
 
       it('makes a GET request', async () => {
-        const engine = new ArcEngine(request, opts);
+        const engine = new CoreEngine(request, opts);
         const info = await engine.send();
         assert.ok(info);
       });
   
       it('makes a delayed GET request', async () => {
         request.url += '?delay=300';
-        const engine = new ArcEngine(request, opts);
+        const engine = new CoreEngine(request, opts);
         const info = await engine.send();
         assert.ok(info);
       });
@@ -1270,12 +1272,12 @@ describe('http-engine', () => {
         const [name, sourceUrl, mime] = item;
         it(`reads the response: ${name}`, async () => {
           const url = sourceUrl.replace('PORT', String(httpPort));
-          const engine = new ArcEngine({
+          const engine = new CoreEngine({
             url,
             method: 'GET',
           }, { logger });
           const info = await engine.send();
-          const response = new ArcResponse(info.response as IArcResponse);
+          const response = new Response(info.response as IResponse);
 
           const headers = new Headers(response.headers);
           assert.equal(headers.get('content-type'), mime, 'has the content type');
@@ -1296,13 +1298,13 @@ describe('http-engine', () => {
         const [name, sourceUrl, enc] = item;
         it(`reads the compressed response: ${name}`, async () => {
           const url = sourceUrl.replace('PORT', String(httpPort));
-          const engine = new ArcEngine({
+          const engine = new CoreEngine({
             url,
             method: 'GET',
             headers: `accept-encoding: ${enc}`,
           }, { logger });
           const info = await engine.send();
-          const response = new ArcResponse(info.response as IArcResponse);
+          const response = new Response(info.response as IResponse);
 
           assert.ok(response.payload, 'has the payload');
 
@@ -1341,13 +1343,13 @@ describe('http-engine', () => {
     
       describe('inflate()', () => {
         it('resolves to a Buffer', async () => {
-          const engine = new ArcEngine(request);
+          const engine = new CoreEngine(request);
           const result = await engine.inflate(createDeflate());
           assert.equal(result.length, 14);
         });
     
         it('has original data', async () => {
-          const engine = new ArcEngine(request);
+          const engine = new CoreEngine(request);
           const result = await engine.inflate(createDeflate());
           assert.equal(result.toString(), 'deflate-string');
         });
@@ -1355,13 +1357,13 @@ describe('http-engine', () => {
     
       describe('gunzip()', () => {
         it('resolves to a buffer', async () => {
-          const engine = new ArcEngine(request);
+          const engine = new CoreEngine(request);
           const result = await engine.gunzip(createGzip());
           assert.equal(result.length, 11);
         });
     
         it('has original data', async () => {
-          const engine = new ArcEngine(request);
+          const engine = new CoreEngine(request);
           const result = await engine.gunzip(createGzip());
           assert.equal(result.toString(), 'gzip-string');
         });
@@ -1369,13 +1371,13 @@ describe('http-engine', () => {
     
       describe('brotli()', () => {
         it('resolves to a buffer', async () => {
-          const engine = new ArcEngine(request);
+          const engine = new CoreEngine(request);
           const result = await engine.brotli(createBrotli());
           assert.equal(result.length, 13);
         });
     
         it('has original data', async () => {
-          const engine = new ArcEngine(request);
+          const engine = new CoreEngine(request);
           const result = await engine.brotli(createBrotli());
           assert.equal(result.toString(), 'brotli-string');
         });
@@ -1383,13 +1385,13 @@ describe('http-engine', () => {
     
       describe('_decompress()', () => {
         it('returns undefined when no data', async () => {
-          const engine = new ArcEngine(request);
+          const engine = new CoreEngine(request);
           const result = await engine.decompress(undefined);
           assert.isUndefined(result);
         });
     
         it('returns undefined when aborted', async () => {
-          const engine = new ArcEngine(request);
+          const engine = new CoreEngine(request);
           engine.aborted = true;
           const result = await engine.decompress(Buffer.from('test'));
           assert.isUndefined(result);
@@ -1397,9 +1399,9 @@ describe('http-engine', () => {
     
         it('returns the same buffer when no content-encoding header', async () => {
           const b = Buffer.from('test');
-          const engine = new ArcEngine(request);
+          const engine = new CoreEngine(request);
           engine.currentHeaders = new Headers();
-          engine.currentResponse = ArcResponse.fromValues(200);
+          engine.currentResponse = Response.fromValues(200);
           engine.currentResponse.loadingTime = 1;
           const result = await engine.decompress(b) as Buffer;
           assert.equal(result.compare(b), 0);
@@ -1407,9 +1409,9 @@ describe('http-engine', () => {
     
         it('decompresses deflate', async () => {
           const b = createDeflate();
-          const engine = new ArcEngine(request);
+          const engine = new CoreEngine(request);
           engine.currentHeaders = new Headers('content-encoding: deflate');
-          engine.currentResponse = ArcResponse.fromValues(200);
+          engine.currentResponse = Response.fromValues(200);
           engine.currentResponse.loadingTime = 1;
           const result = await engine.decompress(b) as Buffer;
           assert.equal(result.toString(), 'deflate-string');
@@ -1417,9 +1419,9 @@ describe('http-engine', () => {
     
         it('decompresses gzip', async () => {
           const b = createGzip();
-          const engine = new ArcEngine(request);
+          const engine = new CoreEngine(request);
           engine.currentHeaders = new Headers('content-encoding: gzip');
-          engine.currentResponse = ArcResponse.fromValues(200);
+          engine.currentResponse = Response.fromValues(200);
           engine.currentResponse.loadingTime = 1;
           const result = await engine.decompress(b) as Buffer;
           assert.equal(result.toString(), 'gzip-string');
@@ -1427,9 +1429,9 @@ describe('http-engine', () => {
     
         it('decompresses brotli', async () => {
           const b = createBrotli();
-          const engine = new ArcEngine(request);
+          const engine = new CoreEngine(request);
           engine.currentHeaders = new Headers('content-encoding: br');
-          engine.currentResponse = ArcResponse.fromValues(200);
+          engine.currentResponse = Response.fromValues(200);
           engine.currentResponse.loadingTime = 1;
           const result = await engine.decompress(b) as Buffer;
           assert.equal(result.toString(), 'brotli-string');
@@ -1439,36 +1441,36 @@ describe('http-engine', () => {
   
     describe('Timings tests', () => {
       it('has the stats object', async () => {
-        const engine = new ArcEngine({
+        const engine = new CoreEngine({
           url: `http://localhost:${httpPort}/v1/get`,
           method: 'GET',
         }, { logger });
         const info = await engine.send();
-        const response = info.response as IArcResponse;
+        const response = info.response as IResponse;
         const timing = response.timings as IRequestTime;
         assert.typeOf(timing, 'object');
       });
   
       (['connect', 'receive', 'send', 'wait', 'dns', 'ssl'] as (keyof IRequestTime)[]).forEach((prop) => {
         it(`has the ${prop} value`, async () => {
-          const engine = new ArcEngine({
+          const engine = new CoreEngine({
             url: `http://localhost:${httpPort}/v1/get`,
             method: 'GET',
           }, { logger });
           const info = await engine.send();
-          const response = info.response as IArcResponse;
+          const response = info.response as IResponse;
           const timing = response.timings as IRequestTime;
           assert.typeOf(timing[prop], 'number');
         });
       });
   
       it('has the stats time for ssl', async () => {
-        const engine = new ArcEngine({
+        const engine = new CoreEngine({
           url: 'https://www.google.com/',
           method: 'GET',
         }, { logger });
         const info = await engine.send();
-        const response = info.response as IArcResponse;
+        const response = info.response as IResponse;
         const timing = response.timings as IRequestTime;
         assert.isAbove(timing.ssl as number, -1);
       });
@@ -1526,9 +1528,9 @@ describe('http-engine', () => {
           'Date': 'Thu, 21 Jun 2018 18:30:51 GMT',
         };
 
-        let engine: ArcEngine;
+        let engine: CoreEngine;
         beforeEach(() => {
-          engine = new ArcEngine(request, opts);
+          engine = new CoreEngine(request, opts);
         });
     
         it('returns data from the _processStatus()', () => {
@@ -1538,7 +1540,7 @@ describe('http-engine', () => {
     
         it('reads the status line', () => {
           engine._processSocketMessage(parts[0]);
-          const cr = engine.currentResponse as ArcResponse;
+          const cr = engine.currentResponse as Response;
           assert.equal(cr.status, 200, 'Status code is set');
           assert.equal(cr.statusText, 'OK', 'Status message is set');
         });
@@ -1566,14 +1568,14 @@ describe('http-engine', () => {
     
         it('sets the status', () => {
           processMessages();
-          const cr = engine.currentResponse as ArcResponse;
+          const cr = engine.currentResponse as Response;
           assert.equal(cr.status, 200, 'Status code is set');
           assert.equal(cr.statusText, 'OK', 'Status message is set');
         });
     
         it('sets the headers', () => {
           processMessages();
-          const cr = engine.currentResponse as ArcResponse;
+          const cr = engine.currentResponse as Response;
           assert.typeOf(cr.headers, 'string');
           assert.typeOf(engine.currentHeaders, 'object');
           engine.currentHeaders.forEach((value, name) => {
@@ -1607,12 +1609,12 @@ describe('http-engine', () => {
       });
     
       describe('Chunked responses', () => {
-        let engine: ArcEngine;
+        let engine: CoreEngine;
 
         it('receives chunked response.', async () => {
-          engine = new ArcEngine(request, opts);
+          engine = new CoreEngine(request, opts);
           const info = await engine.send();
-          const response = new ArcResponse(info.response as IArcResponse);
+          const response = new Response(info.response as IResponse);
           const payload = await response.readPayload() as Buffer;
 
           const parts = payload.toString().split('\n');
@@ -1624,9 +1626,9 @@ describe('http-engine', () => {
       });
     
       describe('readChunkSize()', () => {
-        let engine: ArcEngine;
+        let engine: CoreEngine;
         before(() => {
-          engine = new ArcEngine(request, opts);
+          engine = new CoreEngine(request, opts);
         });
     
         it('returns the the same array when new line is not found', () => {
@@ -1659,9 +1661,9 @@ describe('http-engine', () => {
       });
     
       describe('_processBodyChunked()', () => {
-        let engine: ArcEngine;
+        let engine: CoreEngine;
         beforeEach(() => {
-          engine = new ArcEngine(request, opts);
+          engine = new CoreEngine(request, opts);
           engine._reportResponse = (): void => {};
         });
     
@@ -1703,12 +1705,12 @@ describe('http-engine', () => {
       });
     
       describe('_processBody()', () => {
-        let engine: ArcEngine;
+        let engine: CoreEngine;
         const testData = Buffer.from('abcdefghijklmn');
         const testLength = testData.length;
     
         beforeEach(() => {
-          engine = new ArcEngine(request, opts);
+          engine = new CoreEngine(request, opts);
           engine._reportResponse = ():void => {};
         });
     
@@ -1768,7 +1770,7 @@ describe('http-engine', () => {
           url: `http://localhost:${httpPort}/v1/delay/1000`,
           method: 'GET',
         };
-        const engine = new ArcEngine(request, opts);
+        const engine = new CoreEngine(request, opts);
         const spy = sinon.spy();
         engine.on('loadend', spy);
         const info = await engine.send();
@@ -1793,7 +1795,7 @@ describe('http-engine', () => {
         };
       });
 
-      function setupSocket(base: ArcEngine): Promise<void> {
+      function setupSocket(base: CoreEngine): Promise<void> {
         return new Promise((resolve, reject) => {
           const socket = new net.Socket({
             writable: true,
@@ -1809,20 +1811,20 @@ describe('http-engine', () => {
       }
   
       it('sets aborted flag', () => {
-        const base = new ArcEngine(request, opts);
+        const base = new CoreEngine(request, opts);
         base.abort();
         assert.isTrue(base.aborted);
       });
   
       it('destroys the socket', async () => {
-        const base = new ArcEngine(request, opts);
+        const base = new CoreEngine(request, opts);
         await setupSocket(base);
         base.abort();
         assert.isUndefined(base.socket);
       });
   
       it('removes destroyed socket', async () => {
-        const base = new ArcEngine(request, opts);
+        const base = new CoreEngine(request, opts);
         await setupSocket(base);
         const soc = base.socket as net.Socket;
         soc.pause();
@@ -1832,14 +1834,14 @@ describe('http-engine', () => {
       });
   
       it('decompress() results to undefined', async () => {
-        const base = new ArcEngine(request, opts);
+        const base = new CoreEngine(request, opts);
         base.abort();
         const result = await base.decompress(Buffer.from('test'));
         assert.isUndefined(result);
       });
   
       it('_createResponse() results to undefined', async () => {
-        const base = new ArcEngine(request, opts);
+        const base = new CoreEngine(request, opts);
         base.abort();
         const result = await base._createResponse();
         assert.isUndefined(result);
@@ -1857,9 +1859,9 @@ describe('http-engine', () => {
       });
 
       it('_cleanUp()', () => {
-        const base = new ArcEngine(request);
+        const base = new CoreEngine(request);
         base.redirects = [];
-        base.currentResponse = new ArcResponse();
+        base.currentResponse = new Response();
         base.currentHeaders = new Headers('content-type: test');
         base._rawBody = Buffer.from('test');
         base.stats = { connectedTime: 123 };
@@ -1872,9 +1874,9 @@ describe('http-engine', () => {
       });
     
       it('_cleanUpRedirect()', () => {
-        const base = new ArcEngine(request);
+        const base = new CoreEngine(request);
         base.redirects.push(new ResponseRedirect());
-        base.currentResponse = new ArcResponse();
+        base.currentResponse = new Response();
         base.currentHeaders = new Headers('content-type: test');
         base._rawBody = Buffer.from('test');
         base.stats = { connectedTime: 123 };
@@ -1898,7 +1900,7 @@ describe('http-engine', () => {
       });
     
       it('Sets default logger', () => {
-        const base = new ArcEngine(request);
+        const base = new CoreEngine(request);
         const result = base.setupLogger({});
         assert.typeOf(result, 'object');
         assert.typeOf(result.info, 'function');
@@ -1908,7 +1910,7 @@ describe('http-engine', () => {
       });
     
       it('Sets passed logger option', () => {
-        const base = new ArcEngine(request);
+        const base = new CoreEngine(request);
         const result = base.setupLogger({
           logger: console,
         });
@@ -1922,7 +1924,7 @@ describe('http-engine', () => {
           timeout: 50000,
           followRedirects: false,
           hosts: [{
-            kind: 'ARC#HostRule',
+            kind: HostRuleKind,
             from: 'domain.com',
             to: 'test.com',
           }],
@@ -1932,31 +1934,31 @@ describe('http-engine', () => {
           url: `https://domain.com/api/endpoint?query=param`,
           method: 'GET',
         };
-        const engine = new ArcEngine(request, opts);
+        const engine = new CoreEngine(request, opts);
         assert.equal(engine.uri.hostname, 'test.com');
       });
     });
 
     describe('NTLM authorization', () => {
       it('returns 401 when no credentials', async () => {
-        const engine = new ArcEngine({
+        const engine = new CoreEngine({
           url: `http://localhost:${httpPort}/v1/auth/ntlm/resource`,
           method: 'GET',
         }, { logger });
         const log = await engine.send();
-        const response = log.response as IArcResponse;
+        const response = log.response as IResponse;
         assert.equal(response.status, 401, 'has the 401 status code')
       });
 
       it('authenticates the user', async () => {
-        const engine = new ArcEngine({
+        const engine = new CoreEngine({
           url: `http://localhost:${httpPort}/v1/auth/ntlm/resource`,
           method: 'GET',
         }, {
           logger,
           authorization: [
             {
-              kind: '',
+              kind: RequestAuthorizationKind,
               enabled: true,
               type: 'ntlm',
               valid: true,
@@ -1969,7 +1971,7 @@ describe('http-engine', () => {
           ],
         });
         const log = await engine.send();
-        const response = log.response as IArcResponse;
+        const response = log.response as IResponse;
         assert.equal(response.status, 200, 'has the 200 status code')
       });
     });
@@ -1990,14 +1992,14 @@ describe('http-engine', () => {
         });
 
         it('redirects to an absolute URL', async () => {
-          const request = new ArcEngine(baseRequest, opts);
+          const request = new CoreEngine(baseRequest, opts);
           const log = await request.send();
           assert.typeOf(log.redirects!, 'array', 'has the redirects');
           assert.lengthOf(log.redirects!, 2, 'has both redirects');
         });
 
         it('has the redirects data', async () => {
-          const request = new ArcEngine(baseRequest, opts);
+          const request = new CoreEngine(baseRequest, opts);
           const log = await request.send();
           const redirects = log.redirects!.map(i => new ResponseRedirect(i));
           const rdr1 = redirects[0]!;
@@ -2020,11 +2022,11 @@ describe('http-engine', () => {
         });
 
         it('has the final response', async () => {
-          const request = new ArcEngine(baseRequest, opts);
+          const request = new CoreEngine(baseRequest, opts);
           const log = await request.send();
 
           const transport = log.request as ISentRequest;
-          const response = log.response as IArcResponse;
+          const response = log.response as IResponse;
 
           const location = `http://localhost:${httpPort}/v1/get?test=true`;
           assert.equal(transport.url, location, 'transport request has the final URL');
@@ -2043,14 +2045,14 @@ describe('http-engine', () => {
         });
 
         it('redirects to a relative URL', async () => {
-          const request = new ArcEngine(baseRequest, opts);
+          const request = new CoreEngine(baseRequest, opts);
           const log = await request.send();
           assert.typeOf(log.redirects!, 'array', 'has the redirects');
           assert.lengthOf(log.redirects!, 2, 'has both redirects');
         });
 
         it('has the redirects data', async () => {
-          const request = new ArcEngine(baseRequest, opts);
+          const request = new CoreEngine(baseRequest, opts);
           
           const log = await request.send();
           const redirects = log.redirects!.map(i => new ResponseRedirect(i));
@@ -2074,11 +2076,11 @@ describe('http-engine', () => {
         });
 
         it('has the final response', async () => {
-          const request = new ArcEngine(baseRequest, opts);
+          const request = new CoreEngine(baseRequest, opts);
           const log = await request.send();
 
           const transport = log.request as ISentRequest;
-          const response = log.response as IArcResponse;
+          const response = log.response as IResponse;
 
           const location = `http://localhost:${httpPort}/v1/get?test=true`;
           assert.equal(transport.url, location, 'transport request has the final URL');
@@ -2097,14 +2099,14 @@ describe('http-engine', () => {
         });
 
         it('redirects to a relative URL', async () => {
-          const request = new ArcEngine(baseRequest, opts);
+          const request = new CoreEngine(baseRequest, opts);
           const log = await request.send();
           assert.typeOf(log.redirects!, 'array', 'has the redirects');
           assert.lengthOf(log.redirects!, 2, 'has both redirects');
         });
 
         it('has the redirects data', async () => {
-          const request = new ArcEngine(baseRequest, opts);
+          const request = new CoreEngine(baseRequest, opts);
           const log = await request.send();
           const redirects = log.redirects!.map(i => new ResponseRedirect(i));
           const rdr1 = redirects[0]!;
@@ -2128,11 +2130,11 @@ describe('http-engine', () => {
         });
 
         it('has the final response', async () => {
-          const request = new ArcEngine(baseRequest, opts);
+          const request = new CoreEngine(baseRequest, opts);
           const log = await request.send();
 
           const transport = log.request as ISentRequest;
-          const response = log.response as IArcResponse;
+          const response = log.response as IResponse;
           
           const location = `http://localhost:${httpPort}/v1/get?test=true`;
           assert.equal(transport.url, location, 'transport request has the final URL');
@@ -2151,7 +2153,7 @@ describe('http-engine', () => {
           followRedirects: false,
           logger,
           hosts: [{
-            kind: 'ARC#HostRule',
+            kind: HostRuleKind,
             from: 'domain.com',
             to: 'test.com',
           }],
@@ -2164,11 +2166,11 @@ describe('http-engine', () => {
           method: 'GET',
           headers: 'x-test: true\naccept: application/json',
         };
-        const request = new ArcEngine(info, opts);
+        const request = new CoreEngine(info, opts);
 
         const log = await request.send();
         assert.ok(log.response, 'has the response');
-        const response = new ArcResponse(log.response as IArcResponse);
+        const response = new Response(log.response as IResponse);
         const payload = await response.readPayload() as Buffer;
 
         const payloadString = payload.toString();
@@ -2182,11 +2184,11 @@ describe('http-engine', () => {
           method: 'GET',
           headers: 'x-test: true\naccept: application/json',
         };
-        const request = new ArcEngine(info, opts);
+        const request = new CoreEngine(info, opts);
         
         const log = await request.send();
         assert.ok(log.response, 'has the response');
-        const response = new ArcResponse(log.response as IArcResponse);
+        const response = new Response(log.response as IResponse);
         const payload = await response.readPayload() as Buffer;
 
         const { headers } = JSON.parse(payload.toString('utf8'));
@@ -2205,10 +2207,10 @@ describe('http-engine', () => {
           url: `http://localhost:${httpPort}/v1/get`,
           method: 'GET',
         };
-        const request = new ArcEngine(info, options);
+        const request = new CoreEngine(info, options);
         const log = await request.send();
         assert.ok(log.response, 'has the response');
-        const response = new ArcResponse(log.response as IArcResponse);
+        const response = new Response(log.response as IResponse);
         const payload = await response.readPayload() as Buffer;
 
         const { headers } = JSON.parse(payload.toString('utf8'));
@@ -2228,11 +2230,11 @@ describe('http-engine', () => {
           url: `http://localhost:${httpPort}/v1/get`,
           method: 'GET',
         };
-        const request = new ArcEngine(info, options);
+        const request = new CoreEngine(info, options);
 
         const log = await request.send();
         assert.ok(log.response, 'has the response');
-        const response = new ArcResponse(log.response as IArcResponse);
+        const response = new Response(log.response as IResponse);
         const payload = await response.readPayload() as Buffer;
 
         const { headers } = JSON.parse(payload.toString('utf8'));
@@ -2247,11 +2249,11 @@ describe('http-engine', () => {
           url: `http://localhost:${httpPort}/v1/get`,
           method: 'GET',
         };
-        const request = new ArcEngine(info, options);
+        const request = new CoreEngine(info, options);
         
         const log = await request.send();
         assert.ok(log.response, 'has the response');
-        const response = new ArcResponse(log.response as IArcResponse);
+        const response = new Response(log.response as IResponse);
         const payload = await response.readPayload() as Buffer;
 
         const { headers } = JSON.parse(payload.toString('utf8'));
@@ -2265,11 +2267,11 @@ describe('http-engine', () => {
           headers: 'content-type: application/json',
           payload: jsonBody,
         };
-        const request = new ArcEngine(info, opts);
+        const request = new CoreEngine(info, opts);
 
         const log = await request.send();
         assert.ok(log.response, 'has the response');
-        const response = new ArcResponse(log.response as IArcResponse);
+        const response = new Response(log.response as IResponse);
         const payload = await response.readPayload() as Buffer;
 
         const { headers } = JSON.parse(payload.toString('utf8'));
@@ -2283,11 +2285,11 @@ describe('http-engine', () => {
           headers: 'content-type: application/json',
           payload: jsonBody,
         };
-        const request = new ArcEngine(info, opts);
+        const request = new CoreEngine(info, opts);
         
         const log = await request.send();
         assert.ok(log.response, 'has the response');
-        const response = new ArcResponse(log.response as IArcResponse);
+        const response = new Response(log.response as IResponse);
         const payload = await response.readPayload() as Buffer;
 
         const { body } = JSON.parse(payload.toString('utf8'));
@@ -2304,11 +2306,11 @@ describe('http-engine', () => {
             data: [...Buffer.from(jsonBody)],
           },
         };
-        const request = new ArcEngine(info, opts);
+        const request = new CoreEngine(info, opts);
         
         const log = await request.send();
         assert.ok(log.response, 'has the response');
-        const response = new ArcResponse(log.response as IArcResponse);
+        const response = new Response(log.response as IResponse);
         const payload = await response.readPayload() as Buffer;
 
         const { body } = JSON.parse(payload.toString('utf8'));
@@ -2330,11 +2332,11 @@ describe('http-engine', () => {
           },
         };
 
-        const request = new ArcEngine(info, opts);
+        const request = new CoreEngine(info, opts);
         
         const log = await request.send();
         assert.ok(log.response, 'has the response');
-        const response = new ArcResponse(log.response as IArcResponse);
+        const response = new Response(log.response as IResponse);
         const payload = await response.readPayload() as Buffer;
 
         const { body } = JSON.parse(payload.toString('utf8'));

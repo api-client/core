@@ -188,7 +188,7 @@ export class PayloadSerializer {
       enabled: true,
     };
     if (file.name === 'blob') {
-      // ARC adds the "blob" filename when the content type is set on the editor.
+      // API Client adds the "blob" filename when the content type is set on the editor.
       // otherwise it wouldn't be possible to set the content type value.
       part.type = file.type;
     } else {
@@ -297,9 +297,9 @@ export class PayloadSerializer {
   }
 
   /**
-   * Deserializes FormData from ARC data model.
+   * Deserializes FormData from API Client data model.
    *
-   * @param {IMultipartBody[]} model ARC model for multipart.
+   * @param parts API Client model for multipart.
    * @return {FormData} Restored form data
    */
   static deserializeFormData(parts: IMultipartBody[]): FormData {

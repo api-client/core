@@ -6,7 +6,7 @@ import { HttpProject } from './HttpProject.js';
 import { IThing, Thing, Kind as ThingKind } from './Thing.js';
 import v4 from '../lib/uuid.js';
 
-export const Kind = 'ARC#ProjectFolder';
+export const Kind = 'Core#ProjectFolder';
 export const DefaultFolderName = 'New folder';
 
 export interface IFolderAddOptions {
@@ -126,11 +126,11 @@ export class ProjectFolder extends ProjectParent {
   /**
    * Creates a new project folder clearing anything that is so far defined.
    * 
-   * Note, this throws an error when the project folder is not an ARC project folder.
+   * Note, this throws an error when the project folder is not a project folder.
    */
   new(init: IProjectFolder): void {
     if (!ProjectFolder.isProjectFolder(init)) {
-      throw new Error(`Not an ARC project folder.`);
+      throw new Error(`Not a project folder.`);
     }
     const { key = v4(), created = Date.now(), updated = Date.now(), items, environments, info } = init;
     this.kind = Kind;

@@ -2,8 +2,8 @@
 import { assert } from '@esm-bundle/chai';
 import { Kind as ThingKind } from '../../src/models/Thing.js';
 import { Environment, IEnvironment, Kind as EnvironmentKind } from '../../src/models/Environment.js';
-import { Server } from '../../src/models/Server.js';
-import { Property } from '../../src/models/Property.js';
+import { Server, Kind as ServerKind } from '../../src/models/Server.js';
+import { Property, Kind as PropertyKind } from '../../src/models/Property.js';
 
 describe('Models', () => {
   describe('Environment', () => {
@@ -32,7 +32,7 @@ describe('Models', () => {
           },
           variables: [
             {
-              kind: 'ARC#Property',
+              kind: PropertyKind,
               name: 'a var',
               type: 'string',
               value: '',
@@ -40,7 +40,7 @@ describe('Models', () => {
           ],
           encapsulated: true,
           server: {
-            kind: 'ARC#Server',
+            kind: ServerKind,
             uri: 'api.com',
             basePath: '/',
             description: 'a server',
@@ -90,7 +90,7 @@ describe('Models', () => {
         const result = new Environment(base);
         assert.lengthOf(result.variables, 1, 'has the variables');
         const [var1] = result.variables;
-        assert.equal(var1.kind, 'ARC#Property');
+        assert.equal(var1.kind, PropertyKind);
         assert.equal(var1.name, 'a var');
         assert.equal(var1.type, 'string');
         assert.equal(var1.value, '');
@@ -171,7 +171,7 @@ describe('Models', () => {
         ]);
         assert.lengthOf(result.variables, 1, 'has the variable');
         const [v1] = result.variables;
-        assert.equal(v1.kind, 'ARC#Property');
+        assert.equal(v1.kind, PropertyKind);
         assert.equal(v1.name, 'n1');
         assert.equal(v1.value, 'v1');
         assert.equal(v1.type, 'string');
@@ -203,7 +203,7 @@ describe('Models', () => {
         const env = Environment.fromName('a');
         const schema = env.toJSON();
         schema.server = {
-          kind: 'ARC#Server',
+          kind: ServerKind,
           uri: 'abc',
         };
         env.new(schema);
@@ -227,7 +227,7 @@ describe('Models', () => {
         const schema = env.toJSON();
         schema.variables = [
           {
-            kind: 'ARC#Property',
+            kind: PropertyKind,
             name: 'a',
             value: 'b',
             type: 'string',
@@ -297,7 +297,7 @@ describe('Models', () => {
           },
           variables: [
             {
-              kind: 'ARC#Property',
+              kind: PropertyKind,
               name: 'a var',
               type: 'string',
               value: '',
@@ -305,7 +305,7 @@ describe('Models', () => {
           ],
           encapsulated: true,
           server: {
-            kind: 'ARC#Server',
+            kind: ServerKind,
             uri: 'api.com',
             basePath: '/',
             description: 'a server',
@@ -349,7 +349,7 @@ describe('Models', () => {
         const env = new Environment(init);
         const result = env.toJSON();
         const { server } = result;
-        assert.equal(server.kind, 'ARC#Server');
+        assert.equal(server.kind, ServerKind);
         assert.equal(server.uri, 'api.com');
         assert.equal(server.basePath, '/');
         assert.equal(server.description, 'a server');

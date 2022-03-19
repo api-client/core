@@ -1,6 +1,6 @@
 # Events
 
-This package contains a definition of events used by the ARC ecosystem to communicate with context providers.
+This package contains a definition of events used by the API Client ecosystem to communicate with context providers.
 
 ## Context provider
 

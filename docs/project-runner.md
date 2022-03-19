@@ -2,7 +2,7 @@
 
 This is available in the **node** only.
 
-The `ProjectRequestRunner` class specializes in running requests defined in ARC projects. The class allows to select a project folder end execute each request one-by-one.
+The `ProjectRequestRunner` class specializes in running requests defined in API Client projects. The class allows to select a project folder end execute each request one-by-one.
 
 ## Running requests in the root of a project
 

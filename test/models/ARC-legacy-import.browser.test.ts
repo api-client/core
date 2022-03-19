@@ -3,7 +3,7 @@ import { DataTestHelper } from '../legacy-transformers/DataTestHelper.js';
 import { ArcLegacyNormalizer } from '../../src/models/transformers/ArcLegacyNormalizer.js';
 import { LegacyDataExportToApiProject } from '../../src/models/transformers/LegacyDataExportToApiProject.js';
 import { HttpProject } from '../../src/models/HttpProject.js';
-import { ProjectRequest } from '../../src/models/ProjectRequest.js';
+import { ProjectRequest, Kind as ProjectRequestKind } from '../../src/models/ProjectRequest.js';
 import { LegacyMock } from '../../src/mocking/LegacyMock.js';
 import { LegacyExportProcessor } from '../../src/models/transformers/LegacyExportProcessor.js';
 import { ARCProject } from '../../src/models/legacy/models/ArcLegacyProject.js';
@@ -37,11 +37,11 @@ describe('Models', () => {
         const [item] = items;
         const [def] = definitions.requests;
         
-        assert.equal(item.kind, 'ARC#ProjectRequest');
+        assert.equal(item.kind, ProjectRequestKind);
         assert.equal(item.key, def.key);
         
         assert.typeOf(def.key, 'string');
-        assert.equal(def.kind, 'ARC#ProjectRequest');
+        assert.equal(def.kind, ProjectRequestKind);
         const request = (def  as ProjectRequest);
         assert.typeOf(request.expects, 'object');
         assert.typeOf(request.info, 'object');

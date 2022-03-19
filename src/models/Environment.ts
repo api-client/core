@@ -16,7 +16,7 @@ export interface IEnvironmentCloneOptions {
  * A project environment definition.
  */
 export interface IEnvironment {
-  kind: 'ARC#Environment';
+  kind: typeof Kind;
   /**
    * The identifier of the environment.
    */
@@ -47,7 +47,7 @@ export interface IEnvironment {
   security?: unknown;
 }
 
-export const Kind = 'ARC#Environment';
+export const Kind = 'Core#Environment';
 
 /**
  * An environment is applied to a project or a folder.
@@ -145,11 +145,11 @@ export class Environment {
   /**
    * Creates a new environment clearing anything that is so far defined.
    * 
-   * Note, this throws an error when the environment is not an ARC environment. 
+   * Note, this throws an error when the environment is not an environment. 
    */
   new(init: IEnvironment): void {
     if (!Environment.isEnvironment(init)) {
-      throw new Error(`Not an ARC environment.`);
+      throw new Error(`Not an environment.`);
     }
     const { key=v4(), variables, info, server, encapsulated=false, security } = init;
     this.kind = Kind;

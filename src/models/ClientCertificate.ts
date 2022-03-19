@@ -61,7 +61,7 @@ export interface ICertificateIndex {
 }
 
 /**
- * A base client certificate object used in ARC to create / list objects.
+ * A base client certificate object used in API Client to create / list objects.
  * This is not a data entity but rather something used to outside of a context of a data store.
  */
 export interface IClientCertificate extends IRequestCertificate, ICertificateIndex {

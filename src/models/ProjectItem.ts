@@ -92,11 +92,11 @@ export class ProjectItem {
   /**
    * Creates a new project item clearing anything that is so far defined.
    * 
-   * Note, this throws an error when the project item is not an ARC project item. 
+   * Note, this throws an error when the project item is not a project item. 
    */
   new(init: IProjectItem): void {
     if (!ProjectItem.isProjectItem(init)) {
-      throw new Error(`Not an ARC project item.`);
+      throw new Error(`Not a project item.`);
     }
     const { kind, key } = init;
     this.kind = kind;

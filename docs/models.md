@@ -2,7 +2,7 @@
 
 This is available in: **browser** and **node**.
 
-This is the core of the ARC / API Client logic. It contains definitions and logic related to ARC projects (2022 version), HTTP request and responses, and all helper models working around these 3 definitions.
+This is the core of the API Client logic. It contains definitions and logic related to API Client projects (2022 version), HTTP request and responses, and all helper models working around these 3 definitions.
 
 Using these models ensures:
 

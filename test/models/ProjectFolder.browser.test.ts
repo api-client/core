@@ -259,7 +259,7 @@ describe('Models', () => {
           },
           items: [],
           key: 'abc',
-          kind: 'ARC#ProjectFolder',
+          kind: ProjectFolderKind,
         });
         assert.equal(folder.created, time, 'updates the created');
         assert.equal(folder.updated, time, 'updates the created');
@@ -280,7 +280,7 @@ describe('Models', () => {
           },
           items: [],
           key: 'abc',
-          kind: 'ARC#ProjectFolder',
+          kind: ProjectFolderKind,
         };
         folder.new(def);
         assert.equal(folder.created, time, 'updates the created');
@@ -302,7 +302,7 @@ describe('Models', () => {
           },
           items: [],
           key: 'abc',
-          kind: 'ARC#ProjectFolder',
+          kind: ProjectFolderKind,
         };
         delete def.info;
         folder.new(def);

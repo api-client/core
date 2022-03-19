@@ -32,7 +32,7 @@ describe('Models', () => {
 
       it('creates a Thing from the schema values', () => {
         const schema: IThing = {
-          kind: 'ARC#Thing',
+          kind: ThingKind,
           name: 'a name',
           description: 'a desc',
           version: 'a ver',
@@ -46,7 +46,7 @@ describe('Models', () => {
 
       it('creates a Thing from the JSON schema string', () => {
         const schema: IThing = {
-          kind: 'ARC#Thing',
+          kind: ThingKind,
           name: 'a name',
           description: 'a desc',
           version: 'a ver',

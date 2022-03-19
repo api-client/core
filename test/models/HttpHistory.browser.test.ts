@@ -1,7 +1,8 @@
 import { assert } from '@esm-bundle/chai';
-import { HttpHistory, IHttpHistory, createdSymbol, midnightSymbol, Kind as HttpRequestKind } from '../../src/models/HttpHistory.js';
+import { HttpHistory, IHttpHistory, createdSymbol, midnightSymbol, Kind as HttpHistoryKind } from '../../src/models/HttpHistory.js';
 import { SentRequest, ISentRequest } from '../../src/models/SentRequest.js';
-import { RequestLog } from '../../src/models/RequestLog.js';
+import { RequestLog, Kind as RequestLogKind } from '../../src/models/RequestLog.js';
+import { Kind as HttpRequestKind } from '../../src/models/HttpRequest.js';
 
 describe('Models', () => {
   describe('HttpHistory', () => {
@@ -48,7 +49,7 @@ describe('Models', () => {
       it('creates the default values', () => {
         const now = Date.now();
         const instance = new HttpHistory();
-        assert.equal(instance.kind, HttpRequestKind);
+        assert.equal(instance.kind, HttpHistoryKind);
         assert.typeOf(instance.created, 'number');
         assert.approximately(instance.created, now, 100);
         const { log } = instance;
@@ -62,16 +63,16 @@ describe('Models', () => {
       it('creates values from the schema', () => {
         const now = Date.now();
         const schema: IHttpHistory = {
-          kind: HttpRequestKind,
+          kind: HttpHistoryKind,
           created: now,
           user: 'u1',
           space: 'a1',
           project: 'p1',
           request: 'r1',
           log: {
-            kind: 'ARC#ResponseLog',
+            kind: RequestLogKind,
             request: {
-              kind: 'ARC#HttpRequest',
+              kind: HttpRequestKind,
               url: 'https://dot.com',
               headers: 'x-test: true',
               method: 'PUT',
@@ -81,7 +82,7 @@ describe('Models', () => {
         };
         const instance = new HttpHistory(schema);
 
-        assert.equal(instance.kind, HttpRequestKind);
+        assert.equal(instance.kind, HttpHistoryKind);
         assert.equal(instance.created, now);
         assert.equal(instance.user, 'u1');
         assert.equal(instance.space, 'a1');
@@ -100,16 +101,16 @@ describe('Models', () => {
       it('creates values from the JSON schema string', () => {
         const now = Date.now();
         const schema: IHttpHistory = {
-          kind: HttpRequestKind,
+          kind: HttpHistoryKind,
           created: now,
           user: 'u1',
           space: 'a1',
           project: 'p1',
           request: 'r1',
           log: {
-            kind: 'ARC#ResponseLog',
+            kind: RequestLogKind,
             request: {
-              kind: 'ARC#HttpRequest',
+              kind: HttpRequestKind,
               url: 'https://dot.com',
               headers: 'x-test: true',
               method: 'PUT',
@@ -119,7 +120,7 @@ describe('Models', () => {
         };
         const instance = new HttpHistory(JSON.stringify(schema));
 
-        assert.equal(instance.kind, HttpRequestKind);
+        assert.equal(instance.kind, HttpHistoryKind);
         assert.equal(instance.created, now);
         assert.equal(instance.user, 'u1');
         assert.equal(instance.space, 'a1');
@@ -141,7 +142,7 @@ describe('Models', () => {
         const instance = new HttpHistory();
         const schema = instance.toJSON();
         schema.log.request = {
-          kind: 'ARC#HttpRequest',
+          kind: HttpRequestKind,
           url: 'https://dot.com',
           headers: 'x-test: true',
           method: 'PUT',
@@ -311,7 +312,7 @@ describe('Models', () => {
       it('sets the log', () => {
         const instance = new HttpHistory();
         instance.log = RequestLog.fromRequest({
-          kind: 'ARC#HttpRequest',
+          kind: HttpRequestKind,
           url: 'https://dot.com',
           headers: 'x-test: true',
           method: 'PUT',
@@ -330,7 +331,7 @@ describe('Models', () => {
         const instance = new HttpHistory();
         const result = instance.toJSON();
 
-        assert.equal(result.kind, HttpRequestKind);
+        assert.equal(result.kind, HttpHistoryKind);
       });
 
       it('sets the created and midnight', () => {

@@ -1,6 +1,6 @@
 import { IRequestLog, RequestLog, Kind as RequestLogKind } from './RequestLog.js';
 
-export const Kind = 'ARC#HttpHistory';
+export const Kind = 'Core#HttpHistory';
 export const createdSymbol = Symbol('created');
 export const midnightSymbol = Symbol('midnight');
 

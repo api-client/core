@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-plusplus */
 /**
- * User can export single request in ARC. In this case ARC opens new tab
+ * User can export single request in ARC. In this case the app opens new tab
  * rather actually imports the data. This function tests if this is the case.
  * @param data Normalized import data
  */

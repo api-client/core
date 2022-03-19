@@ -14,8 +14,7 @@ import { ARCSavedRequest, ARCHistoryRequest } from './legacy/request/ArcRequest.
 import { ArcLegacyProject, ARCProject } from './legacy/models/ArcLegacyProject.js';
 import { PostmanDataTransformer } from './transformers/PostmanDataTransformer.js';
 
-export type HttpProjectKind = 'ARC#HttpProject';
-export const Kind = 'ARC#HttpProject';
+export const Kind = 'Core#HttpProject';
 
 /**
  * A list of options to initialize a project in various situations.
@@ -167,12 +166,12 @@ export interface IProjectRequestIterator {
 }
 
 /**
- * The new definition of a project in ARC.
+ * The new definition of a project in API Client.
  * Note, this is not the same as future `ApiProject` which is reserved for building APIs
  * using RAML or OAS.
  */
 export interface IHttpProject extends IProjectDefinitionProperty {
-  kind: HttpProjectKind;
+  kind: typeof Kind;
   /**
    * The license information for this HTTP project.
    */
@@ -340,11 +339,11 @@ export class HttpProject extends ProjectParent {
   /**
    * Creates a new project definition clearing anything that is so far defined.
    * 
-   * Note, this throws an error when the project is not an ARC project.
+   * Note, this throws an error when the project is not an API Client project.
    */
   new(init: IHttpProject): void {
     if (!init || !init.definitions || !init.items) {
-      throw new Error(`Not an ARC project.`);
+      throw new Error(`Not a project.`);
     }
     const { key = v4(), definitions = {}, items, info, license, provider, environments } = init;
     this.key = key;

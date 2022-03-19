@@ -1,10 +1,13 @@
 import { assert } from '@esm-bundle/chai';
 import { Request, IRequest, Kind as RequestKind, updatedSymbol, midnightSymbol } from '../../src/models/Request.js';
 import { HttpRequest, IHttpRequest, Kind as HttpRequestKind } from '../../src/models/HttpRequest.js';
+import { Kind as HttpResponseKind } from '../../src/models/HttpResponse.js';
 import { ErrorResponse } from '../../src/models/ErrorResponse.js';
-import { RequestLog } from '../../src/models/RequestLog.js';
+import { RequestLog, Kind as RequestLogKind } from '../../src/models/RequestLog.js';
 import { RequestConfig, Kind as RequestConfigKind } from '../../src/models/RequestConfig.js';
-import { RequestAuthorization } from '../../src/models/RequestAuthorization.js';
+import { RequestAuthorization, Kind as RequestAuthorizationKind } from '../../src/models/RequestAuthorization.js';
+import { Kind as ConditionKind } from '../../src/models/actions/Condition.js';
+import { Kind as RunnableActionKind } from '../../src/models/actions/RunnableAction.js';
 import { RequestActions } from '../../src/models/RequestActions.js';
 import { Kind as ThingKind } from '../../src/models/Thing.js';
 import { ARCSavedRequest } from '../../src/models/legacy/request/ArcRequest.js';
@@ -253,10 +256,10 @@ describe('Models', () => {
         assert.typeOf(actions.response, 'array', 'has response actions');
 
         const [reqAction] = actions.request;
-        assert.equal(reqAction.kind, 'ARC#RunnableAction');
+        assert.equal(reqAction.kind, RunnableActionKind);
 
         const [resAction] = actions.response;
-        assert.equal(resAction.kind, 'ARC#RunnableAction');
+        assert.equal(resAction.kind, RunnableActionKind);
       });
 
       it('translates the config object', async () => {
@@ -279,7 +282,7 @@ describe('Models', () => {
         const { config } = instance;
 
         assert.typeOf(config, 'object', 'has the UI definition');
-        assert.equal(config.kind, 'ARC#RequestConfig');
+        assert.equal(config.kind, RequestConfigKind);
 
         assert.isTrue(config.enabled);
         assert.isTrue(config.followRedirects);
@@ -329,11 +332,11 @@ describe('Models', () => {
         });
         const { log } = instance;
         assert.ok(log, 'has the log');
-        assert.equal(log.kind, 'ARC#ResponseLog');
+        assert.equal(log.kind, RequestLogKind);
         assert.ok(log.request, 'has the log.request');
         assert.notOk(log.response, 'has no log.response');
         assert.notOk(log.redirects, 'has no log.redirects');
-        assert.equal(log.request.kind, 'ARC#HttpRequest');
+        assert.equal(log.request.kind, HttpRequestKind);
       });
 
       it('creates the log with the response data', async () => {
@@ -348,11 +351,11 @@ describe('Models', () => {
         });
         const { log } = instance;
         assert.ok(log, 'has the log');
-        assert.equal(log.kind, 'ARC#ResponseLog');
+        assert.equal(log.kind, RequestLogKind);
         assert.ok(log.response, 'has the log.response');
         assert.notOk(log.request, 'has no log.request');
         assert.notOk(log.redirects, 'has no log.redirects');
-        assert.equal(log.response.kind, 'ARC#HttpResponse');
+        assert.equal(log.response.kind, HttpResponseKind);
         assert.equal(log.response.status, 200);
       });
 
@@ -369,11 +372,11 @@ describe('Models', () => {
         });
         const { log } = instance;
         assert.ok(log, 'has the log');
-        assert.equal(log.kind, 'ARC#ResponseLog');
+        assert.equal(log.kind, RequestLogKind);
         assert.ok(log.response, 'has the log.response');
         assert.notOk(log.request, 'has no log.request');
         assert.notOk(log.redirects, 'has no log.redirects');
-        assert.equal(log.response.kind, 'ARC#HttpResponse');
+        assert.equal(log.response.kind, HttpResponseKind);
         assert.equal(log.response.status, 0);
         const err = log.response as ErrorResponse;
         assert.equal(err.error.message, 'test');
@@ -685,7 +688,7 @@ describe('Models', () => {
         const instance = new Request();
         const schema = instance.toJSON();
         schema.log = {
-          kind: 'ARC#ResponseLog',
+          kind: RequestLogKind,
           request: {
             startTime: 1,
             url: 'test'
@@ -694,7 +697,7 @@ describe('Models', () => {
         instance.new(schema);
 
         assert.typeOf(instance.log, 'object');
-        assert.equal(instance.log.kind, 'ARC#ResponseLog');
+        assert.equal(instance.log.kind, RequestLogKind);
         assert.typeOf(instance.log.request, 'object');
         assert.equal(instance.log.request.startTime, 1);
       });
@@ -703,7 +706,7 @@ describe('Models', () => {
         const instance = new Request();
         const schema = instance.toJSON();
         schema.log = {
-          kind: 'ARC#ResponseLog',
+          kind: RequestLogKind,
           request: {
             startTime: 1,
             url: 'test'
@@ -722,7 +725,7 @@ describe('Models', () => {
         const schema = instance.toJSON();
         schema.config = {
           enabled: true,
-          kind: 'ARC#RequestConfig',
+          kind: RequestConfigKind,
           timeout: 10,
         };
         instance.new(schema);
@@ -736,7 +739,7 @@ describe('Models', () => {
         const schema = instance.toJSON();
         schema.config = {
           enabled: true,
-          kind: 'ARC#RequestConfig',
+          kind: RequestConfigKind,
           timeout: 10,
         };
         instance.new(schema);
@@ -750,7 +753,7 @@ describe('Models', () => {
         const schema = instance.toJSON();
         schema.authorization = [
           {
-            kind: 'ARC#RequestAuthorization',
+            kind: RequestAuthorizationKind,
             enabled: true,
             type: 'oauth 2',
             valid: true,
@@ -768,7 +771,7 @@ describe('Models', () => {
         const schema = instance.toJSON();
         schema.authorization = [
           {
-            kind: 'ARC#RequestAuthorization',
+            kind: RequestAuthorizationKind,
             enabled: true,
             type: 'oauth 2',
             valid: true,
@@ -832,7 +835,7 @@ describe('Models', () => {
               condition: {
                 source: 'value',
                 alwaysPass: true,
-                kind: 'ARC#Condition',
+                kind: ConditionKind,
               },
               actions: [
                 {
@@ -856,7 +859,7 @@ describe('Models', () => {
         assert.typeOf(actions.response, 'array', 'has response actions');
 
         const [reqAction] = actions.request;
-        assert.equal(reqAction.kind, 'ARC#RunnableAction');
+        assert.equal(reqAction.kind, RunnableActionKind);
       });
 
       it('sets the actions to undefined when missing', () => {
@@ -958,7 +961,7 @@ describe('Models', () => {
       it('sets the log', () => {
         const instance = new Request();
         instance.log = new RequestLog({
-          kind: 'ARC#ResponseLog',
+          kind: RequestLogKind,
           request: {
             startTime: 1,
             url: 'test'
@@ -968,7 +971,7 @@ describe('Models', () => {
         const result = instance.toJSON();
 
         assert.typeOf(result.log, 'object');
-        assert.equal(result.log.kind, 'ARC#ResponseLog');
+        assert.equal(result.log.kind, RequestLogKind);
         assert.typeOf(result.log.request, 'object');
         assert.equal(result.log.request.startTime, 1);
       });
@@ -983,7 +986,7 @@ describe('Models', () => {
         const instance = new Request();
         instance.config = new RequestConfig({
           enabled: true,
-          kind: 'ARC#RequestConfig',
+          kind: RequestConfigKind,
           timeout: 10,
         });
         const result = instance.toJSON();
@@ -1001,7 +1004,7 @@ describe('Models', () => {
         const instance = new Request();
         instance.authorization = [
           new RequestAuthorization({
-            kind: 'ARC#RequestAuthorization',
+            kind: RequestAuthorizationKind,
             enabled: true,
             type: 'oauth 2',
             valid: true,
@@ -1028,7 +1031,7 @@ describe('Models', () => {
               condition: {
                 source: 'value',
                 alwaysPass: true,
-                kind: 'ARC#Condition',
+                kind: ConditionKind,
               },
               actions: [
                 {
@@ -1051,7 +1054,7 @@ describe('Models', () => {
         assert.typeOf(actions.response, 'array', 'has response actions');
 
         const [reqAction] = actions.request;
-        assert.equal(reqAction.kind, 'ARC#RunnableAction');
+        assert.equal(reqAction.kind, RunnableActionKind);
       });
 
       it('does not set the actions when missing', () => {
@@ -1144,7 +1147,7 @@ describe('Models', () => {
     describe('setLog()', () => {
       it('sets the log object from the schema', () => {
         const schema = new RequestLog({
-          kind: 'ARC#ResponseLog',
+          kind: RequestLogKind,
           request: {
             startTime: 1,
             url: 'test'
@@ -1159,7 +1162,7 @@ describe('Models', () => {
 
       it('sets the updated', () => {
         const schema = new RequestLog({
-          kind: 'ARC#ResponseLog',
+          kind: RequestLogKind,
           request: {
             startTime: 1,
             url: 'test'

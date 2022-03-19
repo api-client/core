@@ -2,7 +2,7 @@
 
 This is available in the **node** only.
 
-The request modules allow to extend ARC project's (or rather RequestFactory/ProjectRequestRunner) functionality by providing a pluggable interface to inject *modules* before the request is sent to the remote machine or after the response is ready.
+The request modules allow to extend API Client project's (or rather RequestFactory/ProjectRequestRunner) functionality by providing a pluggable interface to inject *modules* before the request is sent to the remote machine or after the response is ready.
 
 ## The HTTP request modules
 

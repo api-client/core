@@ -1,5 +1,5 @@
 import { IRequestLog } from '../../models/RequestLog.js';
-import { IArcResponse } from '../../models/ArcResponse.js';
+import { IResponse } from '../../models/Response.js';
 import { ErrorResponse } from '../../models/ErrorResponse.js';
 
 export interface IProjectExecutionIteration {
@@ -56,7 +56,7 @@ export abstract class Reporter {
     if (!log.response || ErrorResponse.isErrorResponse(log.response)) {
       return true;
     }
-    const response = log.response as IArcResponse;
+    const response = log.response as IResponse;
     if (response.status >= 400) {
       return true;
     }
@@ -93,7 +93,7 @@ export abstract class Reporter {
         if (!log.response || ErrorResponse.isErrorResponse(log.response)) {
           return;
         }
-        const response = log.response as IArcResponse;
+        const response = log.response as IResponse;
         if (response.status < 400) {
           result++;
         }
@@ -114,7 +114,7 @@ export abstract class Reporter {
         if (!log.response || ErrorResponse.isErrorResponse(log.response)) {
           return;
         }
-        const response = log.response as IArcResponse;
+        const response = log.response as IResponse;
         if (response.loadingTime && response.loadingTime > 0) {
           result += response.loadingTime;
         }

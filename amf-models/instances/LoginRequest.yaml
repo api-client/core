@@ -1,6 +1,6 @@
 #%Http Project Request 1.0
 
-kind: ARC#ProjectRequest
+kind: Core#ProjectRequest
 key: a-request-unique-key-1 # uuid, unique string in the project.
 info:
   name: Basic auth # Give the request a name
@@ -22,7 +22,7 @@ actions: # Actions are a helper logic that is executed before the request and af
         - name: Set the auth variable from a cookie
           failOnError: true # Stops the execution of the logic chain (other actions, tests) when this action fail.
           config: # The specifics of a particular action.
-            kind: ARC#SetVariableAction # This is how the system recognizes action type. Here, it is the set variable action.
+            kind: Core#SetVariableAction # This is how the system recognizes action type. Here, it is the set variable action.
             name: AUTH_SID # The name of the variable to set.
             source: # Data source configuration.
               type: response # the data is read from the response

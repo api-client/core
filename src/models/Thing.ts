@@ -1,4 +1,4 @@
-export const Kind = 'ARC#Thing';
+export const Kind = 'Core#Thing';
 
 /**
  * An interface describing a base metadata of a thing.
@@ -7,7 +7,7 @@ export declare interface IThing {
   /**
    * The data kind. The application ignores the input with an unknown `kind`, unless it can be determined from the context.
    */
-  kind?: 'ARC#Thing';
+  kind?: typeof Kind;
   /**
    * The name of the thing.
    */
@@ -68,11 +68,11 @@ export class Thing {
   /**
    * Creates a new thing clearing anything that is so far defined.
    * 
-   * Note, this throws an error when the server is not an ARC thing.
+   * Note, this throws an error when the server is not a thing.
    */
   new(init: IThing): void {
     if (!Thing.isThing(init)) {
-      throw new Error(`Not an ARC thing.`);
+      throw new Error(`Not a thing.`);
     }
     const { description, name, version } = init;
     this.kind = Kind;

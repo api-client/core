@@ -1,6 +1,6 @@
 #%Http Project 1.0
 
-kind: ARC#HttpProject
+kind: Core#HttpProject
 
 license: # Optional license information.
   url: https://license.org
@@ -32,10 +32,10 @@ environments:
       uri: https://api.comain.com/v1
       description: The main production server.
     variables:
-      - kind: ARC#Property
+      - kind: Core#Property
         name: API_KEY
         value: test key
-      - kind: ARC#Property
+      - kind: Core#Property
         name: API_TOKEN
         value: "*******"
 
@@ -59,25 +59,25 @@ schemas: # A helper objects that allow to reuse a schema definition between HTTP
       - name: zip
 
 definitions: # These are the definitions of all objects (folders, requests) that are in this projects. The structure for the UI is created in the `items` section.
-  - kind: ARC#ProjectFolder # The `kind` is used to distinguish between different types
+  - kind: Core#ProjectFolder # The `kind` is used to distinguish between different types
     key: unique key 1 # creates a relationship between the object (the folder) and it's location in the project defined in the `items` of the project or a folder.
     info:
       name: Authentication # The name of the folder.
-    items:  # This folder has only one item that is a request (ARC#ProjectRequest) and references the definition via the `key` property.
-      - kind: ARC#ProjectRequest
+    items:  # This folder has only one item that is a request (Core#ProjectRequest) and references the definition via the `key` property.
+      - kind: Core#ProjectRequest
         key: a-request-unique-key-1
-  - kind: ARC#ProjectFolder
+  - kind: Core#ProjectFolder
     key: unique key 2
     info:
       name: Create objects
     items:
-      - kind: ARC#ProjectRequest
+      - kind: Core#ProjectRequest
         key: a-request-unique-key-2
   - !include ./LoginRequest.yaml # See the corresponding files for more information
   - !include ./CreateRequest.yaml
 
-items: # The project contains two folders (because `ARC#ProjectFolder`) and the `key` property maps them to the definition.
-  - kind: ARC#ProjectFolder
+items: # The project contains two folders (because `Core#ProjectFolder`) and the `key` property maps them to the definition.
+  - kind: Core#ProjectFolder
     key: unique key 1
-  - kind: ARC#ProjectFolder
+  - kind: Core#ProjectFolder
     key: unique key 2

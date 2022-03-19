@@ -1,4 +1,4 @@
-export const Kind = 'ARC#HttpProjectListItem';
+export const Kind = 'Core#HttpProjectListItem';
 /**
  * The HTTP Project definition to be used in lists.
  */

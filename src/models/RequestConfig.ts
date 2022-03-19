@@ -2,7 +2,7 @@ import { IHostRule, HostRule } from './HostRule.js';
 import { IProperty, Property } from './Property.js';
 import { RequestConfig as LegacyConfig } from './legacy/request/ArcRequest.js';
 
-export const Kind = 'ARC#RequestConfig';
+export const Kind = 'Core#RequestConfig';
 
 export interface IRequestBaseConfig {
   /**
@@ -62,10 +62,10 @@ export interface IRequestBaseConfig {
 }
 
 /**
- * ARC request `config` object.
+ * API Client request `config` object.
  */
 export interface IRequestConfig extends IRequestBaseConfig {
-  kind: string;
+  kind: typeof Kind;
   /**
    * Whether the processor should use this configuration.
    */
@@ -205,8 +205,6 @@ export class RequestConfig {
 
   /**
    * Creates a new request configuration clearing anything that is so far defined.
-   * 
-   * Note, this throws an error when the object is not an ARC request configuration. 
    */
   new(init: IRequestConfig): void {
     const { 

@@ -1,7 +1,7 @@
 import { ActionTypeEnum, RequestDataSourceEnum, ResponseDataSourceEnum, OperatorEnum } from './Enums.js';
 import { Condition as LegacyCondition } from '../legacy/actions/Actions.js';
 
-export const Kind = 'ARC#Condition';
+export const Kind = 'Core#Condition';
 
 /**
  * A base interface describing a configuration to extract data from a request or a response.
@@ -33,7 +33,7 @@ export interface IDataSource {
  * Describes action's condition configuration.
  */
 export interface ICondition extends IDataSource {
-  kind: 'ARC#Condition',
+  kind: typeof Kind,
   /**
    * The comparison operator.
    */

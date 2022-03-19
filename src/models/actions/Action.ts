@@ -5,13 +5,13 @@ import { Kind as SetCookieKind, SetCookieAction, ISetCookieAction } from './runn
 import { Kind as SetVariableKind, SetVariableAction, ISetVariableAction } from './runnable/SetVariableAction.js';
 import { Action as LegacyAction, SetCookieConfig, SetVariableConfig, DeleteCookieConfig } from '../legacy/actions/Actions.js';
 
-export const Kind = 'ARC#Action';
+export const Kind = 'Core#Action';
 
 /**
  * An interface representing a single action.
  */
 export interface IAction {
-  kind?: 'ARC#Action';
+  kind?: typeof Kind;
   /**
    * Action name.
    */

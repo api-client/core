@@ -1,6 +1,6 @@
 import { Internet, Types, DataMockInit, Person, Random } from '@pawel-up/data-mock';
 // import { randomValue } from '@pawel-up/data-mock/src/lib/Http.js';
-import { IUser, ISpaceUser, AccessControlLevel } from '../../models/User.js';
+import { IUser, ISpaceUser, AccessControlLevel, Kind as UserKind } from '../../models/User.js';
 
 
 export interface IUserInit {
@@ -31,6 +31,7 @@ export class User {
 
   user(init: IUserInit = {}): IUser {
     const result: IUser = {
+      kind: UserKind,
       key: this.types.uuid(),
       name: this.person.name(),
     }

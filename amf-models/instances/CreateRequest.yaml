@@ -1,6 +1,6 @@
 #%Http Project Request 1.0
 
-kind: ARC#ProjectRequest
+kind: Core#ProjectRequest
 key: a-request-unique-key-2 # uuid, unique string in the project.
 info:
   name: Create an object  # Give the request a name

@@ -1,6 +1,7 @@
 import { assert } from '@esm-bundle/chai';
 import { ResponseRedirect, IResponseRedirect, Kind as ResponseRedirectKind } from '../../src/models/ResponseRedirect.js';
-import { HttpResponse, IHttpResponse } from '../../src/models/HttpResponse.js';
+import { HttpResponse, IHttpResponse, Kind as HttpResponseKind } from '../../src/models/HttpResponse.js';
+import { Kind as RequestTimeKind } from '../../src/models/RequestTime.js';
 import { ResponseRedirect as LegacyRedirect } from '../../src/models/legacy/request/ArcResponse.js';
 
 describe('Models', () => {
@@ -229,7 +230,7 @@ describe('Models', () => {
           endTime: 5678,
           url: 'https://dot.com',
           response: {
-            kind: 'ARC#HttpResponse',
+            kind: HttpResponseKind,
             status: 200,
             statusText: 'OK',
           },
@@ -275,14 +276,14 @@ describe('Models', () => {
         delete instance.response;
         const result = instance.toJSON();
         assert.deepEqual(result.response, {
-          kind: 'ARC#HttpResponse',
+          kind: HttpResponseKind,
           status: 0,
         });
       });
 
       it('serializes the timings', () => {
         const result = instance.toJSON();
-        assert.deepEqual(result.timings, { ...schema.timings, kind: 'ARC#RequestTime' });
+        assert.deepEqual(result.timings, { ...schema.timings, kind: RequestTimeKind });
       });
 
       it('does not serialize the timings when missing', () => {

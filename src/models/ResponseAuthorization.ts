@@ -1,7 +1,7 @@
-export const Kind = 'ARC#ResponseAuthorization';
+export const Kind = 'Core#ResponseAuthorization';
 
 export interface IResponseAuthorization {
-  kind: 'ARC#ResponseAuthorization';
+  kind: typeof Kind;
   /**
    * The requested by the authorization server authentication method
    */
@@ -60,11 +60,11 @@ export class ResponseAuthorization {
   /**
    * Creates a new response authorization clearing anything that is so far defined.
    * 
-   * Note, this throws an error when the object is not an ARC response authorization.
+   * Note, this throws an error when the object is not a response authorization.
    */
   new(init: IResponseAuthorization): void {
     if (!ResponseAuthorization.isResponseAuthorization(init)) {
-      throw new Error(`Not an ARC response authorization.`);
+      throw new Error(`Not a response authorization.`);
     }
     const { method, state, headers, challengeHeader } = init;
     this.kind = Kind;

@@ -5,7 +5,7 @@ export declare interface IProvider {
   /**
    * The data kind. The application ignores the input with an unknown `kind`, unless it can be determined from the context.
    */
-  kind: 'ARC#Provider';
+  kind: typeof Kind;
   /**
    * The URL to the provider
    */
@@ -20,7 +20,7 @@ export declare interface IProvider {
   email?: string;
 }
 
-export const Kind = 'ARC#Provider';
+export const Kind = 'Core#Provider';
 
 export class Provider {
   kind = Kind;
@@ -56,11 +56,11 @@ export class Provider {
   /**
    * Creates a new provider clearing anything that is so far defined.
    * 
-   * Note, this throws an error when the provider is not an ARC provider object.
+   * Note, this throws an error when the provider is not a provider object.
    */
   new(init: IProvider): void {
     if (!Provider.isProvider(init)) {
-      throw new Error(`Not an ARC provider.`);
+      throw new Error(`Not a provider.`);
     }
     const { url, email, name } = init;
     this.kind = Kind;
