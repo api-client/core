@@ -28,6 +28,10 @@ export interface IRequestLog {
    * Request and response size. Some HTTP clients may not give this information.
    */
   size?: IRequestsSize;
+  /**
+   * Optional request ID defined on an HTTP project that triggered this log.
+   */
+  requestId?: string;
 }
 
 /**
@@ -51,6 +55,10 @@ export class RequestLog {
    * Request and response size. Some HTTP clients may not give this information.
    */
   size?: RequestsSize;
+  /**
+   * Optional request ID defined on an HTTP project that triggered this log.
+   */
+  requestId?: string;
 
   static fromRequest(request: ISentRequest): RequestLog {
     return new RequestLog({
@@ -88,7 +96,7 @@ export class RequestLog {
    * Creates a new response clearing anything that is so far defined.
    */
   new(init: IRequestLog): void {
-    const { request, response, redirects, size } = init;
+    const { request, response, redirects, size, requestId } = init;
     this.kind = Kind;
     if (request) {
       this.request = new SentRequest(request);
@@ -112,6 +120,11 @@ export class RequestLog {
     } else {
       this.size = undefined;
     }
+    if (requestId) {
+      this.requestId = requestId;
+    } else {
+      this.requestId = undefined;
+    }
   }
 
   toJSON(): IRequestLog {
@@ -129,6 +142,9 @@ export class RequestLog {
     }
     if (this.response) {
       result.response = this.response.toJSON();
+    }
+    if (this.requestId) {
+      result.requestId = this.requestId;
     }
     return result;
   }

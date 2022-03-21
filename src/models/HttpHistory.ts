@@ -49,6 +49,36 @@ export interface IHttpHistory {
 }
 
 /**
+ * An interface used when adding a history in bulk.
+ * The store creates a history object propagating meta values defined here
+ * onto the history objects.
+ * Because of that, bulk operation can only be performed when the requests are made in similar 
+ * context (app, space, project).
+ */
+export interface IHttpHistoryBulkAdd {
+  /**
+   * Optional user space id. Must be set when the originating request belongs to a user space.
+   */
+  space?: string;
+  /**
+   * Optional project id. Must be set when the originating request belongs to a user space.
+   */
+  project?: string;
+  /**
+   * Optional application id. Must be set when the application that created this record does not use the concept of a user space.
+   */
+  app?: string;
+  /**
+   * The optional request id in the project that generated this log.
+   */
+  request?: string;
+  /**
+   * The list of request logs.
+   */
+  log: IRequestLog[];
+}
+
+/**
  * An HTTP history is an object containing an information of a request and response
  * made with the application.
  * 

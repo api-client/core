@@ -11,10 +11,9 @@ export { IBackendInfo, IBackendCommand, IBackendEvent, IListResponse, IListOptio
 export { CertificateType, ICertificate, ICertificateIndex, IClientCertificate, IRequestCertificate } from './src/models/ClientCertificate.js';
 export { Environment, IEnvironment, Kind as EnvironmentKind } from './src/models/Environment.js';
 export { ErrorResponse, IErrorResponse } from './src/models/ErrorResponse.js';
-export { HistoryIndex, IHistoryIndex } from './src/models/HistoryIndex.js';
 export { IHostRule, HostRule, Kind as HostRuleKind } from './src/models/HostRule.js';
 export { IHttpCookie, HttpCookie, CookieChangeReason, CookieSameSiteType } from './src/models/HttpCookie.js';
-export { IHttpHistory, HttpHistory } from './src/models/HttpHistory.js';
+export { IHttpHistory, HttpHistory, Kind as HttpHistoryKind, IHttpHistoryBulkAdd } from './src/models/HttpHistory.js';
 export { HttpProject, IHttpProject, Kind as HttpProjectKind, IFolderCreateOptions, IFolderDeleteOptions, IFolderSearchOptions, IProjectMoveOptions, IRequestAddOptions, IRequestDeleteOptions, IRequestSearchOptions } from './src/models/HttpProject.js';
 export { IHttpProjectListItem, Kind as HttpProjectListItemKind } from './src/models/HttpProjectListItem.js';
 export { IHttpRequest, HttpRequest, Kind as HttpRequestKind } from './src/models/HttpRequest.js';
@@ -68,6 +67,7 @@ export * as Timers from './src/lib/timers/Timers.js';
 // Runtime
 //
 export { VariablesProcessor } from './src/runtime/variables/VariablesProcessor.js';
+export * from './src/runtime/node/InteropInterfaces.js';
 
 // 
 // Data processing
@@ -78,6 +78,13 @@ export { JmesparthReader } from './src/data/JmesparthReader.js';
 export { XmlReader } from './src/data/XmlReader.js';
 export { UrlEncodedReader } from './src/data/UrlEncodedReader.js';
 export { RequestDataExtractor } from './src/data/RequestDataExtractor.js';
+
+// 
+// HTTP store
+// 
+export { StoreSdk } from './src/runtime/store/StoreSdkWeb.js';
+export { IStoreTokenInfo, IStoreResponse, IStoreRequestOptions } from './src/runtime/store/SdkBase.js';
+export { RouteBuilder } from './src/runtime/store/RouteBuilder.js';
 
 // 
 // Execution reporters

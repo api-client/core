@@ -11,10 +11,9 @@ export { IBackendInfo, IBackendCommand, IBackendEvent, IListResponse, IListOptio
 export { CertificateType, ICertificate, ICertificateIndex, IClientCertificate, IRequestCertificate } from './src/models/ClientCertificate.js';
 export { Environment, IEnvironment, Kind as EnvironmentKind } from './src/models/Environment.js';
 export { ErrorResponse, IErrorResponse } from './src/models/ErrorResponse.js';
-export { HistoryIndex, IHistoryIndex } from './src/models/HistoryIndex.js';
 export { IHostRule, HostRule, Kind as HostRuleKind } from './src/models/HostRule.js';
 export { IHttpCookie, HttpCookie, CookieChangeReason, CookieSameSiteType } from './src/models/HttpCookie.js';
-export { IHttpHistory, HttpHistory } from './src/models/HttpHistory.js';
+export { IHttpHistory, HttpHistory, Kind as HttpHistoryKind, IHttpHistoryBulkAdd } from './src/models/HttpHistory.js';
 export { HttpProject, IHttpProject, Kind as HttpProjectKind, IFolderCreateOptions, IFolderDeleteOptions, IFolderSearchOptions, IProjectMoveOptions, IRequestAddOptions, IRequestDeleteOptions, IRequestSearchOptions } from './src/models/HttpProject.js';
 export { IHttpProjectListItem, Kind as HttpProjectListItemKind } from './src/models/HttpProjectListItem.js';
 export { IHttpRequest, HttpRequest, Kind as HttpRequestKind } from './src/models/HttpRequest.js';
@@ -74,7 +73,8 @@ export { RequestFactory } from './src/runtime/node/RequestFactory.js';
 export { VariablesStore } from './src/runtime/node/VariablesStore.js';
 export { ProjectSerialRunner } from './src/runtime/node/ProjectSerialRunner.js';
 export { ProjectParallelRunner, IWorkerInfo } from './src/runtime/node/ProjectParallelRunner.js';
-export { IProjectRunnerOptions, ProjectRunner } from './src/runtime/node/ProjectRunner.js';
+export { ProjectRunner } from './src/runtime/node/ProjectRunner.js';
+export * from './src/runtime/node/InteropInterfaces.js';
 
 // 
 // Execution reporters
@@ -101,7 +101,9 @@ export { RequestDataExtractor } from './src/data/RequestDataExtractor.js';
 // 
 // HTTP store
 // 
-export { StoreSdk, IStoreTokenInfo, IStoreResponse, IStoreRequestOptions } from './src/runtime/store/StoreSdk.js';
+export { StoreSdk } from './src/runtime/store/StoreSdkNode.js';
+export { IStoreTokenInfo, IStoreResponse, IStoreRequestOptions } from './src/runtime/store/SdkBase.js';
+export { RouteBuilder } from './src/runtime/store/RouteBuilder.js';
 
 // 
 // Testing

@@ -3,7 +3,8 @@ import process from 'process';
 import cluster from 'cluster';
 import { HttpProject } from '../../models/HttpProject.js';
 import { IProjectExecutionLog } from '../reporters/Reporter.js';
-import { IWorkerMessage, IProjectParallelWorkerOptions } from './ProjectParallelRunner.js';
+import { IWorkerMessage } from './ProjectParallelRunner.js';
+import { IProjectParallelWorkerOptions } from './InteropInterfaces.js';
 import { sleep } from '../../lib/timers/Timers.js';
 import { ProjectRunner } from './ProjectRunner.js';
 

@@ -12,6 +12,7 @@ import {
   IResponse,
   DummyLogger,
   Environment,
+  RunResult,
 } from '../../index.js';
 
 const logger = new DummyLogger();
@@ -441,6 +442,48 @@ describe('Runtime', () => {
           const log = report.log as IRequestLog;
           assert.typeOf(log, 'object', 'has the log');
           assert.typeOf(log.response as IResponse, 'object', 'has the log.response');
+        });
+      });
+
+      describe('[Symbol.asyncIterator]', () => {
+        it('executes requests and yields the run result', async () => {
+          const project = new HttpProject();
+          const request1 = ProjectRequest.fromHttpRequest({
+            url: `http://localhost:${httpPort}/v1/get`,
+            method: 'GET',
+            headers: 'x-request1: true',
+          }, project);
+          project.addRequest(request1);
+          const request2 = ProjectRequest.fromHttpRequest({
+            url: `http://localhost:${httpPort}/v1/get`,
+            method: 'GET',
+            headers: 'x-request2: true',
+          }, project);
+          const folder = project.addFolder('f1');
+          folder.addRequest(request2);
+          const runner = new ProjectRequestRunner(project);
+          runner.logger = logger;
+          const items: RunResult[] = [];
+          for await (let runResult of runner) {
+            items.push(runResult);
+          }
+          assert.lengthOf(items, 2, 'has both requests');
+          const [r1, r2] = items;
+          assert.equal(r1.key, request1.key, 'the report #1 has the key');
+          assert.isUndefined(r1.error, 'the report #1 has no error');
+          assert.isUndefined(r1.errorMessage, 'the report #1 has no errorMessage');
+          assert.isUndefined(r1.parent, 'the report #1 has no parent');
+          const l1 = r1.log as IRequestLog;
+          assert.typeOf(l1, 'object', 'has the log #1');
+          assert.equal(l1.requestId as string, request1.key, 'the log #1 has the requestId');
+          
+          assert.equal(r2.key, request2.key, 'the report #2 has the key');
+          assert.isUndefined(r2.error, 'the report #2 has no error');
+          assert.isUndefined(r2.errorMessage, 'the report #2 has no errorMessage');
+          assert.equal(r2.parent, folder.key, 'the report #2 has the parent');
+          const l2 = r2.log as IRequestLog;
+          assert.typeOf(l2, 'object', 'has the log #2');
+          assert.equal(l2.requestId as string, request2.key, 'the log #2 has the requestId');
         });
       });
     });

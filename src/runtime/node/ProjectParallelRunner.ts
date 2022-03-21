@@ -2,10 +2,10 @@ import cluster, { Worker } from 'cluster';
 import { cpus } from 'os';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
-import { HttpProject, IHttpProject } from '../../models/HttpProject.js';
-import { IProjectRunnerOptions } from './ProjectRunner.js';
+import { HttpProject } from '../../models/HttpProject.js';
 import { IProjectExecutionLog, IProjectExecutionIteration } from '../reporters/Reporter.js';
 import { BaseRunner } from './BaseRunner.js';
+import { IProjectParallelRunnerOptions, IProjectParallelWorkerOptions } from './InteropInterfaces.js'
 
 const numCPUs = cpus().length;
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -38,13 +38,6 @@ interface WorkerInfoInternal extends IWorkerInfo {
 export interface IWorkerMessage {
   cmd: string;
   data?: unknown;
-}
-
-export interface IProjectParallelRunnerOptions extends IProjectRunnerOptions {
-}
-
-export interface IProjectParallelWorkerOptions extends IProjectRunnerOptions {
-  project: IHttpProject;
 }
 
 export interface ProjectParallelRunner {

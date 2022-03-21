@@ -8,12 +8,13 @@ import { getPort } from '../src/testing/getPort.js';
 import * as Server from './lib-http-engine/cert-auth-server/index.js';
 import * as ChunkedServer from './servers/ChunkedServer.js';
 import { ProxyServer } from './servers/ProxyServer.js';
+import { SetupConfig } from './helpers/interfaces.js';
 
 const server = new ExpressServer();
 const proxy = new ProxyServer();
 const lockFile = path.join('test', 'express.lock');
 
-export const mochaGlobalSetup = async () => {
+export const mochaGlobalSetup = async (): Promise<void> => {
   await server.start();
   // SSL certificates
   const certificatesPort = await getPort();
@@ -26,18 +27,20 @@ export const mochaGlobalSetup = async () => {
   await proxy.start();
   // proxy.debug = true;
 
-  await fs.outputJSON(lockFile, {
-    httpPort: server.httpPort,
-    httpsPort: server.httpsPort,
+  const info: SetupConfig = {
+    httpPort: server.httpPort as number,
+    httpsPort: server.httpsPort as number,
     certificatesPort,
     chunkedHttpPort,
     chunkedHttpsPort,
-    proxyHttpPort: proxy.httpPort,
-    proxyHttpsPort: proxy.httpsPort,
-  });
+    proxyHttpPort: proxy.httpPort as number,
+    proxyHttpsPort: proxy.httpsPort as number,
+  };
+
+  await fs.outputJSON(lockFile, info);
 };
 
-export const mochaGlobalTeardown = async () => {
+export const mochaGlobalTeardown = async (): Promise<void> => {
   await server.stop();
   await Server.stopServer();
   await ChunkedServer.stopServer();

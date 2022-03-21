@@ -6,64 +6,14 @@ import { Property } from '../../models/Property.js';
 import { ProjectFolder, Kind as ProjectFolderKind } from '../../models/ProjectFolder.js';
 import { ProjectRequest } from '../../models/ProjectRequest.js';
 import { IHttpRequest } from '../../models/HttpRequest.js';
-import { HttpProject, IProjectRequestIterator } from '../../models/HttpProject.js';
+import { HttpProject } from '../../models/HttpProject.js';
 import { SentRequest } from '../../models/SentRequest.js';
 import { ErrorResponse } from '../../models/ErrorResponse.js';
 import { VariablesStore } from './VariablesStore.js';
 import { VariablesProcessor } from '../variables/VariablesProcessor.js';
 import { RequestFactory } from './RequestFactory.js';
 import { EventTypes } from '../../events/EventTypes.js';
-
-export interface ProjectRunnerOptions {
-  /**
-   * When provided it overrides any project / folder defined environment.
-   */
-  environment?: Environment;
-  /**
-   * Additional variables to pass to the selected environment.
-   * This can be use to pass system variables, when needed.
-   * 
-   * To use system variables tou can use `init.variables = process.env`;
-   */
-  variables?: Record<string, string>;
-  /**
-   * Overrides the default logger (console).
-   */
-  logger?: Logger;
-  /**
-   * The event target to use.
-   * By default it creates its own target.
-   */
-  eventTarget?: EventTarget;
-}
-
-export interface ProjectRunnerRunOptions extends IProjectRequestIterator {
-}
-
-export interface RunResult {
-  /**
-   * The key of the request from the HttpProject that was executed.
-   */
-  key: string;
-  /**
-   * The key of parent folder of the executed request.
-   */
-  parent?: string;
-  /**
-   * Set when a fatal error occurred so the request couldn't be executed.
-   * This is not the same as error reported during a request. The log's response can still be IResponseError.
-   */
-  error?: boolean;
-  /**
-   * The error message. Always set when the `error` is `true`.
-   */
-  errorMessage?: string;
-  /**
-   * The request log.
-   * Always set when the `error` is `false`.
-   */
-  log?: IRequestLog;
-}
+import { ProjectRunnerOptions, ProjectRunnerRunOptions, RunResult } from './InteropInterfaces.js';
 
 export interface ProjectRequestRunner {
   /**
@@ -130,19 +80,49 @@ export class ProjectRequestRunner extends EventEmitter {
     const { project } = this;
     const executed: RunResult[] = [];
     for (const request of project.requestIterator(options)) {
-      const parent = request.getParent() || project;
-      let variables: Record<string, string>;
-      if (VariablesStore.has(parent)) {
-        variables = VariablesStore.get(parent);
-      } else {
-        variables = await this.getVariables(parent);
-        VariablesStore.set(parent, variables);
-      }
-      const info = await this.execute(request, variables);
+      const info = await this._runItem(request);
       executed.push(info);
     }
     return executed;
   }
+
+  /**
+   * Allows to iterate over project requests recursively and execute each request
+   * in order. The generator yields the `RunResult` for the request.
+   * 
+   * Example:
+   * 
+   * ```javascript
+   * const runner = new ProjectRequestRunner(...);
+   * for await (let runResult of runner) {
+   *  console.log(runResult);
+   * }
+   * ```
+   */
+  async* [Symbol.asyncIterator](): AsyncGenerator<RunResult> {
+    const { project } = this;
+    for (const request of project.requestIterator({ recursive: true })) {
+      const info = await this._runItem(request);
+      yield info;
+    }
+  }
+
+  private async _runItem(request: ProjectRequest): Promise<RunResult> {
+    const folder = request.getParent();
+    const parent = folder || this.project;
+    let variables: Record<string, string>;
+    if (VariablesStore.has(parent)) {
+      variables = VariablesStore.get(parent);
+    } else {
+      variables = await this.getVariables(parent);
+      VariablesStore.set(parent, variables);
+    }
+    const info = await this.execute(request, variables);
+    if (folder && folder !== this.project) {
+      info.parent = folder.key;
+    }
+    return info;
+  } 
 
   protected async execute(request: ProjectRequest, variables: Record<string, string>): Promise<RunResult> {
     const config = request.getConfig();
@@ -189,6 +169,7 @@ export class ProjectRequestRunner extends EventEmitter {
       this.emit('request', request.key, { ...requestCopy });
       await factory.processRequestLogic(requestCopy);
       const result = await factory.executeRequest(requestCopy);
+      result.requestId = request.key;
       await factory.processResponse(result);
       request.setLog(result);
       info.log = result;

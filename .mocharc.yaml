@@ -2,8 +2,11 @@ extension:
   - ts
 spec: 
   - test/**/*.node.test.ts
-  # - test/reporters/ProjectRunCliReporter.node.test.ts
-require: ts-node/register
+  # - test/runtime-variables/EvalFunctions.node.test.ts
+require: 
+  - ts-node/register
+  - source-map-support/register.js
+  - test/http-server-fixture.ts
 loader: ts-node/esm
 watch-files:
   - src
