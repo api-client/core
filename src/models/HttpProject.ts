@@ -1358,7 +1358,7 @@ export class HttpProject extends ProjectParent {
           parent: folder.key,
           recursive,
           ignore,
-        }, indent += 1);
+        }, indent + 1);
         for (const f of it) {
           yield f;
         }
