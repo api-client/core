@@ -165,6 +165,38 @@ export interface IProjectRequestIterator {
   ignore?: string[];
 }
 
+export interface IProjectFolderIterator {
+  /**
+   * The parent folder key or name. Sets the starting point to iterate over the folder.
+   */
+  parent?: string
+  /**
+   * When set it includes folders in the current folder and sub-folder according to the order
+   * defined in the folder.
+   */
+  recursive?: boolean;
+  /**
+   * The list of names or keys to ignore.
+   */
+  ignore?: string[];
+}
+
+export interface IProjectFolderIteratorResult {
+  /**
+   * The folder.
+   */
+  folder: ProjectFolder;
+  /**
+   * Optional parent key.
+   */
+  parent?: string;
+  /**
+   * How deep in the structure the folder is located.
+   * The indent is relative to the `parent`.
+   */
+  indent: number;
+}
+
 /**
  * The new definition of a project in API Client.
  * Note, this is not the same as future `ApiProject` which is reserved for building APIs
@@ -1233,7 +1265,7 @@ export class HttpProject extends ProjectParent {
   }
 
   /**
-   * Iterates over requests in the project,
+   * Iterates over requests in the project.
    */
   * requestIterator(opts: IProjectRequestIterator = {}): Generator<ProjectRequest> {
     const { definitions } = this;
@@ -1280,6 +1312,55 @@ export class HttpProject extends ProjectParent {
         });
         for (const request of it) {
           yield request;
+        }
+      }
+    }
+  }
+
+  /**
+   * Iterates over requests in the project.
+   * @param opts Iterator configuration options
+   * @param indent Used internally to add `indent` to the result
+   */
+  * folderIterator(opts: IProjectFolderIterator={}, indent=0): Generator<IProjectFolderIteratorResult> {
+    const { definitions } = this;
+    const { ignore=[], parent, recursive } = opts;
+    const root = parent ? this.findFolder(parent) : this;
+    if (!root) {
+      throw new Error(`The parent folder not found: ${parent}.`);
+    }
+    const items = root.items;
+    if (!items || !items.length) {
+      return;
+    }
+    for (const item of items) {
+      if (item.kind !== ProjectFolderKind) {
+        continue;
+      }
+      const folder = definitions.folders.find(i => i.key === item.key);
+      if (!folder) {
+        // missing definition.
+        continue;
+      }
+      if (ignore.includes(folder.key) || (folder.info.name && ignore.includes(folder.info.name))) {
+        continue;
+      }
+      const result: IProjectFolderIteratorResult = {
+        folder,
+        indent,
+      }
+      if (parent) {
+        result.parent = parent;
+      }
+      yield result;
+      if (recursive) {
+        const it = this.folderIterator({
+          parent: folder.key,
+          recursive,
+          ignore,
+        }, indent += 1);
+        for (const f of it) {
+          yield f;
         }
       }
     }

@@ -14,7 +14,7 @@ export { ErrorResponse, IErrorResponse } from './src/models/ErrorResponse.js';
 export { IHostRule, HostRule, Kind as HostRuleKind } from './src/models/HostRule.js';
 export { IHttpCookie, HttpCookie, CookieChangeReason, CookieSameSiteType } from './src/models/HttpCookie.js';
 export { IHttpHistory, HttpHistory, Kind as HttpHistoryKind, IHttpHistoryBulkAdd } from './src/models/HttpHistory.js';
-export { HttpProject, IHttpProject, Kind as HttpProjectKind, IFolderCreateOptions, IFolderDeleteOptions, IFolderSearchOptions, IProjectMoveOptions, IRequestAddOptions, IRequestDeleteOptions, IRequestSearchOptions } from './src/models/HttpProject.js';
+export { HttpProject, IHttpProject, Kind as HttpProjectKind, IFolderCreateOptions, IFolderDeleteOptions, IFolderSearchOptions, IProjectMoveOptions, IRequestAddOptions, IRequestDeleteOptions, IRequestSearchOptions, IProjectFolderIterator, IProjectFolderIteratorResult, IProjectRequestIterator } from './src/models/HttpProject.js';
 export { IHttpProjectListItem, Kind as HttpProjectListItemKind } from './src/models/HttpProjectListItem.js';
 export { IHttpRequest, HttpRequest, Kind as HttpRequestKind } from './src/models/HttpRequest.js';
 export { HttpResponse, IHttpResponse, Kind as HttpResponseKind } from './src/models/HttpResponse.js';

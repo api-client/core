@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { assert } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { Kind as HttpProjectKind, HttpProject, IHttpProject } from '../../src/models/HttpProject.js';
+import { Kind as HttpProjectKind, HttpProject, IHttpProject, IProjectFolderIteratorResult } from '../../src/models/HttpProject.js';
 import { Kind as ProjectFolderKind } from '../../src/models/ProjectFolder.js';
 import { ProjectRequest } from '../../src/models/ProjectRequest.js';
 import { Kind as ThingKind } from '../../src/models/Thing.js';
@@ -1810,6 +1810,178 @@ describe('Models', () => {
           result.push(request);
         }
         assert.deepEqual(result, [r1, r2, r3]);
+      });
+    });
+
+    describe('[Symbol.iterator]', () => {
+      it('iterates recursively', () => {
+        const project = new HttpProject();
+        const r1 = project.addRequest('r1');
+        const f1 = project.addFolder('f1');
+        const r2 = f1.addRequest('r2');
+        const r3 = project.addRequest('r3');
+        const result: ProjectRequest[] = [];
+        for (const request of project) {
+          result.push(request);
+        }
+        assert.deepEqual(result, [r1, r2, r3]);
+      });
+    });
+
+    describe('folderIterator()', () => {
+      it('iterates over folders in the project', () => {
+        const project = new HttpProject();
+        const f1 = project.addFolder('f1');
+        const f2 = project.addFolder('f2');
+        const f3 = project.addFolder('f3');
+
+        const result: IProjectFolderIteratorResult[] = [];
+
+        for (const folder of project.folderIterator()) {
+          result.push(folder);
+        }
+
+        assert.deepEqual(result[0].folder, f1);
+        assert.deepEqual(result[1].folder, f2);
+        assert.deepEqual(result[2].folder, f3);
+
+        assert.isUndefined(result[0].parent);
+        assert.isUndefined(result[1].parent);
+        assert.isUndefined(result[2].parent);
+
+        assert.equal(result[0].indent, 0);
+        assert.equal(result[1].indent, 0);
+        assert.equal(result[2].indent, 0);
+      });
+
+      it('iterates over folders in a folder', () => {
+        const project = new HttpProject();
+        const f1 = project.addFolder('f1');
+        const f2 = f1.addFolder('f2');
+        const f3 = f1.addFolder('f3');
+
+        const result: IProjectFolderIteratorResult[] = [];
+
+        for (const folder of project.folderIterator({ parent: f1.key })) {
+          result.push(folder);
+        }
+
+        assert.deepEqual(result[0].folder, f2);
+        assert.deepEqual(result[1].folder, f3);
+
+        assert.equal(result[0].parent, f1.key);
+        assert.equal(result[1].parent, f1.key);
+
+        assert.equal(result[0].indent, 0, 'has no relative indent');
+        assert.equal(result[1].indent, 0, 'has no relative indent');
+      });
+
+      it('iterates over folders recursively', () => {
+        const project = new HttpProject();
+        const f1 = project.addFolder('f1');
+        const f2 = f1.addFolder('f2');
+        const f3 = f2.addFolder('f3');
+
+        const result: IProjectFolderIteratorResult[] = [];
+
+        for (const folder of project.folderIterator({ recursive: true })) {
+          result.push(folder);
+        }
+
+        assert.deepEqual(result[0].folder, f1);
+        assert.deepEqual(result[1].folder, f2);
+        assert.deepEqual(result[2].folder, f3);
+
+        assert.isUndefined(result[0].parent);
+        assert.equal(result[1].parent, f1.key);
+        assert.equal(result[2].parent, f2.key);
+
+        assert.equal(result[0].indent, 0, 'has no relative indent');
+        assert.equal(result[1].indent, 1, 'has relative indent');
+        assert.equal(result[2].indent, 2, 'has relative indent');
+      });
+
+      it('preserves the order', () => {
+        const project = new HttpProject();
+        const f1 = project.addFolder('f1');
+        const f2 = f1.addFolder('f2');
+        const f3 = project.addFolder('f3');
+        const f4 = f1.addFolder('f4');
+
+        const result: IProjectFolderIteratorResult[] = [];
+
+        for (const folder of project.folderIterator({ recursive: true })) {
+          result.push(folder);
+        }
+
+        assert.deepEqual(result[0].folder, f1, '#1 is f1');
+        assert.deepEqual(result[1].folder, f2, '#2 is f2');
+        assert.deepEqual(result[2].folder, f4, '#3 is f4');
+        assert.deepEqual(result[3].folder, f3, '#4 is f3');
+      });
+
+      it('ignores folders', () => {
+        const project = new HttpProject();
+        const f1 = project.addFolder('f1');
+        const f2 = project.addFolder('f2');
+        const f3 = project.addFolder('f3');
+
+        const result: IProjectFolderIteratorResult[] = [];
+
+        for (const folder of project.folderIterator({ ignore: [f2.key, f3.key] })) {
+          result.push(folder);
+        }
+
+        assert.lengthOf(result, 1, 'has only one element');
+
+        assert.deepEqual(result[0].folder, f1);
+      });
+
+      it('ignores folders with recursive', () => {
+        const project = new HttpProject();
+        const f1 = project.addFolder('f1');
+        const f2 = project.addFolder('f2');
+        const f3 = f2.addFolder('f3');
+
+        const result: IProjectFolderIteratorResult[] = [];
+
+        for (const folder of project.folderIterator({ ignore: [f3.key], recursive: true })) {
+          result.push(folder);
+        }
+
+        assert.lengthOf(result, 2, 'has only one element');
+
+        assert.deepEqual(result[0].folder, f1);
+        assert.deepEqual(result[1].folder, f2);
+      });
+
+      it('ignores sub-folders with recursive', () => {
+        const project = new HttpProject();
+        const f1 = project.addFolder('f1');
+        const f2 = project.addFolder('f2');
+        f1.addFolder('f3');
+
+        const result: IProjectFolderIteratorResult[] = [];
+
+        for (const folder of project.folderIterator({ ignore: [f1.key], recursive: true })) {
+          result.push(folder);
+        }
+        assert.lengthOf(result, 1, 'has only one element');
+        assert.deepEqual(result[0].folder, f2);
+      });
+
+      it('ignores requests', () => {
+        const project = new HttpProject();
+        const f1 = project.addFolder('f1');
+        project.addRequest('r1');
+
+        const result: IProjectFolderIteratorResult[] = [];
+
+        for (const folder of project.folderIterator()) {
+          result.push(folder);
+        }
+        assert.lengthOf(result, 1, 'has only one element');
+        assert.deepEqual(result[0].folder, f1);
       });
     });
   });
