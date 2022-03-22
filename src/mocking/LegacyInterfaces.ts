@@ -1,4 +1,4 @@
-import { DataMockInit, HarTimingInit, HttpResponseRedirectStatusInit } from '@pawel-up/data-mock/types'
+import { DataMockInit, HarTimingInit, HttpResponseRedirectStatusInit } from '@pawel-up/data-mock'
 
 export interface ArcDataMockInit extends DataMockInit {
 }

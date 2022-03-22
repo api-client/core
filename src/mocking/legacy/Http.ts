@@ -1,5 +1,5 @@
 import { Http as Base, Types, Lorem, Time, HttpRequestInit } from '@pawel-up/data-mock';
-import { randomValue } from '@pawel-up/data-mock/src/lib/Http.js';
+import { randomValue } from '@pawel-up/data-mock/build/src/lib/Http.js';
 import { ArcDataMockInit } from '../LegacyInterfaces.js';
 import { HttpResponse } from './HttpResponse.js';
 import { ARCHistoryRequest, ARCSavedRequest, TransportRequest } from '../../models/legacy/request/ArcRequest.js';

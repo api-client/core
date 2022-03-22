@@ -1,4 +1,4 @@
-import { HttpResponse as Base, headersValue, payloadValue, typesValue, loremValue } from '@pawel-up/data-mock/src/lib/http/HttpResponse.js';
+import { HttpResponse as Base, headersValue, payloadValue, typesValue, loremValue } from '@pawel-up/data-mock/build/src/lib/http/HttpResponse.js';
 import { Har, DataMockLocale } from '@pawel-up/data-mock';
 import { ArcDataMockInit, HttpResponseArcInit, HttpResponseRedirectInit } from '../LegacyInterfaces.js';
 import { ResponseRedirect, Response, ErrorResponse } from '../../models/legacy/request/ArcResponse.js';

@@ -1,7 +1,7 @@
 {
   "name": "@api-client/core",
   "description": "The API Client's core client library. Works in NodeJS and in a ES enabled browser.",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "license": "Apache-2.0",
   "main": "build/index.js",
   "module": "build/index.js",
@@ -84,7 +84,7 @@
   },
   "dependencies": {
     "@metrichor/jmespath": "^0.3.1",
-    "@pawel-up/data-mock": "^0.1.7",
+    "@pawel-up/data-mock": "^0.2.0",
     "@pawel-up/jexl": "^3.0.0",
     "@xmldom/xmldom": "^0.8.1",
     "console-table-printer": "^2.10.0",
