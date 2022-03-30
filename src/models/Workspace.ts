@@ -1,4 +1,4 @@
-import { AccessControlLevel } from "./User.js";
+import { IFile, File } from "./store/File.js";
 import { IThing, Thing, Kind as ThingKind } from './Thing.js';
 import v4 from '../lib/uuid.js';
 
@@ -9,7 +9,7 @@ export const Kind = 'Core#Space';
  * A working space is a logical container in the data store
  * created by the system users, where they can store their projects and other data.
  */
-export interface IWorkspace {
+export interface IWorkspace extends IFile {
   kind: typeof Kind;
   /**
    * The space identifier.
@@ -20,26 +20,10 @@ export interface IWorkspace {
    */
   info: IThing;
   /**
-   * The list of users added to this space. May not be set when owner did not add anyone to the space.
-   */
-  users?: string[];
-  /**
    * The owner of this space. The id of the User object.
    * Set to `default` when there are no users in the system (no authentication).
    */
   owner: string;
-  /**
-   * The list of project keys added to the workspace.
-   * @deprecated This is not actually used.
-   */
-  projects: string[];
-}
-
-/**
- * The workspace information set to a specific client what contains user specific data.
- */
-export interface IUserWorkspace extends IWorkspace {
-  access: AccessControlLevel;
 }
 
 export const DefaultOwner = 'default';
@@ -50,7 +34,7 @@ export const DefaultOwner = 'default';
  * A working space is a logical container in the data store
  * created by the system users, where they can store their projects and other data.
  */
-export class Workspace {
+export class Workspace extends File {
   kind = Kind;
   /**
    * The space identifier.
@@ -61,25 +45,10 @@ export class Workspace {
    */
   info: Thing = new Thing({ kind: ThingKind });
   /**
-   * The list of users added to this space. May not be set when owner did not add anyone to the space.
-   */
-  users?: string[];
-  /**
    * The owner of this space. The id of the User object.
    * Set to `default` when there are no users in the system (no authentication).
    */
   owner = '';
-  /**
-   * The list of keys of projects added to the workspace.
-   * @deprecated This is not actually used.
-   */
-  projects: string[] = [];
-  /**
-   * Only set when the object was created from the data received by the API Client backend.
-   * Level access of the current user to the space.
-   * Note, this information is never serialized with the object.
-   */
-  access?: AccessControlLevel;
 
   /**
    * Creates a new Space object from a name.
@@ -95,7 +64,9 @@ export class Workspace {
       kind: Kind,
       info: info.toJSON(),
       owner,
-      projects: [],
+      parents: [],
+      permissionIds: [],
+      permissions: [],
     });
     return definition;
   }
@@ -103,7 +74,8 @@ export class Workspace {
   /**
    * @param input The environment definition used to restore the state.
    */
-  constructor(input?: string | IWorkspace | IUserWorkspace) {
+  constructor(input?: string | IWorkspace) {
+    super();
     let init: IWorkspace;
     if (typeof input === 'string') {
       init = JSON.parse(input);
@@ -118,7 +90,9 @@ export class Workspace {
           name: '',
         },
         owner: DefaultOwner,
-        projects: [],
+        parents: [],
+        permissionIds: [],
+        permissions: [],
       };
     }
     this.new(init);
@@ -129,28 +103,19 @@ export class Workspace {
    * 
    * Note, this throws an error when the environment is not a space. 
    */
-  new(init: IWorkspace | IUserWorkspace): void {
+  new(init: IWorkspace): void {
     if (!Workspace.isWorkspace(init)) {
       throw new Error(`Not a space.`);
     }
-    const { key = v4(), projects = [], info, owner = DefaultOwner, users } = init;
+    super.new(init);
+    const { key = v4(), info, owner = DefaultOwner } = init;
     this.kind = Kind;
     this.key = key;
-    this.projects = projects;
     this.owner = owner;
     if (info) {
       this.info = new Thing(info);
     } else {
       this.info = new Thing({ kind: ThingKind, name: '' });
-    }
-    if (Array.isArray(users)) {
-      this.users = [...users];
-    } else {
-      this.users = [];
-    }
-    const typed = init as IUserWorkspace;
-    if (typed.access) {
-      this.access = typed.access;
     }
   }
 
@@ -166,17 +131,14 @@ export class Workspace {
   }
 
   toJSON(): IWorkspace {
-    const { projects = [], owner = DefaultOwner, users } = this;
+    const { owner = DefaultOwner } = this;
     const result: IWorkspace = {
       kind: Kind,
       key: this.key,
       info: this.info.toJSON(),
-      projects,
       owner,
+      ...super.toJSON(),
     };
-    if (Array.isArray(users) && users.length) {
-      result.users = [...users];
-    }
     return result;
   }
 }

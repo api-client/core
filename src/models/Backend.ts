@@ -72,7 +72,7 @@ export interface IBackendEvent extends IBackendMessage {
   id?: string;
 }
 
-export interface IListResponse {
+export interface IListResponse<T = unknown> {
   /**
    * The cursor to use with the next query.
    * Not set when no more results.
@@ -81,7 +81,7 @@ export interface IListResponse {
   /**
    * The list of objects returned from the store.
    */
-  data: unknown[];
+  data: T[];
 }
 
 export interface IListOptions {
@@ -105,7 +105,15 @@ export interface IListOptions {
    * Only with the `query` property. Tells the system in which fields to search for the query term.
    */
   queryField?: string[];
+  /**
+   * @deprecated Not sure what this is.
+   */
   type?: string;
+  /**
+   * Whether the list should contain children of a parent.
+   * This is a key of the parent.
+   */
+  parent?: string;
 }
 
 export interface ICursorOptions {

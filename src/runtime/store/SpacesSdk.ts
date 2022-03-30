@@ -2,8 +2,8 @@ import { JsonPatch } from 'json8-patch';
 import { SdkBase, E_RESPONSE_STATUS, E_RESPONSE_NO_VALUE, E_INVALID_JSON, E_RESPONSE_UNKNOWN, E_RESPONSE_LOCATION } from './SdkBase.js';
 import { RouteBuilder } from './RouteBuilder.js';
 import { IListOptions, IListResponse } from '../../models/Backend.js';
-import { IWorkspace, IUserWorkspace, Workspace, Kind as WorkspaceKind } from '../../models/Workspace.js';
-import { UserAccessOperation } from '../../models/User.js';
+import { IWorkspace, Workspace, Kind as WorkspaceKind } from '../../models/Workspace.js';
+import { AccessOperation } from '../../models/store/Permission.js';
 
 export class SpacesSdk extends SdkBase {
   /**
@@ -65,7 +65,7 @@ export class SpacesSdk extends SdkBase {
    * @param key The user space key
    * @returns The definition of the user space.
    */
-  async read(key: string): Promise<IUserWorkspace> {
+  async read(key: string): Promise<IWorkspace> {
     const { token } = this.sdk;
     const url = this.sdk.getUrl(RouteBuilder.space(key));
     const result = await this.sdk.http.get(url.toString(), { token });
@@ -78,7 +78,7 @@ export class SpacesSdk extends SdkBase {
     if (!result.body) {
       throw new Error(`${E_PREFIX}${E_RESPONSE_NO_VALUE}`);
     }
-    let data: IUserWorkspace;
+    let data: IWorkspace;
     try {
       data = JSON.parse(result.body);
     } catch (e) {
@@ -145,7 +145,7 @@ export class SpacesSdk extends SdkBase {
    * @param key The user space key
    * @param value The patch operation on the space's ACL
    */
-  async patchUsers(key: string, value: UserAccessOperation[]): Promise<void> {
+  async patchUsers(key: string, value: AccessOperation[]): Promise<void> {
     const { token } = this.sdk;
     const url = this.sdk.getUrl(RouteBuilder.spaceUsers(key));
     const body = JSON.stringify(value);

@@ -1,5 +1,5 @@
 import { assert } from '@esm-bundle/chai';
-import { IWorkspace, IUserWorkspace, Workspace, Kind as WorkspaceKind, DefaultOwner } from '../../src/models/Workspace.js';
+import { IWorkspace, Workspace, Kind as WorkspaceKind, DefaultOwner } from '../../src/models/Workspace.js';
 import { Kind as ThingKind, Thing } from '../../src/models/Thing.js';
 
 describe('Models', () => {
@@ -31,10 +31,7 @@ describe('Models', () => {
         const result = new Workspace();
         assert.equal(result.kind, WorkspaceKind);
         assert.equal(result.owner, DefaultOwner);
-        assert.deepEqual(result.projects, []);
-        assert.deepEqual(result.users, []);
         assert.typeOf(result.key, 'string');
-        assert.isUndefined(result.access);
       });
 
       it('creates a Workspace from the schema values', () => {
@@ -46,36 +43,25 @@ describe('Models', () => {
             description: 'a desc',
           },
           owner: 'me',
-          projects: ['1', '2'],
           key: '123',
-          users: ['3', '4'],
+          parents: ['p1'],
+          permissionIds: ['pr1'],
+          permissions: [{
+            key: '123',
+            kind: 'Core#Permission',
+            owner: '345',
+            role: 'commenter',
+            type: 'anyone',
+          }],
         };
         const result = new Workspace(schema);
         assert.equal(result.kind, WorkspaceKind);
         assert.equal(result.info.name, 'hello');
         assert.equal(result.owner, 'me');
         assert.equal(result.key, '123');
-        assert.deepEqual(result.projects, ['1', '2']);
-        assert.deepEqual(result.users, ['3', '4']);
-        assert.isUndefined(result.access);
-      });
-
-      it('creates a Workspace from the user schema values', () => {
-        const schema: IUserWorkspace = {
-          kind: WorkspaceKind,
-          info: {
-            kind: ThingKind,
-            name: 'hello',
-            description: 'a desc',
-          },
-          owner: 'me',
-          projects: ['1', '2'],
-          key: '123',
-          users: ['3', '4'],
-          access: 'owner',
-        };
-        const result = new Workspace(schema);
-        assert.equal(result.access, 'owner');
+        assert.deepEqual(result.parents, ['p1']);
+        assert.deepEqual(result.permissionIds, ['pr1']);
+        assert.typeOf(result.permissions, 'array');
       });
 
       it('creates a Workspace from the JSON schema string', () => {
@@ -87,17 +73,22 @@ describe('Models', () => {
             description: 'a desc',
           },
           owner: 'me',
-          projects: ['1', '2'],
           key: '123',
-          users: ['3', '4'],
+          parents: ['p1'],
+          permissionIds: ['pr1'],
+          permissions: [{
+            key: '123',
+            kind: 'Core#Permission',
+            owner: '345',
+            role: 'commenter',
+            type: 'anyone',
+          }],
         };
         const result = new Workspace(JSON.stringify(schema));
         assert.equal(result.kind, WorkspaceKind);
         assert.equal(result.info.name, 'hello');
         assert.equal(result.owner, 'me');
         assert.equal(result.key, '123');
-        assert.deepEqual(result.projects, ['1', '2']);
-        assert.deepEqual(result.users, ['3', '4']);
       });
 
       it('throws when invalid schema', () => {
@@ -131,17 +122,6 @@ describe('Models', () => {
         assert.equal(result.info.name, 'test name');
       });
 
-      it('serializes empty projects', () => {
-        const result = workspace.toJSON();
-        assert.deepEqual(result.projects, []);
-      });
-
-      it('serializes set projects', () => {
-        workspace.projects = ['1'];
-        const result = workspace.toJSON();
-        assert.deepEqual(result.projects, ['1']);
-      });
-
       it('serializes the default owner', () => {
         const result = workspace.toJSON();
         assert.equal(result.owner, DefaultOwner);
@@ -153,22 +133,36 @@ describe('Models', () => {
         assert.equal(result.owner, 'abc');
       });
 
-      it('does not serialize the users', () => {
+      it('serializes the parents', () => {
+        workspace.parents = ['p1'];
         const result = workspace.toJSON();
-        assert.isUndefined(result.users);
+        assert.deepEqual(result.parents, ['p1']);
       });
 
-      it('serializes set users', () => {
-        workspace.users = ['1'];
+      it('serializes the parents', () => {
+        workspace.permissionIds = ['p1'];
         const result = workspace.toJSON();
-        assert.deepEqual(result.users, ['1']);
+        assert.deepEqual(result.permissionIds, ['p1']);
       });
 
-      it('does not serialize the access', () => {
-        workspace.access = 'comment';
+      it('serializes the deleted', () => {
+        workspace.deleted = true;
         const result = workspace.toJSON();
-        // @ts-ignore
-        assert.isUndefined(result.access);
+        assert.isTrue(result.deleted);
+      });
+
+      it('serializes the deletedTime', () => {
+        workspace.deleted = true;
+        workspace.deletedTime = 123456789;
+        const result = workspace.toJSON();
+        assert.equal(result.deletedTime, 123456789);
+      });
+
+      it('serializes the deletingUser', () => {
+        workspace.deleted = true;
+        workspace.deletingUser = '123456789';
+        const result = workspace.toJSON();
+        assert.equal(result.deletingUser, '123456789');
       });
     });
   });

@@ -6,7 +6,7 @@ import { History } from './lib/History.js';
 
 export { IRequestLogInit } from './lib/Request.js';
 export { IResponseInit } from './lib/Response.js';
-export { ISpaceUserInit, IUserInit } from './lib/User.js';
+export { IUserInit } from './lib/User.js';
 export { IHttpHistoryInit, IHttpHistoryListInit } from './lib/History.js';
 
 export class ProjectMock extends DataMock {
