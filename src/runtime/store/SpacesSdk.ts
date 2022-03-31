@@ -5,6 +5,14 @@ import { IListOptions, IListResponse } from '../../models/Backend.js';
 import { IWorkspace, Workspace, Kind as WorkspaceKind } from '../../models/Workspace.js';
 import { AccessOperation } from '../../models/store/Permission.js';
 
+export interface ISpaceCreateOptions {
+  /**
+   * Optional parent space id.
+   * When set it creates a space under this parent.
+   */
+  parent?: string;
+}
+
 export class SpacesSdk extends SdkBase {
   /**
    * Lists spaces in the store.
@@ -41,9 +49,10 @@ export class SpacesSdk extends SdkBase {
    * @param space The workspace definition.
    * @returns The key of the creates space.
    */
-  async create(space: IWorkspace | Workspace): Promise<string> {
+  async create(space: IWorkspace | Workspace, opts: ISpaceCreateOptions = {}): Promise<string> {
     const { token } = this.sdk;
-    const url = this.sdk.getUrl(RouteBuilder.spaces());
+    const path = opts.parent ? RouteBuilder.space(opts.parent) : RouteBuilder.spaces();
+    const url = this.sdk.getUrl(path);
     const body = JSON.stringify(space);
     const result = await this.sdk.http.post(url.toString(), { token, body });
     this.inspectCommonStatusCodes(result.status);

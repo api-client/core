@@ -1,5 +1,7 @@
 import { IPermission } from './Permission.js';
 
+export const DefaultOwner = 'default';
+
 export interface IStoredFile {
   /**
    * The list of parents of the object. It is an ordered list of parents
@@ -28,6 +30,10 @@ export interface IStoredFile {
    * The id of the user that has deleted the file.
    */
   deletingUser?: string;
+  /**
+   * The owner of this object. The id of the User object.
+   */
+  owner: string;
 }
 
 /**
@@ -75,11 +81,17 @@ export class StoredFile {
    * The id of the user that has deleted the file.
    */
   deletingUser?: string;
+  /**
+   * The owner of this space. The id of the User object.
+   * Set to `default` when there are no users in the system (no authentication).
+   */
+  owner = '';
 
   new(init: IStoredFile): void {
-    const { parents=[], permissionIds=[], deleted, deletedTime, deletingUser } = init;
+    const { parents=[], permissionIds=[], deleted, deletedTime, deletingUser, owner = DefaultOwner } = init;
     this.parents = parents;
     this.permissionIds = permissionIds;
+    this.owner = owner;
     if (typeof deleted === 'boolean') {
       this.deleted = deleted;
       this.deletedTime = deletedTime;
@@ -92,9 +104,11 @@ export class StoredFile {
   }
 
   toJSON(): IStoredFile {
+    const { owner = DefaultOwner } = this;
     const result: IStoredFile = {
       parents: this.parents,
       permissionIds: this.permissionIds,
+      owner,
     };
     if (typeof this.deleted === 'boolean') {
       result.deleted = this.deleted;

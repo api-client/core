@@ -7,6 +7,7 @@ import { SpacesSdk } from './SpacesSdk.js';
 import { ProjectsSdk } from './ProjectsSdk.js';
 import { UsersSdk } from './UsersSdk.js';
 import { HistorySdk } from './HistorySdk.js';
+import { SharedSdk } from './SharedSdk.js';
 
 const baseUriSymbol = Symbol('baseUri');
 
@@ -50,6 +51,10 @@ export abstract class Sdk {
    * The history data.
    */
   history = new HistorySdk(this);
+  /**
+   * The shared data.
+   */
+  shared = new SharedSdk(this);
 
 
   [baseUriSymbol] = '';
@@ -125,6 +130,9 @@ export abstract class Sdk {
         options.queryField.forEach((field) => {
           searchParams.append('queryField', field);
         });
+      }
+      if (options.parent) {
+        searchParams.set('parent', options.parent);
       }
     }
   }

@@ -106,7 +106,8 @@ export interface IListOptions {
    */
   queryField?: string[];
   /**
-   * @deprecated Not sure what this is.
+   * General purpose type property to filer the results.
+   * This is used, for example, by the history store to list history for a specific type of requests,
    */
   type?: string;
   /**

@@ -44,9 +44,9 @@ export { Thing, IThing, Kind as ThingKind } from './src/models/Thing.js';
 export { Url, IUrl } from './src/models/Url.js';
 export { WebApi, IWebApi, ILegacyRestApi } from './src/models/WebApi.js';
 export { WebApiIndex, IWebApiIndex, ILegacyWebApiIndex } from './src/models/WebApiIndex.js';
-export { IWorkspace, Workspace, Kind as WorkspaceKind, DefaultOwner } from './src/models/Workspace.js';
+export { IWorkspace, Workspace, Kind as WorkspaceKind } from './src/models/Workspace.js';
 
-export { IFile, File, IStoredFile, StoredFile } from './src/models/store/File.js';
+export { IFile, File, IStoredFile, StoredFile, DefaultOwner } from './src/models/store/File.js';
 export { IGroup } from './src/models/store/Group.js';
 export { IAccessAddOperation, IAccessOperation, IAccessRemoveOperation, Permission, IPermission, AccessOperation, Kind as PermissionKind, PermissionRole, PermissionType } from './src/models/store/Permission.js';
 export { IEmail, IUserPicture, IUser, Kind as UserKind } from './src/models/store/User.js';

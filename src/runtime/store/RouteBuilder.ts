@@ -86,4 +86,8 @@ export class RouteBuilder {
   static historyItem(key: string): string {
     return `/history/${key}`;
   }
+
+  static sharedSpaces(): string {
+    return '/shared/spaces';
+  }
 }

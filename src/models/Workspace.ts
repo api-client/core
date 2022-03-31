@@ -1,4 +1,4 @@
-import { IFile, File } from "./store/File.js";
+import { IFile, File, DefaultOwner } from "./store/File.js";
 import { IThing, Thing, Kind as ThingKind } from './Thing.js';
 import v4 from '../lib/uuid.js';
 
@@ -19,14 +19,9 @@ export interface IWorkspace extends IFile {
    * The environment's meta info.
    */
   info: IThing;
-  /**
-   * The owner of this space. The id of the User object.
-   * Set to `default` when there are no users in the system (no authentication).
-   */
-  owner: string;
 }
 
-export const DefaultOwner = 'default';
+
 
 /**
  * A definition of the working space for users.
@@ -44,12 +39,7 @@ export class Workspace extends File {
    * The name of the environment.
    */
   info: Thing = new Thing({ kind: ThingKind });
-  /**
-   * The owner of this space. The id of the User object.
-   * Set to `default` when there are no users in the system (no authentication).
-   */
-  owner = '';
-
+  
   /**
    * Creates a new Space object from a name.
    * 
@@ -108,10 +98,9 @@ export class Workspace extends File {
       throw new Error(`Not a space.`);
     }
     super.new(init);
-    const { key = v4(), info, owner = DefaultOwner } = init;
+    const { key = v4(), info } = init;
     this.kind = Kind;
     this.key = key;
-    this.owner = owner;
     if (info) {
       this.info = new Thing(info);
     } else {
@@ -131,12 +120,10 @@ export class Workspace extends File {
   }
 
   toJSON(): IWorkspace {
-    const { owner = DefaultOwner } = this;
     const result: IWorkspace = {
       kind: Kind,
       key: this.key,
       info: this.info.toJSON(),
-      owner,
       ...super.toJSON(),
     };
     return result;
