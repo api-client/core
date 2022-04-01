@@ -1,5 +1,6 @@
 import { assert } from '@esm-bundle/chai';
-import { IWorkspace, Workspace, Kind as WorkspaceKind, DefaultOwner } from '../../src/models/Workspace.js';
+import { IWorkspace, Workspace, Kind as WorkspaceKind } from '../../src/models/Workspace.js';
+import { DefaultOwner } from '../../src/models/store/File.js';
 import { Kind as ThingKind, Thing } from '../../src/models/Thing.js';
 
 describe('Models', () => {
@@ -47,6 +48,7 @@ describe('Models', () => {
           parents: ['p1'],
           permissionIds: ['pr1'],
           permissions: [{
+            addingUser: '123',
             key: '123',
             kind: 'Core#Permission',
             owner: '345',
@@ -77,6 +79,7 @@ describe('Models', () => {
           parents: ['p1'],
           permissionIds: ['pr1'],
           permissions: [{
+            addingUser: '123',
             key: '123',
             kind: 'Core#Permission',
             owner: '345',
