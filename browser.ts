@@ -86,8 +86,7 @@ export { RequestDataExtractor } from './src/data/RequestDataExtractor.js';
 // 
 // HTTP store
 // 
-export { StoreSdk } from './src/runtime/store/StoreSdkWeb.js';
-export { IStoreTokenInfo, IStoreResponse, IStoreRequestOptions } from './src/runtime/store/SdkBase.js';
+export * from './src/runtime/store/StoreSdkWeb.js';
 export { RouteBuilder } from './src/runtime/store/RouteBuilder.js';
 
 // 

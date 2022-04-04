@@ -4,6 +4,7 @@ import { RouteBuilder } from './RouteBuilder.js';
 import { IListOptions, IListResponse } from '../../models/Backend.js';
 import { IWorkspace, Workspace, Kind as WorkspaceKind } from '../../models/Workspace.js';
 import { AccessOperation } from '../../models/store/Permission.js';
+import WebSocketNode from 'ws';
 
 export interface ISpaceCreateOptions {
   /**
@@ -195,5 +196,14 @@ export class SpacesSdk extends SdkBase {
       throw new Error(`${E_PREFIX}${E_RESPONSE_UNKNOWN}.`);
     }
     return data;
+  }
+
+  /**
+   * Creates a WS client that listens to the spaces events.
+   */
+  async observeSpaces(): Promise<WebSocketNode | WebSocket> {
+    const { token } = this.sdk;
+    const url = this.sdk.getUrl(RouteBuilder.spaces());
+    return this.sdk.ws.createAndConnect(url.toString(), token);
   }
 }
