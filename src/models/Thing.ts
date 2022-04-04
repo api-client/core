@@ -96,7 +96,7 @@ export class Thing {
     const result: IThing = {
       kind: Kind,
     };
-    if (this.name) {
+    if (typeof this.name === 'string') {
       result.name = this.name;
     }
     if (this.description) {

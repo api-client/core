@@ -1,5 +1,5 @@
 import { IFile, File, DefaultOwner } from "./store/File.js";
-import { IThing, Thing, Kind as ThingKind } from './Thing.js';
+import { Thing, Kind as ThingKind } from './Thing.js';
 import v4 from '../lib/uuid.js';
 
 export const Kind = 'Core#Space';
@@ -11,17 +11,7 @@ export const Kind = 'Core#Space';
  */
 export interface IWorkspace extends IFile {
   kind: typeof Kind;
-  /**
-   * The space identifier.
-   */
-  key: string;
-  /**
-   * The environment's meta info.
-   */
-  info: IThing;
 }
-
-
 
 /**
  * A definition of the working space for users.
@@ -31,14 +21,6 @@ export interface IWorkspace extends IFile {
  */
 export class Workspace extends File {
   kind = Kind;
-  /**
-   * The space identifier.
-   */
-  key = '';
-  /**
-   * The name of the environment.
-   */
-  info: Thing = new Thing({ kind: ThingKind });
   
   /**
    * Creates a new Space object from a name.
@@ -57,6 +39,7 @@ export class Workspace extends File {
       parents: [],
       permissionIds: [],
       permissions: [],
+      lastModified: { user: '', time: 0, byMe: false },
     });
     return definition;
   }
@@ -83,6 +66,7 @@ export class Workspace extends File {
         parents: [],
         permissionIds: [],
         permissions: [],
+        lastModified: { user: '', time: 0, byMe: false },
       };
     }
     this.new(init);
@@ -98,14 +82,7 @@ export class Workspace extends File {
       throw new Error(`Not a space.`);
     }
     super.new(init);
-    const { key = v4(), info } = init;
     this.kind = Kind;
-    this.key = key;
-    if (info) {
-      this.info = new Thing(info);
-    } else {
-      this.info = new Thing({ kind: ThingKind, name: '' });
-    }
   }
 
   /**
@@ -121,10 +98,8 @@ export class Workspace extends File {
 
   toJSON(): IWorkspace {
     const result: IWorkspace = {
-      kind: Kind,
-      key: this.key,
-      info: this.info.toJSON(),
       ...super.toJSON(),
+      kind: Kind,
     };
     return result;
   }

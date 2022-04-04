@@ -1,3 +1,5 @@
+import { IModification } from './store/Modification.js';
+
 export const Kind = 'Core#Revision';
 
 /**
@@ -34,4 +36,8 @@ export interface IRevisionInfo {
    * The `json8-patch` revisions object used to restore the previous state.
    */
   patch: any[];
+  /**
+   * The modification record for this revision.
+   */
+  modification: IModification;
 }

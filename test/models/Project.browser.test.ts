@@ -1,44 +1,55 @@
 import { assert } from '@esm-bundle/chai';
-import { IWorkspace, Workspace, Kind as WorkspaceKind } from '../../src/models/Workspace.js';
+import { IProject, Project, Kind as ProjectKind } from '../../src/models/Project.js';
+import { HttpProject } from '../../src/models/HttpProject.js';
 import { DefaultOwner } from '../../src/models/store/File.js';
 import { Kind as ThingKind } from '../../src/models/Thing.js';
 
 describe('Models', () => {
-  describe('Workspace', () => {
-    describe('Server.fromName()', () => {
+  describe('Project', () => {
+    describe('Project.fromProject()', () => {
       it('sets the kind', () => {
-        const result = Workspace.fromName('name');
-        assert.equal(result.kind, WorkspaceKind);
+        const p1 = HttpProject.fromName('p1');
+        const result = Project.fromProject(p1);
+        assert.equal(result.kind, ProjectKind);
       });
 
       it('sets the name', () => {
-        const result = Workspace.fromName('name');
-        assert.equal(result.info.name, 'name');
+        const p1 = HttpProject.fromName('p1');
+        const result = Project.fromProject(p1);
+        assert.equal(result.info.name, 'p1');
       });
 
-      it('sets the default owner', () => {
-        const result = Workspace.fromName('name');
+      it('sets the key', () => {
+        const p1 = HttpProject.fromName('p1');
+        const result = Project.fromProject(p1);
+        assert.equal(result.key, p1.key);
+      });
+
+      it('sets the owner', () => {
+        const p1 = HttpProject.fromName('p1');
+        const result = Project.fromProject(p1);
         assert.equal(result.owner, DefaultOwner);
       });
 
-      it('sets the passed owner', () => {
-        const result = Workspace.fromName('name', 'me');
-        assert.equal(result.owner, 'me');
+      it('respects schema instead of instance', () => {
+        const p1 = HttpProject.fromName('p1');
+        const result = Project.fromProject(p1.toJSON());
+        assert.equal(result.info.name, 'p1');
       });
     });
 
     describe('constructor()', () => {
       it('creates a default Workspace', () => {
-        const result = new Workspace();
-        assert.equal(result.kind, WorkspaceKind);
+        const result = new Project();
+        assert.equal(result.kind, ProjectKind);
         assert.equal(result.owner, DefaultOwner);
         assert.typeOf(result.key, 'string');
         assert.typeOf(result.lastModified, 'object');
       });
 
       it('creates a Workspace from the schema values', () => {
-        const schema: IWorkspace = {
-          kind: WorkspaceKind,
+        const schema: IProject = {
+          kind: ProjectKind,
           info: {
             kind: ThingKind,
             name: 'hello',
@@ -59,8 +70,8 @@ describe('Models', () => {
           lastModified: { byMe: false, time: 0, user: 'id', name: 'test' },
           labels: ['l1'],
         };
-        const result = new Workspace(schema);
-        assert.equal(result.kind, WorkspaceKind);
+        const result = new Project(schema);
+        assert.equal(result.kind, ProjectKind);
         assert.equal(result.info.name, 'hello');
         assert.equal(result.owner, 'me');
         assert.equal(result.key, '123');
@@ -72,8 +83,8 @@ describe('Models', () => {
       });
 
       it('creates a Workspace from the JSON schema string', () => {
-        const schema: IWorkspace = {
-          kind: WorkspaceKind,
+        const schema: IProject = {
+          kind: ProjectKind,
           info: {
             kind: ThingKind,
             name: 'hello',
@@ -93,8 +104,8 @@ describe('Models', () => {
           }],
           lastModified: { byMe: false, time: 0, user: 'id', name: 'test' },
         };
-        const result = new Workspace(JSON.stringify(schema));
-        assert.equal(result.kind, WorkspaceKind);
+        const result = new Project(JSON.stringify(schema));
+        assert.equal(result.kind, ProjectKind);
         assert.equal(result.info.name, 'hello');
         assert.equal(result.owner, 'me');
         assert.equal(result.key, '123');
@@ -103,7 +114,7 @@ describe('Models', () => {
 
       it('throws when invalid schema', () => {
         assert.throws(() => {
-          new Workspace(JSON.stringify({
+          new Project(JSON.stringify({
             name: 'a name',
           }));
         });
@@ -111,14 +122,14 @@ describe('Models', () => {
     });
 
     describe('toJSON()', () => {
-      let workspace: Workspace;
+      let workspace: Project;
       beforeEach(() => {
-        workspace = new Workspace();
+        workspace = new Project();
       });
 
       it('serializes the kind', () => {
         const result = workspace.toJSON();
-        assert.equal(result.kind, WorkspaceKind);
+        assert.equal(result.kind, ProjectKind);
       });
 
       it('serializes the key', () => {

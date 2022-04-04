@@ -32,7 +32,7 @@ describe('Cookie', () => {
       const instance = new Cookie(name, value, {
         'max-age': 100,
       });
-      assert.equal(instance.expires, Date.now() + 100000);
+      assert.approximately(instance.expires, Date.now() + 100000, 1000);
     });
 
     it('Max-age sets cookie persistent', () => {
