@@ -9,7 +9,7 @@ export class SharedSdk extends SdkBase {
    */
   async list(options?: IListOptions): Promise<IListResponse> {
     const { token } = this.sdk;
-    const url = this.sdk.getUrl(RouteBuilder.sharedSpaces());
+    const url = this.sdk.getUrl(RouteBuilder.shared());
     this.sdk.appendListOptions(url, options);
     const result = await this.sdk.http.get(url.toString(), { token });
     this.inspectCommonStatusCodes(result.status);

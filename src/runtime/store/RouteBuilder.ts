@@ -3,45 +3,31 @@
  */
 export class RouteBuilder {
   /**
-   * @returns The path to the /spaces route.
+   * @returns The path to the /files route.
    */
-  static spaces(): string {
-    return '/spaces';
+  static files(): string {
+    return '/files';
   }
 
   /**
-   * @returns The path to the /spaces/[id] route.
+   * @returns The path to the /files/[id] route.
    */
-  static space(key: string): string {
-    return `/spaces/${key}`;
+  static file(key: string): string {
+    return `/files/${key}`;
   }
 
   /**
-   * @returns The path to the /spaces/[id]/users route.
+   * @returns The path to the /files/[id]/users route.
    */
-  static spaceUsers(key: string): string {
-    return `/spaces/${key}/users`;
+  static fileUsers(key: string): string {
+    return `/files/${key}/users`;
   }
 
   /**
-   * @returns The path to the /spaces/[id]/projects route.
+   * @returns The path to the /file/[id]/revisions route.
    */
-  static spaceProjects(key: string): string {
-    return `/spaces/${key}/projects`;
-  }
-
-  /**
-   * @returns The path to the /spaces/[id]/projects/[id] route.
-   */
-  static spaceProject(space: string, project: string): string {
-    return `/spaces/${space}/projects/${project}`;
-  }
-
-  /**
-   * @returns The path to the /spaces/[id]/projects/[id]/revisions route.
-   */
-  static projectRevisions(space: string, project: string): string {
-    return `/spaces/${space}/projects/${project}/revisions`;
+  static fileRevisions(file: string): string {
+    return `/file/${file}/revisions`;
   }
 
   /**
@@ -87,7 +73,7 @@ export class RouteBuilder {
     return `/history/${key}`;
   }
 
-  static sharedSpaces(): string {
-    return '/shared/spaces';
+  static shared(): string {
+    return '/shared';
   }
 }

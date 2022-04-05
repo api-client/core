@@ -138,10 +138,10 @@ export class StoredFile {
     this.parents = parents;
     this.permissionIds = permissionIds;
     this.owner = owner;
-    this.lastModified = lastModified || { user: '', time: 0, byMe: false };
+    this.lastModified = lastModified ? { ...lastModified } : { user: '', time: 0, byMe: false };
     if (typeof deleted === 'boolean') {
       this.deleted = deleted;
-      this.deletedInfo = deletedInfo;
+      this.deletedInfo = deletedInfo ? { ...deletedInfo } : undefined;
     } else {
       this.deleted = undefined;
       this.deletedInfo = undefined;

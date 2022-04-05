@@ -4,9 +4,11 @@ import { RouteBuilder } from './RouteBuilder.js';
 import { IListOptions, IListResponse } from '../../models/Backend.js';
 import { IWorkspace, Workspace, Kind as WorkspaceKind } from '../../models/Workspace.js';
 import { AccessOperation } from '../../models/store/Permission.js';
+import { IUser } from '../../models/store/User.js';
+import { IFile } from '../../models/store/File.js';
 import WebSocketNode from 'ws';
 
-export interface ISpaceCreateOptions {
+export interface IFileCreateOptions {
   /**
    * Optional parent space id.
    * When set it creates a space under this parent.
@@ -14,14 +16,14 @@ export interface ISpaceCreateOptions {
   parent?: string;
 }
 
-export class SpacesSdk extends SdkBase {
+export class FilesSdk extends SdkBase {
   /**
-   * Lists spaces in the store.
+   * Lists files (spaces, projects, etc) in the store.
    * @param options Optional query options.
    */
-  async list(options?: IListOptions): Promise<IListResponse> {
+  async list(options?: IListOptions): Promise<IListResponse<IFile>> {
     const { token } = this.sdk;
-    const url = this.sdk.getUrl(RouteBuilder.spaces());
+    const url = this.sdk.getUrl(RouteBuilder.files());
     this.sdk.appendListOptions(url, options);
     const result = await this.sdk.http.get(url.toString(), { token });
     this.inspectCommonStatusCodes(result.status);
@@ -33,7 +35,7 @@ export class SpacesSdk extends SdkBase {
     if (!result.body) {
       throw new Error(`${E_PREFIX}${E_RESPONSE_NO_VALUE}`);
     }
-    let data: IListResponse;
+    let data: IListResponse<IFile>;
     try {
       data = JSON.parse(result.body);
     } catch (e) {
@@ -50,9 +52,9 @@ export class SpacesSdk extends SdkBase {
    * @param space The workspace definition.
    * @returns The key of the creates space.
    */
-  async create(space: IWorkspace | Workspace, opts: ISpaceCreateOptions = {}): Promise<string> {
+  async create(space: IWorkspace | Workspace, opts: IFileCreateOptions = {}): Promise<string> {
     const { token } = this.sdk;
-    const path = opts.parent ? RouteBuilder.space(opts.parent) : RouteBuilder.spaces();
+    const path = opts.parent ? RouteBuilder.file(opts.parent) : RouteBuilder.files();
     const url = this.sdk.getUrl(path);
     const body = JSON.stringify(space);
     const result = await this.sdk.http.post(url.toString(), { token, body });
@@ -71,13 +73,31 @@ export class SpacesSdk extends SdkBase {
   }
 
   /**
-   * Reads a user space definition from the store.
-   * @param key The user space key
-   * @returns The definition of the user space.
+   * Reads file metadata from the store.
+   * 
+   * @param key The file key
+   * @returns THe file metadata
    */
-  async read(key: string): Promise<IWorkspace> {
+  read(key: string, media: false): Promise<IFile>;
+  /**
+   * Reads file contents from the store.
+   * 
+   * @param key The file key
+   * @returns THe file contents
+   */
+  read(key: string, media: true): Promise<unknown>;
+
+  /**
+   * Reads a user file definition from the store.
+   * @param key The file key
+   * @param media When true it reads file contents rather than metadata.
+   */
+  async read(key: string, media?: boolean): Promise<IFile | unknown> {
     const { token } = this.sdk;
-    const url = this.sdk.getUrl(RouteBuilder.space(key));
+    const url = this.sdk.getUrl(RouteBuilder.file(key));
+    if (media) {
+      url.searchParams.set('alt', 'media');
+    }
     const result = await this.sdk.http.get(url.toString(), { token });
     this.inspectCommonStatusCodes(result.status);
     const E_PREFIX = 'Unable to read a user space. ';
@@ -101,14 +121,33 @@ export class SpacesSdk extends SdkBase {
   }
 
   /**
+   * Patches file's meta in the store.
+   * 
+   * @param key The file key
+   * @param value The patch to apply.
+   */
+  patch(key: string, value: JsonPatch, media: false): Promise<JsonPatch>;
+
+  /**
+   * Patches file's content in the store.
+   * 
+   * @param key The file key
+   * @param value The patch to apply.
+   */
+  patch(key: string, value: JsonPatch, media: true): Promise<JsonPatch>;
+
+  /**
    * Patches a user space in the store.
    * @param key The key of the user space to patch
    * @param value The JSON patch to be processed.
    * @returns The JSON patch to revert the change using the `json8-patch` library
    */
-  async patch(key: string, value: JsonPatch): Promise<JsonPatch> {
+  async patch(key: string, value: JsonPatch, media?: boolean): Promise<JsonPatch> {
     const { token } = this.sdk;
-    const url = this.sdk.getUrl(RouteBuilder.space(key));
+    const url = this.sdk.getUrl(RouteBuilder.file(key));
+    if (media) {
+      url.searchParams.set('alt', 'media');
+    }
     const body = JSON.stringify(value);
     const result = await this.sdk.http.patch(url.toString(), { token, body });
     this.inspectCommonStatusCodes(result.status);
@@ -139,7 +178,7 @@ export class SpacesSdk extends SdkBase {
    */
   async delete(key: string): Promise<void> {
     const { token } = this.sdk;
-    const url = this.sdk.getUrl(RouteBuilder.space(key));
+    const url = this.sdk.getUrl(RouteBuilder.file(key));
     const result = await this.sdk.http.delete(url.toString(), { token });
     this.inspectCommonStatusCodes(result.status);
     const E_PREFIX = 'Unable to delete a user space. ';
@@ -157,7 +196,7 @@ export class SpacesSdk extends SdkBase {
    */
   async patchUsers(key: string, value: AccessOperation[]): Promise<void> {
     const { token } = this.sdk;
-    const url = this.sdk.getUrl(RouteBuilder.spaceUsers(key));
+    const url = this.sdk.getUrl(RouteBuilder.fileUsers(key));
     const body = JSON.stringify(value);
     const result = await this.sdk.http.patch(url.toString(), { token, body });
     this.inspectCommonStatusCodes(result.status);
@@ -173,9 +212,9 @@ export class SpacesSdk extends SdkBase {
    * 
    * @param key The user space key
    */
-  async listUsers(key: string): Promise<IListResponse> {
+  async listUsers(key: string): Promise<IListResponse<IUser>> {
     const { token } = this.sdk;
-    const url = this.sdk.getUrl(RouteBuilder.spaceUsers(key));
+    const url = this.sdk.getUrl(RouteBuilder.fileUsers(key));
     const result = await this.sdk.http.get(url.toString(), { token });
     this.inspectCommonStatusCodes(result.status);
     const E_PREFIX = 'Unable to list users in the space. ';
@@ -186,7 +225,7 @@ export class SpacesSdk extends SdkBase {
     if (!result.body) {
       throw new Error(`${E_PREFIX}${E_RESPONSE_NO_VALUE}`);
     }
-    let data: IListResponse;
+    let data: IListResponse<IUser>;
     try {
       data = JSON.parse(result.body);
     } catch (e) {
@@ -201,9 +240,9 @@ export class SpacesSdk extends SdkBase {
   /**
    * Creates a WS client that listens to the spaces events.
    */
-  async observeSpaces(): Promise<WebSocketNode | WebSocket> {
+  async observeFiles(): Promise<WebSocketNode | WebSocket> {
     const { token } = this.sdk;
-    const url = this.sdk.getUrl(RouteBuilder.spaces());
+    const url = this.sdk.getUrl(RouteBuilder.files());
     return this.sdk.ws.createAndConnect(url.toString(), token);
   }
 }

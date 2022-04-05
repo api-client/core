@@ -3,8 +3,7 @@ import { Http } from './Http.js';
 import { WsClient } from './WsClient.js';
 import { AuthSdk } from './AuthSdk.js';
 import { BackendSdk } from './BackendSdk.js';
-import { SpacesSdk } from './SpacesSdk.js';
-import { ProjectsSdk } from './ProjectsSdk.js';
+import { FilesSdk } from './FilesSdk.js';
 import { UsersSdk } from './UsersSdk.js';
 import { HistorySdk } from './HistorySdk.js';
 import { SharedSdk } from './SharedSdk.js';
@@ -30,11 +29,7 @@ export abstract class Sdk {
   /**
    * The user spaces features.
    */
-  space = new SpacesSdk(this);
-  /**
-   * The user projects features.
-   */
-  project = new ProjectsSdk(this);
+  file = new FilesSdk(this);
   /**
    * Reads user information.
    */
