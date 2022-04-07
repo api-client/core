@@ -1,7 +1,7 @@
 {
   "name": "@api-client/core",
   "description": "The API Client's core client library. Works in NodeJS and in a ES enabled browser.",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "license": "Apache-2.0",
   "main": "build/index.js",
   "module": "build/index.js",
@@ -31,7 +31,6 @@
     "@types/cors": "^2.8.12",
     "@types/express-ntlm": "^2.3.3",
     "@types/fs-extra": "^9.0.13",
-    "@types/json8-patch": "^1.0.0",
     "@types/mocha": "^9.0.0",
     "@types/node": "^17.0.18",
     "@types/sinon": "^10.0.11",
@@ -83,13 +82,13 @@
     ]
   },
   "dependencies": {
+    "@api-client/json": "^0.1.0",
     "@metrichor/jmespath": "^0.3.1",
     "@pawel-up/data-mock": "^0.2.0",
     "@pawel-up/jexl": "^3.0.0",
     "@xmldom/xmldom": "^0.8.1",
     "console-table-printer": "^2.10.0",
     "form-data": "^4.0.0",
-    "json8-patch": "^1.0.6",
     "ws": "^8.5.0",
     "xpath": "^0.0.32"
   },

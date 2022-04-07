@@ -4,7 +4,7 @@ export const Kind = 'Core#Revision';
 
 /**
  * The definition of a patch revision.
- * The revision is created with the `json8-patch` library.
+ * The revision is created with the `@api-client/json` library.
  */
 export interface IRevisionInfo {
   /**
@@ -33,7 +33,7 @@ export interface IRevisionInfo {
    */
   deleted?: boolean;
   /**
-   * The `json8-patch` revisions object used to restore the previous state.
+   * The `@api-client/json` revisions object used to restore the previous state.
    */
   patch: any[];
   /**

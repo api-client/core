@@ -1,5 +1,5 @@
 import WebSocketNode from 'ws';
-import { JsonPatch } from 'json8-patch';
+import { Patch } from '@api-client/json';
 import { SdkBase, E_RESPONSE_STATUS, E_RESPONSE_NO_VALUE, E_INVALID_JSON, E_RESPONSE_UNKNOWN, E_RESPONSE_LOCATION, ISdkRequestOptions } from './SdkBase.js';
 import { RouteBuilder } from './RouteBuilder.js';
 import { IListOptions, IListResponse } from '../../models/Backend.js';
@@ -154,7 +154,7 @@ export class FilesSdk extends SdkBase {
    * @param value The patch to apply.
    * @param request Optional request options.
    */
-  patch(key: string, value: JsonPatch, media: false, request?: ISdkRequestOptions): Promise<JsonPatch>;
+  patch(key: string, value: Patch.JsonPatch, media: false, request?: ISdkRequestOptions): Promise<Patch.JsonPatch>;
 
   /**
    * Patches file's content in the store.
@@ -163,16 +163,16 @@ export class FilesSdk extends SdkBase {
    * @param value The patch to apply.
    * @param request Optional request options.
    */
-  patch(key: string, value: JsonPatch, media: true, request?: ISdkRequestOptions): Promise<JsonPatch>;
+  patch(key: string, value: Patch.JsonPatch, media: true, request?: ISdkRequestOptions): Promise<Patch.JsonPatch>;
 
   /**
    * Patches a file in the store.
    * @param key The key of the file to patch
    * @param value The JSON patch to be processed.
    * @param request Optional request options.
-   * @returns The JSON patch to revert the change using the `json8-patch` library
+   * @returns The JSON patch to revert the change using the `@api-client/json` library
    */
-  async patch(key: string, value: JsonPatch, media?: boolean, request: ISdkRequestOptions = {}): Promise<JsonPatch> {
+  async patch(key: string, value: Patch.JsonPatch, media?: boolean, request: ISdkRequestOptions = {}): Promise<Patch.JsonPatch> {
     const token = request.token || this.sdk.token;
     const url = this.sdk.getUrl(RouteBuilder.file(key));
     if (media) {
@@ -203,7 +203,7 @@ export class FilesSdk extends SdkBase {
     if (!data.revert) {
       throw new Error(`${E_PREFIX}${E_RESPONSE_UNKNOWN}.`);
     }
-    return data.revert as JsonPatch;
+    return data.revert as Patch.JsonPatch;
   }
 
   /**

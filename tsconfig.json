@@ -24,7 +24,6 @@
     "src/**/*",
     "index.ts",
     "browser.ts",
-    "test/servers/ssl-root-cas.d.ts",
-    "json8-patch.d.ts"
+    "test/servers/ssl-root-cas.d.ts"
   ]
 }
