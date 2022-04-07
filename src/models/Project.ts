@@ -82,7 +82,7 @@ export class Project extends File {
    * Note, this throws an error when the environment is not a space. 
    */
   new(init: IProject): void {
-    if (!Project.isWorkspace(init)) {
+    if (!Project.isProject(init)) {
       throw new Error(`Not a space.`);
     }
     super.new(init);
@@ -92,7 +92,7 @@ export class Project extends File {
   /**
    * Checks whether the input is a definition of an user space.
    */
-  static isWorkspace(input: unknown): boolean {
+  static isProject(input: unknown): boolean {
     const typed = input as IProject;
     if (!input || typed.kind !== Kind) {
       return false;

@@ -61,7 +61,7 @@ export interface IBackendEvent extends IBackendMessage {
    * Note, `updated` is when the entire object must be revalidated in the opposite
    * to `patch` where the patch should be applied to the object.
    */
-  operation: 'created' | 'updated' | 'patch' | 'deleted' | 'access-granted' | 'access-removed';
+  operation: 'created' | 'patch' | 'deleted' | 'access-granted' | 'access-removed';
   /**
    * The kind of data that has been changed.
    */
@@ -70,6 +70,10 @@ export interface IBackendEvent extends IBackendMessage {
    * For update events it is the key of the updated object.
    */
   id?: string;
+  /**
+   * When relevant, the parent of the changed object.
+   */
+  parent?: string;
 }
 
 export interface IListResponse<T = unknown> {
@@ -152,11 +156,6 @@ export interface IHistorySpaceListOptions extends IListOptions {
 export interface IHistoryProjectListOptions extends IListOptions {
   type: 'project';
   /**
-   * The id of the space containing the project.
-   * The access to the history records for the project is tested against the user space.
-   */
-  space: string;
-  /**
    * The id of the project.
    */
   id: string;
@@ -173,10 +172,9 @@ export interface IHistoryProjectListOptions extends IListOptions {
 export interface IHistoryRequestListOptions extends IListOptions {
   type: 'request';
   /**
-   * The id of the space containing the project that contains the request.
-   * The access to the history records for the request is tested against the user space.
+   * The id of the project that contains the request.
    */
-  space: string;
+  project: string;
   /**
    * The id of the request.
    */

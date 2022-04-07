@@ -6,6 +6,7 @@ export interface ISerializedError {
   message: string;
   stack?: string;
   code?: string | number;
+  [key: PropertyKey]: any;
 }
 
 /**

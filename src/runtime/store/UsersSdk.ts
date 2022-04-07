@@ -1,11 +1,15 @@
-import { SdkBase, E_RESPONSE_STATUS, E_RESPONSE_NO_VALUE, E_INVALID_JSON, E_RESPONSE_UNKNOWN } from './SdkBase.js';
+import { SdkBase, E_RESPONSE_STATUS, E_RESPONSE_NO_VALUE, E_INVALID_JSON, E_RESPONSE_UNKNOWN, ISdkRequestOptions } from './SdkBase.js';
 import { RouteBuilder } from './RouteBuilder.js';
 import { IListOptions, IListResponse } from '../../models/Backend.js';
 import { IUser } from '../../models/store/User.js';
 
 export class UsersSdk extends SdkBase {
-  async me(): Promise<IUser> {
-    const { token } = this.sdk;
+  /**
+   * Reads the current user.
+   * @param request Optional request options.
+   */
+  async me(request: ISdkRequestOptions = {}): Promise<IUser> {
+    const token = request.token || this.sdk.token;
     const url = this.sdk.getUrl(RouteBuilder.usersMe());
     const result = await this.sdk.http.get(url.toString(), { token });
     this.inspectCommonStatusCodes(result.status);
@@ -33,9 +37,10 @@ export class UsersSdk extends SdkBase {
    * Lists users in the store
    * 
    * @param options Optional query options.
+   * @param request Optional request options.
    */
-  async list(options?: IListOptions): Promise<IListResponse> {
-    const { token } = this.sdk;
+  async list(options?: IListOptions, request: ISdkRequestOptions = {}): Promise<IListResponse<IUser>> {
+    const token = request.token || this.sdk.token;
     const url = this.sdk.getUrl(RouteBuilder.users());
     this.sdk.appendListOptions(url, options);
     const result = await this.sdk.http.get(url.toString(), { token });
@@ -48,7 +53,7 @@ export class UsersSdk extends SdkBase {
     if (!result.body) {
       throw new Error(`${E_PREFIX}${E_RESPONSE_NO_VALUE}`);
     }
-    let data: IListResponse;
+    let data: IListResponse<IUser>;
     try {
       data = JSON.parse(result.body);
     } catch (e) {
@@ -63,10 +68,11 @@ export class UsersSdk extends SdkBase {
   /**
    * Reads a user information from the store.
    * @param key The user key.
+   * @param request Optional request options.
    * @returns The user object
    */
-  async read(key: string): Promise<IUser> {
-    const { token } = this.sdk;
+  async read(key: string, request: ISdkRequestOptions = {}): Promise<IUser> {
+    const token = request.token || this.sdk.token;
     const url = this.sdk.getUrl(RouteBuilder.user(key));
     const result = await this.sdk.http.get(url.toString(), { token });
     this.inspectCommonStatusCodes(result.status);

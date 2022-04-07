@@ -51,6 +51,11 @@ export abstract class Sdk {
    */
   shared = new SharedSdk(this);
 
+  /**
+   * When set it limits log output to minimum.
+   */
+  silent = false;
+
 
   [baseUriSymbol] = '';
 

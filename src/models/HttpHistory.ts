@@ -14,11 +14,11 @@ export interface IHttpHistory {
    */
   key?: string;
   /**
-   * Optional user space id. Must be set when the originating request belongs to a user space.
+   * Optional user space id. When set the history will become available to all space users.
    */
   space?: string;
   /**
-   * Optional project id. Must be set when the originating request belongs to a user space.
+   * Optional project id. When set the history will become available to all project users.
    */
   project?: string;
   /**

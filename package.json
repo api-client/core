@@ -1,7 +1,7 @@
 {
   "name": "@api-client/core",
   "description": "The API Client's core client library. Works in NodeJS and in a ES enabled browser.",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "license": "Apache-2.0",
   "main": "build/index.js",
   "module": "build/index.js",
@@ -37,7 +37,7 @@
     "@types/sinon": "^10.0.11",
     "@typescript-eslint/eslint-plugin": "^5.12.0",
     "@typescript-eslint/parser": "^5.12.0",
-    "@web/dev-server-esbuild": "^0.2.16",
+    "@web/dev-server-esbuild": "^0.3.0",
     "@web/test-runner": "^0.13.21",
     "@web/test-runner-playwright": "^0.8.8",
     "chai": "^4.3.4",

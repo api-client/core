@@ -87,6 +87,7 @@ export { RequestDataExtractor } from './src/data/RequestDataExtractor.js';
 // HTTP store
 // 
 export * from './src/runtime/store/StoreSdkWeb.js';
+export { ApiError, IApiError, SdkError, ISdkError } from './src/runtime/store/Errors.js';
 export { RouteBuilder } from './src/runtime/store/RouteBuilder.js';
 
 // 
