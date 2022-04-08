@@ -63,6 +63,7 @@ export class FilesSdk extends SdkBase {
    * Creates a file in the store.
    * 
    * @param file The definition of a file that extends the IFile interface or one of the supported by the server schemas.
+   * @param opts Optional options when creating a file
    * @param request Optional request options.
    * @returns The key of the creates file.
    */
