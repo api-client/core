@@ -10,6 +10,13 @@ export class RouteBuilder {
   }
 
   /**
+   * @returns The path to the /files/bulk route.
+   */
+  static filesBulk(): string {
+    return '/files/bulk';
+  }
+
+  /**
    * @returns The path to the /files/[id] route.
    */
   static file(key: string): string {

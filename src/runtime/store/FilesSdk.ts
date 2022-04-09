@@ -149,6 +149,44 @@ export class FilesSdk extends SdkBase {
   }
 
   /**
+   * Reads a number of files in a bulk operation.
+   * 
+   * @param keys The list of keys to read. When the user has no access to the file it returns undefined 
+   * in that place. It also inserts `undefined` in place of a file that doesn't exist.
+   * @param request Optional request options.
+   */
+  async readBulk(keys: string[], request: ISdkRequestOptions = {}): Promise<IListResponse<IFile|undefined>> {
+    const token = request.token || this.sdk.token;
+    const url = this.sdk.getUrl(RouteBuilder.filesBulk());
+    const body = JSON.stringify(keys);
+    const result = await this.sdk.http.post(url.toString(), { token, body });
+    this.inspectCommonStatusCodes(result.status, result.body);
+    const E_PREFIX = 'Unable to read files in bulk. ';
+    if (result.status !== 200) {
+      this.logInvalidResponse(result);
+      let e = this.createGenericSdkError(result.body)
+      if (!e) {
+        e = new SdkError(`${E_PREFIX}${E_RESPONSE_STATUS}${result.status}`, result.status);
+        e.response = result.body;
+      }
+      throw e;
+    }
+    if (!result.body) {
+      throw new Error(`${E_PREFIX}${E_RESPONSE_NO_VALUE}`);
+    }
+    let data: IListResponse<IFile | undefined>;
+    try {
+      data = JSON.parse(result.body);
+    } catch (e) {
+      throw new Error(`${E_PREFIX}${E_INVALID_JSON}.`);
+    }
+    if (!Array.isArray(data.data)) {
+      throw new Error(`${E_PREFIX}${E_RESPONSE_UNKNOWN}.`);
+    }
+    return data;
+  }
+
+  /**
    * Patches file's meta in the store.
    * 
    * @param key The file key
