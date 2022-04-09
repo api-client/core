@@ -35,7 +35,6 @@ export { RequestTime, IRequestTime, Kind as RequestTimeKind } from './src/models
 export { RequestUiMeta, IRequestUiMeta, Kind as RequestUiMetaKind, IActionsMeta, IAuthMeta, IBodyMeta, IBodyMetaModel, IHeadersMeta, IRawBody, IResponseUiMeta, IUrlMeta } from './src/models/RequestUiMeta.js';
 export { ResponseAuthorization, IResponseAuthorization, Kind as ResponseAuthorizationKind } from './src/models/ResponseAuthorization.js';
 export { ResponseRedirect, IResponseRedirect, Kind as ResponseRedirectKind } from './src/models/ResponseRedirect.js';
-export { IRevisionInfo, Kind as RevisionInfoKind } from './src/models/RevisionInfo.js';
 export { ISentRequest, SentRequest, IBaseSentRequest } from './src/models/SentRequest.js';
 export { SerializableError, ISerializedError } from './src/models/SerializableError.js';
 export { SerializablePayload } from './src/models/SerializablePayload.js';
@@ -46,9 +45,12 @@ export { WebApi, IWebApi, ILegacyRestApi } from './src/models/WebApi.js';
 export { WebApiIndex, IWebApiIndex, ILegacyWebApiIndex } from './src/models/WebApiIndex.js';
 export { IWorkspace, Workspace, Kind as WorkspaceKind } from './src/models/Workspace.js';
 
+export { IBreadcrumb } from './src/models/store/Breadcrumb.js';
+export { ICapabilities } from './src/models/store/Capabilities';
 export { IFile, File, IStoredFile, StoredFile, DefaultOwner } from './src/models/store/File.js';
 export { IGroup } from './src/models/store/Group.js';
 export { IAccessAddOperation, IAccessOperation, IAccessRemoveOperation, Permission, IPermission, AccessOperation, Kind as PermissionKind, PermissionRole, PermissionType } from './src/models/store/Permission.js';
+export { IRevision, Kind as RevisionKind } from './src/models/store/Revision.js';
 export { IEmail, IUserPicture, IUser, Kind as UserKind } from './src/models/store/User.js';
 
 //

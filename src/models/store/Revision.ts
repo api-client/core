@@ -1,4 +1,4 @@
-import { IModification } from './store/Modification.js';
+import { IModification } from './Modification.js';
 
 export const Kind = 'Core#Revision';
 
@@ -6,7 +6,7 @@ export const Kind = 'Core#Revision';
  * The definition of a patch revision.
  * The revision is created with the `@api-client/json` library.
  */
-export interface IRevisionInfo {
+export interface IRevision {
   /**
    * The datastore key for this patch object.
    */

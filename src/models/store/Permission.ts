@@ -47,7 +47,6 @@ interface IBasePermission {
    * The store id of the user that added this permission.
    */
   addingUser: string;
-
   /**
    * Whether the permission object is deleted.
    */

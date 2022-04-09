@@ -4,6 +4,7 @@ import { IDeletion } from './Deletion.js';
 import { IUser, Kind as UserKind } from './User.js';
 import { IThing, Thing } from '../Thing.js';
 import v4 from '../../lib/uuid.js';
+import { ICapabilities } from './Capabilities.js';
 
 export const DefaultOwner = 'default';
 
@@ -56,6 +57,13 @@ export interface IStoredFile {
    * An arbitrary list of labels applied to the file.
    */
   labels?: string[];
+  /**
+   * This is populated when reading a file from the store.
+   * A list of actions the user can perform on the file.
+   * 
+   * This is a readonly field and it is ignored when creating / updating the file.
+   */
+  capabilities?: ICapabilities;
 }
 
 /**
