@@ -197,6 +197,7 @@ export class Environment {
       result.server = server.toJSON();
     }
     if (this.security) {
+      // TODO: When this is defined then call toJSON().
       result.security = this.security;
     }
     return result;

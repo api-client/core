@@ -401,7 +401,7 @@ export class Request {
       result.actions = this.actions.toJSON();
     }
     if (this.clientCertificate) {
-      result.clientCertificate = this.clientCertificate;
+      result.clientCertificate = { ...this.clientCertificate };
     }
     return result;
   }

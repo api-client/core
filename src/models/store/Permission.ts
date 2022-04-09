@@ -4,6 +4,7 @@ export const Kind = 'Core#Permission';
 
 export type PermissionType = 'user' | 'group' | 'anyone';
 export type PermissionRole = 'owner' | 'reader' | 'commenter' | 'writer';
+const orderedRoles: PermissionRole[] = ["reader", "commenter", "writer", "owner"];
 
 interface IBasePermission {
   /**
@@ -64,7 +65,7 @@ interface IBasePermission {
 /**
  * A schema describing a permission to a store object.
  */
-export interface IPermission extends IBasePermission{
+export interface IPermission extends IBasePermission {
   kind: typeof Kind;
   /**
    * The data store key of the permission.
@@ -141,6 +142,7 @@ export class Permission {
    * 
    * @param role The user role to set.
    * @param user The user id that has the role.
+   * @param addingUser The key of the user that created this permission
    */
   static fromUserRole(role: PermissionRole, user: string, addingUser: string): Permission {
     const init: IPermission = {
@@ -159,6 +161,7 @@ export class Permission {
    * 
    * @param role The group role to set.
    * @param group The group id that has the role.
+   * @param addingUser The key of the user that created this permission
    */
   static fromGroupRole(role: PermissionRole, group: string, addingUser: string): Permission {
     const init: IPermission = {
@@ -176,7 +179,7 @@ export class Permission {
    * Creates a Permission object for a group.
    * 
    * @param role The group role to set.
-   * @param group The group id that has the role.
+   * @param addingUser The key of the user that created this permission
    */
   static fromAnyoneRole(role: PermissionRole, addingUser: string): Permission {
     const init: IPermission = {
@@ -265,6 +268,31 @@ export class Permission {
       return false;
     }
     return true;
+  }
+
+  /**
+   * Checks whether the current user role meets the minimum required role.
+   * 
+   * @param minimumLevel The minimum requested role
+   * @param currentRole The user role. When not set it always returns false.
+   * @returns True if the `currentRole` is at least the `minimumRole`
+   */
+  static hasRole(minimumLevel: PermissionRole, currentRole?: PermissionRole): boolean {
+    if (!currentRole) {
+      return false;
+    }
+    const currentAccessIndex = orderedRoles.indexOf(currentRole);
+    const requestedAccessIndex = orderedRoles.indexOf(minimumLevel);
+    // the current must be at least at the index of requested.
+    return currentAccessIndex >= requestedAccessIndex;
+  }
+
+  /**
+   * Link to the `Permission.hasRole(minimumLevel, currentRole)`.
+   * @see {@link Permission.hasRole}
+   */
+  hasRole(minimumLevel: PermissionRole, currentRole: PermissionRole): boolean {
+    return Permission.hasRole(minimumLevel, currentRole);
   }
 
   toJSON(): IPermission {

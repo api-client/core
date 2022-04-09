@@ -101,9 +101,10 @@ export class RequestAuthorization {
   }
 
   toJSON(): IRequestAuthorization {
+    const { config={} } = this;
     const result:IRequestAuthorization = {
       kind: Kind,
-      config: this.config || {},
+      config: { ...config },
       enabled: this.enabled || false,
       type: this.type || '' as AuthorizationType,
       valid: this.valid || true,

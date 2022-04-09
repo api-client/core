@@ -1,6 +1,8 @@
 import { assert } from '@esm-bundle/chai';
 import { DefaultOwner, IFile, File } from '../../src/models/store/File.js';
 import { IUser } from '../../src/models/store/User.js';
+import { Project } from '../../src/models/Project.js';
+import { Workspace } from '../../src/models/Workspace.js';
 import { Kind as ThingKind } from '../../src/models/Thing.js';
 
 describe('Models', () => {
@@ -15,9 +17,10 @@ describe('Models', () => {
           assert.deepEqual(result.info.toJSON(), { kind: ThingKind, name: '' });
           assert.deepEqual(result.parents, []);
           assert.deepEqual(result.permissionIds, []);
-          assert.isUndefined(result.deleted);
+          assert.isFalse(result.deleted, 'deleted');
           assert.isUndefined(result.deletedInfo);
           assert.isUndefined(result.labels);
+          assert.isUndefined(result.iconColor);
           assert.deepEqual(result.lastModified, { user: '', time: 0, byMe: false });
         });
       });
@@ -51,6 +54,7 @@ describe('Models', () => {
             labels: ['l1'],
             deleted: true,
             deletedInfo: { byMe: false, time: 2, user: 'u2', name: 'delete-test' },
+            iconColor: '#c00',
           };
         });
 
@@ -155,7 +159,7 @@ describe('Models', () => {
           file.new(iFile);
           Reflect.deleteProperty(iFile, 'deleted');
           file.new(iFile);
-          assert.isUndefined(file.deleted);
+          assert.isFalse(file.deleted);
         });
 
         it('sets the deletedInfo with deleted', () => {
@@ -182,6 +186,19 @@ describe('Models', () => {
           Reflect.deleteProperty(iFile, 'labels');
           file.new(iFile);
           assert.isUndefined(file.labels);
+        });
+
+        it('sets the iconColor', () => {
+          file.new({ ...base });
+          assert.equal(file.iconColor, base.iconColor);
+        });
+
+        it('clears iconColor when not set', () => {
+          const iFile = { ...base };
+          file.new(iFile);
+          Reflect.deleteProperty(iFile, 'iconColor');
+          file.new(iFile);
+          assert.isUndefined(file.iconColor);
         });
       });
 
@@ -277,6 +294,19 @@ describe('Models', () => {
         it('does not set the labels by default', () => {
           const result = file.toJSON();
           assert.isUndefined(result.labels);
+        });
+
+        it('sets the iconColor', () => {
+          const iFile = { ...base };
+          iFile.iconColor = '#c00';
+          file.new({ ...iFile });
+          const result = file.toJSON();
+          assert.deepEqual(result.iconColor, '#c00');
+        });
+
+        it('does not set the iconColor by default', () => {
+          const result = file.toJSON();
+          assert.isUndefined(result.iconColor);
         });
       });
 
@@ -424,6 +454,200 @@ describe('Models', () => {
           assert.throws(() => {
             file.addLabel('    ');
           });
+        });
+      });
+
+      describe('File.createFileCapabilities()', () => {
+        describe('Project file', () => {
+          ([
+            ['canEdit', 'reader', false], 
+            ['canEdit', 'commenter', false], 
+            ['canEdit', 'writer', true], 
+            ['canEdit', 'owner', true],
+
+            ['canComment', 'reader', false], 
+            ['canComment', 'commenter', true], 
+            ['canComment', 'writer', true], 
+            ['canComment', 'owner', true],
+
+            ['canShare', 'reader', false], 
+            ['canShare', 'commenter', false], 
+            ['canShare', 'writer', true], 
+            ['canShare', 'owner', true],
+
+            ['canCopy', 'reader', false], 
+            ['canCopy', 'commenter', false], 
+            ['canCopy', 'writer', false], 
+            ['canCopy', 'owner', false],
+
+            ['canReadRevisions', 'reader', true], 
+            ['canReadRevisions', 'commenter', true], 
+            ['canReadRevisions', 'writer', true], 
+            ['canReadRevisions', 'owner', true],
+
+            ['canAddChildren', 'reader', false], 
+            ['canAddChildren', 'commenter', false], 
+            ['canAddChildren', 'writer', false], 
+            ['canAddChildren', 'owner', false],
+
+            ['canDelete', 'reader', false], 
+            ['canDelete', 'commenter', false], 
+            ['canDelete', 'writer', false], 
+            ['canDelete', 'owner', true],
+
+            ['canListChildren', 'reader', false], 
+            ['canListChildren', 'commenter', false], 
+            ['canListChildren', 'writer', false], 
+            ['canListChildren', 'owner', false],
+
+            ['canRename', 'reader', false], 
+            ['canRename', 'commenter', false], 
+            ['canRename', 'writer', true], 
+            ['canRename', 'owner', true],
+
+            ['canTrash', 'reader', false], 
+            ['canTrash', 'commenter', false], 
+            ['canTrash', 'writer', false], 
+            ['canTrash', 'owner', true],
+
+            ['canUntrash', 'reader', false], 
+            ['canUntrash', 'commenter', false], 
+            ['canUntrash', 'writer', false], 
+            ['canUntrash', 'owner', true],
+
+            ['canReadMedia', 'reader', true], 
+            ['canReadMedia', 'commenter', true], 
+            ['canReadMedia', 'writer', true], 
+            ['canReadMedia', 'owner', true],
+
+          ] as any[]).forEach((info) => {
+            it(`sets ${info[0]} for role ${info[1]}`, () => {
+              const file = new Project();
+              const result = File.createFileCapabilities(file, info[1]);
+              assert.strictEqual(result[info[0]], info[2]);
+            });
+          });
+        });
+
+        describe('Workspace file', () => {
+          ([
+            ['canEdit', 'reader', false], 
+            ['canEdit', 'commenter', false], 
+            ['canEdit', 'writer', true], 
+            ['canEdit', 'owner', true],
+
+            ['canComment', 'reader', false], 
+            ['canComment', 'commenter', true], 
+            ['canComment', 'writer', true], 
+            ['canComment', 'owner', true],
+
+            ['canShare', 'reader', false], 
+            ['canShare', 'commenter', false], 
+            ['canShare', 'writer', true], 
+            ['canShare', 'owner', true],
+
+            ['canCopy', 'reader', false], 
+            ['canCopy', 'commenter', false], 
+            ['canCopy', 'writer', false], 
+            ['canCopy', 'owner', false],
+
+            ['canReadRevisions', 'reader', true], 
+            ['canReadRevisions', 'commenter', true], 
+            ['canReadRevisions', 'writer', true], 
+            ['canReadRevisions', 'owner', true],
+
+            ['canAddChildren', 'reader', false], 
+            ['canAddChildren', 'commenter', false], 
+            ['canAddChildren', 'writer', true], 
+            ['canAddChildren', 'owner', true],
+
+            ['canDelete', 'reader', false], 
+            ['canDelete', 'commenter', false], 
+            ['canDelete', 'writer', false], 
+            ['canDelete', 'owner', true],
+
+            ['canListChildren', 'reader', true], 
+            ['canListChildren', 'commenter', true], 
+            ['canListChildren', 'writer', true], 
+            ['canListChildren', 'owner', true],
+
+            ['canRename', 'reader', false], 
+            ['canRename', 'commenter', false], 
+            ['canRename', 'writer', true], 
+            ['canRename', 'owner', true],
+
+            ['canTrash', 'reader', false], 
+            ['canTrash', 'commenter', false], 
+            ['canTrash', 'writer', false], 
+            ['canTrash', 'owner', true],
+
+            ['canUntrash', 'reader', false], 
+            ['canUntrash', 'commenter', false], 
+            ['canUntrash', 'writer', false], 
+            ['canUntrash', 'owner', true],
+
+            ['canReadMedia', 'reader', false], 
+            ['canReadMedia', 'commenter', false], 
+            ['canReadMedia', 'writer', false], 
+            ['canReadMedia', 'owner', false],
+
+          ] as any[]).forEach((info) => {
+            it(`sets ${info[0]} for role ${info[1]}`, () => {
+              const file = new Workspace();
+              const result = File.createFileCapabilities(file, info[1]);
+              assert.strictEqual(result[info[0]], info[2]);
+            });
+          });
+        });
+      });
+
+      describe('File.updateByMeMeta()', () => {
+        it('sets deletedInfo.byMe for the same user', () => {
+          const schema = Workspace.fromName('s1').toJSON();
+          schema.deletedInfo = {
+            byMe: false,
+            time: 1,
+            name: 'a',
+            user: 'b',
+          };
+          File.updateByMeMeta(schema, 'b');
+          assert.isTrue(schema.deletedInfo!.byMe);
+        });
+
+        it('sets deletedInfo.byMe for the different user', () => {
+          const schema = Workspace.fromName('s1').toJSON();
+          schema.deletedInfo = {
+            byMe: false,
+            time: 1,
+            name: 'a',
+            user: 'c',
+          };
+          File.updateByMeMeta(schema, 'b');
+          assert.isFalse(schema.deletedInfo!.byMe);
+        });
+
+        it('sets lastModified.byMe for the same user', () => {
+          const schema = Workspace.fromName('s1').toJSON();
+          schema.lastModified = {
+            byMe: false,
+            time: 1,
+            name: 'a',
+            user: 'b',
+          };
+          File.updateByMeMeta(schema, 'b');
+          assert.isTrue(schema.lastModified!.byMe);
+        });
+
+        it('sets lastModified.byMe for the different user', () => {
+          const schema = Workspace.fromName('s1').toJSON();
+          schema.lastModified = {
+            byMe: false,
+            time: 1,
+            name: 'a',
+            user: 'c',
+          };
+          File.updateByMeMeta(schema, 'b');
+          assert.isFalse(schema.lastModified!.byMe);
         });
       });
     });

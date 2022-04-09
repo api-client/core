@@ -46,7 +46,7 @@ export interface ICapabilities {
    */
   canAddChildren: boolean;
   /**
-   * Whether the user can delete the file.
+   * Whether the user can permanently delete the file.
    * 
    * The permission to edit can be inherited from a containing space so not visible
    * in the file's permissions.
