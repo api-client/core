@@ -1,3 +1,6 @@
+import { IProperty, Property } from './Property.js';
+import { UriTemplate } from '../lib/parsers/UriTemplate.js';
+
 export const Kind = 'Core#Server';
 
 export interface IServer {
@@ -129,8 +132,10 @@ export class Server {
 
   /**
    * Constructs the final URI from the server configuration.
+   * 
+   * @param variables When set it evaluates the generated URI against these variables
    */
-  readUri(): string {
+  readUri(variables?: (IProperty | Property)[]): string {
     const { uri, protocol, basePath } = this;
     let result = '';
     if (!uri) {
@@ -147,6 +152,32 @@ export class Server {
         result = result.substring(0, result.length - 1);
       }
       result += basePath.startsWith('/') ? basePath : `/${basePath}`
+    }
+    if (variables) {
+      return this.evaluateUri(result, variables);
+    }
+    return result;
+  }
+
+  /**
+   * Evaluates the URI against the variables.
+   * 
+   * Note, this doesn't throw errors. When error occurs it returns the input string. 
+   * 
+   * @param uri The URI to process
+   * @param variables The list of variables to use
+   * @returns Expanded URI.
+   */
+  protected evaluateUri(uri: string, variables: (IProperty | Property)[]): string {
+    if (!variables || !variables.length) {
+      return uri;
+    }
+    let result = uri;
+    try {
+      const map = Property.toMap(variables);
+      result = new UriTemplate(uri).expand(map, { ignoreMissing: true });
+    } catch (e) {
+      // 
     }
     return result;
   }

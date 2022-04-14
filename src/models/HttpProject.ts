@@ -1108,6 +1108,16 @@ export class HttpProject extends ProjectParent {
   }
 
   /**
+   * @returns Returns the effective environments. If the project has been initialized with an environment then it is returned. Otherwise other environments.
+   */
+  getEnvironments(): Environment[] {
+    if (Array.isArray(this.initEnvironments)) {
+      return this.initEnvironments;
+    }
+    return super.getEnvironments();
+  }
+
+  /**
    * Makes a copy of this project.
    */
   clone(opts: IProjectCloneOptions = {}): HttpProject {
@@ -1255,13 +1265,6 @@ export class HttpProject extends ProjectParent {
       return [];
     }
     return this.definitions.schemas;
-  }
-
-  getEnvironments(): Environment[] {
-    if (Array.isArray(this.initEnvironments)) {
-      return this.initEnvironments;
-    }
-    return super.getEnvironments();
   }
 
   /**

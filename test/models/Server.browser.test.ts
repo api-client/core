@@ -1,5 +1,6 @@
 import { assert } from '@esm-bundle/chai';
 import { Server, IServer, Kind as ServerKind } from '../../src/models/Server.js';
+import { Property } from '../../src/models/Property.js';
 
 describe('Models', () => {
   describe('Server', () => {
@@ -169,6 +170,27 @@ describe('Models', () => {
         info.basePath = 'api';
         const result = info.readUri();
         assert.equal(result, 'dot.com/api');
+      });
+
+      it('evaluates the uri when no variables', () => {
+        const info = Server.fromUri('https://api.com');
+        const p1 = Property.String('a', 'b');
+        const result = info.readUri([p1]);
+        assert.equal(result, 'https://api.com');
+      });
+
+      it('evaluates the uri', () => {
+        const info = Server.fromUri('https://{a}.com');
+        const p1 = Property.String('a', 'b');
+        const result = info.readUri([p1]);
+        assert.equal(result, 'https://b.com');
+      });
+
+      it('evaluates the uri when no property', () => {
+        const info = Server.fromUri('https://{a}.com');
+        const p1 = Property.String('c', 'b');
+        const result = info.readUri([p1]);
+        assert.equal(result, 'https://{a}.com');
       });
     });
   });

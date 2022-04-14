@@ -420,4 +420,22 @@ export class Property {
     }
     return result;
   }
+
+  /**
+   * Maps the list of properties to a single map.
+   * It overrides previously defined properties on the map in case of multiple variables with the same name.
+   * 
+   * @param properties The list of properties to map.
+   * @returns A map where keys are property names and values are the property values.
+   */
+  static toMap(properties: (IProperty | Property)[]): Record<string, any> {
+    const result: Record<string, any> = {};
+    properties.forEach(p => {
+      if (p.enabled === false) {
+        return;
+      }
+      result[p.name] = p.value;
+    });
+    return result;
+  }
 }

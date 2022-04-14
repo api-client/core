@@ -24,7 +24,7 @@ export class DataCalculator {
    * @param str A string to compute size from.
    * @returns The size of the string.
    */
-  stringSize(str: string): number {
+  static stringSize(str: string): number {
     if (!str || !str.length || typeof str !== 'string') {
       return 0;
     }
@@ -49,7 +49,7 @@ export class DataCalculator {
    * @param data The size of the form data
    * @returns The size of the form data
    */
-  async formDataSize(data: FormData): Promise<number> {
+  static async formDataSize(data: FormData): Promise<number> {
     if (typeof Request === 'undefined') {
       return 0;
     }
@@ -70,7 +70,7 @@ export class DataCalculator {
    * @param payload The payload to compute te size for 
    * @returns The size of the payload
    */
-  async payloadSize(payload: unknown): Promise<number> {
+  static async payloadSize(payload: unknown): Promise<number> {
     if (!payload) {
       return 0;
     }

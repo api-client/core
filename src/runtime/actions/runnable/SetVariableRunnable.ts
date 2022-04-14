@@ -3,7 +3,7 @@ import { ActionRunnable } from './ActionRunnable.js';
 import { ISetVariableAction } from '../../../models/actions/runnable/SetVariableAction.js';
 import { Events } from '../../../events/Events.js';
 import { RequestDataExtractor } from '../../../data/RequestDataExtractor.js';
-import { IRequestLog } from 'src/models/RequestLog.js';
+import { IRequestLog } from '../../../models/RequestLog.js';
 
 export class SetVariableRunnable extends ActionRunnable {
   async request(request: IHttpRequest): Promise<void> {

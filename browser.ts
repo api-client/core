@@ -64,10 +64,12 @@ export { Headers } from './src/lib/headers/Headers.js';
 export { Cookie, CookieOptions } from './src/lib/cookies/Cookie.js';
 export { Cookies } from './src/lib/cookies/Cookies.js';
 export * as TransformerUtils from './src/lib/transformers/Utils.js';
+export * as EventUtils from './src/lib/events/Utils.js';
 export { default as uuidV4 } from './src/lib/uuid.js';
 export { UrlParser } from './src/lib/parsers/UrlParser.js';
 export { UrlEncoder } from './src/lib/parsers/UrlEncoder.js';
 export * as Timers from './src/lib/timers/Timers.js';
+export { UriTemplate, IUriTemplateOptions } from './src/lib/parsers/UriTemplate.js';
 
 //
 // Runtime

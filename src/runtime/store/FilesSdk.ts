@@ -338,4 +338,20 @@ export class FilesSdk extends SdkBase {
     const url = this.sdk.getUrl(RouteBuilder.files());
     return this.sdk.ws.createAndConnect(url.toString(), token);
   }
+
+  /**
+   * Creates a WS client that listens to the file events.
+   * 
+   * @param key The file key to observe
+   * @param media Whether to observe changes to the file media instead of meta.
+   * @param request Optional request options.
+   */
+  async observeFile(key: string, media?: boolean, request: ISdkRequestOptions = {}): Promise<WebSocketNode | WebSocket> {
+    const token = request.token || this.sdk.token;
+    const url = this.sdk.getUrl(RouteBuilder.file(key));
+    if (media) {
+      url.searchParams.set('alt', 'media');
+    }
+    return this.sdk.ws.createAndConnect(url.toString(), token);
+  }
 }

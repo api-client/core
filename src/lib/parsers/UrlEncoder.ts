@@ -71,4 +71,55 @@ export class UrlEncoder {
     }
     return decodeURIComponent(result);
   }
+
+  static strictEncode(str: string): string {
+    if (!str) {
+      return str;
+    }
+    const escaped = {
+      '!': '%21',
+      "'": '%27',
+      '(': '%28',
+      ')': '%29',
+    };
+    return encodeURIComponent(str).replace(/\*/g, '%2A')
+    // @ts-ignore
+    .replace(/[!'()*]/g, (c) => escaped[c] );
+  }
+
+  /**
+   * For URI templates encodes the URL string without encoding the reserved characters.
+   */
+  static encodeReserved(str: string): string {
+    if (!str) {
+      return str;
+    }
+    const expression = /%(21|23|24|26|27|28|29|2A|2B|2C|2F|3A|3B|3D|3F|40|5B|5D)/ig;
+    const map = {
+      // gen-delims
+      '%3A': ':',
+      '%2F': '/',
+      '%3F': '?',
+      '%23': '#',
+      '%5B': '[',
+      '%5D': ']',
+      '%40': '@',
+      // sub-delims
+      '%21': '!',
+      '%24': '$',
+      '%26': '&',
+      '%27': '\'',
+      '%28': '(',
+      '%29': ')',
+      '%2A': '*',
+      '%2B': '+',
+      '%2C': ',',
+      '%3B': ';',
+      '%3D': '='
+    };
+    let result = UrlEncoder.strictEncode(str);
+    // @ts-ignore
+    result = result.replace(expression, (c) => map[c]);
+    return result;
+  }
 }

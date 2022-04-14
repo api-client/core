@@ -3,7 +3,7 @@ import tls from 'tls';
 import http from 'http';
 import https from 'https';
 import { HttpEngine, HttpEngineOptions, HeadersReceivedDetail } from './HttpEngine.js';
-import { IRequestLog } from 'src/models/RequestLog.js';
+import { IRequestLog } from '../../models/RequestLog.js';
 import { IHttpRequest } from '../../models/HttpRequest.js';
 import { Response } from '../../models/Response.js';
 import { SerializableError } from '../../models/SerializableError.js';

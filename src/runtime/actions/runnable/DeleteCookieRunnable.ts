@@ -2,7 +2,7 @@ import { IHttpRequest } from 'src/models/HttpRequest.js';
 import { ActionRunnable } from './ActionRunnable.js';
 import { IDeleteCookieAction } from '../../../models/actions/runnable/DeleteCookieAction.js';
 import { Events } from '../../../events/Events.js';
-import { IRequestLog } from 'src/models/RequestLog.js';
+import { IRequestLog } from '../../../models/RequestLog.js';
 
 export class DeleteCookieRunnable extends ActionRunnable {
   async response(log: IRequestLog): Promise<void> {

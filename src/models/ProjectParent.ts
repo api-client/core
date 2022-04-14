@@ -110,4 +110,31 @@ export abstract class ProjectParent implements ProjectDefinitionProperty {
     });
     return result;
   }
+
+  /**
+   * @param key The environment key to read.
+   */
+  getEnvironment(key: string): Environment | undefined {
+    const { environments } = this;
+    if (!environments.length) {
+      return undefined;
+    }
+    const has = environments.includes(key);
+    if (!has) {
+      return undefined;
+    }
+    const project = this.getProject();
+    if (!project.definitions.environments) {
+      return undefined;
+    }
+    return project.definitions.environments.find(i => i.key === key);
+  }
+
+  /**
+   * This is a link to the `getEnvironments()`. The difference is that on the 
+   * project level it won't return environments defined with the class initialization.
+   */
+  listEnvironments(): Environment[] {
+    return this.getEnvironments();
+  }
 }
