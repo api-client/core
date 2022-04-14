@@ -1118,6 +1118,16 @@ export class HttpProject extends ProjectParent {
   }
 
   /**
+   * Finds a definition for an environment regardless of its parent.
+   * 
+   * @param key The Key of the environment to find.
+   * @returns The environment definition or undefined if not found.
+   */
+  findEnvironment(key: string): Environment | undefined {
+    return this.definitions.environments.find(i => i.key === key);
+  }
+
+  /**
    * Makes a copy of this project.
    */
   clone(opts: IProjectCloneOptions = {}): HttpProject {
