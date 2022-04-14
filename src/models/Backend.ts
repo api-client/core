@@ -16,14 +16,45 @@ export interface IBackendInfo {
    * @default single-user
    */
   mode: BackendMode;
+  
   /**
-   * Optional, the store base path when set on the configuration.
+   * Client authentication configuration
    */
-  prefix?: string;
+  auth: {
+    /**
+     * The path to the authentication endpoint.
+     * This is always populated whether the store is in the single- or multi-user mode.
+     */
+    path: string;
+    /**
+     * When configured, the OAuth2 redirect URI.
+     */
+    redirect?: string;
+    /**
+     * When configured the type of the authentication protocol.
+     */
+    type?: string;
+  }
+
   /**
-   * The path to the authentication endpoint.
+   * The information about hosting.
    */
-  authPath: string;
+  hosting: {
+    /**
+     * Optional, the store base path when set on the configuration.
+     */
+    prefix?: string;
+    /**
+     * When configured with the host information, this is the public host name of the store.
+     * When using udp to discover the store in the local network, this is the ip address of the machine the store
+     * is running on.
+     */
+    host?: string;
+    /**
+     * The port number the store operates on.
+     */
+    port: number;
+  }
 }
 
 export interface IBackendCommand {
