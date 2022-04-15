@@ -1,8 +1,7 @@
 import WebSocketNode from 'ws';
 import { SdkBase, E_RESPONSE_STATUS, E_RESPONSE_NO_VALUE, E_INVALID_JSON, E_RESPONSE_UNKNOWN, E_RESPONSE_LOCATION, ISdkRequestOptions } from './SdkBase.js';
 import { RouteBuilder } from './RouteBuilder.js';
-import { IListOptions, IListResponse, IPatchInfo, IPatchRevision } from '../../models/store/Backend.js';
-import { AccessOperation } from '../../models/store/Permission.js';
+import { IListOptions, IListResponse, IPatchInfo, IPatchRevision, IAccessPatchInfo } from '../../models/store/Backend.js';
 import { IUser } from '../../models/store/User.js';
 import { IFile } from '../../models/store/File.js';
 import { Kind as ProjectKind } from '../../models/Project.js';
@@ -275,7 +274,7 @@ export class FilesSdk extends SdkBase {
    * @param value The patch operation on the file's ACL
    * @param request Optional request options.
    */
-  async patchUsers(key: string, value: AccessOperation[], request: ISdkRequestOptions = {}): Promise<void> {
+  async patchUsers(key: string, value: IAccessPatchInfo, request: ISdkRequestOptions = {}): Promise<void> {
     const token = request.token || this.sdk.token;
     const url = this.sdk.getUrl(RouteBuilder.fileUsers(key));
     const body = JSON.stringify(value);
