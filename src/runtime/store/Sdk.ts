@@ -1,4 +1,4 @@
-import { IListOptions } from '../../models/Backend.js';
+import { IListOptions } from '../../models/store/Backend.js';
 import { Http } from './Http.js';
 import { WsClient } from './WsClient.js';
 import { AuthSdk } from './AuthSdk.js';

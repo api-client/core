@@ -1,6 +1,6 @@
 import { SdkBase, E_RESPONSE_STATUS, E_RESPONSE_NO_VALUE, E_INVALID_JSON, E_RESPONSE_UNKNOWN, ISdkRequestOptions } from './SdkBase.js';
 import { RouteBuilder } from './RouteBuilder.js';
-import { IListOptions, IListResponse } from '../../models/Backend.js';
+import { IListOptions, IListResponse } from '../../models/store/Backend.js';
 import { IUser } from '../../models/store/User.js';
 
 export class UsersSdk extends SdkBase {

@@ -7,7 +7,6 @@ export { IApplication } from './src/models/Application.js';
 export { Response, IResponse, Kind as ResponseKind } from './src/models/Response.js';
 export { IAuthorizationSettingsUnion, IApiKeyAuthorization, IAuthorizationParams, IBasicAuthorization, IBearerAuthorization, ICCAuthorization, IDigestAuthorization, INtlmAuthorization, IOAuth1Authorization, IOAuth2Authorization, IOAuth2AuthorizationRequestCustomData, IOAuth2CustomData, IOAuth2CustomParameter, IOAuth2TokenRequestCustomData, IOauth2GrantType, IOauth2ResponseType, IOidcAuthorization, IOidcTokenError, IOidcTokenInfo, IPassThroughAuthorization, IRamlCustomAuthorization, ITokenError, ITokenInfo, ITokenRemoveOptions, OAuth2DeliveryMethod } from './src/models/Authorization.js';
 export { AuthorizationData, IAuthorizationData } from './src/models/AuthorizationData.js';
-export { IBackendInfo, IBackendCommand, IBackendEvent, IListResponse, IListOptions, HistoryListOptions, IHistorySpaceListOptions, IHistoryProjectListOptions, IHistoryRequestListOptions, IHistoryUserListOptions, IHistoryAppListOptions, ICursorOptions } from './src/models/Backend.js';
 export { CertificateType, ICertificate, ICertificateIndex, IClientCertificate, IRequestCertificate } from './src/models/ClientCertificate.js';
 export { Environment, IEnvironment, Kind as EnvironmentKind } from './src/models/Environment.js';
 export { ErrorResponse, IErrorResponse } from './src/models/ErrorResponse.js';
@@ -45,6 +44,7 @@ export { WebApi, IWebApi, ILegacyRestApi } from './src/models/WebApi.js';
 export { WebApiIndex, IWebApiIndex, ILegacyWebApiIndex } from './src/models/WebApiIndex.js';
 export { IWorkspace, Workspace, Kind as WorkspaceKind } from './src/models/Workspace.js';
 
+export * from './src/models/store/Backend.js';
 export { IBreadcrumb } from './src/models/store/Breadcrumb.js';
 export { ICapabilities } from './src/models/store/Capabilities';
 export { IFile, File, IStoredFile, StoredFile, DefaultOwner } from './src/models/store/File.js';

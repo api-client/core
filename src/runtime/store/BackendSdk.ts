@@ -1,6 +1,6 @@
 import { SdkBase } from './SdkBase.js';
 import { RouteBuilder } from './RouteBuilder.js';
-import { IBackendInfo } from '../../models/Backend.js';
+import { IBackendInfo } from '../../models/store/Backend.js';
 
 export class BackendSdk extends SdkBase {
   /**

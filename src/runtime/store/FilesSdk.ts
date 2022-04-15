@@ -1,8 +1,7 @@
 import WebSocketNode from 'ws';
-import { Patch } from '@api-client/json';
 import { SdkBase, E_RESPONSE_STATUS, E_RESPONSE_NO_VALUE, E_INVALID_JSON, E_RESPONSE_UNKNOWN, E_RESPONSE_LOCATION, ISdkRequestOptions } from './SdkBase.js';
 import { RouteBuilder } from './RouteBuilder.js';
-import { IListOptions, IListResponse } from '../../models/Backend.js';
+import { IListOptions, IListResponse, IPatchInfo, IPatchRevision } from '../../models/store/Backend.js';
 import { AccessOperation } from '../../models/store/Permission.js';
 import { IUser } from '../../models/store/User.js';
 import { IFile } from '../../models/store/File.js';
@@ -193,7 +192,7 @@ export class FilesSdk extends SdkBase {
    * @param value The patch to apply.
    * @param request Optional request options.
    */
-  patch(key: string, value: Patch.JsonPatch, media: false, request?: ISdkRequestOptions): Promise<Patch.JsonPatch>;
+  patch(key: string, value: IPatchInfo, media: false, request?: ISdkRequestOptions): Promise<IPatchRevision>;
 
   /**
    * Patches file's content in the store.
@@ -202,7 +201,7 @@ export class FilesSdk extends SdkBase {
    * @param value The patch to apply.
    * @param request Optional request options.
    */
-  patch(key: string, value: Patch.JsonPatch, media: true, request?: ISdkRequestOptions): Promise<Patch.JsonPatch>;
+  patch(key: string, value: IPatchInfo, media: true, request?: ISdkRequestOptions): Promise<IPatchRevision>;
 
   /**
    * Patches a file in the store.
@@ -211,7 +210,7 @@ export class FilesSdk extends SdkBase {
    * @param request Optional request options.
    * @returns The JSON patch to revert the change using the `@api-client/json` library
    */
-  async patch(key: string, value: Patch.JsonPatch, media?: boolean, request: ISdkRequestOptions = {}): Promise<Patch.JsonPatch> {
+  async patch(key: string, value: IPatchInfo, media?: boolean, request: ISdkRequestOptions = {}): Promise<IPatchRevision> {
     const token = request.token || this.sdk.token;
     const url = this.sdk.getUrl(RouteBuilder.file(key));
     if (media) {
@@ -233,16 +232,17 @@ export class FilesSdk extends SdkBase {
     if (!result.body) {
       throw new Error(`${E_PREFIX}${E_RESPONSE_NO_VALUE}`);
     }
-    let data: any;
+    let data: IPatchRevision;
     try {
       data = JSON.parse(result.body);
     } catch (e) {
       throw new Error(`${E_PREFIX}${E_INVALID_JSON}.`);
     }
+    // revert is added to the response
     if (!data.revert) {
       throw new Error(`${E_PREFIX}${E_RESPONSE_UNKNOWN}.`);
     }
-    return data.revert as Patch.JsonPatch;
+    return data;
   }
 
   /**

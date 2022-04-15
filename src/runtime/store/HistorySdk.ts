@@ -1,6 +1,6 @@
 import { SdkBase, E_RESPONSE_STATUS, E_RESPONSE_NO_VALUE, E_INVALID_JSON, E_RESPONSE_UNKNOWN, E_RESPONSE_LOCATION, ISdkRequestOptions } from './SdkBase.js';
 import { RouteBuilder } from './RouteBuilder.js';
-import { IListResponse, HistoryListOptions, IHistoryRequestListOptions } from '../../models/Backend.js';
+import { IListResponse, HistoryListOptions, IHistoryRequestListOptions } from '../../models/store/Backend.js';
 import { IHttpHistory, IHttpHistoryBulkAdd, Kind as HttpHistoryKind } from '../../models/HttpHistory.js';
 
 export class HistorySdk extends SdkBase {
