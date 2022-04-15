@@ -28,7 +28,6 @@ describe('Models', () => {
             kind: HttpProjectKind,
             key: 'abc',
             definitions: {},
-            environments: [],
             items: [],
             info: {
               kind: ThingKind,

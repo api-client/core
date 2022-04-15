@@ -1,12 +1,15 @@
 import { Kind as ProjectFolderKind, ProjectFolder } from './ProjectFolder.js';
 import { Kind as ProjectRequestKind, ProjectRequest } from './ProjectRequest.js';
+import { Kind as EnvironmentKind, Environment } from './Environment.js';
 import { HttpProject } from './HttpProject.js';
+
+type Kind = typeof ProjectFolderKind | typeof ProjectRequestKind | typeof EnvironmentKind;
 
 export interface IProjectItem {
   /**
    * The kind of the item.
    */
-  kind: typeof ProjectFolderKind | typeof ProjectRequestKind;
+  kind: Kind;
   /**
    * The identifier in the `definitions` array of the project.
    */
@@ -17,7 +20,7 @@ export class ProjectItem {
   /**
    * The kind of the item.
    */
-  kind: typeof ProjectFolderKind | typeof ProjectRequestKind = ProjectRequestKind;
+  kind: Kind = ProjectRequestKind;
   /**
    * The identifier of the object in the `definitions` array of the project.
    */
@@ -32,16 +35,16 @@ export class ProjectItem {
    */
   static isProjectItem(input: unknown): boolean {
     const typed = input as IProjectItem;
-    if (!input || ![ProjectFolderKind, ProjectRequestKind].includes(typed.kind)) {
+    if (!input || ![ProjectFolderKind, ProjectRequestKind, EnvironmentKind].includes(typed.kind)) {
       return false;
     }
     return true;
   }
 
   /**
-   * @return An instance that represents a request object
+   * @return An instance that represents a request item
    */
-  static projectRequest(project: HttpProject, key: string) : ProjectItem {
+  static projectRequest(project: HttpProject, key: string): ProjectItem {
     const item = new ProjectItem(project, {
       kind: ProjectRequestKind,
       key,
@@ -50,11 +53,22 @@ export class ProjectItem {
   }
 
   /**
-   * @return An instance that represents a folder object
+   * @return An instance that represents a folder item
    */
-  static projectFolder(project: HttpProject, key: string) : ProjectItem {
+  static projectFolder(project: HttpProject, key: string): ProjectItem {
     const item = new ProjectItem(project, {
       kind: ProjectFolderKind,
+      key,
+    });
+    return item;
+  }
+
+  /**
+   * @return An instance that represents an environment item
+   */
+  static projectEnvironment(project: HttpProject, key: string): ProjectItem {
+    const item = new ProjectItem(project, {
+      kind: EnvironmentKind,
       key,
     });
     return item;
@@ -64,7 +78,7 @@ export class ProjectItem {
    * @param project The top-most project.
    * @param input The project item definition used to restore the state.
    */
-  constructor(project: HttpProject, input: string|IProjectItem) {
+  constructor(project: HttpProject, input: string | IProjectItem) {
     this.project = project;
     let init: IProjectItem;
     if (typeof input === 'string') {
@@ -76,6 +90,11 @@ export class ProjectItem {
       } else if (input === 'folder') {
         init = {
           kind: ProjectFolderKind,
+          key: '',
+        };
+      } else if (input === 'environment') {
+        init = {
+          kind: EnvironmentKind,
           key: '',
         };
       } else {
@@ -114,7 +133,7 @@ export class ProjectItem {
   /**
    * @returns The instance of the definition associated with this item.
    */
-  getItem(): ProjectFolder | ProjectRequest| undefined {
+  getItem(): ProjectFolder | ProjectRequest | Environment | undefined {
     const { project, key, kind } = this;
     const { definitions } = project;
     if (kind === ProjectRequestKind) {
@@ -123,12 +142,15 @@ export class ProjectItem {
     if (kind === ProjectFolderKind) {
       return definitions.folders.find(i => i.key === key);
     }
+    if (kind === EnvironmentKind) {
+      return definitions.environments.find(i => i.key === key);
+    }
   }
 
   /**
-   * @returns The instance of the HttpProject or a ProjectFolder that is a closes parent of this item.
+   * @returns The instance of the HttpProject or a ProjectFolder that is a closest parent of this item.
    */
-  getParent(): ProjectFolder|HttpProject|undefined {
+  getParent(): ProjectFolder | HttpProject | undefined {
     const { project, key } = this;
     return project.findParent(key);
   }

@@ -7,7 +7,7 @@ import { ProjectRequest } from '../../src/models/ProjectRequest.js';
 import { Kind as ThingKind } from '../../src/models/Thing.js';
 import { Kind as ProviderKind } from '../../src/models/Provider.js';
 import { Kind as LicenseKind } from '../../src/models/License.js';
-import { Kind as EnvironmentKind, Environment } from '../../src/models/Environment.js';
+import { Environment } from '../../src/models/Environment.js';
 import { ProjectSchema } from '../../src/models/ProjectSchema.js';
 import { ArcLegacyProject } from '../../src/models/legacy/models/ArcLegacyProject.js';
 import { ARCSavedRequest } from '../../src/models/legacy/request/ArcRequest.js';
@@ -29,7 +29,6 @@ describe('Models', () => {
           assert.deepEqual(result.definitions.folders, [], 'sets the definitions.folders property');
           assert.deepEqual(result.definitions.requests, [], 'sets the definitions.requests property');
           assert.deepEqual(result.definitions.schemas, [], 'sets the definitions.schemas property');
-          assert.deepEqual(result.environments, [], 'sets the environments property');
           assert.deepEqual(result.items, [], 'sets the items property');
           const { info } = result;
           assert.typeOf(info, 'object', 'sets the default info property');
@@ -80,7 +79,6 @@ describe('Models', () => {
                 }
               ]
             },
-            environments: ['b'],
             info: {
               kind: ThingKind,
               name: 'Project',
@@ -118,7 +116,6 @@ describe('Models', () => {
             kind: HttpProjectKind,
             key: 'abc',
             definitions: {},
-            environments: [],
             items: [],
             info: {
               kind: ThingKind,
@@ -172,23 +169,6 @@ describe('Models', () => {
           assert.equal(license.name, 'Test License', 'sets the license.name property');
           assert.equal(license.content, 'test content', 'sets the license.content property');
           assert.equal(license.url, 'https://test.com', 'sets the license.url property');
-        });
-
-        it('sets the environments', () => {
-          const env = Environment.fromName('test environment');
-          const init: IHttpProject = { ...base, ...{ environments: [env.key]}};
-          init.definitions = { ...init.definitions };
-          init.definitions.environments = [env.toJSON()];
-          const project = new HttpProject(init);
-          const { environments: environmentKeys } = project;
-          assert.typeOf(environmentKeys, 'array', 'has the environment keys')
-          assert.lengthOf(environmentKeys, 1, 'has a single environment key')
-          const { environments } = project.definitions;
-          assert.typeOf(environments, 'array', 'has the environment definitions')
-          assert.lengthOf(environments, 1, 'has a single environment definition')
-          const [item] = environments;
-          assert.equal(item.kind, EnvironmentKind, 'sets the item.kind property');
-          assert.equal(item.info.name, env.info.name, 'sets the item.info.name property');
         });
 
         it('sets the items', () => {
@@ -266,7 +246,6 @@ describe('Models', () => {
           assert.deepEqual(project.definitions.folders, [], 'sets the definitions.folders property');
           assert.deepEqual(project.definitions.requests, [], 'sets the definitions.requests property');
           assert.deepEqual(project.definitions.schemas, [], 'sets the definitions.schemas property');
-          assert.deepEqual(project.environments, [], 'sets the environments property');
           assert.deepEqual(project.items, [], 'sets the items property');
           const { info } = project;
           assert.typeOf(info, 'object', 'sets the default info property');
@@ -390,7 +369,6 @@ describe('Models', () => {
         assert.equal(folder.created, folder.updated, 'the updated and created properties equal');
         
         assert.deepEqual(folder.items, [], 'has empty items');
-        assert.deepEqual(folder.environments, [], 'has empty environments');
       });
 
       it('adds multiple folders', () => {
@@ -1365,6 +1343,58 @@ describe('Models', () => {
       });
     });
 
+    describe('addEnvironment()', () => {
+      let project: HttpProject;
+      beforeEach(() => {
+        project = HttpProject.fromName('test');
+      });
+
+      it('adds environment by name', () => {
+        const created = project.addEnvironment('test');
+        assert.deepEqual(project.definitions.environments, [created]);
+      });
+
+      it('adds environment from an instance', () => {
+        const env = Environment.fromName('test');
+        project.addEnvironment(env);
+        assert.deepEqual(project.definitions.environments, [env]);
+      });
+
+      it('adds environment from a schema', () => {
+        const env = Environment.fromName('test');
+        project.addEnvironment(env.toJSON());
+        assert.deepEqual(project.definitions.environments, [env]);
+      });
+
+      it('creates environment array when missing', () => {
+        delete project.definitions.environments;
+        const created = project.addEnvironment('test');
+        assert.deepEqual(project.definitions.environments, [created]);
+      });
+
+      it('adds missing keys', () => {
+        const env = Environment.fromName('test');
+        delete env.key;
+        project.addEnvironment(env);
+        const envs = project.getEnvironments();
+        assert.typeOf(envs[0].key, 'string');
+      });
+
+      it('adds the environment to the list of project items', () => {
+        const e1 = project.addEnvironment('e1');
+        assert.lengthOf(project.items, 1);
+        assert.equal(project.items[0].key, e1.key);
+      });
+
+      it('adds the environment to a folder', () => {
+        const f1 = project.addFolder('f1');
+        const e1 = project.addEnvironment('e1', { parent: f1.key });
+        assert.deepEqual(project.definitions.environments, [e1], 'has the env definition on the project');
+        assert.lengthOf(project.items, 1, 'project has only folder item');
+        assert.deepEqual(f1.items[0].key, e1.key);
+      });
+    });
+
     describe('readEnvironments()', () => {
       let project: HttpProject;
       beforeEach(() => {
@@ -1389,12 +1419,11 @@ describe('Models', () => {
         assert.equal(envs[0].info.name, 'b', 'has the first environment');
       });
 
-      it('reads environments to a folder', async () => {
+      it('reads environments from a folder', async () => {
         project.addEnvironment('a');
         const f = project.addFolder('folder');
         f.addEnvironment('b');
-
-        const envs = await project.readEnvironments({ folderKey: f.key });
+        const envs = await project.readEnvironments({ parent: f.key });
         assert.lengthOf(envs, 2, 'has all environments');
         assert.equal(envs[0].info.name, 'a', 'has the first environment');
         assert.equal(envs[1].info.name, 'b', 'has the second environment');
@@ -1406,7 +1435,7 @@ describe('Models', () => {
         const f2 = f1.addFolder('folder 2');
         f2.addEnvironment('b');
 
-        const envs = await project.readEnvironments({ folderKey: f2.key });
+        const envs = await project.readEnvironments({ parent: f2.key });
         assert.lengthOf(envs, 2, 'has all environments');
         assert.equal(envs[0].info.name, 'a', 'has the first environment');
         assert.equal(envs[1].info.name, 'b', 'has the second environment');
@@ -1420,7 +1449,7 @@ describe('Models', () => {
         const env = f2.addEnvironment('c');
         env.encapsulated = true;
 
-        const envs = await project.readEnvironments({ folderKey: f2.key });
+        const envs = await project.readEnvironments({ parent: f2.key });
         assert.lengthOf(envs, 1, 'has a single environment');
         assert.equal(envs[0].info.name, 'c', 'has the folder environment');
       });
@@ -1429,8 +1458,33 @@ describe('Models', () => {
         project.addEnvironment('a');
         const f = project.addFolder('folder 1');
         f.addEnvironment('b');
-        const envs = await project.readEnvironments({ folderKey: 'some' });
+        const envs = await project.readEnvironments({ parent: 'some' });
         assert.lengthOf(envs, 0);
+      });
+    });
+
+    describe('listEnvironments()', () => {
+      let project: HttpProject;
+      beforeEach(() => {
+        project = new HttpProject();
+      });
+
+      it('returns environments defined in the project only', () => {
+        const f1 = project.addFolder('f1');
+        f1.addEnvironment('e1');
+        const e2 = project.addEnvironment('e2');
+
+        const result = project.listEnvironments();
+        assert.deepEqual(result, [e2]);
+      });
+
+      it('returns environments defined in a folder', () => {
+        const f1 = project.addFolder('f1');
+        const e1 = f1.addEnvironment('e1');
+        project.addEnvironment('e2');
+
+        const result = project.listEnvironments({ parent: f1.key });
+        assert.deepEqual(result, [e1]);
       });
     });
 
@@ -1457,7 +1511,7 @@ describe('Models', () => {
         assert.equal(envs[0].info.name, 'test');
       });
 
-      it('returns environments defined in the project only', () => {
+      it('returns environments when no initialization environments', () => {
         const project = new HttpProject();
         const f1 = project.addFolder('f1');
         f1.addEnvironment('e1');
@@ -1486,6 +1540,53 @@ describe('Models', () => {
         assert.deepEqual(result, env);
       });
     })
+
+    describe('removeEnvironment()', () => {
+      let project: HttpProject;
+      beforeEach(() => {
+        project = new HttpProject();
+      });
+
+      it('removes the environment from the definitions when in project root', () => {
+        const e1 = project.addEnvironment('e1');
+        project.removeEnvironment(e1.key);
+        assert.deepEqual(project.definitions.environments, []);
+      });
+
+      it('removes the environment from the definitions when in a folder', () => {
+        const f1 = project.addFolder('f1');
+        const e1 = f1.addEnvironment('e1');
+        project.removeEnvironment(e1.key, { parent: f1.key });
+        assert.deepEqual(project.definitions.environments, []);
+      });
+
+      it('does nothing when the environment does not belong to the folder', () => {
+        const f1 = project.addFolder('f1');
+        const f2 = f1.addFolder('f2');
+        const e1 = f2.addEnvironment('e1');
+        project.removeEnvironment(e1.key, { parent: f1.key });
+        assert.isNotEmpty(project.definitions.environments);
+      });
+
+      it('returns the removed environment', () => {
+        const e1 = project.addEnvironment('e1');
+        const result = project.removeEnvironment(e1.key);
+        assert.deepEqual(result, e1);
+      });
+
+      it('removes the environment from the project items', () => {
+        const e1 = project.addEnvironment('e1');
+        project.removeEnvironment(e1.key);
+        assert.deepEqual(project.items, []);
+      });
+
+      it('removes the environment from the folder items', () => {
+        const f1 = project.addFolder('f1');
+        const e1 = f1.addEnvironment('e1');
+        project.removeEnvironment(e1.key, { parent: f1.key });
+        assert.deepEqual(f1.items, []);
+      });
+    });
 
     describe('clone()', () => {
       let project: HttpProject;

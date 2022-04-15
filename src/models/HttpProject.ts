@@ -1,6 +1,6 @@
 import { ProjectParent } from './ProjectParent.js';
 import { IProjectDefinitionProperty } from './ProjectDefinitionProperty.js';
-import { Environment, IEnvironment } from './Environment.js';
+import { Environment, IEnvironment, Kind as EnvironmentKind } from './Environment.js';
 import { License, ILicense } from './License.js';
 import { Provider, IProvider } from './Provider.js';
 import { IThing, Thing, Kind as ThingKind } from './Thing.js';
@@ -15,6 +15,24 @@ import { ArcLegacyProject, ARCProject } from './legacy/models/ArcLegacyProject.j
 import { PostmanDataTransformer } from './transformers/PostmanDataTransformer.js';
 
 export const Kind = 'Core#HttpProject';
+
+export interface IItemOptions {
+  /**
+   * The parent folder to add the item to.
+   */
+  parent?: string;
+}
+
+export interface IItemCreateOptions extends IItemOptions{
+  
+  /**
+   * The position at which to add the item.
+   */
+  index?: number;
+}
+
+export interface IEnvironmentCreateOptions extends IItemCreateOptions {
+}
 
 /**
  * A list of options to initialize a project in various situations.
@@ -95,20 +113,16 @@ export interface IProjectMoveOptions {
   parent?: string;
 }
 
-export interface IReadEnvironmentOptions {
+export interface IReadEnvironmentOptions extends IItemOptions {
   /**
    * The name or the key of the environment to select.
    * 
    * When the name is not specified it selects: 
    * - the first environment from the project, if any
-   * - any parent folder's first environment to the requested folder, if any (if folderKey is set)
-   * - the requested folder's first environment, if any (if folderKey is set)
+   * - any parent folder's first environment to the requested folder, if any (if parent is set)
+   * - the requested folder's first environment, if any (if parent is set)
    */
   nameOrKey?: string;
-  /**
-   * The key of the folder to collect the environments for.
-   */
-  folderKey?: string;
 }
 
 /**
@@ -226,11 +240,6 @@ export interface IHttpProject extends IProjectDefinitionProperty {
    * This is where all the data are stored.
    */
   definitions: IHttpProjectDefinitions;
-  /**
-   * The list of environment keys to apply to the project.
-   * Each key references an environment in the `definitions.environments` array.
-   */
-  environments?: string[];
 }
 
 export interface IHttpProjectDefinitions {
@@ -377,12 +386,8 @@ export class HttpProject extends ProjectParent {
     if (!init || !init.definitions || !init.items) {
       throw new Error(`Not a project.`);
     }
-    const { key = v4(), definitions = {}, items, info, license, provider, environments } = init;
+    const { key = v4(), definitions = {}, items, info, license, provider } = init;
     this.key = key;
-    this.environments = [];
-    if (Array.isArray(environments)) {
-      this.environments = [...environments];
-    }
     if (license) {
       this.license = new License(license);
     } else {
@@ -430,7 +435,6 @@ export class HttpProject extends ProjectParent {
       kind: Kind,
       key: this.key,
       definitions: {},
-      environments: [],
       items: [],
       info: this.info.toJSON(),
     };
@@ -445,9 +449,6 @@ export class HttpProject extends ProjectParent {
     }
     if (Array.isArray(this.definitions.schemas) && this.definitions.schemas.length) {
       result.definitions.schemas = this.definitions.schemas.map(i => i.toJSON());
-    }
-    if (Array.isArray(this.environments) && this.environments.length) {
-      result.environments = [...this.environments];
     }
     if (Array.isArray(this.items) && this.items.length) {
       result.items = this.items.map(i => i.toJSON());
@@ -1010,24 +1011,18 @@ export class HttpProject extends ProjectParent {
     const { items = [] } = root;
     const { definitions } = this;
     items.forEach((item) => {
-      let definition: ProjectFolder | ProjectRequest | undefined;
+      let definition: ProjectFolder | ProjectRequest | Environment | undefined;
       if (item.kind === ProjectFolderKind) {
         definition = definitions.folders.find(d => item.key === d.key);
       } else if (item.kind === ProjectRequestKind) {
         definition = definitions.requests.find(d => item.key === d.key);
+      } else if (item.kind === EnvironmentKind) {
+        definition = definitions.environments.find(d => item.key === d.key);
       }
       if (definition) {
         result.push(definition);
       }
     });
-    if (Array.isArray(root.environments)) {
-      root.environments.map((id) => {
-        const definition = definitions.environments.find(d => d.key === id);
-        if (definition) {
-          result.push(definition);
-        }
-      });
-    }
     return result;
   }
 
@@ -1073,61 +1068,6 @@ export class HttpProject extends ProjectParent {
   }
 
   /**
-   * Reads the list of environments from then selected folder up to the project environments.
-   * It stops going up in the project structure when selected environment has the `encapsulated`
-   * property set to true.
-   * The environments are ordered from the top-most level to the selected folder.
-   * 
-   * @param opts The environment read options
-   */
-  async readEnvironments(opts: IReadEnvironmentOptions = {}): Promise<Environment[]> {
-    const result: Environment[] = [];
-    const { folderKey, nameOrKey } = opts;
-
-    const root = folderKey ? this.findFolder(folderKey, { keyOnly: true }) : this;
-    if (!root) {
-      return result;
-    }
-
-    let current: HttpProject | ProjectFolder | undefined = root;
-    while (current) {
-      const environments = current.getEnvironments();
-      if (environments.length) {
-        const selected = nameOrKey ? environments.find(i => i.key === nameOrKey || i.info.name === nameOrKey) : environments[0];
-        if (selected) {
-          result.push(selected);
-          if (selected.encapsulated) {
-            break;
-          }
-        }
-      }
-      current = current.getParent();
-    }
-
-    return result.reverse();
-  }
-
-  /**
-   * @returns Returns the effective environments. If the project has been initialized with an environment then it is returned. Otherwise other environments.
-   */
-  getEnvironments(): Environment[] {
-    if (Array.isArray(this.initEnvironments)) {
-      return this.initEnvironments;
-    }
-    return super.getEnvironments();
-  }
-
-  /**
-   * Finds a definition for an environment regardless of its parent.
-   * 
-   * @param key The Key of the environment to find.
-   * @returns The environment definition or undefined if not found.
-   */
-  findEnvironment(key: string): Environment | undefined {
-    return this.definitions.environments.find(i => i.key === key);
-  }
-
-  /**
    * Makes a copy of this project.
    */
   clone(opts: IProjectCloneOptions = {}): HttpProject {
@@ -1160,14 +1100,14 @@ export class HttpProject extends ProjectParent {
         flatItems = flatItems.concat(folder.items);
       }
     });
-    const withEnvironments: (HttpProject | ProjectFolder)[] = [];
-    if (Array.isArray(src.environments) && src.environments.length) {
-      withEnvironments.push(src);
-    }
+    // const withEnvironments: (HttpProject | ProjectFolder)[] = [];
+    // if (Array.isArray(src.environments) && src.environments.length) {
+    //   withEnvironments.push(src);
+    // }
     (definitions.folders || []).forEach((folder) => {
-      if (Array.isArray(folder.environments) && folder.environments.length) {
-        withEnvironments.push(folder);
-      }
+      // if (Array.isArray(folder.environments) && folder.environments.length) {
+      //   withEnvironments.push(folder);
+      // }
       const oldKey = folder.key;
       const indexObject = flatItems.find(i => i.key === oldKey);
       if (!indexObject) {
@@ -1191,15 +1131,14 @@ export class HttpProject extends ProjectParent {
       schema.key = v4();
     });
     (definitions.environments || []).forEach((environment) => {
-      // project or folder that has the environment.
-      const parent = withEnvironments.find(item => item.environments.includes(environment.key));
       const oldKey = environment.key;
-      const newKey = v4();
-      environment.key = newKey;
-      if (parent) {
-        const index = parent.environments.indexOf(oldKey);
-        parent.environments[index] = newKey;
+      const indexObject = flatItems.find(i => i.key === oldKey);
+      if (!indexObject) {
+        return;
       }
+      const newKey = v4();
+      indexObject.key = newKey;
+      environment.key = newKey;
     });
   }
 
@@ -1383,5 +1322,203 @@ export class HttpProject extends ProjectParent {
     return this.requestIterator({
       recursive: true,
     });
+  }
+
+  /**
+   * Depending on the options returns a project or a folder.
+   * It throws when parent folder cannot ber found.
+   */
+  protected _getRoot(opts: IItemOptions): ProjectFolder | HttpProject {
+    const project = this.getProject();
+    if (opts.parent) {
+      const parent = project.findFolder(opts.parent);
+      if (!parent) {
+        throw new Error(`Unable to find the parent folder ${opts.parent}.`);
+      }
+      return parent;
+    }
+    return project;
+  }
+
+  protected _insertItem(item: ProjectItem, root: ProjectFolder | HttpProject, opts: IItemCreateOptions): void {
+    if (!Array.isArray(root.items)) {
+      root.items = [];
+    }
+    if (typeof opts.index === 'number') {
+      root.items.splice(opts.index, 0, item);
+    } else {
+      root.items.push(item);
+    }
+  }
+
+  /**
+   * Adds an environment to the project.
+   * 
+   * @param env The definition of the environment to use to create the environment
+   * @returns The same or created environment.
+   */
+  addEnvironment(env: IEnvironment, opts?: IEnvironmentCreateOptions): Environment;
+
+  /**
+   * Adds an environment to the project.
+   * 
+   * @param env The instance of the environment to add
+   * @returns The same or created environment.
+   */
+  addEnvironment(env: Environment, opts?: IEnvironmentCreateOptions): Environment;
+
+  /**
+   * Adds an environment to the project.
+   * 
+   * @param env The name of the environment to create
+   * @returns The same or created environment.
+   */
+  addEnvironment(env: string, opts?: IEnvironmentCreateOptions): Environment;
+
+  /**
+   * Adds an environment to the project.
+   * @returns The same or created environment.
+   */
+  addEnvironment(env: IEnvironment | Environment | string, opts: IEnvironmentCreateOptions = {}): Environment {
+    const environment = this._createEnv(env);
+    const root = this._getRoot(opts);
+    const project = this.getProject();
+    if (!project.definitions.environments) {
+      project.definitions.environments = [];
+    }
+    project.definitions.environments.push(environment);
+    const item = ProjectItem.projectEnvironment(project, environment.key);
+    this._insertItem(item, root, opts)
+    return environment;
+  }
+
+  protected _createEnv(env: IEnvironment | Environment | string): Environment {
+    let finalEnv: Environment;
+    if (env instanceof Environment) {
+      finalEnv = env;
+    } else if (typeof env === 'string') {
+      finalEnv = Environment.fromName(env);
+    } else {
+      finalEnv = new Environment(env);
+    }
+    if (!finalEnv.key) {
+      finalEnv.key = v4();
+    }
+    return finalEnv;
+  }
+
+  /**
+   * This is different to `readEnvironments()`. While the `readEnvironments()`
+   * function generate a list of all environments that apply to a folder, this method
+   * just lists this folder's environments.
+   * 
+   * @returns The list of environments defined in this folder
+   */
+  getEnvironments(opts: IItemOptions = {}): Environment[] {
+    if (Array.isArray(this.initEnvironments)) {
+      return this.initEnvironments;
+    }
+    return this.listEnvironments(opts);
+  }
+
+  /**
+   * @param key The environment key to read.
+   */
+  getEnvironment(key: string, opts: IItemOptions = {}): Environment | undefined {
+    const root = this._getRoot(opts);
+    const item = root.items.find(i => i.key === key);
+    if (!item) {
+      return undefined;
+    }
+    const project = this.getProject();
+    if (!Array.isArray(project.definitions.environments)) {
+      project.definitions.environments = [];
+    }
+    return project.definitions.environments.find(e => e.key === key);
+  }
+
+  /**
+   * Removes an environment from the folder or a sub-folder.
+   * 
+   * @param key the key of the environment to remove
+   * @returns The removed environment, if any.
+   */
+  removeEnvironment(key: string, opts: IItemOptions = {}): Environment | undefined {
+    const root = this._getRoot(opts);
+    const itemIndex = root.items.findIndex(i => i.key === key);
+    if (itemIndex < 0) {
+      return undefined;
+    }
+    root.items.splice(itemIndex, 1);
+    const project = this.getProject();
+    if (!Array.isArray(project.definitions.environments)) {
+      project.definitions.environments = [];
+    }
+    const defIndex = project.definitions.environments.findIndex(i => i.key === key);
+    if (defIndex < 0) {
+      return undefined;
+    }
+    const env = project.definitions.environments[defIndex];
+    project.definitions.environments.splice(defIndex, 1);
+    return env;
+  }
+
+  /**
+   * This is a link to the `getEnvironments()`. The difference is that on the 
+   * project level it won't return environments defined with the class initialization.
+   */
+  listEnvironments(opts: IItemOptions = {}): Environment[] {
+    const root = this._getRoot(opts);
+    const items = root.items.filter(i => i.kind === EnvironmentKind).map(i => i.key);
+    const project = this.getProject();
+    if (!Array.isArray(project.definitions.environments)) {
+      project.definitions.environments = [];
+    }
+    return project.definitions.environments.filter(e => items.includes(e.key));
+  }
+
+  /**
+   * Reads the list of environments from then selected folder up to the project root.
+   * It stops going up in the project structure when selected environment has the `encapsulated`
+   * property set to true.
+   * The environments are ordered from the top-most level to the selected folder.
+   * 
+   * @param opts The environment read options
+   */
+  async readEnvironments(opts: IReadEnvironmentOptions = {}): Promise<Environment[]> {
+    const result: Environment[] = [];
+    const { parent, nameOrKey } = opts;
+
+    const root = parent ? this.findFolder(parent, { keyOnly: true }) : this;
+    if (!root) {
+      return result;
+    }
+
+    let current: HttpProject | ProjectFolder | undefined = root;
+    while (current) {
+      const environments = current.getEnvironments();
+      if (environments.length) {
+        const selected = nameOrKey ? environments.find(i => i.key === nameOrKey || i.info.name === nameOrKey) : environments[0];
+        if (selected) {
+          result.push(selected);
+          if (selected.encapsulated) {
+            break;
+          }
+        }
+      }
+      current = current.getParent();
+    }
+
+    return result.reverse();
+  }
+
+  /**
+   * Finds a definition for an environment regardless of its parent.
+   * 
+   * @param key The Key of the environment to find.
+   * @returns The environment definition or undefined if not found.
+   */
+  findEnvironment(key: string): Environment | undefined {
+    return this.definitions.environments.find(i => i.key === key);
   }
 }

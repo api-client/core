@@ -205,7 +205,7 @@ export class ProjectRequestRunner extends EventEmitter {
    */
   protected async readEnvironments(parent: HttpProject | ProjectFolder): Promise<Environment[]> {
     const folderKey = parent.kind === ProjectFolderKind ? (parent as ProjectFolder).key : undefined;
-    return this.project.readEnvironments({ folderKey });
+    return this.project.readEnvironments({ parent: folderKey });
   }
 
   /**

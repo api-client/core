@@ -5,7 +5,7 @@ import { HttpProject } from '../../src/models/HttpProject.js';
 import { Kind as ProjectFolderKind, ProjectFolder, DefaultFolderName, IProjectFolder } from '../../src/models/ProjectFolder.js';
 import { Kind as ThingKind } from '../../src/models/Thing.js';
 import { ProjectItem } from '../../src/models/ProjectItem.js';
-import { Environment } from '../../src/models/Environment.js';
+import { Environment, Kind as EnvironmentKind } from '../../src/models/Environment.js';
 import { ProjectRequest } from '../../src/models/ProjectRequest.js';
 
 describe('Models', () => {
@@ -20,7 +20,6 @@ describe('Models', () => {
         const result = new ProjectFolder(project);
         assert.equal(result.kind, ProjectFolderKind, 'sets the kind property');
         assert.deepEqual(result.items, [], 'sets the items property');
-        assert.deepEqual(result.environments, [], 'sets the environments property');
         assert.typeOf(result.updated, 'number', 'sets the updated property');
         assert.typeOf(result.created, 'number', 'sets the created property');
 
@@ -38,7 +37,6 @@ describe('Models', () => {
         project = new HttpProject();
         base = {
           kind: ProjectFolderKind,
-          environments: [],
           items: [],
           updated: 123,
           created: 456,
@@ -95,22 +93,6 @@ describe('Models', () => {
         assert.lengthOf(result.items, 1, 'has a single item');
         assert.equal(result.items[0].key, 'a-key', 'has the serialized item');
       });
-
-      it('creates the default environments', () => {
-        delete base.environments;
-        const result = new ProjectFolder(project, base);
-        assert.deepEqual(result.environments, []);
-      });
-
-      it('sets the stored items', () => {
-        const env = Environment.fromName('a-key');
-        project.definitions.environments = [env];
-        base.environments = [env.key];
-        const serialized = JSON.stringify(base);
-        const result = new ProjectFolder(project, serialized);
-        assert.lengthOf(result.environments, 1, 'has a single item');
-        assert.equal(result.environments[0], env.key, 'has the serialized item');
-      });
     });
 
     describe('From JSON string initialization', () => {
@@ -145,7 +127,6 @@ describe('Models', () => {
         project = new HttpProject();
         base = {
           kind: ProjectFolderKind,
-          environments: [],
           items: [],
           updated: 123,
           created: 456,
@@ -193,13 +174,6 @@ describe('Models', () => {
         const result = folder.toJSON();
         assert.lengthOf(result.items, 1);
       });
-
-      it('serializes the environments', () => {
-        const init: IProjectFolder = { ...base, ...{ environments: ['test-123'] } };
-        const folder = new ProjectFolder(project, init);
-        const result = folder.toJSON();
-        assert.deepEqual(result.environments, ['test-123']);
-      });
     });
 
     describe('ProjectFolder.fromName()', () => {
@@ -232,11 +206,6 @@ describe('Models', () => {
       it('adds empty items', () => {
         const result = ProjectFolder.fromName(project, 'a name');
         assert.deepEqual(result.items, []);
-      });
-
-      it('adds empty environments', () => {
-        const result = ProjectFolder.fromName(project, 'a name');
-        assert.deepEqual(result.environments, []);
       });
 
       it('sets the kind', () => {
@@ -785,6 +754,111 @@ describe('Models', () => {
         assert.throws(() => {
           folder.clone({ targetProject, targetFolder: 'test' });
         });
+      });
+    });
+
+    describe('addEnvironment()', () => {
+      let project: HttpProject;
+      let f1: ProjectFolder;
+      beforeEach(() => {
+        project = HttpProject.fromName('test');
+        f1 = project.addFolder('f1');
+      });
+
+      it('adds environment by name', () => {
+        const created = f1.addEnvironment('test');
+        assert.lengthOf(f1.items, 1, 'has an item');
+        assert.equal(f1.items[0].key, created.key, 'has the item');
+        assert.equal(f1.items[0].kind, EnvironmentKind, 'has the item');
+      });
+
+      it('adds environment from an instance', () => {
+        const created = Environment.fromName('test');
+        f1.addEnvironment(created);
+        assert.lengthOf(f1.items, 1, 'has an item');
+        assert.equal(f1.items[0].key, created.key, 'has the item');
+      });
+
+      it('adds environment from a schema', () => {
+        const created = Environment.fromName('test');
+        f1.addEnvironment(created.toJSON());
+        assert.lengthOf(f1.items, 1, 'has an item');
+        assert.equal(f1.items[0].key, created.key, 'has the item');
+      });
+    });
+
+    describe('getEnvironments()', () => {
+      it('returns project class initialization environments', () => {
+        const project = new HttpProject(undefined, [Environment.fromName('test').toJSON()]);
+        const f1 = project.addFolder();
+        f1.addEnvironment(Environment.fromName('other'));
+        const envs = f1.getEnvironments();
+        assert.typeOf(envs, 'array');
+        assert.lengthOf(envs, 1);
+        assert.equal(envs[0].info.name, 'test');
+      });
+
+      it('returns environments when no initialization environments', () => {
+        const project = new HttpProject();
+        const f1 = project.addFolder('f1');
+        const e1 = f1.addEnvironment(Environment.fromName('other'));
+        project.addEnvironment('e2');
+
+        const result = f1.getEnvironments();
+        assert.deepEqual(result, [e1]);
+      });
+    });
+
+    describe('listEnvironments()', () => {
+      let project: HttpProject;
+      let f1: ProjectFolder;
+      let e2: Environment;
+      beforeEach(() => {
+        project = new HttpProject();
+        project.addEnvironment('e1');
+        f1 = project.addFolder('f1');
+        e2 = f1.addEnvironment('e2');
+      });
+
+      it('returns environments defined in the folder', () => {
+        const result = project.listEnvironments({ parent: f1.key });
+        assert.deepEqual(result, [e2]);
+      });
+
+      it('ignores sub-folders', () => {
+        const f2 = f1.addFolder('f2');
+        f2.addEnvironment('e3');
+        const result = project.listEnvironments({ parent: f1.key });
+        assert.deepEqual(result, [e2]);
+      });
+    });
+
+    describe('removeEnvironment()', () => {
+      let project: HttpProject;
+      let f1: ProjectFolder;
+      let e2: Environment;
+      beforeEach(() => {
+        project = new HttpProject();
+        project.addEnvironment('e1');
+        f1 = project.addFolder('f1');
+        e2 = f1.addEnvironment('e2');
+      });
+
+      it('removes the environment from folder items', () => {
+        f1.removeEnvironment(e2.key);
+        assert.deepEqual(f1.items, []);
+      });
+
+      it('does nothing when the environment is not in the folder', () => {
+        const f2 = f1.addFolder('f2');
+        const e3 = f2.addEnvironment('e1');
+        const result = f1.removeEnvironment(e3.key);
+        assert.isUndefined(result);
+      });
+
+      it('returns the removed environment', () => {
+        const result = f1.removeEnvironment(e2.key);
+        assert.deepEqual(result, e2);
       });
     });
   });

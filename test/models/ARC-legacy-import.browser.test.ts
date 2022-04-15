@@ -32,8 +32,9 @@ describe('Models', () => {
 
       it('the project has requests and corresponding items', () => {
         const { definitions, items } = projects[0];
-        assert.lengthOf(items, 1);
+        assert.lengthOf(items, 4); // request + environments
         assert.lengthOf(definitions.requests, 1);
+        assert.lengthOf(definitions.environments, 3);
         const [item] = items;
         const [def] = definitions.requests;
         
@@ -133,10 +134,12 @@ describe('Models', () => {
 
       it('adds environments to the generated projects', () => {
         const [project] = result;
-        const { environments: envIds, definitions } = project.toJSON();
+        const { items, definitions } = project.toJSON();
         const { environments } = definitions;
+
+        const envItems = items.filter(i => i.kind === 'Core#Environment');
         
-        assert.lengthOf(envIds, 3, 'has all environment ids');
+        assert.lengthOf(envItems, 3, 'has all environment items');
         assert.lengthOf(environments, 3, 'has all environment definitions');
         const [env] = environments;
         const [variable] = generatedVariables;

@@ -146,7 +146,6 @@ export class PostmanBackupTransformer extends PostmanTransformer {
     const init: IHttpProject = {
       kind: ProjectKind,
       definitions: {},
-      environments: [],
       info: {
         kind: ThingKind,
         name,

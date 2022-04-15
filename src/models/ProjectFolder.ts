@@ -2,8 +2,9 @@ import { ProjectParent } from './ProjectParent.js';
 import { IProjectDefinitionProperty } from './ProjectDefinitionProperty.js';
 import { ProjectItem, IProjectItem } from './ProjectItem.js';
 import { ProjectRequest, Kind as ProjectRequestKind, IProjectRequest } from './ProjectRequest.js';
-import { HttpProject } from './HttpProject.js';
+import { HttpProject, IEnvironmentCreateOptions } from './HttpProject.js';
 import { IThing, Thing, Kind as ThingKind } from './Thing.js';
+import { Environment, IEnvironment } from './Environment.js';
 import v4 from '../lib/uuid.js';
 
 export const Kind = 'Core#ProjectFolder';
@@ -58,11 +59,6 @@ export interface IProjectFolder extends IProjectDefinitionProperty {
    * The UI uses this to manipulate the view without changing the definitions.
    */
   items: IProjectItem[];
-  /**
-   * The environments defined for this project.
-   * If not set it is inherited from the parent.
-   */
-  environments?: string[];
   /**
    * Timestamp when the folder was last updated.
    */
@@ -132,7 +128,7 @@ export class ProjectFolder extends ProjectParent {
     if (!ProjectFolder.isProjectFolder(init)) {
       throw new Error(`Not a project folder.`);
     }
-    const { key = v4(), created = Date.now(), updated = Date.now(), items, environments, info } = init;
+    const { key = v4(), created = Date.now(), updated = Date.now(), items, info } = init;
     this.kind = Kind;
     this.key = key;
     this.created = created;
@@ -146,11 +142,6 @@ export class ProjectFolder extends ProjectParent {
       this.info = new Thing(info);
     } else {
       this.info = new Thing({ kind: ThingKind, name: DefaultFolderName });
-    }
-    if (Array.isArray(environments)) {
-      this.environments = [...environments];
-    } else {
-      this.environments = [];
     }
   }
 
@@ -173,13 +164,9 @@ export class ProjectFolder extends ProjectParent {
       created: this.created,
       updated: this.updated,
       items: [],
-      environments: [],
     };
     if (Array.isArray(this.items)) {
       result.items = this.items.map(i => i.toJSON());
-    }
-    if (Array.isArray(this.environments)) {
-      result.environments = [...this.environments];
     }
     return result;
   }
@@ -198,7 +185,6 @@ export class ProjectFolder extends ProjectParent {
       created: now,
       updated: now,
       items: [],
-      environments: [],
       kind: Kind,
       info: info.toJSON(),
     });
@@ -272,6 +258,39 @@ export class ProjectFolder extends ProjectParent {
   }
 
   /**
+   * Adds an environment to the project.
+   * 
+   * @param env The definition of the environment to use to create the environment
+   * @returns The same or created environment.
+   */
+  addEnvironment(env: IEnvironment, opts?: IEnvironmentCreateOptions): Environment;
+
+  /**
+   * Adds an environment to the project.
+   * 
+   * @param env The instance of the environment to add
+   * @returns The same or created environment.
+   */
+  addEnvironment(env: Environment, opts?: IEnvironmentCreateOptions): Environment;
+
+  /**
+   * Adds an environment to the project.
+   * 
+   * @param env The name of the environment to create
+   * @returns The same or created environment.
+   */
+  addEnvironment(env: string, opts?: IEnvironmentCreateOptions): Environment;
+
+  /**
+   * Adds an environment to the project.
+   * @returns The same or created environment.
+   */
+  addEnvironment(env: IEnvironment | Environment | string, opts: IEnvironmentCreateOptions = {}): Environment {
+    const newOptions: IEnvironmentCreateOptions = { ...opts, parent: this.key };
+    return this.project.addEnvironment(env as Environment, newOptions);
+  }
+
+  /**
    * Lists items (not the actual definitions!) that are folders.
    */
   listFolderItems(): ProjectItem[] {
@@ -339,6 +358,38 @@ export class ProjectFolder extends ProjectParent {
    */
   remove(): void {
     this.project.removeFolder(this.key);
+  }
+
+  /**
+   * @returns The list of environments defined in this folder
+   */
+  getEnvironments(): Environment[] {
+    return this.project.getEnvironments({ parent: this.key });
+  }
+
+  /**
+   * @param key The environment key to read.
+   */
+  getEnvironment(key: string): Environment | undefined {
+    return this.project.getEnvironment(key, { parent: this.key });
+  }
+
+  /**
+   * Removes an environment from the folder or a sub-folder.
+   * 
+   * @param key the key of the environment to remove
+   * @returns The removed environment, if any.
+   */
+  removeEnvironment(key: string): Environment | undefined {
+    return this.project.removeEnvironment(key, { parent: this.key });
+  }
+
+  /**
+   * This is a link to the `getEnvironments()`. The difference is that on the 
+   * project level it won't return environments defined with the class initialization.
+   */
+  listEnvironments(): Environment[] {
+    return this.project.listEnvironments({ parent: this.key });
   }
 
   /**

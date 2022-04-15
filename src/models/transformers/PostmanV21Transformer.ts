@@ -133,7 +133,6 @@ export class PostmanV21Transformer extends PostmanTransformer {
     const init: IHttpProject = {
       kind: ProjectKind,
       definitions: {},
-      environments: [],
       info: {
         kind: ThingKind,
         name: info.name || 'Unnamed Postman project',
