@@ -255,11 +255,13 @@ export class UriTemplate {
     if (!this.parts || !this.parts.length) {
       this.parse();
     }
-    const data = new Data(map);
-
+    const data = UriTemplate.getData(map);
     for (const part of this.parts!) {
-      const item = typeof part === 'string' ? part : UriTemplate.expand(part, data, opts);
-      result += item;
+      if (typeof part === 'string') {
+        result += UriTemplate.expandString(part);
+      } else {
+        result += UriTemplate.expand(part, data, opts);
+      }
     }
     return result;
   }
@@ -336,6 +338,25 @@ export class UriTemplate {
     }
 
     this.parts = parts;
+  }
+
+  /**
+   * Creates a Data object with the passed map.
+   * 
+   * @param map The map with values.
+   */
+  protected static getData(map: Record<string, any>): Data {
+    return new Data(map);
+  }
+
+  /**
+   * Can be used by a child class to manipulate string parts that are not template expressions
+   * 
+   * @param part The string part
+   * @returns The processed part.
+   */
+  protected static expandString(part: string): string {
+    return part;
   }
 
   protected static expand(expression: IPart, data: Data, opts: IUriTemplateOptions = {}): string {
