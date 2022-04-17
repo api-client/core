@@ -390,7 +390,7 @@ describe('lib/UriTemplate', () => {
 
     it('throws for invalid literals', function () {
       assert.throws(() => {
-        new UriTemplate('invalid.char}acter').parse();
+        new UriTemplate('invalid.char}acter').parse({ strict: true });
       }, Error, 'Invalid Literal "invalid.char}acter"');
     });
 

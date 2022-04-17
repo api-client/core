@@ -70,6 +70,7 @@ export { UrlParser } from './src/lib/parsers/UrlParser.js';
 export { UrlEncoder } from './src/lib/parsers/UrlEncoder.js';
 export * as Timers from './src/lib/timers/Timers.js';
 export { UriTemplate, IUriTemplateOptions } from './src/lib/parsers/UriTemplate.js';
+export * from './src/lib/parsers/UrlProcessor.js';
 
 //
 // Runtime

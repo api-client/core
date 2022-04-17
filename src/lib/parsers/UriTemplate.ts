@@ -134,11 +134,14 @@ interface IPart {
   variables: IVariable[];
 }
 
-export interface IUriTemplateOptions {
+export interface IUriTemplateParseOptions {
   /**
-   * Throws when a variable is not found to replaces a value in the template.
+   * Throws an error when template literals are invalid
    */
   strict?: boolean;
+}
+
+export interface IUriTemplateOptions extends IUriTemplateParseOptions {
   /**
    * When set it ignores replacing the value in the template when the variable is missing.
    */
@@ -253,7 +256,7 @@ export class UriTemplate {
   expand(map: Record<string, any>, opts: IUriTemplateOptions = {}): string {
     let result = '';
     if (!this.parts || !this.parts.length) {
-      this.parse();
+      this.parse(opts);
     }
     const data = UriTemplate.getData(map);
     for (const part of this.parts!) {
@@ -269,13 +272,13 @@ export class UriTemplate {
   /**
    * Parses the template into action tokens.
    */
-  parse(): void {
+  parse(opts: IUriTemplateParseOptions = {}): void {
     const { expression } = this;
     const parts: (string | IPart)[] = [];
     let pos = 0;
 
     function checkLiteral(literal: string): string {
-      if (literal.match(LITERAL_PATTERN)) {
+      if (opts.strict && literal.match(LITERAL_PATTERN)) {
         throw new Error(`Invalid Literal "${literal}"`);
       }
       return literal;
@@ -364,7 +367,7 @@ export class UriTemplate {
     const type = options.named ? 'Named' : 'Unnamed';
     const { variables } = expression;
     const buffer = [];
-
+    
     for (const variable of variables) {
       const d = data.get(variable.name);
       if (d.type === DataType.nil && opts && opts.strict) {
@@ -465,7 +468,6 @@ export class UriTemplate {
     let result = '';
     const { encode, empty_name_separator } = options;
     const _encode = !d[encode].length;
-
     d.val.forEach((item, index) => {
       let _value: string;
       if (length) {
