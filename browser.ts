@@ -71,6 +71,7 @@ export { UrlEncoder } from './src/lib/parsers/UrlEncoder.js';
 export * as Timers from './src/lib/timers/Timers.js';
 export { UriTemplate, IUriTemplateOptions } from './src/lib/parsers/UriTemplate.js';
 export * from './src/lib/parsers/UrlProcessor.js';
+export * as HttpDefinitions from './src/lib/definitions/HttpDefinitions.js';
 
 //
 // Runtime

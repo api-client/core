@@ -200,7 +200,7 @@ export interface IUrlExpandOptions {
 
 export type UrlPart = IUrlPart | IUrlParamPart | IUrlExpressionPart;
 
-class SearchParams {
+export class UrlSearchParams {
   /**
    * A reference to the URL processor's parts.
    */
@@ -369,12 +369,12 @@ export class UrlProcessor {
   /**
    * A helper class to manipulate query parameters on the parser.
    */
-  search: SearchParams;
+  search: UrlSearchParams;
 
   constructor(expression: string) {
     this.expression = expression;
     this.tokens = new Tokenizer(expression);
-    this.search = new SearchParams(this.parts);
+    this.search = new UrlSearchParams(this.parts);
     this._parse();
   }
 

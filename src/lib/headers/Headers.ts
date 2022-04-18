@@ -55,8 +55,8 @@ function* headersStringToList(string: string): Generator<string[]> {
     if (sepPosition === -1) {
       yield [line, ''];
     } else {
-      const name = line.substr(0, sepPosition);
-      const value = line.substr(sepPosition + 1).trim();
+      const name = line.substring(0, sepPosition);
+      const value = line.substring(sepPosition + 1).trim();
       yield [name, value];
     }
   }
@@ -70,7 +70,8 @@ export class Headers {
   /**
    * The keys are canonical keys and the values are the input values.
    */
-  map: Record<string, RawValue> = {};
+  _map: Record<string, RawValue> = {};
+
   /**
    * @param headers The headers to parse.
    */
@@ -99,7 +100,7 @@ export class Headers {
     }
     const normalizedName = normalizeName(name);
     value = value ? normalizeValue(value) : '';
-    let item = this.map[normalizedName];
+    let item = this._map[normalizedName];
     if (item) {
       const oldValue = item.value;
       item.value = oldValue ? `${oldValue},${value}` : value;
@@ -109,7 +110,7 @@ export class Headers {
         value,
       };
     }
-    this.map[normalizedName] = item;
+    this._map[normalizedName] = item;
   }
 
   /**
@@ -117,7 +118,7 @@ export class Headers {
    * @param name The header name
    */
   delete(name: string): void {
-    delete this.map[normalizeName(name)];
+    delete this._map[normalizeName(name)];
   }
 
   /**
@@ -126,14 +127,14 @@ export class Headers {
    */
   get(name: string): string | undefined {
     name = normalizeName(name);
-    return this.has(name) ? this.map[name].value : undefined;
+    return this.has(name) ? this._map[name].value : undefined;
   }
 
   /**
    * Checks if the header exists.
    */
   has(name: string): boolean {
-    return Object.prototype.hasOwnProperty.call(this.map, normalizeName(name));
+    return Object.prototype.hasOwnProperty.call(this._map, normalizeName(name));
   }
 
   /**
@@ -141,7 +142,7 @@ export class Headers {
    */
   set(name: string, value: string): void {
     const normalizedName = normalizeName(name);
-    this.map[normalizedName] = {
+    this._map[normalizedName] = {
       value: normalizeValue(value),
       name,
     };
@@ -151,11 +152,28 @@ export class Headers {
    * Iterates over each header.
    */
   forEach(callback: (value: string, name: string, headers: Headers) => void, thisArg?: unknown): void {
-    for (const name in this.map) {
-      if (Object.prototype.hasOwnProperty.call(this.map, name)) {
-        callback.call(thisArg, this.map[name].value, this.map[name].name, this);
-      }
+    const keys = Object.keys(this._map);
+    keys.forEach((key) => {
+      const item = this._map[key];
+      callback.call(thisArg, item.value, item.name, this);
+    });
+  }
+
+  /**
+   * Calls a defined callback function on each element of the headers, and returns an array that contains the results.
+   * 
+   * @param callbackfn A function that accepts up to two arguments. The map method calls the callbackfn function one time for each header.
+   * @param thisArg An object to which the `this` keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.
+   */
+  map<U>(callbackfn: (name: string, value: string) => U, thisArg?: any): U[] {
+    const keys = Object.keys(this._map);
+    const results: U[] = [];
+    for (const name of keys) {
+      const item = this._map[name];
+      const cbReturn = callbackfn.call(thisArg, item.value, item.name);
+      results.push(cbReturn);
     }
+    return results;
   }
 
   /**
@@ -163,13 +181,15 @@ export class Headers {
    */
   toString(): string {
     const result: string[] = [];
-    this.forEach((value, name) => {
-      let tmp = `${name}: `;
-      if (value) {
-        tmp += value;
+    const keys = Object.keys(this._map);
+    for (const name of keys) {
+      const item = this._map[name];
+      let tmp = `${item.name}: `;
+      if (item.value) {
+        tmp += item.value;
       }
       result.push(tmp);
-    });
+    }
     return result.join('\n');
   }
 
@@ -177,10 +197,9 @@ export class Headers {
    * Iterates over keys.
    */
   *keys(): IterableIterator<string> {
-    for (const name in this.map) {
-      if (Object.prototype.hasOwnProperty.call(this.map, name)) {
-        yield this.map[name].name;
-      }
+    const keys = Object.keys(this._map);
+    for (const name of keys) {
+      yield this._map[name].name;
     }
   }
 
@@ -188,10 +207,9 @@ export class Headers {
    * Iterates over values.
    */
   *values(): IterableIterator<string> {
-    for (const name in this.map) {
-      if (Object.prototype.hasOwnProperty.call(this.map, name)) {
-        yield this.map[name].value;
-      }
+    const keys = Object.keys(this._map);
+    for (const name of keys) {
+      yield this._map[name].value;
     }
   }
 
@@ -199,10 +217,9 @@ export class Headers {
    * Iterates over headers.
    */
   *entries(): IterableIterator<string[]> {
-    for (const name in this.map) {
-      if (Object.prototype.hasOwnProperty.call(this.map, name)) {
-        yield [this.map[name].name, this.map[name].value];
-      }
+    const keys = Object.keys(this._map);
+    for (const name of keys) {
+      yield [this._map[name].name, this._map[name].value];
     }
   }
 
@@ -210,10 +227,9 @@ export class Headers {
    * Iterates over headers.
    */
   *[Symbol.iterator](): IterableIterator<string[]> {
-    for (const name in this.map) {
-      if (Object.prototype.hasOwnProperty.call(this.map, name)) {
-        yield [this.map[name].name, this.map[name].value];
-      }
+    const keys = Object.keys(this._map);
+    for (const name of keys) {
+      yield [this._map[name].name, this._map[name].value];
     }
   }
 }
