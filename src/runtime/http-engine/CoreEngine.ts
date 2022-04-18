@@ -728,12 +728,15 @@ export class CoreEngine extends HttpEngine {
       return;
     }
     if (data.length === 0) {
+      if (this.currentResponse?.status === 204) {
+        this._reportResponse();
+        return;
+      }
       if (this.currentHeaders.has('Content-Length')) {
         // If the server do not close the connection and clearly indicate that
         // there are no further data to receive the app can close the connection
         // and prepare the response.
         const length = Number(this.currentHeaders.get('Content-Length'));
-        // NaN never equals NaN. This is faster.
         if (!Number.isNaN(length) && length === 0) {
           this._reportResponse();
           return;

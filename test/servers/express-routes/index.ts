@@ -11,6 +11,7 @@ import compressionRoute from './CompressApi.js';
 import delayRoute from './DelayRoute.js';
 import CookieApi from './CookieApi.js';
 import NTLMRoute from './NTLMRoute.js';
+import StatusCodeApi from './StatusCodeApi.js';
 
 const router = Router();
 export default router;
@@ -27,3 +28,4 @@ router.use('/compression', compressionRoute);
 router.use('/delay', delayRoute);
 router.use('/cookie', CookieApi);
 router.use('/auth/ntlm', NTLMRoute);
+router.use('/code', StatusCodeApi);

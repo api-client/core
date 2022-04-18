@@ -385,7 +385,7 @@ export abstract class HttpEngine extends EventEmitter {
 
   /**
    * Reports response when redirected.
-   * @param  Received status code
+   * @param status Received status code
    * @return True if the request has been redirected.
    */
   _reportRedirect(status: number): boolean {

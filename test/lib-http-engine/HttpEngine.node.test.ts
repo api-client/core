@@ -2356,5 +2356,47 @@ describe('http-engine', () => {
         assert.include(body, 'name="a"');
       });
     });
+
+    describe('Status codes', () => {
+      it('results with 200', async () => {
+        const engine = new CoreEngine({
+          url: `http://localhost:${httpPort}/v1/code/200`,
+          method: 'GET',
+        }, { logger });
+        const info = await engine.send();
+        assert.ok(info.response, 'has the response')
+        assert.equal(info.response!.status, 200);
+      });
+
+      it('results with 201', async () => {
+        const engine = new CoreEngine({
+          url: `http://localhost:${httpPort}/v1/code/201`,
+          method: 'GET',
+        }, { logger });
+        const info = await engine.send();
+        assert.ok(info.response, 'has the response')
+        assert.equal(info.response!.status, 201);
+      });
+
+      it('results with 202', async () => {
+        const engine = new CoreEngine({
+          url: `http://localhost:${httpPort}/v1/code/202`,
+          method: 'GET',
+        }, { logger });
+        const info = await engine.send();
+        assert.ok(info.response, 'has the response')
+        assert.equal(info.response!.status, 202);
+      });
+
+      it('results with 204', async () => {
+        const engine = new CoreEngine({
+          url: `http://localhost:${httpPort}/v1/code/204`,
+          method: 'GET',
+        }, { logger });
+        const info = await engine.send();
+        assert.ok(info.response, 'has the response')
+        assert.equal(info.response!.status, 204);
+      });
+    });
   });
 });
