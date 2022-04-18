@@ -10,17 +10,17 @@ describe('Headers', () => {
 
     it(`Parses a string as an input`, () => {
       const instance = new Headers(input);
-      assert.lengthOf(Object.keys(instance.map), expectedSize);
+      assert.lengthOf(Object.keys(instance._map), expectedSize);
     });
 
     it('Has correct list of headers', () => {
       const instance = new Headers(input);
-      const keys = Object.keys(instance.map);
+      const keys = Object.keys(instance._map);
       keys.forEach((key) => {
         assert.notEqual(/** @type string[] */ (keysArray).indexOf(key), -1);
       });
       keys.forEach((key) => {
-        assert.notEqual(valuesArray.indexOf(instance.map[key].value), -1);
+        assert.notEqual(valuesArray.indexOf(instance._map[key].value), -1);
       });
     });
   });
@@ -37,17 +37,17 @@ describe('Headers', () => {
 
     it(`Parses a string as an input`, () => {
       const instance = new Headers(input);
-      assert.lengthOf(Object.keys(instance.map), expectedSize);
+      assert.lengthOf(Object.keys(instance._map), expectedSize);
     });
 
     it('Has correct list of headers', () => {
       const instance = new Headers(input);
-      const keys = Object.keys(instance.map);
+      const keys = Object.keys(instance._map);
       keys.forEach((key) => {
         assert.notEqual(/** @type string[] */ (keysArray).indexOf(key), -1);
       });
       keys.forEach((key) => {
-        assert.notEqual(valuesArray.indexOf(instance.map[key].value), -1);
+        assert.notEqual(valuesArray.indexOf(instance._map[key].value), -1);
       });
     });
   });
@@ -55,7 +55,7 @@ describe('Headers', () => {
   describe(`undefined input`, () => {
     it(`has no values in the map`, () => {
       const instance = new Headers();
-      assert.lengthOf(Object.keys(instance.map), 0);
+      assert.lengthOf(Object.keys(instance._map), 0);
     });
   });
 
@@ -63,21 +63,21 @@ describe('Headers', () => {
     it('Appends an item that does not exists', () => {
       const instance = new Headers();
       instance.append('name', 'value');
-      assert.equal(instance.map.name.value, 'value');
-      assert.equal(instance.map.name.name, 'name');
+      assert.equal(instance._map.name.value, 'value');
+      assert.equal(instance._map.name.name, 'name');
     });
 
     it('Updates existing item', () => {
       const instance = new Headers();
       instance.append('name', 'value');
       instance.append('name', 'other-value');
-      assert.equal(instance.map.name.value, 'value,other-value');
+      assert.equal(instance._map.name.value, 'value,other-value');
     });
 
     it('Normalizes keys', () => {
       const instance = new Headers();
       instance.append('AbCd', 'value');
-      assert.ok(instance.map.abcd);
+      assert.ok(instance._map.abcd);
     });
   });
 
@@ -85,21 +85,21 @@ describe('Headers', () => {
     it('Sets an item that does not exists', () => {
       const instance = new Headers();
       instance.set('name', 'value');
-      assert.equal(instance.map.name.value, 'value');
-      assert.equal(instance.map.name.name, 'name');
+      assert.equal(instance._map.name.value, 'value');
+      assert.equal(instance._map.name.name, 'name');
     });
 
     it('Replaces existing item', () => {
       const instance = new Headers();
       instance.set('name', 'value');
       instance.set('name', 'other-value');
-      assert.equal(instance.map.name.value, 'other-value');
+      assert.equal(instance._map.name.value, 'other-value');
     });
 
     it('Normalizes keys', () => {
       const instance = new Headers();
       instance.set('AbCd', 'value');
-      assert.ok(instance.map.abcd);
+      assert.ok(instance._map.abcd);
     });
   });
 
@@ -107,19 +107,19 @@ describe('Headers', () => {
     it('Ignores item that does not exists', () => {
       const instance = new Headers('a: b');
       instance.delete('x');
-      assert.ok(instance.map.a);
+      assert.ok(instance._map.a);
     });
 
     it('Removes existing item', () => {
       const instance = new Headers('a: b');
       instance.delete('a');
-      assert.lengthOf(Object.keys(instance.map), 0);
+      assert.lengthOf(Object.keys(instance._map), 0);
     });
 
     it('Normalizes keys', () => {
       const instance = new Headers('AbCd: xxx');
       instance.delete('aBcD');
-      assert.lengthOf(Object.keys(instance.map), 0);
+      assert.lengthOf(Object.keys(instance._map), 0);
     });
   });
 
