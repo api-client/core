@@ -10,7 +10,7 @@ import { IHttpRequest, HttpRequest } from '../../models/HttpRequest.js';
 import { IRequestBaseConfig } from '../../models/RequestConfig.js';
 import { IRequestAuthorization } from '../../models/RequestAuthorization.js';
 import { HostRule } from '../../models/HostRule.js';
-import { IRequestCertificate } from '../../models/ClientCertificate.js';
+import { HttpCertificate } from '../../models/ClientCertificate.js';
 import { SentRequest } from '../../models/SentRequest.js';
 import { Response } from '../../models/Response.js';
 import { ErrorResponse } from '../../models/ErrorResponse.js';
@@ -40,7 +40,7 @@ export interface HttpEngineOptions extends IRequestBaseConfig {
   /**
    * A certificate to use with the request.
    */
-  certificates?: IRequestCertificate[];
+  certificates?: HttpCertificate[];
 }
 
 export interface RequestStats {
@@ -734,51 +734,57 @@ Check your request parameters.`);
    * @param certificate List of certificate configurations.
    * @param options Request options. Cert agent options are added to this object.
    */
-  _addClientCertificate(certificate: IRequestCertificate, options: tls.ConnectionOptions): void {
+  _addClientCertificate(certificate: HttpCertificate, options: tls.ConnectionOptions): void {
     if (!certificate) {
       return;
     }
     const cert = { ...certificate };
-    if (!Array.isArray(cert.cert)) {
-      cert.cert = [cert.cert];
-    }
     if (cert.type === 'p12') {
       if (!options.pfx) {
         options.pfx = [];
       }
-      const added = cert.cert.map((item) => {
-        const struct: tls.PxfObject = {
-          buf: Buffer.from(item.data as string),
-        };
-        if (item.passphrase) {
-          struct.passphrase = item.passphrase;
+      const struct: tls.PxfObject = {
+        buf: Buffer.from(cert.cert.data as string),
+      };
+      if (cert.cert.passphrase) {
+        struct.passphrase = cert.cert.passphrase;
+      }
+      if (!Array.isArray(options.pfx)) {
+        if (options.pfx) {
+          options.pfx = [options.pfx];
+        } else {
+          options.pfx = [];
         }
-        return struct;
-      });
-      options.pfx = (options.pfx as tls.PxfObject[]).concat(added);
+      }
+      options.pfx.push(struct);
     } else if (cert.type === 'pem') {
       if (!options.cert) {
         options.cert = [];
       }
-      const added = cert.cert.map((item) => Buffer.from(item.data as string));
-      options.cert = (options.cert as Buffer[]).concat(added);
-      if (cert.key) {
-        if (!Array.isArray(cert.key)) {
-          cert.key = [cert.key];
+      if (!Array.isArray(options.cert)) {
+        if (options.cert) {
+          options.cert = [options.cert];
+        } else {
+          options.cert = [];
         }
-        if (!options.key) {
-          options.key = [];
-        }
-        const keys = cert.key.map((item) => {
-          const struct: tls.KeyObject = {
-            pem: Buffer.from(item.data as string),
-          };
-          if (item.passphrase) {
-            struct.passphrase = item.passphrase;
+      }
+      const added = Buffer.from(cert.cert.data as string);
+      options.cert.push(added);
+      if (cert.certKey) {
+        if (!Array.isArray(options.key)) {
+          if (options.key) {
+            options.key = [options.key];
+          } else {
+            options.key = [];
           }
-          return struct;
-        });
-        options.key = (options.key as tls.KeyObject[]).concat(keys);
+        }
+        const struct: tls.KeyObject = {
+          pem: Buffer.from(cert.certKey.data as string),
+        };
+        if (cert.certKey.passphrase) {
+          struct.passphrase = cert.certKey.passphrase;
+        }
+        options.key.push(struct);
       }
     }
   }

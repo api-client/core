@@ -12,6 +12,7 @@ import { RequestActions } from '../../src/models/RequestActions.js';
 import { Kind as ThingKind } from '../../src/models/Thing.js';
 import { ARCSavedRequest } from '../../src/models/legacy/request/ArcRequest.js';
 import { ISafePayload } from '../../src/lib/transformers/PayloadSerializer.js';
+import { Certificate, Kind as CertificateKind, IP12Certificate } from '../../src/models/ClientCertificate.js';
 
 describe('Models', () => {
   describe('Request', () => {
@@ -879,27 +880,35 @@ describe('Models', () => {
       it('sets the clientCertificate', () => {
         const instance = new Request();
         const schema = instance.toJSON();
-        schema.clientCertificate = {
-          type: 'pem',
-          cert: {
-            data: 'abc'
-          },
+        const cert: IP12Certificate = {
+          cert: { data: 'test' },
+          key: '123',
+          kind: 'Core#Certificate',
+          name: 'name',
+          type: 'p12',
+          created: 123456,
         };
+
+        schema.clientCertificate = cert;
         instance.new(schema);
 
         const { clientCertificate } = instance;
         assert.ok(clientCertificate, 'has clientCertificate');
+        assert.equal(clientCertificate.kind, CertificateKind);
       });
 
       it('sets the clientCertificate to undefined when missing', () => {
         const instance = new Request();
         const schema = instance.toJSON();
-        schema.clientCertificate = {
-          type: 'pem',
-          cert: {
-            data: 'abc'
-          },
+        const cert: IP12Certificate = {
+          cert: { data: 'test' },
+          key: '123',
+          kind: 'Core#Certificate',
+          name: 'name',
+          type: 'p12',
+          created: 123456,
         };
+        schema.clientCertificate = cert;
         instance.new(schema);
         delete schema.clientCertificate;
         instance.new(schema);
@@ -1065,15 +1074,19 @@ describe('Models', () => {
 
       it('sets the clientCertificate', () => {
         const instance = new Request();
-        instance.clientCertificate = {
-          type: 'pem',
-          cert: {
-            data: 'abc'
-          },
+        const cert: IP12Certificate = {
+          cert: { data: 'test' },
+          key: '123',
+          kind: 'Core#Certificate',
+          name: 'name',
+          type: 'p12',
+          created: 123456,
         };
+        instance.clientCertificate = new Certificate(cert);
         const result = instance.toJSON();
         const { clientCertificate } = result;
         assert.ok(clientCertificate, 'has clientCertificate');
+        assert.equal(clientCertificate.key, '123');
       });
 
       it('sets the clientCertificate to undefined when missing', () => {

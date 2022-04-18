@@ -1,4 +1,4 @@
-import { IClientCertificate, ICertificateIndex, IRequestCertificate } from '../../models/ClientCertificate.js';
+import { HttpCertificate, ICertificateCreateOptions } from '../../models/ClientCertificate.js';
 import { ContextReadEvent, ContextListEvent, ContextListOptions, ContextListResult, ContextDeleteEvent, ContextDeleteRecord, ContextUpdateEvent, ContextChangeRecord, ContextStateUpdateEvent, ContextStateDeleteEvent } from '../BaseEvents.js';
 import { ModelEventTypes } from './ModelEventTypes.js';
 
@@ -8,11 +8,10 @@ export class ClientCertificateEvents {
    *
    * @param target A node on which to dispatch the event.
    * @param id The id of the client certificate
-   * @param rev The revision of the client certificate. If not set then the latest revision is used.
    * @returns Promise resolved to a client certificate model.
    */
-  static async read(target: EventTarget, id: string, rev?: string): Promise<IRequestCertificate | undefined> {
-    const e = new ContextReadEvent<IClientCertificate>(ModelEventTypes.ClientCertificate.read, id, rev);
+  static async read(target: EventTarget, id: string): Promise<HttpCertificate | undefined> {
+    const e = new ContextReadEvent<HttpCertificate>(ModelEventTypes.ClientCertificate.read, id);
     target.dispatchEvent(e);
     return e.detail.result;
   }
@@ -24,8 +23,8 @@ export class ClientCertificateEvents {
    * @param opts Query options.
    * @returns The list result.
    */
-  static async list(target: EventTarget, opts?: ContextListOptions): Promise<ContextListResult<ICertificateIndex> | undefined> {
-    const e = new ContextListEvent<ICertificateIndex>(ModelEventTypes.ClientCertificate.list, opts);
+  static async list(target: EventTarget, opts?: ContextListOptions): Promise<ContextListResult<HttpCertificate> | undefined> {
+    const e = new ContextListEvent<HttpCertificate>(ModelEventTypes.ClientCertificate.list, opts);
     target.dispatchEvent(e);
     return e.detail.result;
   }
@@ -35,11 +34,10 @@ export class ClientCertificateEvents {
    *
    * @param target A node on which to dispatch the event.
    * @param id The id of the project to delete.
-   * @param rev The revision of the project. If not set then the latest revision is used.
    * @returns Promise resolved to a new revision after delete.
    */
-  static async delete(target: EventTarget, id: string, rev?: string): Promise<ContextDeleteRecord | undefined> {
-    const e = new ContextDeleteEvent(ModelEventTypes.ClientCertificate.delete, id, undefined, rev);
+  static async delete(target: EventTarget, id: string): Promise<ContextDeleteRecord | undefined> {
+    const e = new ContextDeleteEvent(ModelEventTypes.ClientCertificate.delete, id, undefined);
     target.dispatchEvent(e);
     return e.detail.result;
   }
@@ -51,8 +49,8 @@ export class ClientCertificateEvents {
    * @param item The certificate object.
    * @returns Promise resolved to the change record
    */
-  static async insert(target: EventTarget, item: IClientCertificate): Promise<ContextChangeRecord<ICertificateIndex> | undefined> {
-    const e = new ContextUpdateEvent<IClientCertificate>(ModelEventTypes.ClientCertificate.insert, { item, });
+  static async insert(target: EventTarget, item: ICertificateCreateOptions): Promise<ContextChangeRecord<HttpCertificate> | undefined> {
+    const e = new ContextUpdateEvent<ICertificateCreateOptions, HttpCertificate>(ModelEventTypes.ClientCertificate.insert, { item, });
     target.dispatchEvent(e);
     return e.detail.result;
   }
@@ -69,8 +67,8 @@ class StateEvents {
    * @param target A node on which to dispatch the event.
    * @param record Change record
    */
-  static update(target: EventTarget, record: ContextChangeRecord<ICertificateIndex>): void {
-    const e = new ContextStateUpdateEvent<ICertificateIndex>(ModelEventTypes.ClientCertificate.State.update, record);
+  static update(target: EventTarget, record: ContextChangeRecord<HttpCertificate>): void {
+    const e = new ContextStateUpdateEvent<HttpCertificate>(ModelEventTypes.ClientCertificate.State.update, record);
     target.dispatchEvent(e);
   }
 

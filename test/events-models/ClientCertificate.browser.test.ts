@@ -2,16 +2,17 @@ import { assert } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { Events } from '../../src/events/Events.js';
 import { EventTypes } from '../../src/events/EventTypes.js';
-import { IClientCertificate } from '../../src/models/ClientCertificate.js';
+import { ICertificateCreateOptions } from '../../src/models/ClientCertificate.js';
 
 describe('Events', () => {
   describe('Models', () => {
     describe('EventTypes.Model.ClientCertificate', () => {
       describe('insert()', () => {
-        const item: IClientCertificate = { 
+        const item: ICertificateCreateOptions = { 
           name: 'test',
           cert: undefined,
           type: 'p12',
+          key: 'test',
         };
 
         it('dispatches the event', () => {
@@ -34,7 +35,6 @@ describe('Events', () => {
 
       describe('read()', () => {
         const id = 'test-cc-id';
-        const rev = 'test-cc-rev-id';
 
         it('dispatches the event', () => {
           const spy = sinon.spy();
@@ -51,15 +51,6 @@ describe('Events', () => {
           window.removeEventListener(EventTypes.Model.ClientCertificate.read, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.deepEqual(e.detail.id, id);
-        });
-
-        it('has the rev property', () => {
-          const spy = sinon.spy();
-          window.addEventListener(EventTypes.Model.ClientCertificate.read, spy);
-          Events.Model.ClientCertificate.read(document.body, id, rev);
-          window.removeEventListener(EventTypes.Model.ClientCertificate.read, spy);
-          const e = spy.args[0][0] as CustomEvent<any>;
-          assert.deepEqual(e.detail.rev, rev);
         });
       });
 
@@ -86,7 +77,6 @@ describe('Events', () => {
 
       describe('delete()', () => {
         const id = 'test-cc-id';
-        const rev = 'test-cc-rev-id';
 
         it('dispatches the event', () => {
           const spy = sinon.spy();
@@ -103,15 +93,6 @@ describe('Events', () => {
           window.removeEventListener(EventTypes.Model.ClientCertificate.delete, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.equal(e.detail.id, id);
-        });
-
-        it('has the rev property', () => {
-          const spy = sinon.spy();
-          window.addEventListener(EventTypes.Model.ClientCertificate.delete, spy);
-          Events.Model.ClientCertificate.delete(document.body, id, rev);
-          window.removeEventListener(EventTypes.Model.ClientCertificate.delete, spy);
-          const e = spy.args[0][0] as CustomEvent<any>;
-          assert.equal(e.detail.rev, rev);
         });
       });
 

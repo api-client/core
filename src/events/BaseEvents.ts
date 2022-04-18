@@ -212,7 +212,7 @@ export interface ContextUpdateEventDetail<T> {
  * 
  * @template T The object that is being updated.
  */
-export class ContextUpdateEvent<T extends object> extends ContextEvent<ContextUpdateEventDetail<T>, ContextChangeRecord<T>> {
+export class ContextUpdateEvent<T extends object, U = T> extends ContextEvent<ContextUpdateEventDetail<T>, ContextChangeRecord<U>> {
   constructor(type: string, updateInfo: ContextUpdateEventDetail<T>) {
     super(type, updateInfo);
   }

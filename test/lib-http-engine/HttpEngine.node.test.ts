@@ -11,7 +11,7 @@ import {
   Response, 
   HttpEngineOptions, 
   IHttpRequest, 
-  IRequestCertificate, 
+  HttpCertificate, 
   DummyLogger,
   ISentRequest,
   ResponseRedirect,
@@ -746,19 +746,22 @@ describe('http-engine', () => {
     });
 
     describe('Client certificate', () => {
-      let alicePem: IRequestCertificate;
-      let aliceP12: IRequestCertificate;
-      let alicePassword: IRequestCertificate;
-      let bobP12: IRequestCertificate;
+      let alicePem: HttpCertificate;
+      let aliceP12: HttpCertificate;
+      let alicePassword: HttpCertificate;
+      let bobP12: HttpCertificate;
       before(async () => {
         alicePem = {
           cert: {
             data: fs.readFileSync('./test/lib-http-engine/cert-auth-server/alice_cert.pem', 'utf8'),
           },
-          key: {
+          certKey: {
             data: fs.readFileSync('./test/lib-http-engine/cert-auth-server/alice_key.pem', 'utf8'),
           },
           type: 'pem',
+          key: '1',
+          kind: 'Core#Certificate',
+          name: 'Alice PEM',
         };
         aliceP12 = {
           cert: {
@@ -766,6 +769,9 @@ describe('http-engine', () => {
             passphrase: '',
           },
           type: 'p12',
+          key: '2',
+          kind: 'Core#Certificate',
+          name: 'Alice p12',
         };
         alicePassword = {
           cert: {
@@ -773,6 +779,9 @@ describe('http-engine', () => {
             passphrase: 'test',
           },
           type: 'p12',
+          key: '3',
+          kind: 'Core#Certificate',
+          name: 'Alice password',
         };
         bobP12 = {
           cert: {
@@ -780,6 +789,9 @@ describe('http-engine', () => {
             passphrase: 'test',
           },
           type: 'p12',
+          key: '4',
+          kind: 'Core#Certificate',
+          name: 'Bob p12',
         };
       });
   

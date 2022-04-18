@@ -7,7 +7,7 @@ export { IApplication } from './src/models/Application.js';
 export { Response, IResponse, Kind as ResponseKind } from './src/models/Response.js';
 export { IAuthorizationSettingsUnion, IApiKeyAuthorization, IAuthorizationParams, IBasicAuthorization, IBearerAuthorization, ICCAuthorization, IDigestAuthorization, INtlmAuthorization, IOAuth1Authorization, IOAuth2Authorization, IOAuth2AuthorizationRequestCustomData, IOAuth2CustomData, IOAuth2CustomParameter, IOAuth2TokenRequestCustomData, IOauth2GrantType, IOauth2ResponseType, IOidcAuthorization, IOidcTokenError, IOidcTokenInfo, IPassThroughAuthorization, IRamlCustomAuthorization, ITokenError, ITokenInfo, ITokenRemoveOptions, OAuth2DeliveryMethod } from './src/models/Authorization.js';
 export { AuthorizationData, IAuthorizationData } from './src/models/AuthorizationData.js';
-export { CertificateType, ICertificate, ICertificateIndex, IClientCertificate, IRequestCertificate } from './src/models/ClientCertificate.js';
+export { Certificate, CertificateDataFormat, CertificateType, HttpCertificate, ICertificate, ICertificateCreateOptions, ICertificateData, IP12Certificate, IP12CreateOptions, IPemCertificate, IPemCreateOptions, Kind as CertificateKind } from './src/models/ClientCertificate.js';
 export { Environment, IEnvironment, Kind as EnvironmentKind } from './src/models/Environment.js';
 export { ErrorResponse, IErrorResponse } from './src/models/ErrorResponse.js';
 export { IHostRule, HostRule, Kind as HostRuleKind } from './src/models/HostRule.js';
@@ -72,6 +72,7 @@ export * as Timers from './src/lib/timers/Timers.js';
 export { UriTemplate, IUriTemplateOptions } from './src/lib/parsers/UriTemplate.js';
 export * from './src/lib/parsers/UrlProcessor.js';
 export * as HttpDefinitions from './src/lib/definitions/HttpDefinitions.js';
+export * as Buffer from './src/lib/Buffer.js';
 
 //
 // Runtime
@@ -117,13 +118,6 @@ export { DataCalculator } from './src/lib/calculators/DataCalculator.js';
 export { Events } from './src/events/Events.js';
 export { EventTypes } from './src/events/EventTypes.js';
 export * from './src/events/BaseEvents.js';
-export { 
-  ProjectMoveEventDetail,
-  ProjectCloneEventDetail,
-  IFolderInitOptions,
-  IRequestInitOptions,
-  IEnvironmentInitOptions,
-} from './src/events/models/ProjectEvents.js';
 export {
   ICookieDeleteUrlDetail,
   ICookieDetail,

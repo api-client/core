@@ -136,7 +136,7 @@ export class ProjectRequestRunner extends EventEmitter {
       factory.actions = request.actions.toJSON();
     }
     if (request.clientCertificate) {
-      factory.certificates = [request.clientCertificate];
+      factory.certificates = [request.clientCertificate.toJSON()];
     }
     if (config.enabled !== false) {
       factory.config = config.toJSON();

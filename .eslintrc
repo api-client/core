@@ -55,6 +55,15 @@
     },
     {
       "files": [
+        "test/**/*.node.test.ts"
+      ],
+      "env": {
+        "browser": false,
+        "node": true
+      }
+    },
+    {
+      "files": [
         "**/*.ts"
       ],
       "rules": {

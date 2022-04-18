@@ -1,7 +1,7 @@
 import { IRequestConfig, RequestConfig } from './RequestConfig.js';
 import { Thing, IThing, Kind as ThingKind } from './Thing.js';
 import { IRequestActions, RequestActions } from './RequestActions.js';
-import { IRequestCertificate } from './ClientCertificate.js';
+import { HttpCertificate, Certificate } from './ClientCertificate.js';
 import { IRequestAuthorization, RequestAuthorization } from './RequestAuthorization.js';
 import { IRequestLog, RequestLog, Kind as LogKind } from './RequestLog.js';
 import { SentRequest } from './SentRequest.js';
@@ -64,7 +64,7 @@ export interface IRequest {
   /**
    * The list of certificates to use with the request.
    */
-  clientCertificate?: IRequestCertificate;
+  clientCertificate?: HttpCertificate;
 }
 
 export class Request {
@@ -99,7 +99,7 @@ export class Request {
   /**
    * The list of certificates to use with the request.
    */
-  clientCertificate?: IRequestCertificate;
+  clientCertificate?: Certificate;
 
   /**
    * Creates a request from an URL.
@@ -373,7 +373,7 @@ export class Request {
       this.actions = undefined;
     }
     if (clientCertificate) {
-      this.clientCertificate = clientCertificate;
+      this.clientCertificate = new Certificate(clientCertificate);
     } else {
       this.clientCertificate = undefined;
     }
@@ -401,7 +401,7 @@ export class Request {
       result.actions = this.actions.toJSON();
     }
     if (this.clientCertificate) {
-      result.clientCertificate = { ...this.clientCertificate };
+      result.clientCertificate = this.clientCertificate.toJSON();
     }
     return result;
   }

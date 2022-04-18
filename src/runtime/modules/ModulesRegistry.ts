@@ -8,7 +8,7 @@ import { ClientCertificateEvents } from '../../events/models/ClientCertificateEv
 import { IRequestAuthorization } from '../../models/RequestAuthorization.js';
 import { IRequestConfig } from '../../models/RequestConfig.js';
 import { IRequestLog } from '../../models/RequestLog.js';
-import { IRequestCertificate } from '../../models/ClientCertificate.js';
+import { HttpCertificate } from '../../models/ClientCertificate.js';
 
 export interface RegisteredRequestModule {
   fn: (request: IHttpRequest, context: ExecutionContext) => Promise<number>;
@@ -49,7 +49,7 @@ export interface ExecutionContext {
   /**
    * Can be altered by the actions.
    */
-  certificates?: IRequestCertificate[];
+  certificates?: HttpCertificate[];
 }
 
 export interface ExecutionEvents {

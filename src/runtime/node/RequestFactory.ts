@@ -3,7 +3,7 @@ import { IHttpRequest } from '../../models/HttpRequest.js';
 import { IRequestConfig, IRequestBaseConfig } from '../../models/RequestConfig.js';
 import { IRequestAuthorization } from '../../models/RequestAuthorization.js';
 import { IRequestActions } from '../../models/RequestActions.js';
-import { IRequestCertificate } from '../../models/ClientCertificate.js';
+import { HttpCertificate } from '../../models/ClientCertificate.js';
 import { IRequestLog } from '../../models/RequestLog.js';
 import { VariablesProcessor } from '../variables/VariablesProcessor.js';
 import { IRunnableAction } from '../../models/actions/RunnableAction.js';
@@ -57,7 +57,7 @@ export class RequestFactory {
   /**
    * The list of certificates to use with the request.
    */
-  certificates?: IRequestCertificate[];
+  certificates?: HttpCertificate[];
   /**
    * The cumulative list of all variables to be applied to the request and other properties.
    * The variables must be already processed for variables in values (evaluated).
