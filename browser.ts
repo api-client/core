@@ -74,6 +74,17 @@ export * from './src/lib/parsers/UrlProcessor.js';
 export * as HttpDefinitions from './src/lib/definitions/HttpDefinitions.js';
 export * as Buffer from './src/lib/Buffer.js';
 
+// 
+// Authorization
+// 
+export { OAuth2Authorization } from './src/authorization/OAuth2Authorization.js'
+export { OidcAuthorization } from './src/authorization/OidcAuthorization.js'
+export { AuthorizationError, CodeError } from './src/authorization/AuthorizationError.js'
+export * as AuthUtils from './src/authorization/Utils.js';
+export * from './src/authorization/types.js';
+export { Tokens as OidcTokens } from './src/authorization/lib/Tokens.js';
+export * as KnownGrants from './src/authorization/lib/KnownGrants.js';
+
 //
 // Runtime
 //
