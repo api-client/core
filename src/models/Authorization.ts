@@ -72,7 +72,7 @@ export interface ICCAuthorization {
   /**
    * The certificate object to use with the HTTP request.
    */
-  certificate: HttpCertificate;
+  certificate?: HttpCertificate;
 }
 
 export declare interface IOAuth2CustomParameter {

@@ -58,8 +58,9 @@ export class RequestAuthorization {
   }
 
   static fromLegacy(info: LegacyAuthorization): RequestAuthorization {
-    if (info.type === 'client certificate') {
-      throw new Error(`The legacy client certificate authorization cannot be restored.`);
+    const copy = { ...info };
+    if (copy.type === 'client certificate') {
+      copy.config = {};
     }
     return new RequestAuthorization({
       kind: Kind,
