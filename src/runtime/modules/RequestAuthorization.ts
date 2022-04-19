@@ -9,18 +9,14 @@ import { ExecutionContext } from './ModulesRegistry.js';
  * Injects client certificate object into the request object
  */
 async function processClientCertificate(config: ICCAuthorization, context: ExecutionContext): Promise<void> {
-  const { id } = config;
-  if (!id || !context.Events) {
-    return;
-  }
-  const result = await context.Events.ClientCertificate.read(context.eventsTarget, id);
-  if (!result) {
+  const { certificate } = config;
+  if (!certificate) {
     return;
   }
   if (!Array.isArray(context.certificates)) {
     context.certificates = [];
   }
-  context.certificates.push(result);
+  context.certificates.push(certificate);
 }
 
 /**

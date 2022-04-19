@@ -1,3 +1,5 @@
+import { HttpCertificate } from "./ClientCertificate.js";
+
 export interface IBasicAuthorization {
   /**
    * User name value.
@@ -68,12 +70,9 @@ export interface IOAuth1Authorization {
  */
 export interface ICCAuthorization {
   /**
-   * The ID of the certificate to use.
-   * Because the certificates are stored by the application 
-   * this configuration only returns an ID of the certificate 
-   * to use when making the request.
+   * The certificate object to use with the HTTP request.
    */
-  id: string;
+  certificate: HttpCertificate;
 }
 
 export declare interface IOAuth2CustomParameter {
