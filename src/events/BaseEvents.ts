@@ -39,9 +39,9 @@ export interface ContextReadEventDetail {
    */
   id: string;
   /**
-   * Optional revision of the state, when supported by the context provider.
+   * Optional parent, when needed.
    */
-  rev?: string;
+  parent?: string;
 }
 
 /**
@@ -51,10 +51,10 @@ export class ContextReadEvent<T> extends ContextEvent<ContextReadEventDetail, T>
   /**
    * @param type The type of the event
    * @param id The domain id of the object to read
-   * @param rev Optional revision of the state, when supported by the context provider.
+   * @param parent Optional parent, when needed.
    */
-  constructor(type: string, id: string, rev?: string) {
-    super(type, { id, rev });
+  constructor(type: string, id: string, parent?: string) {
+    super(type, { id, parent });
   }
 }
 
@@ -93,15 +93,6 @@ export interface ContextChangeRecord<T> {
    */
   key: string;
   /**
-   * The revision of the updated context state object.
-   * It is not set when old revision is unavailable (new entity is created) or when the context provider does not support this value.
-   */
-  oldRev?: string;
-  /**
-   * New revision of updated state object. May not be set when the context provider does not support this value.
-   */
-  rev?: string;
-  /**
    * The updated context state object.
    */
   item?: T;
@@ -120,10 +111,6 @@ export interface ContextDeleteEventDetail {
    * The id of the parent object, if applicable.
    */
   parent?: string;
-  /**
-   * The revision to delete, when applicable.
-   */
-  rev?: string;
 }
 
 /**
@@ -135,8 +122,8 @@ export class ContextDeleteEvent extends ContextEvent<ContextDeleteEventDetail, C
    * @param id The id of the object to delete
    * @param parent The id of the parent object, if applicable.
    */
-  constructor(type: string, id: string, parent?: string, rev?: string) {
-    super(type, { id, parent, rev });
+  constructor(type: string, id: string, parent?: string) {
+    super(type, { id, parent });
   }
 }
 
