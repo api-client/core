@@ -1,4 +1,4 @@
-import { IHttpRequest } from 'src/models/HttpRequest.js';
+import { IHttpRequest } from '../../../models/HttpRequest.js';
 import { ActionRunnable } from './ActionRunnable.js';
 import { IDeleteCookieAction } from '../../../models/actions/runnable/DeleteCookieAction.js';
 import { Events } from '../../../events/Events.js';

@@ -7,7 +7,7 @@ import { AuthorizationError, CodeError } from './AuthorizationError.js';
 import { IframeAuthorization } from './lib/IframeAuthorization.js';
 import { PopupAuthorization } from './lib/PopupAuthorization.js';
 import * as KnownGrants from './lib/KnownGrants.js';
-import { IOAuth2Authorization, ITokenInfo } from 'src/models/Authorization.js';
+import { IOAuth2Authorization, ITokenInfo } from '../models/Authorization.js';
 import { OauthProcessingOptions } from './types.js';
 
 export const resolveFunction = Symbol('resolveFunction');

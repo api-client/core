@@ -1,5 +1,5 @@
-import { IHttpRequest } from 'src/models/HttpRequest.js';
-import { IHttpCookie } from 'src/models/HttpCookie.js';
+import { IHttpRequest } from '../../../models/HttpRequest.js';
+import { IHttpCookie } from '../../../models/HttpCookie.js';
 import { ActionRunnable } from './ActionRunnable.js';
 import { ISetCookieAction } from '../../../models/actions/runnable/SetCookieAction.js';
 import { Events } from '../../../events/Events.js';

@@ -1,4 +1,4 @@
-import { IHttpRequest } from 'src/models/HttpRequest.js';
+import { IHttpRequest } from '../../../models/HttpRequest.js';
 import { ActionRunnable } from './ActionRunnable.js';
 import { ISetVariableAction } from '../../../models/actions/runnable/SetVariableAction.js';
 import { Events } from '../../../events/Events.js';
