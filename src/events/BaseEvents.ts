@@ -15,7 +15,7 @@ export interface ContextEventDetailWithResult<T> {
 /**
  * A base class to use with context providers.
  */
-export class ContextEvent<S extends object, R> extends CustomEvent<ContextEventDetailWithResult<R>> {
+export class ContextEvent<S extends object, R> extends CustomEvent<S & ContextEventDetailWithResult<R>> {
   /**
    * @param type The event type
    * @param detail The optional detail object. It adds object's properties to the `detail` with the `result` property.
