@@ -17,11 +17,7 @@ export class SerializablePayload {
    */
   async writePayload(message: unknown): Promise<void> {
     this._sourcePayload = message;
-    if (typeof message === 'string') {
-      this.payload = message;
-    } else {
-      this.payload = await PayloadSerializer.serialize(message as DeserializedPayload);
-    }
+    this.payload = await PayloadSerializer.serialize(message as DeserializedPayload);
   }
 
   /**

@@ -2,6 +2,7 @@ import { blobToDataUrl } from './Utils.js';
 
 export type PayloadTypes = 'string' | 'file' | 'blob' | 'buffer' | 'arraybuffer' | 'formdata' | 'x-www-form-urlencoded';
 export type DeserializedPayload = string | Blob | File | FormData | Buffer | ArrayBuffer | undefined;
+export const SupportedPayloadTypes: PayloadTypes[] = ['string', 'file', 'blob', 'buffer', 'arraybuffer', 'formdata', 'x-www-form-urlencoded'];
 
 export interface IMultipartBody {
   /**
@@ -64,15 +65,41 @@ export const hasBuffer: boolean = typeof Buffer === 'function';
 
 export class PayloadSerializer {
   /**
+   * Checked whether the passed payload can be safely stored in the data store.
+   * @param payload The value to test. 
+   */
+  static isSafePayload(payload: any): boolean {
+    if (payload === undefined || payload === null) {
+      // both values should be stored correctly
+      return true;
+    }
+    if (typeof payload === 'string') {
+      return true;
+    }
+    // checks whether the payload is already serialized./
+    const typed = payload as ISafePayload;
+    if (typed.type && SupportedPayloadTypes.includes(typed.type)) {
+      return true
+    }
+    return false;
+  }
+
+  /**
    * Transforms the payload into a data store safe object.
    */
   static async serialize(payload: DeserializedPayload): Promise<ISafePayload | string | undefined> {
-    if (typeof payload === 'undefined' || payload === null) {
-      return undefined;
+    if (PayloadSerializer.isSafePayload(payload)) {
+      if (payload === null) {
+        return undefined;
+      }
+      return (payload as unknown) as ISafePayload | string | undefined;
     }
-    if (typeof payload === 'string') {
-      return payload;
-    }
+    // if (payload === undefined || payload === null) {
+    //   return undefined;
+    // }
+    // if (typeof payload === 'string') {
+    //   return payload;
+    // }
     if (hasBlob && payload instanceof Blob) {
       return PayloadSerializer.stringifyBlob(payload);
     }
@@ -129,8 +156,8 @@ export class PayloadSerializer {
   /**
    * When the passed argument is an ArrayBuffer it creates an object describing the object in a safe to store object.
    * 
-   * @param {any} payload 
-   * @returns {TransformedPayload|undefined} The buffer metadata or undefined if the passed argument is not an ArrayBuffer.
+   * @param payload 
+   * @returns The buffer metadata or undefined if the passed argument is not an ArrayBuffer.
    */
   static stringifyArrayBuffer(payload: ArrayBuffer): ISafePayload | undefined {
     if (payload.byteLength) {
@@ -164,9 +191,9 @@ export class PayloadSerializer {
   /**
    * Transforms a FormData entry into a safe-to-store text entry
    *
-   * @param {string} name The part name
-   * @param {string|File} file The part value
-   * @return {Promise<IMultipartBody>} Transformed FormData part to a datastore safe entry.
+   * @param name The part name
+   * @param file The part value
+   * @returns Transformed FormData part to a datastore safe entry.
    */
   static async serializeFormDataEntry(name: string, file: string | File): Promise<IMultipartBody> {
     if (typeof file === 'string') {
@@ -202,7 +229,7 @@ export class PayloadSerializer {
    * Restores the payload into its original format.
    */
   static async deserialize(payload: ISafePayload | string | undefined): Promise<DeserializedPayload> {
-    if (typeof payload === 'undefined' || payload === null) {
+    if (payload === undefined || payload === null) {
       return undefined;
     }
     if (typeof payload === 'string') {
