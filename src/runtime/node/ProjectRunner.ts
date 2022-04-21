@@ -10,6 +10,7 @@ import { IProjectExecutionIteration, IProjectExecutionLog } from '../reporters/R
 import { pathExists, readJson } from '../../lib/fs/Fs.js';
 import { BaseRunner } from './BaseRunner.js';
 import { IProjectRunnerOptions } from './InteropInterfaces.js';
+import { State } from './enums.js';
 
 type ProjectParent = HttpProject | ProjectFolder;
 
@@ -127,11 +128,48 @@ export abstract class ProjectRunner extends BaseRunner {
    */
   noEmit = false;
 
+  /**
+   * When executing, this is the last user request runner.
+   */
+  protected _runner?: ProjectRequestRunner;
+
+  protected _state: State = State.Idle;
+
+  get state(): State {
+    return this._state;
+  }
+
+  protected _signal?: AbortSignal;
+
+  /**
+   * The abort signal to set on this request.
+   * Aborts the request when the signal fires.
+   * @type {(AbortSignal | undefined)}
+   */
+  get signal(): AbortSignal | undefined {
+    return this._signal;
+  }
+
+  set signal(value: AbortSignal | undefined) {
+    const old = this._signal;
+    if (old === value) {
+      return;
+    }
+    this._signal = value;
+    if (old) {
+      old.removeEventListener('abort', this._abortHandler);
+    }
+    if (value) {
+      value.addEventListener('abort', this._abortHandler);
+    }
+  }
+
   constructor() {
     super();
     this._requestHandler = this._requestHandler.bind(this);
     this._responseHandler = this._responseHandler.bind(this);
     this._errorHandler = this._errorHandler.bind(this);
+    this._abortHandler = this._abortHandler.bind(this);
   }
 
   /**
@@ -152,6 +190,9 @@ export abstract class ProjectRunner extends BaseRunner {
     }
     this.root = root;
     this.environment = await this.getEnvironment();
+    if (opts.signal) {
+      this.signal = opts.signal;
+    }
   }
 
   /**
@@ -159,6 +200,24 @@ export abstract class ProjectRunner extends BaseRunner {
    * @returns The execution log created by calling the `createReport()` function.
    */
   abstract execute(): Promise<IProjectExecutionLog>;
+
+  /**
+   * Aborts the current run.
+   * The promise returned by the `execute()` method will reject if not yet resolved.
+   */
+  abort(): void {
+    this._state = State.Aborted;
+    if (this._runner) {
+      this._runner.abort();
+    }
+  }
+
+  /**
+   * Handler for the `abort` event on the `AbortSignal`.
+   */
+  protected _abortHandler(): void {
+    this.abort();
+  }
 
   /**
    * Creates the report of the execution.
@@ -207,6 +266,9 @@ export abstract class ProjectRunner extends BaseRunner {
    * Runs the requests from the project as configured.
    */
   protected async executeIteration(): Promise<void> {
+    if (this._state === State.Aborted) {
+      throw new Error(`The execution has been aborted.`);
+    }
     const { environment, project, options, hasIterations, index, noEmit } = this;
     if (!options || !project) {
       throw new Error(`Run configure() first.`);
@@ -221,6 +283,7 @@ export abstract class ProjectRunner extends BaseRunner {
       eventTarget: this.target,
       variables: this.getSystemVariables(),
     });
+    this._runner = runner;
     
     runner.on('request', this._requestHandler);
     runner.on('response', this._responseHandler);

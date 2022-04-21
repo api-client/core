@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import { HttpProject } from '../../models/HttpProject.js';
 import { IProjectExecutionLog, IProjectExecutionIteration } from '../reporters/Reporter.js';
 import { BaseRunner } from './BaseRunner.js';
+import { State } from './enums.js';
 import { IProjectParallelRunnerOptions, IProjectParallelWorkerOptions } from './InteropInterfaces.js'
 
 const numCPUs = cpus().length;
@@ -74,9 +75,13 @@ export class ProjectParallelRunner extends BaseRunner {
   constructor(project: HttpProject, opts: IProjectParallelRunnerOptions = {}) {
     super();
     this.project = project;
-    this.options = opts || {};
+    this.options = opts;
 
     this._exitHandler = this._exitHandler.bind(this);
+    this._abortHandler = this._abortHandler.bind(this);
+    if (opts.signal) {
+      this.signal = opts.signal;
+    }
   }
 
   execute(): Promise<IProjectExecutionLog> {
@@ -87,7 +92,70 @@ export class ProjectParallelRunner extends BaseRunner {
     });
   }
 
+  protected _state: State = State.Idle;
+
+  get state(): State {
+    return this._state;
+  }
+
+  protected _signal?: AbortSignal;
+
+  /**
+   * The abort signal to set on this request.
+   * Aborts the request when the signal fires.
+   * @type {(AbortSignal | undefined)}
+   */
+  get signal(): AbortSignal | undefined {
+    return this._signal;
+  }
+
+  set signal(value: AbortSignal | undefined) {
+    const old = this._signal;
+    if (old === value) {
+      return;
+    }
+    this._signal = value;
+    if (old) {
+      old.removeEventListener('abort', this._abortHandler);
+    }
+    if (value) {
+      value.addEventListener('abort', this._abortHandler);
+    }
+  }
+
+  /**
+   * Aborts the current run.
+   * The promise returned by the `execute()` method will reject if not yet resolved.
+   */
+  abort(): void {
+    this._state = State.Aborted;
+    const { workers } = this;
+    workers.forEach((info) => {
+      if (info.status !== 'error') {
+        try {
+          info.worker.destroy();
+        } catch (e) {
+          // ...
+        }
+        info.status = 'error';
+      }
+    });
+    if (this.mainRejecter) {
+      this.mainRejecter!(new Error(`The execution has been aborted.`));
+      this.mainRejecter = undefined;
+      this.mainResolver = undefined;
+    }
+  }
+
+  /**
+   * Handler for the `abort` event on the `AbortSignal`.
+   */
+  protected _abortHandler(): void {
+    this.abort();
+  }
+
   private _execute(): void {
+    this._state = State.Running as State;
     try {
       cluster.setupPrimary({
         exec: join(__dirname, 'ProjectRunnerWorker.js'),
@@ -105,6 +173,9 @@ export class ProjectParallelRunner extends BaseRunner {
     } catch (e) {
       const cause = e as Error;
       this.mainRejecter!(cause);
+      this.mainResolver = undefined
+      this.mainRejecter = undefined
+      this._state = State.Idle as State;
     }
   }
 
@@ -211,7 +282,10 @@ export class ProjectParallelRunner extends BaseRunner {
     this.endTime = Date.now();
     const report = await this.createReport();
     this.mainResolver(report);
+    this.mainResolver = undefined
+    this.mainRejecter = undefined
     cluster.off('exit', this._exitHandler);
+    this._state = State.Idle as State;
   }
 
   private setRunError(worker: Worker, message: IWorkerMessage): void {

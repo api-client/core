@@ -191,6 +191,31 @@ export abstract class HttpEngine extends EventEmitter {
   protected mainRejecter?: (err: SerializableError) => void;
   [mainPromiseSymbol]?: Promise<IRequestLog>;
 
+  protected _signal?: AbortSignal;
+
+  /**
+   * The abort signal to set on this request.
+   * Aborts the request when the signal fires.
+   * @type {(AbortSignal | undefined)}
+   */
+  get signal(): AbortSignal | undefined {
+    return this._signal;
+  }
+
+  set signal(value: AbortSignal | undefined) {
+    const old = this._signal;
+    if (old === value) {
+      return;
+    }
+    this._signal = value;
+    if (old) {
+      old.removeEventListener('abort', this._abortHandler);
+    }
+    if (value) {
+      value.addEventListener('abort', this._abortHandler);
+    }
+  }
+
   constructor(request: IHttpRequest, opts: HttpEngineOptions = {}) {
     super();
     this.request = new HttpRequest({ ...request });
@@ -199,6 +224,11 @@ export abstract class HttpEngine extends EventEmitter {
     this.sentRequest = new SentRequest({ ...request, startTime: Date.now() });
     this.uri = this.readUrl(request.url);
     this.hostHeader = RequestUtils.getHostHeader(request.url);
+
+    this._abortHandler = this._abortHandler.bind(this);
+    if (opts.signal) {
+      this.signal = opts.signal;
+    }
   }
 
   /**
@@ -243,6 +273,16 @@ export abstract class HttpEngine extends EventEmitter {
     this.socket.pause();
     this.socket.destroy();
     this.socket = undefined;
+
+    const e = new SerializableError('Request aborted', 3);
+    this._errorRequest(e);
+  }
+
+  /**
+   * Handler for the `abort` event on the `AbortSignal`.
+   */
+  protected _abortHandler(): void {
+    this.abort();
   }
 
   /**

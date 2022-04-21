@@ -2,6 +2,7 @@ import { SerializableError } from '../../models/SerializableError.js';
 import { sleep } from '../../lib/timers/Timers.js';
 import { ProjectRunner } from './ProjectRunner.js';
 import { IProjectExecutionLog } from '../reporters/Reporter.js';
+import { State } from './enums.js';
 
 /**
  * Project runner that runs the requests in the project one-by-one.
@@ -15,7 +16,7 @@ export class ProjectSerialRunner extends ProjectRunner {
     if (!root) {
       throw new SerializableError(`The project runner is not configured.`, 'ECONFIGURE');
     }
-    
+    this._state = State.Running as State;
     this.startTime = Date.now();
     while (this.remaining > 0) {
       this.remaining--;
@@ -29,7 +30,7 @@ export class ProjectSerialRunner extends ProjectRunner {
         await sleep(0);
       }
     }
-
+    this._state = State.Idle as State;
     this.endTime = Date.now();
     return this.createReport();
   }

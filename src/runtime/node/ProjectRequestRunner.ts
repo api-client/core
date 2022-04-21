@@ -14,6 +14,7 @@ import { VariablesProcessor } from '../variables/VariablesProcessor.js';
 import { RequestFactory } from './RequestFactory.js';
 import { EventTypes } from '../../events/EventTypes.js';
 import { ProjectRunnerOptions, ProjectRunnerRunOptions, RunResult } from './InteropInterfaces.js';
+import { State } from './enums.js';
 
 export interface ProjectRequestRunner {
   /**
@@ -62,6 +63,12 @@ export class ProjectRequestRunner extends EventEmitter {
    */
   protected variablesProcessor = new VariablesProcessor();
 
+  protected _state: State = State.Idle;
+
+  get state(): State {
+    return this._state;
+  }
+
   constructor(project: HttpProject, opts: ProjectRunnerOptions = {}) {
     super();
     this.project = project;
@@ -77,13 +84,23 @@ export class ProjectRequestRunner extends EventEmitter {
    * @returns A promise with the run result.
    */
   async run(options?: ProjectRunnerRunOptions): Promise<RunResult[]> {
+    this._state = State.Running as State;
     const { project } = this;
     const executed: RunResult[] = [];
     for (const request of project.requestIterator(options)) {
       const info = await this._runItem(request);
       executed.push(info);
     }
+    this._state = State.Idle;
     return executed;
+  }
+
+  /**
+   * Aborts the current run.
+   * The promise returned by the `run()` method will reject if not yet resolved.
+   */
+  abort(): void {
+    this._state = State.Aborted;
   }
 
   /**
@@ -101,13 +118,18 @@ export class ProjectRequestRunner extends EventEmitter {
    */
   async* [Symbol.asyncIterator](): AsyncGenerator<RunResult> {
     const { project } = this;
+    this._state = State.Running as State;
     for (const request of project.requestIterator({ recursive: true })) {
       const info = await this._runItem(request);
       yield info;
     }
+    this._state = State.Idle;
   }
 
   private async _runItem(request: ProjectRequest): Promise<RunResult> {
+    if (this._state === State.Aborted) {
+      throw new Error(`The execution has been aborted.`);
+    }
     const folder = request.getParent();
     const parent = folder || this.project;
     let variables: Record<string, string>;

@@ -7,6 +7,7 @@ import { IWorkerMessage } from './ProjectParallelRunner.js';
 import { IProjectParallelWorkerOptions } from './InteropInterfaces.js';
 import { sleep } from '../../lib/timers/Timers.js';
 import { ProjectRunner } from './ProjectRunner.js';
+import { State } from './enums.js';
 
 class ProjectExeWorker extends ProjectRunner {
   initialize(): void {
@@ -40,6 +41,7 @@ class ProjectExeWorker extends ProjectRunner {
     }
     function unhandledRejection(): void {}
     process.on('unhandledRejection', unhandledRejection);
+    this._state = State.Running as State;
     this.startTime = Date.now();
     while (this.remaining > 0) {
       this.remaining--;
@@ -54,6 +56,7 @@ class ProjectExeWorker extends ProjectRunner {
 
     const log = await this.createReport();
     process.send!({ cmd: 'result', data: log.iterations });
+    this._state = State.Idle as State;
     return log;
   }
 }

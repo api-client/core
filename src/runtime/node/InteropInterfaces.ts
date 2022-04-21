@@ -118,4 +118,10 @@ export interface IProjectRunnerOptions {
    * When not set it does not read system variables.
    */
   variables?: boolean | string[] | Record<string, string>;
+
+  /**
+   * Optional signal from an `AbortController`.
+   * It aborts the execution when the ``abort` event is dispatched.
+   */
+  signal?: AbortSignal;
 }

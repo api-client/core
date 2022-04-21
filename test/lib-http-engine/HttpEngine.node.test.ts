@@ -27,6 +27,7 @@ import {
   ErrorResponse,
   HostRuleKind,
   RequestAuthorizationKind,
+  SerializableError,
 } from '../../index.js';
 
 const logger = new DummyLogger();
@@ -1858,6 +1859,19 @@ describe('http-engine', () => {
         base.abort();
         const result = await base._createResponse();
         assert.isUndefined(result);
+      });
+
+      it('aborts the request with a signal', async () => {
+        const ctrl = new AbortController();
+        const base = new CoreEngine(request, { ...opts, signal: ctrl.signal });
+        const p = base.send();
+        setTimeout(() => {
+          ctrl.abort();
+        }, 1);
+        const result = await p;
+        const response = result.response as IErrorResponse;
+        assert.equal(response.status, 0);
+        assert.equal((response.error as SerializableError).message, 'Request aborted');
       });
     });
 

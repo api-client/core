@@ -59,6 +59,12 @@ export interface IRequestBaseConfig {
    * Whether the processor should validate certificates.
    */
   validateCertificates?: boolean;
+
+  /**
+   * Optional signal from an `AbortController`.
+   * This is populated only when executing a request. This value is opaque for the data store.
+   */
+  signal?: AbortSignal;
 }
 
 /**
@@ -150,6 +156,12 @@ export class RequestConfig {
    */
   sentMessageLimit?: number;
 
+  /**
+   * Optional signal from an `AbortController`.
+   * This is populated only when executing a request. This value is opaque for the data store.
+   */
+  signal?: AbortSignal;
+
   static withDefaults(): RequestConfig {
     return new RequestConfig({
       kind: Kind,
@@ -209,7 +221,7 @@ export class RequestConfig {
   new(init: IRequestConfig): void {
     const { 
       enabled, followRedirects, ignoreSessionCookies, validateCertificates, defaultHeaders, timeout, hosts, variables,
-      defaultAccept, defaultUserAgent, proxy, proxyPassword, proxyUsername, sentMessageLimit,
+      defaultAccept, defaultUserAgent, proxy, proxyPassword, proxyUsername, sentMessageLimit, signal,
     } = init;
     this.kind = Kind;
     if (typeof enabled === 'boolean') {
@@ -282,6 +294,11 @@ export class RequestConfig {
     } else {
       this.sentMessageLimit = undefined;
     }
+    if (signal) {
+      this.signal = signal;
+    } else {
+      this.signal = undefined;
+    }
   }
 
   toJSON(): IRequestConfig {
@@ -310,6 +327,7 @@ export class RequestConfig {
     if (Array.isArray(this.variables)) {
       result.variables = this.variables.map(i => i.toJSON());
     }
+    // DO NOT put the `signal` here.
     return result;
   }
 }

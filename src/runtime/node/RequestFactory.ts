@@ -74,6 +74,13 @@ export class RequestFactory {
   logger?: Logger;
 
   /**
+   * The abort signal to set on this request.
+   * Aborts the request when the signal fires.
+   * @type {(AbortSignal | undefined)}
+   */
+  signal?: AbortSignal;
+
+  /**
    * Creates an instance from the IRequest object with setting the corresponding variables.
    * @param eventTarget The main events bus.
    * This target is used to dispatch the events on.
@@ -302,7 +309,7 @@ export class RequestFactory {
    * Creates a configuration options for the HTTP engine.
    */
   async prepareEngineConfig(): Promise<HttpEngineOptions> {
-    const { certificates, logger } = this;
+    const { certificates, logger, signal } = this;
     const auth = await this.readAuthorization();
     const config = await this.readConfig();
     const opts: HttpEngineOptions = {};
@@ -314,6 +321,9 @@ export class RequestFactory {
     }
     if (logger) {
       opts.logger = logger;
+    }
+    if (signal) {
+      opts.signal = signal;
     }
     if (!config || config.enabled === false) {
       return opts;
