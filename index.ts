@@ -27,7 +27,7 @@ export { Provider, IProvider, Kind as ProviderKind } from './src/models/Provider
 export { Request, IRequest, Kind as RequestKind } from './src/models/Request.js';
 export { RequestActions, IRequestActions } from './src/models/RequestActions.js';
 export { RequestAuthorization, IRequestAuthorization, Kind as RequestAuthorizationKind } from './src/models/RequestAuthorization.js';
-export { RequestConfig, IRequestConfig, Kind as RequestConfigKind } from './src/models/RequestConfig.js';
+export { RequestConfig, IRequestConfig, IRequestBaseConfig, Kind as RequestConfigKind } from './src/models/RequestConfig.js';
 export { RequestLog, IRequestLog, Kind as RequestLogKind } from './src/models/RequestLog.js';
 export { RequestsSize, IRequestsSize, Kind as RequestsSizeKind } from './src/models/RequestsSize.js';
 export { RequestTime, IRequestTime, Kind as RequestTimeKind } from './src/models/RequestTime.js';
@@ -171,6 +171,11 @@ export {
   ITelemetryTimingDetail,
 } from './src/events/telemetry/TelemetryEvents.js';
 export { ISetVariableDetail } from './src/events/environment/EnvironmentEvents.js';
+export {
+  ICoreRequestDetail,
+  IHttpRequestDetail,
+  IProjectRequestDetail,
+} from './src/events/transport/TransportEvents.js';
 
 // 
 // Request actions
