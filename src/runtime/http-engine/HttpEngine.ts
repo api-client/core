@@ -262,8 +262,6 @@ export abstract class HttpEngine extends EventEmitter {
    */
   abort(): void {
     this.aborted = true;
-    const e = new SerializableError('Request aborted', 3);
-    this._errorRequest(e);
     if (!this.socket) {
       return;
     }
@@ -281,6 +279,8 @@ export abstract class HttpEngine extends EventEmitter {
    * Handler for the `abort` event on the `AbortSignal`.
    */
   protected _abortHandler(): void {
+    const e = new SerializableError('Request aborted', 3);
+    this._errorRequest(e);
     this.abort();
   }
 

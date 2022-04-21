@@ -74,7 +74,7 @@ export class CoreEngine extends HttpEngine {
       } else {
         await this.connect();
       }
-      if (!this.socket || !this.aborted) {
+      if (!this.socket || this.aborted) {
         return;
       }
       const message = await this.prepareMessage();
