@@ -1865,9 +1865,7 @@ describe('http-engine', () => {
         const ctrl = new AbortController();
         const base = new CoreEngine(request, { ...opts, signal: ctrl.signal });
         const p = base.send();
-        setTimeout(() => {
-          ctrl.abort();
-        }, 1);
+        ctrl.abort();
         const result = await p;
         const response = result.response as IErrorResponse;
         assert.equal(response.status, 0);
