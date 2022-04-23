@@ -1,5 +1,4 @@
-import { Internet, Types, DataMockInit, Person, Random } from '@pawel-up/data-mock';
-// import { randomValue } from '@pawel-up/data-mock/src/lib/Http.js';
+import { Internet, Types, IDataMockInit, Person, Random } from '@pawel-up/data-mock';
 import { IUser, Kind as UserKind } from '../../models/store/User.js';
 
 export interface IUserInit {
@@ -14,7 +13,7 @@ export class User {
   internet: Internet;
   random: Random;
 
-  constructor(init: DataMockInit={}) {
+  constructor(init: IDataMockInit={}) {
     this.person = new Person(init);
     this.types = new Types(init.seed);
     this.internet = new Internet(init);

@@ -1,4 +1,4 @@
-import { DataMockInit, Internet, Types } from "@pawel-up/data-mock";
+import { IDataMockInit, Internet, Types } from "@pawel-up/data-mock";
 import { IUrl } from "../../models/Url.js";
 
 /**
@@ -8,7 +8,7 @@ export class Url {
   types: Types;
   internet: Internet;
   
-  constructor(init: DataMockInit={}) {
+  constructor(init: IDataMockInit={}) {
     this.types = new Types(init.seed);
     this.internet = new Internet(init);
   }

@@ -1,4 +1,4 @@
-import { DataMock, DataMockInit } from '@pawel-up/data-mock';
+import { DataMock, IDataMockInit } from '@pawel-up/data-mock';
 import { Request } from './lib/Request.js';
 import { Response } from './lib/Response.js';
 import { User } from './lib/User.js';
@@ -20,7 +20,7 @@ export class ProjectMock extends DataMock {
   /**
    * @param init The library init options.
    */
-  constructor(init?: DataMockInit) {
+  constructor(init?: IDataMockInit) {
     super(init);
     this.projectRequest = new Request(init);
     this.response = new Response(init);

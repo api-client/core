@@ -1,14 +1,11 @@
-import { Http, Har, Types, Lorem, Time, DataMockInit, HttpResponseInit, HarTimingInit, Internet } from '@pawel-up/data-mock';
-import { IHttpResponse, Kind as HttpResponseKind } from '../../models/HttpResponse.js';
+import { Http, Har, Types, Lorem, Time, IDataMockInit, IHttpResponseInit, IHarTimingInit, Internet, IHttpPayloadInit } from '@pawel-up/data-mock';
+import { IHttpResponse, HttpResponse, Kind as HttpResponseKind } from '../../models/HttpResponse.js';
 import { IResponse, Kind as ResponseKind } from '../../models/Response.js';
 import { IRequestsSize } from '../../models/RequestsSize.js';
 import { IResponseRedirect, Kind as ResponseRedirectKind  } from '../../models/ResponseRedirect.js';
+import { DeserializedPayload } from '../../lib/transformers/PayloadSerializer.js';
 
-export interface IResponseInit extends HttpResponseInit, HarTimingInit {
-  /**
-   * When set it does not generate a response payload.
-   */
-  noBody?: boolean;
+export interface IResponseInit extends IHttpResponseInit, IHarTimingInit {
   /**
    * The first number of the status group. Other 2 are auto generated
    */
@@ -27,7 +24,7 @@ export class Response {
   har: Har;
   internet: Internet;
 
-  constructor(init: DataMockInit={}) {
+  constructor(init: IDataMockInit={}) {
     this.types = new Types(init.seed);
     this.lorem = new Lorem(init);
     this.time = new Time(init);
@@ -36,10 +33,21 @@ export class Response {
     this.internet = new Internet(init);
   }
 
-  httpResponse(init: IResponseInit = {}): IHttpResponse {
-    const ct = init.noBody ? undefined : this.http.headers.contentType();
-    const body = init.noBody ? undefined : this.http.payload.payload(ct);
-    const headers = this.http.headers.headers('response', { mime: ct });
+  protected _getPayload(mime?: string): DeserializedPayload {
+    if (mime) {
+      return undefined;
+    }
+    switch (mime) {
+      case 'multipart/form-data': return this.http.formData.form();
+      default:
+        return this.http.payload.payload(mime as string);
+    }
+  }
+
+  async httpResponse(init: IResponseInit = {}): Promise<IHttpResponse> {
+    const mime = this.http.headers.contentType(init.payload as IHttpPayloadInit);
+    const body = this._getPayload(mime);
+    const headers = this.http.headers.headers('response', { mime: mime });
     const statusGroup = init.statusGroup ? init.statusGroup : this.types.number({ min: 2, max: 5 });
     const sCode = this.types.number({ min: 0, max: 99 }).toString();
     const code = Number(`${statusGroup}${sCode.padStart(2, '0')}`);
@@ -50,14 +58,15 @@ export class Response {
       statusText: status,
       headers,
     };
-    if (!init.noBody) {
-      result.payload = body;
+    const response = new HttpResponse(result);
+    if (body) {
+      await response.writePayload(body)
     }
-    return result;
+    return response.toJSON();
   }
 
-  response(init: IResponseInit={}): IResponse {
-    const base = this.httpResponse(init);
+  async response(init: IResponseInit={}): Promise<IResponse> {
+    const base = await this.httpResponse(init);
     const length = this.types.number({ min: 10, max: 4000 });
     const result: IResponse = {
       ...base,
@@ -78,7 +87,7 @@ export class Response {
     return result;
   }
 
-  redirect(init?: IResponseInit): IResponseRedirect {
+  async redirect(init?: IResponseInit): Promise<IResponseRedirect> {
     const start = this.time.timestamp();
     const end = this.time.timestamp({ min: start + 1 })
     const info: IResponseRedirect = {
@@ -86,16 +95,16 @@ export class Response {
       startTime: start,
       endTime: end,
       url: this.internet.uri(),
-      response: this.httpResponse({ ...init, statusGroup: 3}),
+      response: await this.httpResponse({ ...init, statusGroup: 3}),
     };
     return info;
   }
 
-  redirects(size=1, init?: IResponseInit): IResponseRedirect[] {
-    const result: IResponseRedirect[] = [];
+  async redirects(size=1, init?: IResponseInit): Promise<IResponseRedirect[]> {
+    const result: Promise<IResponseRedirect>[] = [];
     for (let i = 0; i < size; i++) {
       result.push(this.redirect(init));
     }
-    return result;
+    return Promise.all(result);
   }
 }

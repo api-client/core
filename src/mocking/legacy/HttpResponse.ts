@@ -1,4 +1,4 @@
-import { HttpResponse as Base, headersValue, payloadValue, typesValue, loremValue } from '@pawel-up/data-mock/build/src/lib/http/HttpResponse.js';
+import Base, { headersValue, payloadValue, typesValue, loremValue } from '@pawel-up/data-mock/build/src/lib/http/Response.js';
 import { Har, DataMockLocale } from '@pawel-up/data-mock';
 import { ArcDataMockInit, HttpResponseArcInit, HttpResponseRedirectInit } from '../LegacyInterfaces.js';
 import { ResponseRedirect, Response, ErrorResponse } from '../../models/legacy/request/ArcResponse.js';
@@ -36,7 +36,7 @@ export class HttpResponse extends Base {
     const url = this[headersValue].link();
     headers += `\nlocation: ${url}`;
     const { code, status } = this.redirectStatus(init);
-    const body = init.body ? this[payloadValue].payload(ct) : undefined;
+    const body = init.body ? this[payloadValue].payload(ct as string) : undefined;
     const startTime = this[typesValue].datetime().getTime();
     const duration = this[typesValue].number({ min: 10, max: 4000 });
     const result: ResponseRedirect = {
@@ -60,7 +60,7 @@ export class HttpResponse extends Base {
 
   arcResponse(init: HttpResponseArcInit = {}): Response {
     const ct = init.noBody ? undefined : this[headersValue].contentType();
-    const body = init.noBody ? undefined : this[payloadValue].payload(ct);
+    const body = init.noBody ? undefined : this[payloadValue].payload(ct as string);
     const headers = this[headersValue].headers('response', { mime: ct });
     const statusGroup = init.statusGroup ? init.statusGroup : this[typesValue].number({ min: 2, max: 5 });
     const sCode = this[typesValue].number({ min: 0, max: 99 }).toString();

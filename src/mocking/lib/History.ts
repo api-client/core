@@ -1,4 +1,4 @@
-import { Internet, Types, DataMockInit, Person, Random, TypeDateTimeInit } from '@pawel-up/data-mock';
+import { Internet, Types, IDataMockInit, Person, Random, ITypeDateTimeInit } from '@pawel-up/data-mock';
 // import { randomValue } from '@pawel-up/data-mock/src/lib/Http.js';
 import { IHttpHistory, Kind as HttpHistoryKind } from '../../models/HttpHistory.js';
 import { Request, IRequestLogInit } from './Request.js';
@@ -32,7 +32,7 @@ export interface IHttpHistoryInit {
   /**
    * The created time init options.
    */
-  created?: TypeDateTimeInit;
+  created?: ITypeDateTimeInit;
 }
 
 export interface IHttpHistoryListInit extends IHttpHistoryInit {
@@ -70,7 +70,7 @@ export class History {
   random: Random;
   request: Request;
 
-  constructor(init: DataMockInit={}) {
+  constructor(init: IDataMockInit={}) {
     this.person = new Person(init);
     this.types = new Types(init.seed);
     this.internet = new Internet(init);
@@ -78,12 +78,12 @@ export class History {
     this.request = new Request(init);
   }
 
-  httpHistory(init: IHttpHistoryInit = {}): IHttpHistory {
+  async httpHistory(init: IHttpHistoryInit = {}): Promise<IHttpHistory> {
     const date = this.types.datetime(init.created);
     const result: IHttpHistory = {
       kind: HttpHistoryKind,
       created: date.getTime(),
-      log: this.request.log(init.log),
+      log: await this.request.log(init.log),
       user: '',
     }
     date.setHours(0, 0, 0, 0);
@@ -131,7 +131,7 @@ export class History {
     return result;
   }
 
-  httpHistoryList(size=25, init: IHttpHistoryListInit = {}): IHttpHistory[] {
+  async httpHistoryList(size=25, init: IHttpHistoryListInit = {}): Promise<IHttpHistory[]> {
     const { usersSize, spacesSize, projectsSize, requestsSize, appsSize } = init;
     const copy = { ...init };
     if (usersSize && typeof init.user === 'undefined') {
@@ -172,7 +172,7 @@ export class History {
 
     const result: IHttpHistory[] = [];
     for (let i = 0; i < size; i++) {
-      result.push(this.httpHistory(copy));
+      result.push(await this.httpHistory(copy));
     }
     return result;
   }

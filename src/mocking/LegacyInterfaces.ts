@@ -1,6 +1,6 @@
-import { DataMockInit, HarTimingInit, HttpResponseRedirectStatusInit } from '@pawel-up/data-mock'
+import { IDataMockInit, IHarTimingInit, IHttpResponseRedirectStatusInit } from '@pawel-up/data-mock'
 
-export interface ArcDataMockInit extends DataMockInit {
+export interface ArcDataMockInit extends IDataMockInit {
 }
 
 export interface VariableInit {
@@ -13,7 +13,7 @@ export declare interface RestApiIndexInit {
   order?: number;
 }
 
-export declare interface HttpResponseArcInit extends HarTimingInit {
+export declare interface HttpResponseArcInit extends IHarTimingInit {
   /**
    * When set it does not generate a response payload.
    */
@@ -36,7 +36,7 @@ export declare interface HttpResponseArcInit extends HarTimingInit {
   redirects?: boolean;
 }
 
-export declare interface HttpResponseRedirectInit extends HttpResponseRedirectStatusInit, HarTimingInit {
+export declare interface HttpResponseRedirectInit extends IHttpResponseRedirectStatusInit, IHarTimingInit {
   /**
    * When set it adds body to the response
    */

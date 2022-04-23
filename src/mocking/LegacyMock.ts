@@ -10,6 +10,7 @@ import { Variables } from './legacy/Variables.js';
 import { ArcDataMockInit } from './LegacyInterfaces.js';
 
 export class LegacyMock extends DataMock {
+  // @ts-ignore
   http: Http;
   variables: Variables;
   cookies: Cookies;

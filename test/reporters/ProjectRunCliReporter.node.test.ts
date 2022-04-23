@@ -32,9 +32,9 @@ describe('Runtime', () => {
         const info = wrapIteration({
           index: 0,
           executed: [
-            mock.projectRequest.log(opts),
-            mock.projectRequest.log(opts),
-            mock.projectRequest.log(opts),
+            await mock.projectRequest.log(opts),
+            await mock.projectRequest.log(opts),
+            await mock.projectRequest.log(opts),
           ],
         });
         const out = await TestCliHelper.grabOutput(async () => {

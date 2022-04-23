@@ -1,4 +1,4 @@
-import { Http, Types, Lorem, Time, DataMockInit, HttpRequestInit } from '@pawel-up/data-mock';
+import { Http, Types, Lorem, Time, IDataMockInit, IHttpRequestInit } from '@pawel-up/data-mock';
 // import { randomValue } from '@pawel-up/data-mock/src/lib/Http.js';
 import { IHttpRequest, Kind as HttpRequestKind } from '../../models/HttpRequest.js';
 import { IRequest, Kind as RequestKind } from '../../models/Request.js';
@@ -7,7 +7,7 @@ import { IRequestLog, Kind as RequestLogKind } from '../../models/RequestLog.js'
 import { IResponseInit, Response } from './Response.js';
 
 export interface IRequestLogInit {
-  request?: HttpRequestInit;
+  request?: IHttpRequestInit;
   response?: IResponseInit;
   /**
    * When set it ignores size information
@@ -21,6 +21,14 @@ export interface IRequestLogInit {
   noRequest?: boolean;
 }
 
+export interface IRequestInit extends IResponseInit {
+  /**
+   * The content type to generate the body for.
+   * Has no effect when `noBody` is set.
+   */
+  contentType?: string;
+}
+
 export class Request {
   types: Types;
   lorem: Lorem;
@@ -28,7 +36,7 @@ export class Request {
   http: Http;
   response: Response;
 
-  constructor(init: DataMockInit={}) {
+  constructor(init: IDataMockInit={}) {
     this.types = new Types(init.seed);
     this.lorem = new Lorem(init);
     this.time = new Time(init);
@@ -36,7 +44,7 @@ export class Request {
     this.response = new Response(init);
   }
 
-  request(init?: HttpRequestInit): IRequest {
+  request(init?: IHttpRequestInit): IRequest {
     return {
       kind: RequestKind,
       expects: this.httpRequest(init),
@@ -47,15 +55,15 @@ export class Request {
     }
   }
 
-  httpRequest(init?: HttpRequestInit): IHttpRequest {
-    const request = this.http.request(init);
+  httpRequest(init?: IHttpRequestInit): IHttpRequest {
+    const request = this.http.request.request(init);
     return {
       kind: HttpRequestKind,
       ...request,
     }
   }
 
-  sentRequest(init?: HttpRequestInit): ISentRequest {
+  sentRequest(init?: IHttpRequestInit): ISentRequest {
     const start = this.time.timestamp();
     return {
       startTime: start,
@@ -64,7 +72,7 @@ export class Request {
     };
   }
 
-  log(init: IRequestLogInit = {}): IRequestLog {
+  async log(init: IRequestLogInit = {}): Promise<IRequestLog> {
     const result: IRequestLog = {
       kind: RequestLogKind,
     };
@@ -72,10 +80,10 @@ export class Request {
       result.request = this.sentRequest(init.request);
     }
     if (!init.noResponse) {
-      result.response = this.response.response(init.response);
+      result.response = await this.response.response(init.response);
     }
     if (init.redirects) {
-      result.redirects = this.response.redirects();
+      result.redirects = await this.response.redirects();
     }
     if (!init.noSize) {
       result.size = this.response.size();

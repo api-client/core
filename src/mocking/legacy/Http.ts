@@ -1,15 +1,14 @@
-import { Http as Base, Types, Lorem, Time, HttpRequestInit } from '@pawel-up/data-mock';
-import { randomValue } from '@pawel-up/data-mock/build/src/lib/Http.js';
+import { Http as Base, Types, Lorem, Time, IHttpRequestInit, Random } from '@pawel-up/data-mock';
 import { ArcDataMockInit } from '../LegacyInterfaces.js';
 import { HttpResponse } from './HttpResponse.js';
 import { ARCHistoryRequest, ARCSavedRequest, TransportRequest } from '../../models/legacy/request/ArcRequest.js';
 import { ARCProject } from '../../models/legacy/models/ArcLegacyProject.js';
 
-export interface RequestHistoryInit extends HttpRequestInit {
+export interface RequestHistoryInit extends IHttpRequestInit {
   noId?: boolean;
 }
 
-export interface RequestSavedInit extends HttpRequestInit {
+export interface RequestSavedInit extends IHttpRequestInit {
   forceDescription?: boolean;
   noDescription?: boolean;
   project?: string;
@@ -33,7 +32,7 @@ export declare interface GenerateSavedResult {
   requests: ARCSavedRequest[];
 }
 
-export interface TransportRequestInit extends HttpRequestInit {
+export interface TransportRequestInit extends IHttpRequestInit {
   noHttpMessage?: boolean;
 }
 
@@ -41,8 +40,11 @@ export class Http extends Base {
   LAST_TIME: number;
   types: Types;
   lorem: Lorem;
+  // @ts-ignore
   response: HttpResponse;
   time: Time;
+
+  protected _random: Random;
 
   constructor(init: ArcDataMockInit={}) {
     super(init);
@@ -51,10 +53,11 @@ export class Http extends Base {
     this.lorem = new Lorem(init);
     this.response = new HttpResponse(init);
     this.time = new Time(init);
+    this._random = new Random(init.seed);
   }
 
   history(opts: RequestHistoryInit={}): ARCHistoryRequest {
-    const base = this.request(opts);
+    const base = this.request.request(opts);
     this.LAST_TIME -= this.types.datetime().getTime();
     const midnight = this.time.midnight(this.LAST_TIME);
 
@@ -72,7 +75,7 @@ export class Http extends Base {
   }
 
   saved(opts: RequestSavedInit={}): ARCSavedRequest {
-    const base = this.request(opts);
+    const base = this.request.request(opts);
     const time = this.types.datetime().getTime();
     const requestName = this.lorem.words(2);
     const description = this.description(opts);
@@ -165,7 +168,7 @@ export class Http extends Base {
       allow = this.types.boolean();
     }
     if (allow) {
-      return this[randomValue].pickOne(opts.projects);
+      return this._random.pickOne(opts.projects);
     }
     return undefined;
   }
@@ -214,7 +217,7 @@ export class Http extends Base {
    * @returns The transport request object
    */
   transportRequest(opts: TransportRequestInit={}): TransportRequest {
-    const base = this.request(opts);
+    const base = this.request.request(opts);
     const request: TransportRequest = {
       ...base,
       startTime: Date.now() - 1000,
