@@ -34,7 +34,7 @@ export class Response {
   }
 
   protected _getPayload(mime?: string): DeserializedPayload {
-    if (mime) {
+    if (!mime) {
       return undefined;
     }
     switch (mime) {
