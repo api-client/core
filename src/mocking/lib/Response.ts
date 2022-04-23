@@ -87,7 +87,7 @@ export class Response {
     return result;
   }
 
-  async redirect(init?: IResponseInit): Promise<IResponseRedirect> {
+  async redirect(init: IResponseInit = {}): Promise<IResponseRedirect> {
     const start = this.time.timestamp();
     const end = this.time.timestamp({ min: start + 1 })
     const info: IResponseRedirect = {
@@ -97,6 +97,9 @@ export class Response {
       url: this.internet.uri(),
       response: await this.httpResponse({ ...init, statusGroup: 3}),
     };
+    if (init.timings) {
+      info.timings = this.har.timing(init);
+    }
     return info;
   }
 

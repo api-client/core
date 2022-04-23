@@ -83,7 +83,7 @@ export class Request {
       result.response = await this.response.response(init.response);
     }
     if (init.redirects) {
-      result.redirects = await this.response.redirects();
+      result.redirects = await this.response.redirects(undefined, init.response);
     }
     if (!init.noSize) {
       result.size = this.response.size();
