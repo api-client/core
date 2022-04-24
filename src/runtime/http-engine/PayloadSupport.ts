@@ -1,6 +1,6 @@
 import formDataConverter from './FormData.js';
 import { Headers } from '../../lib/headers/Headers.js';
-import { Payload, PayloadSerializer, IMultipartBody } from '../../lib/transformers/PayloadSerializer.js';
+import { Payload, PayloadSerializer, IMultipartBody, IFileMeta, IBlobMeta } from '../../lib/transformers/PayloadSerializer.js';
 
 /**
  * A class containing static helper methods to deal with Payload
@@ -8,9 +8,8 @@ import { Payload, PayloadSerializer, IMultipartBody } from '../../lib/transforme
  */
 export class PayloadSupport {
   /**
-   * NormalizeLineEndingsToCRLF
-   * https://code.google.com/p/chromium/codesearch#chromium/src/third_party/WebKit/Source/
-   * platform/text/LineEnding.cpp&rcl=1458041387&l=101
+   * Normalizes line endings to CRLF
+   * https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/platform/wtf/text/line_ending.cc;l=68
    *
    * @param string A string to be normalized.
    * @return normalized string
@@ -41,28 +40,37 @@ export class PayloadSupport {
   /**
    * Transforms the request payload into a `Buffer`
    *
-   * @param payload A payload message
    * @param headers A headers object where to append headers when needed
+   * @param payload A payload message
    * @returns A promise resolved to a `Buffer`.
    */
-  static async payloadToBuffer(payload: Payload, headers: Headers): Promise<Buffer|undefined> {
+  static payloadToBuffer(headers: Headers, payload?: Payload): Buffer | undefined {
     if (!payload) {
-      return;
+      return undefined;
     }
     if (typeof payload === 'string') {
       payload = PayloadSupport.normalizeString(payload);
       return Buffer.from(payload, 'utf8');
     }
-    
+
     if (payload.type === 'string') {
-      return PayloadSupport.payloadToBuffer(payload.data as string, headers);
+      return PayloadSupport.payloadToBuffer(headers, payload.data as string);
     }
 
-    if (['blob', 'file'].includes(payload.type)) {
-      if (!headers.has('content-type') && payload.mime) {
-        headers.set('content-type', payload.mime);
+    if (payload.type === 'file') {
+      const meta = payload.meta as IFileMeta;
+      if (!headers.has('content-type') && meta.mime) {
+        headers.set('content-type', meta.mime);
       }
-      return PayloadSerializer.deserializeBlobBuffer(payload.data as string);
+      return PayloadSerializer.deserializeFileBuffer(payload);
+    }
+
+    if (payload.type === 'blob') {
+      const meta = payload.meta as IBlobMeta;
+      if (!headers.has('content-type') && meta.mime) {
+        headers.set('content-type', meta.mime);
+      }
+      return PayloadSerializer.deserializeBlobBuffer(payload);
     }
 
     if (payload.type === 'buffer') {
@@ -74,11 +82,11 @@ export class PayloadSupport {
     }
 
     if (payload.type === 'formdata') {
-      const result = await formDataConverter(payload.data as IMultipartBody[]);
+      const result = formDataConverter(payload.data as IMultipartBody[]);
       headers.set('Content-Type', result.type);
       return result.buffer;
     }
-    
+
     throw new Error('Unsupported payload message');
   }
 }

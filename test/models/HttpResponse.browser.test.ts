@@ -10,7 +10,7 @@ describe('Models', () => {
           const result = new HttpResponse();
           assert.equal(result.kind, HttpResponseKind, 'sets the kind property');
           assert.equal(result.status, 0, 'sets the status property');
-          assert.isUndefined(result.statusText,'has no statusText property');
+          assert.isUndefined(result.statusText, 'has no statusText property');
           assert.isUndefined(result.headers, 'has no headers property');
           assert.isUndefined(result.payload, 'has no payload property');
         });
@@ -32,36 +32,38 @@ describe('Models', () => {
         });
 
         it('sets the status', () => {
-          const init: IHttpResponse = { ...base, ...{ status: 200 }};
+          const init: IHttpResponse = { ...base, ...{ status: 200 } };
           const response = new HttpResponse(init);
           assert.equal(response.status, 200);
         });
 
         it('sets the statusText', () => {
-          const init: IHttpResponse = { ...base, ...{ statusText: 'hello' }};
+          const init: IHttpResponse = { ...base, ...{ statusText: 'hello' } };
           const response = new HttpResponse(init);
           assert.equal(response.statusText, 'hello');
         });
 
         it('sets the headers', () => {
-          const init: IHttpResponse = { ...base, ...{ headers: 'content-type: test' }};
+          const init: IHttpResponse = { ...base, ...{ headers: 'content-type: test' } };
           const response = new HttpResponse(init);
           assert.equal(response.headers, 'content-type: test');
         });
 
         it('sets the payload', () => {
-          const init: IHttpResponse = { ...base, ...{ payload: 'test' }};
+          const init: IHttpResponse = { ...base, ...{ payload: 'test' } };
           const response = new HttpResponse(init);
           assert.equal(response.payload, 'test');
         });
 
         it('sets the values form serialized schema', () => {
-          const init: IHttpResponse = { ...base, ...{
-            status: 200,
-            statusText: 'hello',
-            headers: 'content-type: test',
-            payload: 'test',
-          }};
+          const init: IHttpResponse = {
+            ...base, ...{
+              status: 200,
+              statusText: 'hello',
+              headers: 'content-type: test',
+              payload: 'test',
+            }
+          };
           const response = new HttpResponse(JSON.stringify(init));
           assert.equal(response.kind, HttpResponseKind, 'has the kind');
           assert.equal(response.status, 200, 'has the status');
@@ -160,12 +162,26 @@ describe('Models', () => {
 
       it('writes the payload as Blob', async () => {
         const response = HttpResponse.fromValues(200);
-        const message = new Blob(['***** ***'], {type: 'text/plain'});
+        const message = new Blob(['***** ***'], { type: 'text/plain' });
         await response.writePayload(message);
         const typed = response.payload as ISafePayload;
-        
+
         assert.equal(typed.type, 'blob');
-        assert.equal(typed.data, 'data:text/plain;base64,KioqKiogKioq');
+        assert.typeOf(typed.data, 'array');
+        assert.deepEqual(typed.data, [42, 42, 42, 42, 42, 32, 42, 42, 42]);
+        assert.equal(typed.meta!.mime, 'text/plain');
+      });
+
+      it('writes the payload as File', async () => {
+        const response = HttpResponse.fromValues(200);
+        const message = new File(["***** ***"], "foo.txt", { type: "text/plain" });
+        await response.writePayload(message);
+        const typed = response.payload as ISafePayload;
+
+        assert.equal(typed.type, 'file');
+        assert.typeOf(typed.data, 'array');
+        assert.deepEqual(typed.data, [42, 42, 42, 42, 42, 32, 42, 42, 42]);
+        assert.equal(typed.meta!.mime, 'text/plain');
       });
 
       it('writes the payload as ArrayBuffer', async () => {
@@ -174,21 +190,21 @@ describe('Models', () => {
         const view = encoder.encode('test');
         await response.writePayload(view.buffer);
         const typed = response.payload as ISafePayload;
-        
+
         assert.equal(typed.type, 'arraybuffer');
         assert.typeOf(typed.data, 'array');
       });
 
       it('writes the payload as FormData', async () => {
         const response = HttpResponse.fromValues(200);
-        const b = new Blob(['***'], {type: 'text/plain'});
+        const b = new Blob(['***'], { type: 'text/plain' });
         const fd = new FormData();
         fd.append('file', b, 'file-name');
         fd.append('text', 'abcd');
         fd.append('text-part', b, 'text-part');
         await response.writePayload(fd);
         const typed = response.payload as ISafePayload;
-        
+
         assert.equal(typed.type, 'formdata');
         assert.typeOf(typed.data, 'array');
         assert.lengthOf(typed.data, 3);
@@ -244,7 +260,7 @@ describe('Models', () => {
       it('sets the payload from an ArrayBuffer', async () => {
         const encoder = new TextEncoder();
         const view = encoder.encode('test');
-        
+
         const response = await HttpResponse.fromLegacy({
           status: 200,
           payload: view.buffer,
@@ -252,24 +268,24 @@ describe('Models', () => {
         assert.ok(response.payload, 'has the payload');
         const payload = response.payload as ISafePayload;
         assert.equal(payload.type, 'arraybuffer');
-        assert.deepEqual(payload.data, [ 116, 101, 115, 116 ]);
+        assert.deepEqual(payload.data, [116, 101, 115, 116]);
       });
 
       it('sets the payload from an ArrayBuffer as LegacyTransformedPayload', async () => {
         const encoder = new TextEncoder();
         const view = encoder.encode('test');
-        
+
         const response = await HttpResponse.fromLegacy({
           status: 200,
           payload: {
             type: 'ArrayBuffer',
-            data: [ ...view ],
+            data: [...view],
           },
         });
         assert.ok(response.payload, 'has the payload');
         const payload = response.payload as ISafePayload;
         assert.equal(payload.type, 'arraybuffer');
-        assert.deepEqual(payload.data, [ 116, 101, 115, 116 ]);
+        assert.deepEqual(payload.data, [116, 101, 115, 116]);
       });
     });
   });

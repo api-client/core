@@ -134,12 +134,9 @@ export class CoreEngine extends HttpEngine {
     if (auth) {
       headers.set('proxy-authorization', auth);
     }
-    let buffer: Buffer | undefined;
-    if (payload) {
-      buffer = await PayloadSupport.payloadToBuffer(payload, headers);
-      if (buffer) {
-        addContentLength(this.request.method || 'GET', buffer, headers);
-      }
+    const buffer = PayloadSupport.payloadToBuffer(headers, payload);
+    if (buffer) {
+      addContentLength(this.request.method || 'GET', buffer, headers);
     }
 
     this._handleAuthorization(headers);

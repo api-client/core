@@ -1,35 +1,52 @@
-import { blobToDataUrl } from './Utils.js';
-
 export type PayloadTypes = 'string' | 'file' | 'blob' | 'buffer' | 'arraybuffer' | 'formdata' | 'x-www-form-urlencoded';
 export type DeserializedPayload = string | Blob | File | FormData | Buffer | ArrayBuffer | undefined;
 export const SupportedPayloadTypes: PayloadTypes[] = ['string', 'file', 'blob', 'buffer', 'arraybuffer', 'formdata', 'x-www-form-urlencoded'];
 
 export interface IMultipartBody {
   /**
-   * When true a this entry represent a file part
+   * Whether the parameter is enabled. Default to true.
    */
-  isFile: boolean;
+  enabled?: boolean;
   /**
    * The name of the filed
    */
   name: string;
   /**
-   * Converted value
+   * Converted value.
+   * When the part value was a string this is a string.
+   * When the previous value was a Blob or a Buffer, this will be a serialized payload.
    */
-  value: string;
+  value: string | ISafePayload;
+  /**
+   * When `true` this entry represent a file part
+   * @deprecated This is only used for the compatibility with ARC. This information is encoded in the `value`.
+   */
+  isFile?: boolean;
   /**
    * A content type entered by the user to the text part of the text part input.
    * This can only be set when `isFile` is false.
+   * @deprecated This is only used for the compatibility with ARC. This information is encoded in the `value`.
    */
   type?: string;
   /**
    * The original file name used with the part
+   * @deprecated This is only used for the compatibility with ARC. This information is encoded in the `value`.
    */
   fileName?: string;
+}
+
+export interface IBlobMeta {
   /**
-   * Whether the parameter is enabled. Default to true.
+   * The blob's mime type.
    */
-  enabled?: boolean;
+  mime: string;
+}
+
+export interface IFileMeta extends IBlobMeta {
+  /**
+   * The file name.
+   */
+  name: string;
 }
 
 /**
@@ -43,13 +60,17 @@ export interface ISafePayload {
    * The type od the originating payload object.
    */
   type: PayloadTypes;
+  /**
+   * The payload contents. The data type depends on the `type`.
+   */
   data: string | number[] | IMultipartBody[];
   /**
    * Optionally the original mime type of the payload.
    * This is used with files.
    */
-  mime?: string;
+  meta?: IBlobMeta | IFileMeta;
 }
+
 /**
  * The request payload. When not a string then it has to go through a 
  * transformation from a store safe object to the original data object.
@@ -85,6 +106,17 @@ export class PayloadSerializer {
   }
 
   /**
+   * Tests whether the given input should be processed by the `serialize()`.
+   */
+  static needsSerialization(input: unknown): boolean {
+    const typedSerialized = input as ISafePayload;
+    if (typedSerialized.type && SupportedPayloadTypes.includes(typedSerialized.type)) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
    * Transforms the payload into a data store safe object.
    */
   static async serialize(payload: DeserializedPayload): Promise<ISafePayload | string | undefined> {
@@ -100,6 +132,10 @@ export class PayloadSerializer {
     // if (typeof payload === 'string') {
     //   return payload;
     // }
+
+    if (hasBlob && payload instanceof File) {
+      return PayloadSerializer.stringifyFile(payload);
+    }
     if (hasBlob && payload instanceof Blob) {
       return PayloadSerializer.stringifyBlob(payload);
     }
@@ -111,7 +147,7 @@ export class PayloadSerializer {
     }
     if (hasFormData && payload instanceof FormData) {
       try {
-        const result = await PayloadSerializer.stringifyFormData((payload as unknown) as Iterable<(string | File)[]>);
+        const result = await PayloadSerializer.stringifyFormData(payload);
         return result;
       } catch (e: unknown) {
         console.warn(`Unable to transform FormData: ${(e as Error).message}`);
@@ -121,18 +157,38 @@ export class PayloadSerializer {
   }
 
   /**
-   * Converts blob data to base64 string.
+   * Stringifies a file object.
+   */
+  static async stringifyFile(file: File): Promise<ISafePayload> {
+    const buffer = await file.arrayBuffer();
+    const view = new Uint8Array(buffer);
+    const meta: IFileMeta = {
+      mime: file.type,
+      name: file.name,
+    };
+    const result: ISafePayload = {
+      type: 'file',
+      data: [...view],
+      meta,
+    };
+    return result;
+  }
+
+  /**
+   * Stringifies a blob object.
    *
-   * @param blob File or blob object to be translated to string
-   * @return Promise resolved to a base64 string data from the file.
+   * @param blob Blob object to be translated to string
    */
   static async stringifyBlob(blob: Blob): Promise<ISafePayload> {
-    const typedFile = blob as File;
-    const data = await blobToDataUrl(blob);
+    const buffer = await blob.arrayBuffer();
+    const view = new Uint8Array(buffer);
+    const meta: IBlobMeta = {
+      mime: blob.type,
+    };
     const result: ISafePayload = {
       type: 'blob',
-      data,
-      mime: typedFile.type,
+      data: [...view],
+      meta,
     };
     return result;
   }
@@ -160,14 +216,11 @@ export class PayloadSerializer {
    * @returns The buffer metadata or undefined if the passed argument is not an ArrayBuffer.
    */
   static stringifyArrayBuffer(payload: ArrayBuffer): ISafePayload | undefined {
-    if (payload.byteLength) {
-      const view = new Uint8Array(payload);
-      return {
-        type: 'arraybuffer',
-        data: Array.from(view),
-      };
-    }
-    return undefined;
+    const view = new Uint8Array(payload);
+    return {
+      type: 'arraybuffer',
+      data: Array.from(view),
+    };
   }
 
   /**
@@ -176,9 +229,11 @@ export class PayloadSerializer {
    * @param payload A `FormData` object
    * @return A promise resolved to a datastore safe entries.
    */
-  static async stringifyFormData(payload: Iterable<(string | File)[]>): Promise<ISafePayload> {
+  static async stringifyFormData(payload: FormData): Promise<ISafePayload> {
+    // TS apparently doesn't know that FormData is iterable.
+    const iterable = (payload as unknown) as Iterable<(string | File)[]>;
     const promises: Promise<IMultipartBody>[] = [];
-    for (const part of payload) {
+    for (const part of iterable) {
       promises.push(PayloadSerializer.serializeFormDataEntry(part[0] as string, part[1]));
     }
     const items = await Promise.all(promises);
@@ -195,33 +250,27 @@ export class PayloadSerializer {
    * @param file The part value
    * @returns Transformed FormData part to a datastore safe entry.
    */
-  static async serializeFormDataEntry(name: string, file: string | File): Promise<IMultipartBody> {
+  static async serializeFormDataEntry(name: string, file: string | File | Blob): Promise<IMultipartBody> {
     if (typeof file === 'string') {
-      // when adding an item to the FormData object without 3rd parameter of the append function
-      // then  the value is a string.
       return {
-        isFile: false,
         name,
         value: file,
         enabled: true,
       };
     }
-
-    const value = await blobToDataUrl(file);
+    let value: ISafePayload;
+    // API Client adds the "blob" when adding a text value with a mime type.
+    // This is recognized by the UI to restore the entry as the text and not a file.
+    if (file instanceof File && file.name !== 'blob') {
+      value = await PayloadSerializer.stringifyFile(file);
+    } else {
+      value = await PayloadSerializer.stringifyBlob(file);
+    }
     const part: IMultipartBody = {
-      isFile: false,
       name,
       value,
       enabled: true,
     };
-    if (file.name === 'blob') {
-      // API Client adds the "blob" filename when the content type is set on the editor.
-      // otherwise it wouldn't be possible to set the content type value.
-      part.type = file.type;
-    } else {
-      part.isFile = true;
-      part.fileName = file.name;
-    }
     return part;
   }
 
@@ -240,8 +289,8 @@ export class PayloadSerializer {
       // We mostly gonna return a Buffer here.
       switch (payload.type) {
         case 'string': return payload.data as string;
-        case 'file':
-        case 'blob': return PayloadSerializer.deserializeBlobBuffer(payload.data as string);
+        case 'file': return PayloadSerializer.deserializeFileBuffer(payload);
+        case 'blob': return PayloadSerializer.deserializeBlobBuffer(payload);
         case 'buffer': return PayloadSerializer.deserializeBuffer(payload.data as number[]);
         case 'arraybuffer': return PayloadSerializer.deserializeArrayBufferBuffer(payload.data as number[]);
         case 'formdata': return undefined;
@@ -250,9 +299,9 @@ export class PayloadSerializer {
     }
     switch (payload.type) {
       case 'string': return payload.data as string;
-      case 'file':
-      case 'blob': return PayloadSerializer.deserializeBlob(payload.data as string);
-      case 'buffer': return PayloadSerializer.deserializeBuffer(payload.data as number[]);
+      case 'file': return PayloadSerializer.deserializeFile(payload);
+      case 'blob': return PayloadSerializer.deserializeBlob(payload);
+      case 'buffer': return PayloadSerializer.deserializeArrayBuffer(payload.data as number[]);
       case 'arraybuffer': return PayloadSerializer.deserializeArrayBuffer(payload.data as number[]);
       case 'formdata': return PayloadSerializer.deserializeFormData(payload.data as IMultipartBody[]);
       default: return undefined;
@@ -260,12 +309,47 @@ export class PayloadSerializer {
   }
 
   /**
-   * Converts data-url string to blob
+   * Deserializes previously serialized file object.
+   * 
+   * @param payload The serialized payload with a file.
+   */
+  static deserializeFile(payload: ISafePayload): File {
+    const data = payload.data as number[];
+    const meta = payload.meta as IFileMeta;
+    const { mime, name } = meta;
+    const { buffer } = new Uint8Array(data);
+    return new File([buffer], name, {
+      type: mime,
+    });
+  }
+
+  /**
+   * Deserializes previously serialized blob object.
+   * 
+   * In previous versions of ARC the data was a string as data URL. In API client this is a buffer.
    *
+   * @param payload The serialized payload.
+   * @return Restored blob value
+   */
+  static deserializeBlob(payload: ISafePayload): Blob | undefined {
+    if (typeof payload.data === 'string') {
+      return this.deserializeBlobLegacy(payload.data);
+    }
+    const data = payload.data as number[];
+    const meta = payload.meta as IBlobMeta;
+    const { mime } = meta;
+    const { buffer } = new Uint8Array(data);
+    return new Blob([buffer], { type: mime });
+  }
+
+  /**
+   * The old implementation of the blob deserializer.
+   * 
+   * @deprecated
    * @param dataUrl Data url from blob value.
    * @return Restored blob value
    */
-  static deserializeBlob(dataUrl: string): Blob | undefined {
+  static deserializeBlobLegacy(dataUrl: string): Blob | undefined {
     const arr = dataUrl.split(',');
     const matchedMime = arr[0].match(/:(.*?);/);
     if (!matchedMime) {
@@ -282,12 +366,40 @@ export class PayloadSerializer {
   }
 
   /**
-   * Converts data-url string to blob
+   * Converts previously serialized File to a Buffer.
    *
+   * @param payload The serialized payload.
+   * @return Restored File value as Buffer
+   */
+  static deserializeFileBuffer(payload: ISafePayload): Buffer {
+    const data = payload.data as number[];
+    const ab = this.deserializeArrayBuffer(data);
+    return Buffer.from(ab);
+  }
+
+  /**
+   * Converts data-url string to buffer
+   *
+   * @param payload The serialized payload.
+   * @return Restored blob value
+   */
+  static deserializeBlobBuffer(payload: ISafePayload): Buffer {
+    if (typeof payload.data === 'string') {
+      return this.deserializeBlobBufferLegacy(payload.data);
+    }
+    const data = payload.data as number[];
+    const ab = this.deserializeArrayBuffer(data);
+    return Buffer.from(ab);
+  }
+
+  /**
+   * Converts data-url string to buffer
+   *
+   * @deprecated
    * @param dataUrl Data url from blob value.
    * @return Restored blob value
    */
-  static deserializeBlobBuffer(dataUrl: string): Buffer {
+  static deserializeBlobBufferLegacy(dataUrl: string): Buffer {
     const arr = dataUrl.split(',');
     const value = arr[1];
     return Buffer.from(value, 'base64url');
@@ -334,26 +446,50 @@ export class PayloadSerializer {
     if (!Array.isArray(parts) || !parts.length) {
       return fd;
     }
-    parts.forEach((part) => {
-      const { isFile, name, value, type, fileName, enabled } = part;
-      if (enabled === false) {
-        return;
-      }
-      let blob;
-      if (isFile) {
-        blob = PayloadSerializer.deserializeBlob(value);
-        if (blob) {
-          fd.append(name, blob, fileName);
-        }
-      } else if (type) {
-        blob = PayloadSerializer.deserializeBlob(value);
-        if (blob) {
-          fd.append(name, blob, 'blob');
-        }
-      } else {
-        fd.append(name, value);
-      }
-    });
+    parts.forEach(part => this.deserializeFormDataPart(fd, part));
     return fd;
+  }
+
+  private static deserializeFormDataPart(form: FormData, part: IMultipartBody): void {
+    if (part.enabled === false) {
+      return;
+    }
+    // the compatibility with old ARC.
+    if (typeof part.isFile === 'boolean') {
+      this.deserializeFormDataLegacy(form, part);
+      return;
+    }
+    const { name, value } = part;
+    if (typeof value === 'string') {
+      form.append(name, value);
+      return;
+    }
+    if (value.type === 'file') {
+      const file = this.deserializeFile(value);
+      form.append(name, file);
+      return;
+    }
+    const blob = this.deserializeBlob(value) as Blob;
+    form.append(name, blob);
+  }
+
+  /**
+   * @deprecated This is only for compatibility with ARC.
+   */
+  private static deserializeFormDataLegacy(form: FormData, part: IMultipartBody): void {
+    let blob;
+    if (part.isFile) {
+      blob = PayloadSerializer.deserializeBlobLegacy(part.value as string);
+      if (blob) {
+        form.append(part.name, blob, part.fileName);
+      }
+    } else if (part.type) {
+      blob = PayloadSerializer.deserializeBlobLegacy(part.value as string);
+      if (blob) {
+        form.append(part.name, blob, 'blob');
+      }
+    } else {
+      form.append(part.name, part.value as string);
+    }
   }
 }

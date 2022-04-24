@@ -34,36 +34,38 @@ describe('Models', () => {
         });
 
         it('sets the url', () => {
-          const init: IHttpRequest = { ...base, ...{ url: 'test.com' }};
+          const init: IHttpRequest = { ...base, ...{ url: 'test.com' } };
           const request = new HttpRequest(init);
           assert.equal(request.url, 'test.com');
         });
 
         it('sets the method', () => {
-          const init: IHttpRequest = { ...base, ...{ method: 'POST' }};
+          const init: IHttpRequest = { ...base, ...{ method: 'POST' } };
           const request = new HttpRequest(init);
           assert.equal(request.method, 'POST');
         });
 
         it('sets the headers', () => {
-          const init: IHttpRequest = { ...base, ...{ headers: 'content-type: test' }};
+          const init: IHttpRequest = { ...base, ...{ headers: 'content-type: test' } };
           const request = new HttpRequest(init);
           assert.equal(request.headers, 'content-type: test');
         });
 
         it('sets the payload', () => {
-          const init: IHttpRequest = { ...base, ...{ payload: 'test' }};
+          const init: IHttpRequest = { ...base, ...{ payload: 'test' } };
           const request = new HttpRequest(init);
           assert.equal(request.payload, 'test');
         });
 
         it('sets the values form serialized schema', () => {
-          const init: IHttpRequest = { ...base, ...{
-            url: 'test.com',
-            method: 'POST',
-            headers: 'content-type: test',
-            payload: 'test',
-          }};
+          const init: IHttpRequest = {
+            ...base, ...{
+              url: 'test.com',
+              method: 'POST',
+              headers: 'content-type: test',
+              payload: 'test',
+            }
+          };
           const request = new HttpRequest(JSON.stringify(init));
           assert.equal(request.kind, HttpRequestKind, 'has the kind');
           assert.equal(request.url, 'test.com', 'has the url');
@@ -164,12 +166,26 @@ describe('Models', () => {
 
       it('writes the payload as Blob', async () => {
         const request = HttpRequest.fromBaseValues({ url: '', method: '' });
-        const message = new Blob(['***** ***'], {type: 'text/plain'});
+        const message = new Blob(['***** ***'], { type: 'text/plain' });
         await request.writePayload(message);
         const typed = request.payload as ISafePayload;
-        
+
         assert.equal(typed.type, 'blob');
-        assert.equal(typed.data, 'data:text/plain;base64,KioqKiogKioq');
+        assert.typeOf(typed.data, 'array');
+        assert.deepEqual(typed.data, [42, 42, 42, 42, 42, 32, 42, 42, 42]);
+        assert.equal(typed.meta!.mime, 'text/plain');
+      });
+
+      it('writes the payload as File', async () => {
+        const request = HttpRequest.fromBaseValues({ url: '', method: '' });
+        const message = new File(["***** ***"], "foo.txt", { type: "text/plain" });
+        await request.writePayload(message);
+        const typed = request.payload as ISafePayload;
+
+        assert.equal(typed.type, 'file');
+        assert.typeOf(typed.data, 'array');
+        assert.deepEqual(typed.data, [42, 42, 42, 42, 42, 32, 42, 42, 42]);
+        assert.equal(typed.meta!.mime, 'text/plain');
       });
 
       it('writes the payload as ArrayBuffer', async () => {
@@ -178,21 +194,21 @@ describe('Models', () => {
         const view = encoder.encode('test');
         await request.writePayload(view.buffer);
         const typed = request.payload as ISafePayload;
-        
+
         assert.equal(typed.type, 'arraybuffer');
         assert.typeOf(typed.data, 'array');
       });
 
       it('writes the payload as FormData', async () => {
         const request = HttpRequest.fromBaseValues({ url: '', method: '' });
-        const b = new Blob(['***'], {type: 'text/plain'});
+        const b = new Blob(['***'], { type: 'text/plain' });
         const fd = new FormData();
         fd.append('file', b, 'file-name');
         fd.append('text', 'abcd');
         fd.append('text-part', b, 'text-part');
         await request.writePayload(fd);
         const typed = request.payload as ISafePayload;
-        
+
         assert.equal(typed.type, 'formdata');
         assert.typeOf(typed.data, 'array');
         assert.lengthOf(typed.data, 3);
