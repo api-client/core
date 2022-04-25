@@ -1,5 +1,5 @@
 import { IProperty, Property } from './Property.js';
-import { IMultipartBody } from '../lib/transformers/PayloadSerializer.js';
+import { IMultipartBody, ISafePayload } from '../lib/transformers/PayloadSerializer.js';
 import { RequestUiMeta as LegacyRequestUiMeta } from './legacy/request/ArcRequest.js';
 
 export const Kind = 'Core#RequestUiMeta';
@@ -70,7 +70,7 @@ export interface IBodyMetaModel {
   /**
    * Generated view model.
    */
-  viewModel: (IProperty | IMultipartBody | IRawBody)[];
+  viewModel: (IProperty | ISafePayload | IMultipartBody | IRawBody)[];
 }
 
 /**

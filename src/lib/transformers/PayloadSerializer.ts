@@ -18,6 +18,12 @@ export interface IMultipartBody {
    */
   value: string | ISafePayload;
   /**
+   * Aside from the `value` which is used to process the Payload, the purpose of this field to to keep
+   * the entered by the user string value for the "blob" item. This is primarily handled by the UI
+   * and ignored by the HTTP Engine.
+   */
+  blobText?: string;
+  /**
    * When `true` this entry represent a file part
    * @deprecated This is only used for the compatibility with ARC. This information is encoded in the `value`.
    */
@@ -462,6 +468,10 @@ export class PayloadSerializer {
     const { name, value } = part;
     if (typeof value === 'string') {
       form.append(name, value);
+      return;
+    }
+    if (value.type === 'string') {
+      form.append(name, value.data as string);
       return;
     }
     if (value.type === 'file') {

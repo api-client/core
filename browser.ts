@@ -56,7 +56,7 @@ export { IEmail, IUserPicture, IUser, Kind as UserKind } from './src/models/stor
 //
 // Libs
 //
-export { PayloadSerializer, ISafePayload, IMultipartBody, Payload, DeserializedPayload } from './src/lib/transformers/PayloadSerializer.js';
+export { PayloadSerializer, ISafePayload, IMultipartBody, Payload, DeserializedPayload, IBlobMeta, IFileMeta } from './src/lib/transformers/PayloadSerializer.js';
 export { ILogger, Logger } from './src/lib/logging/Logger.js';
 export { DummyLogger } from './src/lib/logging/DummyLogger.js';
 export { DefaultLogger } from './src/lib/logging/DefaultLogger.js';
