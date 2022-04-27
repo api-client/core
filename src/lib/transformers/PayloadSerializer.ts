@@ -1,3 +1,5 @@
+import { hasBlob, hasBuffer, hasFormData } from '../../Platform.js';
+
 export type PayloadTypes = 'string' | 'file' | 'blob' | 'buffer' | 'arraybuffer' | 'formdata' | 'x-www-form-urlencoded';
 export type DeserializedPayload = string | Blob | File | FormData | Buffer | ArrayBuffer | undefined;
 export const SupportedPayloadTypes: PayloadTypes[] = ['string', 'file', 'blob', 'buffer', 'arraybuffer', 'formdata', 'x-www-form-urlencoded'];
@@ -85,10 +87,6 @@ export interface ISafePayload {
  * with the `data` being an UInt8Array of the content.
  */
 export type Payload = string | ISafePayload;
-
-export const hasFormData: boolean = typeof FormData === 'function';
-export const hasBlob: boolean = typeof Blob === 'function';
-export const hasBuffer: boolean = typeof Buffer === 'function';
 
 export class PayloadSerializer {
   /**

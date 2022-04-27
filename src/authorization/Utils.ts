@@ -74,7 +74,7 @@ export function camel(name: string): string | undefined {
   while ((l = name[i])) {
     if ((l === "_" || l === "-") && i + 1 < name.length) {
       // eslint-disable-next-line no-param-reassign
-      name = name.substr(0, i) + name[i + 1].toUpperCase() + name.substr(i + 2);
+      name = name.substring(0, i) + name[i + 1].toUpperCase() + name.substring(i + 2);
       changed = true;
     }
     // eslint-disable-next-line no-plusplus

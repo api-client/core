@@ -12,7 +12,7 @@ describe('OAuth2', () => {
       clientSecret: 'auth-code-cs',
       authorizationUri: new URL('/oauth2/auth-code', document.baseURI).toString(),
       accessTokenUri: new URL('/oauth2/token', document.baseURI).toString(),
-      redirectUri: new URL('/test/oauth2/popup.html', document.baseURI).toString(),
+      redirectUri: new URL('/test/authorization/popup.html', document.baseURI).toString(),
       scopes: ['a', 'b'],
       state: 'my-state'
     });
@@ -69,7 +69,7 @@ describe('OAuth2', () => {
         const config = {
           ...baseConfig,
           interactive: false,
-          redirectUri: new URL('/test/oauth2/wrong-redirect.html', document.baseURI).toString(),
+          redirectUri: new URL('/test/authorization/wrong-redirect.html', document.baseURI).toString(),
         };
         const auth = new OAuth2Authorization(config);
         let err;
@@ -186,7 +186,7 @@ describe('OAuth2', () => {
       it('throws invalid_request error', async () => {
         const config = {
           ...baseConfig,
-          redirectUri: new URL('/test/oauth2/wrong-redirect.html', document.baseURI).toString(),
+          redirectUri: new URL('/test/authorization/wrong-redirect.html', document.baseURI).toString(),
         };
         const auth = new OAuth2Authorization(config);
         let err;
@@ -272,7 +272,7 @@ describe('OAuth2', () => {
         clientSecret: 'auth-code-cs',
         authorizationUri: new URL('/oauth2/auth-code-custom', document.baseURI).toString(),
         accessTokenUri: new URL('/oauth2/token-custom', document.baseURI).toString(),
-        redirectUri: new URL('/test/oauth2/popup.html', document.baseURI).toString(),
+        redirectUri: new URL('/test/authorization/popup.html', document.baseURI).toString(),
         scopes: ['a', 'b'],
         state: 'my-state',
         customData: {
@@ -312,7 +312,7 @@ describe('OAuth2', () => {
         clientSecret: 'auth-code-cs',
         authorizationUri: new URL('/oauth2/auth-code', document.baseURI).toString(),
         accessTokenUri: new URL('/oauth2/token', document.baseURI).toString(),
-        redirectUri: new URL('/test/oauth2/popup.html', document.baseURI).toString(),
+        redirectUri: new URL('/test/authorization/popup.html', document.baseURI).toString(),
         pkce: true,
       };
 

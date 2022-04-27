@@ -2,7 +2,7 @@
 import { ARCHistoryRequest, ARCSavedRequest } from './request/ArcRequest.js';
 import { TransformedPayload as LegacyTransformedPayload } from './request/ArcResponse.js';
 import { IRequestAuthorization, Kind as AuthKind } from '../RequestAuthorization.js';
-import { hasBuffer } from '../../lib/transformers/PayloadSerializer.js';
+import { hasBuffer } from '../../Platform.js';
 
 export class Normalizer {
   static normalizeRequest(request: unknown): ARCHistoryRequest | ARCSavedRequest | undefined {

@@ -159,7 +159,7 @@ export class OAuth2Authorization {
    * Performs the authorization.
    * @returns Promise resolved to the token info.
    */
-  authorize(): Promise<ITokenInfo> {
+  authorize(): Promise<ITokenInfo | any> {
     return new Promise((resolve, reject) => {
       this[resolveFunction] = resolve;
       this[rejectFunction] = reject;

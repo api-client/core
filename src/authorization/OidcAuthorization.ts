@@ -4,6 +4,10 @@ import { OAuth2Authorization, grantResponseMapping, reportOAuthError, resolveFun
 import { nonceGenerator } from './Utils.js';
 
 export class OidcAuthorization extends OAuth2Authorization {
+  authorize(): Promise<(IOidcTokenInfo|IOidcTokenError)[]> {
+    return super.authorize();
+  }
+
   /**
    * @returns The parameters to build popup URL.
    */

@@ -7,7 +7,7 @@ import { IOpenIdProviderMetadata } from '../../src/authorization/types.js';
 import env from '../env.js';
 
 describe('OidcAuthorization', () => {
-  const oauth2redirect = `${window.location.origin}/test/oauth2/popup.html`;
+  const oauth2redirect = `${window.location.origin}/test/authorization/popup.html`;
   const fullDiscoveryUrl = `${env.oauth2.issuer}/.well-known/openid-configuration`;
 
   describe('Unit tests', () => {

@@ -10,7 +10,7 @@ describe('OAuth2', () => {
       grantType: 'implicit',
       clientId: 'auth-code-cid',
       authorizationUri: new URL('/oauth2/auth-implicit', document.baseURI).toString(),
-      redirectUri: new URL('/test/oauth2/popup.html', document.baseURI).toString(),
+      redirectUri: new URL('/test/authorization/popup.html', document.baseURI).toString(),
       scopes: ['a', 'b'],
       state: 'my-state',
     });
@@ -170,7 +170,7 @@ describe('OAuth2', () => {
         grantType: 'implicit',
         clientId: 'auth-code-cid',
         authorizationUri: new URL('/oauth2/auth-implicit-custom', document.baseURI).toString(),
-        redirectUri: new URL('/test/oauth2/popup.html', document.baseURI).toString(),
+        redirectUri: new URL('/test/authorization/popup.html', document.baseURI).toString(),
         scopes: ['a', 'b'],
         state: 'my-state',
         customData: {

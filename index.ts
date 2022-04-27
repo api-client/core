@@ -81,6 +81,8 @@ export { AuthorizationError, CodeError } from './src/authorization/Authorization
 export * from './src/authorization/types.js';
 export { Tokens as OidcTokens } from './src/authorization/lib/Tokens.js';
 export * as KnownGrants from './src/authorization/lib/KnownGrants.js';
+export * as AuthorizationUtils from './src/authorization/lib/Utils.js';
+export { SecurityProcessor, IAuthApplyOptions } from './src/authorization/lib/SecurityProcessor.js';
 
 //
 // Runtime
