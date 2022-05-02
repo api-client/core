@@ -6,6 +6,7 @@ import { IUser } from '../../models/store/User.js';
 import { IFile } from '../../models/store/File.js';
 import { Kind as ProjectKind } from '../../models/Project.js';
 import { Kind as WorkspaceKind } from '../../models/Workspace.js';
+import { Kind as DataNamespaceKind } from '../../models/data/DataNamespace.js';
 import { IHttpProject } from '../../models/HttpProject.js';
 import { SdkError } from './Errors.js';
 
@@ -17,15 +18,17 @@ export interface IFileCreateOptions {
   parent?: string;
 }
 
+export type FileKind = typeof ProjectKind | typeof WorkspaceKind | typeof DataNamespaceKind;
+
 export class FilesSdk extends SdkBase {
   /**
    * Lists files (spaces, projects, etc) in the store.
    * 
-   * @param kinds the list of kinds to list. Spaces are always included.
+   * @param kinds Optional list of kinds to limit the file types in the result. Spaces are always included.
    * @param options Optional query options.
    * @param request Optional request options.
    */
-  async list(kinds: (typeof ProjectKind | typeof WorkspaceKind)[], options?: IListOptions, request: ISdkRequestOptions = {}): Promise<IListResponse<IFile>> {
+  async list(kinds: FileKind[], options?: IListOptions, request: ISdkRequestOptions = {}): Promise<IListResponse<IFile>> {
     const token = request.token || this.sdk.token;
     const url = this.sdk.getUrl(RouteBuilder.files());
     this.sdk.appendListOptions(url, options);

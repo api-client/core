@@ -53,6 +53,13 @@ export { IAccessAddOperation, IAccessOperation, IAccessRemoveOperation, Permissi
 export { IRevision, Kind as RevisionKind } from './src/models/store/Revision.js';
 export { IEmail, IUserPicture, IUser, Kind as UserKind } from './src/models/store/User.js';
 
+export { DataAssociation, IDataAssociation, Kind as DataAssociationKind } from './src/models/data/DataAssociation.js';
+export { DataEntity, IDataEntity, Kind as DataEntityKind } from './src/models/data/DataEntity.js';
+export { DataModel, IDataModel, Kind as DataModelKind } from './src/models/data/DataModel.js';
+export { DataNamespace, IDataNamespace, Kind as DataNamespaceKind, DataItem, IDataItem } from './src/models/data/DataNamespace.js';
+export { DataProperty, IDataProperty, Kind as DataPropertyKind, DataPropertyType, DataPropertyTypes, DataPropertyList, IPropertySchema } from './src/models/data/DataProperty.js';
+export { IDataPropertySchema, DateFormat, DateFormatList, DateFormats, NumberFormat, NumberFormatList, NumberFormats } from './src/models/data/DataPropertySchema.js';
+
 //
 // Libs
 //
@@ -144,7 +151,7 @@ export {
   IProcessStopDetail,
 } from './src/events/process/ProcessEvents.js';
 export { IReportingErrorDetail } from './src/events/reporting/ReportingEvents.js';
-export { 
+export {
   ITelemetryCustomMetric,
   ITelemetryCustomValue,
   ITelemetryDetail,
