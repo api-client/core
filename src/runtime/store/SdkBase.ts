@@ -10,7 +10,7 @@ export interface ISdkRequestOptions {
 }
 
 export interface IStoreRequestOptions extends ISdkRequestOptions {
-  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+  method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
   headers?: Record<string, string>,
   body?: string | Buffer;
 }

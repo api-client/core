@@ -14,5 +14,7 @@ export abstract class Http extends SdkBase {
 
   abstract patch(url: string, opts?: IStoreRequestOptions): Promise<IStoreResponse>;
 
+  abstract put(url: string, opts?: IStoreRequestOptions): Promise<IStoreResponse>;
+
   abstract delete(url: string, opts?: IStoreRequestOptions): Promise<IStoreResponse>;
 }

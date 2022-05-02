@@ -87,14 +87,17 @@ export class HttpNode extends Http {
   }
 
   patch(url: string, opts: IStoreRequestOptions = {}): Promise<IStoreResponse> {
-    const options = { ...opts };
-    options.method = 'PATCH';
+    const options: IStoreRequestOptions = { ...opts, method: 'PATCH' };
+    return this.post(url, options);
+  }
+
+  put(url: string, opts: IStoreRequestOptions = {}): Promise<IStoreResponse> {
+    const options: IStoreRequestOptions = { ...opts, method: 'PUT' };
     return this.post(url, options);
   }
 
   delete(url: string, opts: IStoreRequestOptions = {}): Promise<IStoreResponse> {
-    const options = { ...opts };
-    options.method = 'DELETE';
+    const options: IStoreRequestOptions = { ...opts, method: 'DELETE' };
     return this.post(url, options);
   }
 }

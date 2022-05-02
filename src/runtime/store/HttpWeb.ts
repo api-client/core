@@ -82,6 +82,11 @@ export class HttpWeb extends Http {
     return this.post(url, options);
   }
 
+  put(url: string, opts: IStoreRequestOptions = {}): Promise<IStoreResponse> {
+    const options: IStoreRequestOptions = { ...opts, method: 'PUT' };
+    return this.post(url, options);
+  }
+
   delete(url: string, opts: IStoreRequestOptions = {}): Promise<IStoreResponse> {
     const options: IStoreRequestOptions = { ...opts, method: 'DELETE' };
     return this.post(url, options);

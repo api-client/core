@@ -23,6 +23,8 @@ export default /** @type TestRunnerConfig */ ({
     }
   },
 
+  concurrentBrowsers: 3,
+
   plugins: [
     esbuildPlugin({ ts: true, js: true, }),
 

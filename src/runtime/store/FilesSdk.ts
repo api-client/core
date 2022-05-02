@@ -7,10 +7,9 @@ import { IFile } from '../../models/store/File.js';
 import { Kind as ProjectKind } from '../../models/Project.js';
 import { Kind as WorkspaceKind } from '../../models/Workspace.js';
 import { Kind as DataNamespaceKind } from '../../models/data/DataNamespace.js';
-import { IHttpProject } from '../../models/HttpProject.js';
 import { SdkError } from './Errors.js';
 
-export interface IFileCreateOptions {
+export interface IMetaCreateOptions {
   /**
    * Optional parent file id.
    * When set it creates a file under this parent.
@@ -18,8 +17,26 @@ export interface IFileCreateOptions {
   parent?: string;
 }
 
+export interface IMediaCreateOptions {
+  /**
+   * Optional contents mime type.
+   * Default to `application/json`.
+   */
+  mime?: string;
+}
+
+export interface IFileCreateOptions extends IMetaCreateOptions, IMediaCreateOptions {
+
+}
+
 export type FileKind = typeof ProjectKind | typeof WorkspaceKind | typeof DataNamespaceKind;
 
+/**
+ * In the store, the file is represented by the meta and the media.
+ * 
+ * The meta is used to represent the file in the UI when listing files or presenting their metadata (like name, last modified, etc).
+ * The media is the actual contents of the file and is only used by application specializing in this file modification.
+ */
 export class FilesSdk extends SdkBase {
   /**
    * Lists files (spaces, projects, etc) in the store.
@@ -28,11 +45,13 @@ export class FilesSdk extends SdkBase {
    * @param options Optional query options.
    * @param request Optional request options.
    */
-  async list(kinds: FileKind[], options?: IListOptions, request: ISdkRequestOptions = {}): Promise<IListResponse<IFile>> {
+  async list(kinds?: FileKind[], options?: IListOptions, request: ISdkRequestOptions = {}): Promise<IListResponse<IFile>> {
     const token = request.token || this.sdk.token;
     const url = this.sdk.getUrl(RouteBuilder.files());
     this.sdk.appendListOptions(url, options);
-    kinds.forEach(k => url.searchParams.append('kind', k));
+    if (Array.isArray(kinds)) {
+      kinds.forEach(k => url.searchParams.append('kind', k));
+    }
     const result = await this.sdk.http.get(url.toString(), { token });
     this.inspectCommonStatusCodes(result.status, result.body);
     const E_PREFIX = 'Unable to list files. ';
@@ -61,19 +80,43 @@ export class FilesSdk extends SdkBase {
   }
 
   /**
+   * Creates both the meta and the media for a file.
+   * 
+   * @param meta The file meta
+   * @param contents The file contents
+   * @param opts Meta and media create options. 
+   * @param request Optional request details
+   * @returns The id of the created file meta.
+   */
+  async create(meta: IFile, contents: unknown, opts: IFileCreateOptions = {}, request: ISdkRequestOptions = {}): Promise<string> {
+    const id = await this.createMeta(meta, opts, request);
+    await this.createMedia(contents, id, opts, request);
+    return id;
+  }
+
+  /**
    * Creates a file in the store.
    * 
-   * @param file The definition of a file that extends the IFile interface or one of the supported by the server schemas.
+   * @param file The definition of a file that extends the IFile interface.
    * @param opts Optional options when creating a file
    * @param request Optional request options.
    * @returns The key of the creates file.
    */
-  async create(file: IFile | IHttpProject, opts: IFileCreateOptions = {}, request: ISdkRequestOptions = {}): Promise<string> {
+  async createMeta(file: IFile, opts: IMetaCreateOptions = {}, request: ISdkRequestOptions = {}): Promise<string> {
     const token = request.token || this.sdk.token;
-    const path = opts.parent ? RouteBuilder.file(opts.parent) : RouteBuilder.files();
+    const path = RouteBuilder.files();
     const url = this.sdk.getUrl(path);
+    if (opts.parent) {
+      url.searchParams.set('parent', opts.parent);
+    }
     const body = JSON.stringify(file);
-    const result = await this.sdk.http.post(url.toString(), { token, body });
+    const result = await this.sdk.http.post(url.toString(), { 
+      token, 
+      body,
+      headers: {
+        'content-type': 'application/json'
+      },
+    });
     this.inspectCommonStatusCodes(result.status, result.body);
     const E_PREFIX = 'Unable to create a file. ';
     if (result.status !== 204) {
@@ -91,6 +134,46 @@ export class FilesSdk extends SdkBase {
     }
     const id = location.split('/').pop();
     return id as string;
+  }
+
+  /**
+   * Creates a file contents (the media) after the file meta was created.
+   * 
+   * @param contents The file contents to upload to the server.
+   * @param key The created file meta key.
+   * @param opts Contents create options. You can define content's mime type here.
+   * @param request Optional request.
+   */
+  async createMedia(contents: unknown, key: string, opts: IMediaCreateOptions = {}, request: ISdkRequestOptions = {}): Promise<void> {
+    const token = request.token || this.sdk.token;
+    const path = RouteBuilder.file(key);
+    const url = this.sdk.getUrl(path);
+    url.searchParams.set('alt', 'media');
+    const mime = opts.mime || 'application/json';
+    let body: string;
+    if (mime.includes('json')) {
+      body = JSON.stringify(contents);
+    } else {
+      body = String(contents);
+    }
+    const result = await this.sdk.http.put(url.toString(), { 
+      token, 
+      body,
+      headers: {
+        'content-type': mime
+      },
+    });
+    this.inspectCommonStatusCodes(result.status, result.body);
+    const E_PREFIX = 'Unable to create a file. ';
+    if (result.status !== 204) {
+      this.logInvalidResponse(result);
+      let e = this.createGenericSdkError(result.body)
+      if (!e) {
+        e = new SdkError(`${E_PREFIX}${E_RESPONSE_STATUS}${result.status}`, result.status);
+        e.response = result.body;
+      }
+      throw e;
+    }
   }
 
   /**
