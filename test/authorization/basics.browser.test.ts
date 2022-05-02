@@ -57,8 +57,24 @@ describe('OAuth2', () => {
     describe('checkConfig()', () => {
       // The check sanity is tested with the utils class tests,
       // this only checks whether the tests are called.
-      it('throws when accessTokenUri is invalid', () => {
+      it('throws when accessTokenUri is invalid (javascript:)', () => {
         const settings = { accessTokenUri: 'javascript://' };
+        const auth = new OAuth2Authorization(settings);
+        assert.throws(() => {
+          auth.checkConfig();
+        });
+      });
+
+      it('throws when accessTokenUri is invalid (data:)', () => {
+        const settings = { accessTokenUri: 'data://' };
+        const auth = new OAuth2Authorization(settings);
+        assert.throws(() => {
+          auth.checkConfig();
+        });
+      });
+
+      it('throws when accessTokenUri is invalid (vbscript:)', () => {
+        const settings = { accessTokenUri: 'vbscript://' };
         const auth = new OAuth2Authorization(settings);
         assert.throws(() => {
           auth.checkConfig();

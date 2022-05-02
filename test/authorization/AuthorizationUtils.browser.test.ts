@@ -59,6 +59,16 @@ describe('AuthorizationUtils', () => {
       assert.isFalse(result);
     });
 
+    it('returns false when starts with data:', () => {
+      const result = AuthorizationUtils.validateRedirectUri('data:alert("a")');
+      assert.isFalse(result);
+    });
+
+    it('returns false when starts with vbscript:', () => {
+      const result = AuthorizationUtils.validateRedirectUri('vbscript:alert("a")');
+      assert.isFalse(result);
+    });
+
     it('returns true for custom URI scheme', () => {
       const result = AuthorizationUtils.validateRedirectUri('my-app://app-name');
       assert.isTrue(result);

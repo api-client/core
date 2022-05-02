@@ -27,8 +27,11 @@ export function validateRedirectUri(value: unknown): boolean {
   // the redirect URI can have any value, especially for installed apps which 
   // may use custom schemes. We do very basic sanity check for any script content 
   // validation to make sure we are not passing any script.
-  if (result && String(value).startsWith('javascript:')) {
-    result = false;
+  if (result) {
+    const u = String(value).toLowerCase();
+    if (u.startsWith("javascript:") || u.startsWith("data:") || u.startsWith("vbscript:")) {
+      result = false;
+    }
   }
   return result;
 }
