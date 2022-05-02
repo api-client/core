@@ -55,6 +55,7 @@ export { IEmail, IUserPicture, IUser, Kind as UserKind } from './src/models/stor
 
 export { DataAssociation, IDataAssociation, Kind as DataAssociationKind } from './src/models/data/DataAssociation.js';
 export { DataEntity, IDataEntity, Kind as DataEntityKind } from './src/models/data/DataEntity.js';
+export { DataFile, IDataFile, Kind as DataFileKind } from './src/models/data/DataFile.js';
 export { DataModel, IDataModel, Kind as DataModelKind } from './src/models/data/DataModel.js';
 export { DataNamespace, IDataNamespace, Kind as DataNamespaceKind, DataItem, IDataItem } from './src/models/data/DataNamespace.js';
 export { DataProperty, IDataProperty, Kind as DataPropertyKind, DataPropertyType, DataPropertyTypes, DataPropertyList, IPropertySchema } from './src/models/data/DataProperty.js';

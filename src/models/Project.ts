@@ -48,9 +48,6 @@ export class Project extends File {
     return new Project(init);
   }
 
-  /**
-   * @param input The environment definition used to restore the state.
-   */
   constructor(input?: string | IProject) {
     super();
     let init: IProject;
@@ -76,22 +73,14 @@ export class Project extends File {
     this.new(init);
   }
 
-  /**
-   * Creates a new environment clearing anything that is so far defined.
-   * 
-   * Note, this throws an error when the environment is not a space. 
-   */
   new(init: IProject): void {
     if (!Project.isProject(init)) {
-      throw new Error(`Not a space.`);
+      throw new Error(`Not a project file.`);
     }
     super.new(init);
     this.kind = Kind;
   }
 
-  /**
-   * Checks whether the input is a definition of an user space.
-   */
   static isProject(input: unknown): boolean {
     const typed = input as IProject;
     if (!input || typed.kind !== Kind) {
