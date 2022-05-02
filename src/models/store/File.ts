@@ -310,7 +310,7 @@ export class StoredFile {
       throw new Error(`The user is required.`);
     }
     if (user.kind !== UserKind) {
-      throw new Error(`Invalid value for the user when setting "lastModified".`);
+      throw new Error(`Invalid value for the user when setting "deletedInfo".`);
     }
     this[deletedSymbol] = true;
     this[deletedInfoSymbol] = {
@@ -386,6 +386,60 @@ export class StoredFile {
     if (file.lastModified) {
       file.lastModified.byMe = file.lastModified.user === user;
     }
+  }
+
+  /**
+   * Static method to set the `lastModified` property on a file without creating an instance of a file meta.
+   * Useful when the meta kind is unknown.
+   * 
+   * @param file The file to update. Note, this method mutates the file.
+   * @param user The user that modifies the file.
+   * @returns The same file.
+   */
+  static setLastModified(file: IFile, user: IUser): IFile {
+    if (!file) {
+      throw new Error(`The file is required.`);
+    }
+    if (!user) {
+      throw new Error(`The user is required.`);
+    }
+    if (user.kind !== UserKind) {
+      throw new Error(`Invalid value for the user when setting "lastModified".`);
+    }
+    file.lastModified = {
+      byMe: false,
+      time: Date.now(),
+      user: user.key,
+      name: user.name,
+    };
+    return file;
+  }
+
+  /**
+   * Similar to the instance method `setDeleted()` but without creating an instance of the file when the type is unknown.
+   * 
+   * @param file The file to change. Note, this operation mutates the file.
+   * @param user The deleting user
+   * @returns The same file reference.
+   */
+  static setDeleted(file: IFile, user: IUser): IFile {
+    if (!file) {
+      throw new Error(`The file is required.`);
+    }
+    if (!user) {
+      throw new Error(`The user is required.`);
+    }
+    if (user.kind !== UserKind) {
+      throw new Error(`Invalid value for the user when setting "deletedInfo".`);
+    }
+    file.deleted = true;
+    file.deletedInfo = {
+      byMe: false,
+      time: Date.now(),
+      user: user.key,
+      name: user.name,
+    };
+    return file;
   }
 }
 

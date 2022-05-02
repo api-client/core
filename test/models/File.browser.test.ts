@@ -400,7 +400,7 @@ describe('Models', () => {
           assert.throws(() => {
             // @ts-ignore
             file.setDeleted(undefined);
-          });
+          }, 'The user is required.');
         });
 
         it('throws when invalid user', () => {
@@ -408,7 +408,7 @@ describe('Models', () => {
           assert.throws(() => {
             // @ts-ignore
             file.setDeleted({});
-          });
+          }, 'Invalid value for the user when setting "deletedInfo".');
         });
       });
 
@@ -648,6 +648,122 @@ describe('Models', () => {
           };
           File.updateByMeMeta(schema, 'b');
           assert.isFalse(schema.lastModified!.byMe);
+        });
+      });
+
+      describe('File.setLastModified()', () => {
+        const user: IUser = {
+          key: '123',
+          kind: 'Core#User',
+          name: 'a1',
+        };
+        
+        it('sets the time', () => {
+          const file = new File().toJSON();
+          File.setLastModified(file, user);
+          assert.isAbove(file.lastModified.time, 0);
+        });
+
+        it('sets the user', () => {
+          const file = new File().toJSON();
+          File.setLastModified(file, user);
+          assert.equal(file.lastModified.user, user.key);
+        });
+
+        it('sets the name', () => {
+          const file = new File().toJSON();
+          File.setLastModified(file, user);
+          assert.equal(file.lastModified.name, user.name);
+        });
+
+        it('sets the byMe', () => {
+          const file = new File().toJSON();
+          File.setLastModified(file, user);
+          assert.isFalse(file.lastModified.byMe);
+        });
+
+        it('throws when no file argument', () => {
+          assert.throws(() => {
+            // @ts-ignore
+            File.setLastModified(undefined, user);
+          }, 'The file is required.');
+        });
+
+        it('throws when no user argument', () => {
+          const file = new File().toJSON();
+          assert.throws(() => {
+            // @ts-ignore
+            File.setLastModified(file, undefined);
+          }, 'The user is required.');
+        });
+
+        it('throws when invalid user', () => {
+          const file = new File().toJSON();
+          assert.throws(() => {
+            // @ts-ignore
+            File.setLastModified(file, {});
+          }, 'Invalid value for the user when setting "lastModified".');
+        });
+      });
+
+      describe('File.setDeleted()', () => {
+        const user: IUser = {
+          key: '123',
+          kind: 'Core#User',
+          name: 'a1',
+        };
+        
+        it('sets the time', () => {
+          const file = new File().toJSON();
+          File.setDeleted(file, user);
+          assert.isAbove(file.deletedInfo.time, 0);
+        });
+
+        it('sets the user', () => {
+          const file = new File().toJSON();
+          File.setDeleted(file, user);
+          assert.equal(file.deletedInfo.user, user.key);
+        });
+
+        it('sets the name', () => {
+          const file = new File().toJSON();
+          File.setDeleted(file, user);
+          assert.equal(file.deletedInfo.name, user.name);
+        });
+
+        it('sets the byMe', () => {
+          const file = new File().toJSON();
+          File.setDeleted(file, user);
+          assert.isFalse(file.deletedInfo.byMe);
+        });
+
+        it('sets the deleted', () => {
+          const file = new File().toJSON();
+          File.setDeleted(file, user);
+          assert.isTrue(file.deleted);
+        });
+
+        it('throws when no file argument', () => {
+          assert.throws(() => {
+            // @ts-ignore
+            File.setDeleted(undefined, user);
+          }, 'The file is required.');
+        });
+
+        it('throws when no user argument', () => {
+          const file = new File().toJSON();
+          assert.throws(() => {
+            // @ts-ignore
+            File.setDeleted(file, undefined);
+          }, 'The user is required.');
+        });
+
+        it('throws when invalid user', () => {
+          const file = new File().toJSON();
+          assert.throws(() => {
+            // @ts-ignore
+            File.setDeleted(file, {});
+          }, 'Invalid value for the user when setting "deletedInfo".');
         });
       });
     });
