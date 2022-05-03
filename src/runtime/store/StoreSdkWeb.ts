@@ -5,7 +5,7 @@ import { Http } from './Http.js';
 import { WsClient } from './WsClient.js';
 
 export { IStoreTokenInfo, IStoreResponse, IStoreRequestOptions } from './SdkBase.js';
-export { IFileCreateOptions } from './FilesSdk.js';
+export { IFileCreateOptions, ListFileKind } from './FilesSdk.js';
 
 /**
  * NodeJS API for API Client's net-store module.

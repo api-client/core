@@ -29,7 +29,7 @@ export interface IFileCreateOptions extends IMetaCreateOptions, IMediaCreateOpti
 
 }
 
-export type FileKind = typeof ProjectKind | typeof WorkspaceKind | typeof DataNamespaceKind;
+export type ListFileKind = typeof ProjectKind | typeof WorkspaceKind | typeof DataNamespaceKind;
 
 /**
  * In the store, the file is represented by the meta and the media.
@@ -45,7 +45,7 @@ export class FilesSdk extends SdkBase {
    * @param options Optional query options.
    * @param request Optional request options.
    */
-  async list(kinds?: FileKind[], options?: IListOptions, request: ISdkRequestOptions = {}): Promise<IListResponse<IFile>> {
+  async list(kinds?: ListFileKind[], options?: IListOptions, request: ISdkRequestOptions = {}): Promise<IListResponse<IFile>> {
     const token = request.token || this.sdk.token;
     const url = this.sdk.getUrl(RouteBuilder.files());
     this.sdk.appendListOptions(url, options);

@@ -1,10 +1,9 @@
 import { SdkBase, E_RESPONSE_STATUS, E_RESPONSE_NO_VALUE, E_INVALID_JSON, E_RESPONSE_UNKNOWN, ISdkRequestOptions } from './SdkBase.js';
 import { RouteBuilder } from './RouteBuilder.js';
 import { IListOptions, IListResponse } from '../../models/store/Backend.js';
-import { Kind as ProjectKind } from '../../models/Project.js';
-import { Kind as WorkspaceKind } from '../../models/Workspace.js';
 import { IFile } from '../../models/store/File.js';
 import { SdkError } from './Errors.js';
+import { ListFileKind } from './FilesSdk.js';
 
 export class SharedSdk extends SdkBase {
   /**
@@ -14,11 +13,13 @@ export class SharedSdk extends SdkBase {
    * @param options Optional query options.
    * @param request Optional request options.
    */
-  async list(kinds: (typeof ProjectKind | typeof WorkspaceKind)[], options?: IListOptions, request: ISdkRequestOptions = {}): Promise<IListResponse<IFile>> {
+  async list(kinds?: ListFileKind[], options?: IListOptions, request: ISdkRequestOptions = {}): Promise<IListResponse<IFile>> {
     const token = request.token || this.sdk.token;
     const url = this.sdk.getUrl(RouteBuilder.shared());
     this.sdk.appendListOptions(url, options);
-    kinds.forEach(k => url.searchParams.append('kind', k));
+    if (Array.isArray(kinds)) {
+      kinds.forEach(k => url.searchParams.append('kind', k));
+    }
     const result = await this.sdk.http.get(url.toString(), { token });
     this.inspectCommonStatusCodes(result.status, result.body);
     const E_PREFIX = 'Unable to list spaces. ';
