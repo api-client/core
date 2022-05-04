@@ -172,7 +172,7 @@ class DataNamespaceParent {
   remove(): void {
     const { root } = this;
     if (!root) {
-      return;
+      throw new Error(`Unable to remove the root namespace this way.`);
     }
     const models = this.listDataModels();
     const children = this.listNamespaces();
@@ -318,7 +318,7 @@ export class DataNamespace extends DataNamespaceParent {
 
   new(init: IDataNamespace): void {
     if (!init || !init.definitions || !init.items) {
-      throw new Error(`Not a namespace.`);
+      throw new Error(`Not a data namespace.`);
     }
     const { key = v4(), definitions = {}, items, info } = init;
     this.key = key;
@@ -378,6 +378,11 @@ export class DataNamespace extends DataNamespaceParent {
     return result;
   }
 
+  /**
+   * Finds a parent namespace for the given namespace.
+   * @param key The namespace key to find the parent for.
+   * @returns The parent namespace or undefined when the namespace does not exist. It may return the root namespace.
+   */
   findParent(key: string): DataNamespace | undefined {
     const { definitions, items = [] } = this;
     const rootIndex = items.findIndex(i => i.key === key);
@@ -439,7 +444,11 @@ export class DataNamespace extends DataNamespaceParent {
    * @param key The key of the namespace to find.
    */
   removeNamespace(key: string): void {
-    const { definitions } = this.root || this;
+    const root = this.root || this;
+    if (root.key === key) {
+      throw new Error(`Unable to remove the root namespace this way.`);
+    }
+    const { definitions } = root;
     const space = definitions.namespaces.find(i => i.key === key);
     if (space) {
       space.remove();
@@ -454,7 +463,7 @@ export class DataNamespace extends DataNamespaceParent {
   addDataModel(init: string | IDataModel | DataModel, parent?: string): DataModel {
     let root: DataNamespace;
     if (parent) {
-      const rootCandidate = this.findParent(parent);
+      const rootCandidate = this.findNamespace(parent);
       if (!rootCandidate) {
         throw new Error(`Unable to find the parent namespace ${parent}`);
       }
