@@ -352,6 +352,11 @@ export class DataNamespace extends DataNamespaceParent {
     } else {
       this.definitions.namespaces = [];
     }
+    if (Array.isArray(definitions.properties)) {
+      this.definitions.properties = definitions.properties.map(i => new DataProperty(this, i));
+    } else {
+      this.definitions.properties = [];
+    }
   }
 
   toJSON(): IDataNamespace {
@@ -362,7 +367,7 @@ export class DataNamespace extends DataNamespaceParent {
       items: this.items.map(i => i.toJSON()),
       definitions: {},
     };
-    const { associations, entities, models, namespaces } = this.definitions;
+    const { associations, entities, models, namespaces, properties } = this.definitions;
     if (Array.isArray(associations) && associations.length) {
       result.definitions.associations = associations.map(i => i.toJSON());
     }
@@ -374,6 +379,9 @@ export class DataNamespace extends DataNamespaceParent {
     }
     if (Array.isArray(namespaces) && namespaces.length) {
       result.definitions.namespaces = namespaces.map(i => i.toJSON());
+    }
+    if (Array.isArray(properties) && properties.length) {
+      result.definitions.properties = properties.map(i => i.toJSON());
     }
     return result;
   }

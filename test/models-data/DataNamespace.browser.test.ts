@@ -141,6 +141,61 @@ describe('models', () => {
             ns.new({});
           }, 'Not a data namespace.');
         });
+
+        it('sets the "definitions.namespaces"', () => {
+          const ns = new DataNamespace();
+          ns.addNamespace('n1');
+          const instance = new DataNamespace();
+          instance.new(ns.toJSON());
+          assert.lengthOf(instance.definitions.namespaces, 1);
+          instance.new(base);
+          assert.lengthOf(instance.definitions.namespaces, 0);
+        });
+
+        it('sets the "definitions.models"', () => {
+          const ns = new DataNamespace();
+          ns.addDataModel('d1');
+          const instance = new DataNamespace();
+          instance.new(ns.toJSON());
+          assert.lengthOf(instance.definitions.models, 1);
+          instance.new(base);
+          assert.lengthOf(instance.definitions.models, 0);
+        });
+
+        it('sets the "definitions.entities"', () => {
+          const ns = new DataNamespace();
+          const d1 = ns.addDataModel('d1');
+          d1.addEntity('e1');
+          const instance = new DataNamespace();
+          instance.new(ns.toJSON());
+          assert.lengthOf(instance.definitions.entities, 1);
+          instance.new(base);
+          assert.lengthOf(instance.definitions.entities, 0);
+        });
+
+        it('sets the "definitions.properties"', () => {
+          const ns = new DataNamespace();
+          const d1 = ns.addDataModel('d1');
+          const e1 = d1.addEntity('e1');
+          e1.addNamedProperty('p1');
+          const instance = new DataNamespace();
+          instance.new(ns.toJSON());
+          assert.lengthOf(instance.definitions.properties, 1);
+          instance.new(base);
+          assert.lengthOf(instance.definitions.properties, 0);
+        });
+
+        it('sets the "definitions.properties"', () => {
+          const ns = new DataNamespace();
+          const d1 = ns.addDataModel('d1');
+          const e1 = d1.addEntity('e1');
+          e1.addNamedAssociation('a1');
+          const instance = new DataNamespace();
+          instance.new(ns.toJSON());
+          assert.lengthOf(instance.definitions.associations, 1);
+          instance.new(base);
+          assert.lengthOf(instance.definitions.associations, 0);
+        });
       });
 
       describe('toJSON()', () => {
@@ -168,6 +223,83 @@ describe('models', () => {
         it('serializes the info', () => {
           const result = base.toJSON();
           assert.equal(result.info.name, 'test name');
+        });
+
+        it('serializes the "items"', () => {
+          const created = base.addNamespace('n1');
+          const result = base.toJSON();
+          assert.lengthOf(result.items, 1);
+          assert.equal(result.items[0].key, created.key);
+        });
+
+        it('serializes the "definitions"', () => {
+          const result = base.toJSON();
+          assert.typeOf(result.definitions, 'object');
+        });
+
+        it('serializes the "definitions.namespaces"', () => {
+          const created = base.addNamespace('n1');
+          const result = base.toJSON();
+          assert.typeOf(result.definitions.namespaces, 'array', 'has the array');
+          assert.lengthOf(result.definitions.namespaces, 1, 'has a single namespace item');
+          assert.deepEqual(result.definitions.namespaces, [created.toJSON()], 'has the namespace item');
+        });
+
+        it('serializes the "definitions.models"', () => {
+          const created = base.addDataModel('d1');
+          const result = base.toJSON();
+          assert.typeOf(result.definitions.models, 'array', 'has the array');
+          assert.lengthOf(result.definitions.models, 1, 'has a single models item');
+          assert.deepEqual(result.definitions.models, [created.toJSON()], 'has the models item');
+        });
+
+        it('serializes the "definitions.entities"', () => {
+          const d1 = base.addDataModel('d1');
+          const created = d1.addEntity('e1');
+          const result = base.toJSON();
+          assert.typeOf(result.definitions.entities, 'array', 'has the array');
+          assert.lengthOf(result.definitions.entities, 1, 'has a single entity item');
+          assert.deepEqual(result.definitions.entities, [created.toJSON()], 'has the entity item');
+        });
+
+        it('serializes the "definitions.properties"', () => {
+          const d1 = base.addDataModel('d1');
+          const e1 = d1.addEntity('e1');
+          const created = e1.addNamedProperty('p1');
+          const result = base.toJSON();
+          assert.typeOf(result.definitions.properties, 'array', 'has the array');
+          assert.lengthOf(result.definitions.properties, 1, 'has a single property item');
+          assert.deepEqual(result.definitions.properties, [created.toJSON()], 'has the property item');
+        });
+
+        it('serializes the "definitions.associations"', () => {
+          const d1 = base.addDataModel('d1');
+          const e1 = d1.addEntity('e1');
+          const created = e1.addNamedAssociation('p1');
+          const result = base.toJSON();
+          assert.typeOf(result.definitions.associations, 'array', 'has the array');
+          assert.lengthOf(result.definitions.associations, 1, 'has a single association item');
+          assert.deepEqual(result.definitions.associations, [created.toJSON()], 'has the association item');
+        });
+
+        it('has no "definitions.models" when empty', () => {
+          const result = base.toJSON();
+          assert.isUndefined(result.definitions.models);
+        });
+
+        it('has no "definitions.entities" when empty', () => {
+          const result = base.toJSON();
+          assert.isUndefined(result.definitions.entities);
+        });
+
+        it('has no "definitions.properties" when empty', () => {
+          const result = base.toJSON();
+          assert.isUndefined(result.definitions.properties);
+        });
+
+        it('has no "definitions.associations" when empty', () => {
+          const result = base.toJSON();
+          assert.isUndefined(result.definitions.associations);
         });
       });
 
