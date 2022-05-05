@@ -1,7 +1,7 @@
 {
   "name": "@api-client/core",
   "description": "The API Client's core client library. Works in NodeJS and in a ES enabled browser.",
-  "version": "0.6.12",
+  "version": "0.6.13",
   "license": "Apache-2.0",
   "main": "build/index.js",
   "module": "build/index.js",

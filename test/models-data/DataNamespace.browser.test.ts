@@ -173,6 +173,17 @@ describe('models', () => {
           assert.lengthOf(instance.definitions.entities, 0);
         });
 
+        it('sets entities on the corresponding data model', () => {
+          const ns = new DataNamespace();
+          const d1 = ns.addDataModel('d1');
+          const e1 = d1.addEntity('e1');
+          const instance = new DataNamespace();
+          instance.new(ns.toJSON());
+          const model = instance.findDataModel(d1.key);
+          const [entity] = model.entities;
+          assert.deepEqual(entity, e1);
+        });
+
         it('sets the "definitions.properties"', () => {
           const ns = new DataNamespace();
           const d1 = ns.addDataModel('d1');
@@ -185,7 +196,21 @@ describe('models', () => {
           assert.lengthOf(instance.definitions.properties, 0);
         });
 
-        it('sets the "definitions.properties"', () => {
+        it('sets the properties on the corresponding entity', () => {
+          const ns = new DataNamespace();
+          const d1 = ns.addDataModel('d1');
+          const e1 = d1.addEntity('e1');
+          const p1 = e1.addNamedProperty('p1');
+          const instance = new DataNamespace();
+          instance.new(ns.toJSON());
+          
+          const model = instance.findDataModel(d1.key);
+          const [entity] = model.entities;
+          assert.lengthOf(entity.properties, 1, 'has the properties');
+          assert.deepEqual(entity.properties[0], p1, 'has the property');
+        });
+
+        it('sets the "definitions.associations"', () => {
           const ns = new DataNamespace();
           const d1 = ns.addDataModel('d1');
           const e1 = d1.addEntity('e1');
@@ -195,6 +220,20 @@ describe('models', () => {
           assert.lengthOf(instance.definitions.associations, 1);
           instance.new(base);
           assert.lengthOf(instance.definitions.associations, 0);
+        });
+
+        it('sets the associations on the corresponding entity', () => {
+          const ns = new DataNamespace();
+          const d1 = ns.addDataModel('d1');
+          const e1 = d1.addEntity('e1');
+          const a1 = e1.addNamedAssociation('a1');
+          const instance = new DataNamespace();
+          instance.new(ns.toJSON());
+          
+          const model = instance.findDataModel(d1.key);
+          const [entity] = model.entities;
+          assert.lengthOf(entity.associations, 1, 'has the associations');
+          assert.deepEqual(entity.associations[0], a1, 'has the association');
         });
       });
 

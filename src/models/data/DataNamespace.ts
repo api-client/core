@@ -337,11 +337,18 @@ export class DataNamespace extends DataNamespaceParent {
     } else {
       this.definitions.associations = [];
     }
+    if (Array.isArray(definitions.properties)) {
+      this.definitions.properties = definitions.properties.map(i => new DataProperty(this, i));
+    } else {
+      this.definitions.properties = [];
+    }
+    // note, entities must be restored after properties / associations
     if (Array.isArray(definitions.entities)) {
       this.definitions.entities = definitions.entities.map(i => new DataEntity(this, i));
     } else {
       this.definitions.entities = [];
     }
+    // must be set after entities.
     if (Array.isArray(definitions.models)) {
       this.definitions.models = definitions.models.map(i => new DataModel(this, i));
     } else {
@@ -351,11 +358,6 @@ export class DataNamespace extends DataNamespaceParent {
       this.definitions.namespaces = definitions.namespaces.map(i => new DataNamespace(i, this));
     } else {
       this.definitions.namespaces = [];
-    }
-    if (Array.isArray(definitions.properties)) {
-      this.definitions.properties = definitions.properties.map(i => new DataProperty(this, i));
-    } else {
-      this.definitions.properties = [];
     }
   }
 
