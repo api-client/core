@@ -55,6 +55,11 @@ export interface IDataEntity {
    * with inconsistent definition of a schema because the last read property wins.
    */
   parents?: string[];
+
+  /**
+   * Whether this entity is deprecated.
+   */
+  deprecated?: boolean;
 }
 
 /**
@@ -104,6 +109,11 @@ export class DataEntity {
    */
   parents: string[] = [];
 
+  /**
+   * Whether this entity is deprecated.
+   */
+  deprecated?: boolean;
+
   static fromName(root: DataNamespace, name: string): DataEntity {
     const entity = new DataEntity(root);
     entity.info = Thing.fromName(name);
@@ -133,7 +143,7 @@ export class DataEntity {
     if (!DataEntity.isDataEntity(init)) {
       throw new Error(`Not a data entity.`);
     }
-    const { info, key = v4(), kind = Kind, tags, taxonomy, parents, properties, associations } = init;
+    const { info, key = v4(), kind = Kind, tags, taxonomy, parents, properties, associations, deprecated } = init;
     this.kind = kind;
     this.key = key;
     if (info) {
@@ -177,6 +187,12 @@ export class DataEntity {
         }
       });
     }
+
+    if (typeof deprecated === 'boolean') {
+      this.deprecated = deprecated;
+    } else {
+      this.deprecated = undefined;
+    }
   }
 
   static isDataEntity(input: unknown): boolean {
@@ -207,6 +223,9 @@ export class DataEntity {
     }
     if (Array.isArray(this.associations) && this.associations.length) {
       result.associations = this.associations.map(i => i.key);
+    }
+    if (typeof this.deprecated === 'boolean') {
+      result.deprecated = this.deprecated;
     }
     return result;
   }
@@ -492,5 +511,45 @@ export class DataEntity {
       kind: this.root.kind,
     });
     return result.reverse();
+  }
+
+  /**
+   * Adds a new tag to the property. It also populates the root namespace's tags when tag is new.
+   * 
+   * Note, it does nothing when the tag is already defined.
+   * 
+   * @param tag The tag to add.
+   */
+  addTag(tag: string): void {
+    if (!tag) {
+      return;
+    }
+    const lower = tag.toLowerCase();
+    const { tags } = this;
+    if (tags.some(t => t.toLowerCase() === lower)) {
+      return;
+    }
+    tags.push(tag);
+    const { definitions } = this.root;
+    if (!definitions.tags.some(t => t.toLowerCase() === lower)) {
+      definitions.tags.push(tag);
+    }
+  }
+
+  /**
+   * Removes a tag from the property. Unlike the `addTag()` this won't remove a `tag` from the root namespace.
+   * 
+   * @param tag The tag to remove.
+   */
+  removeTag(tag: string): void {
+    if (!tag) {
+      return;
+    }
+    const lower = tag.toLowerCase();
+    const { tags } = this;
+    const index = tags.findIndex(t => t.toLowerCase() === lower);
+    if (index >= 0) {
+      tags.splice(index, 1);
+    }
   }
 }

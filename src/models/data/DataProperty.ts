@@ -73,6 +73,10 @@ export interface IDataProperty {
    */
   index?: boolean;
   /**
+   * Whether this property is deprecated.
+   */
+  deprecated?: boolean;
+  /**
    * Optional general purpose tags for the UI.
    */
   tags?: string[];
@@ -133,7 +137,14 @@ export class DataProperty {
   index?: boolean;
 
   /**
+   * Whether this property is deprecated.
+   */
+  deprecated?: boolean;
+
+  /**
    * Optional general purpose tags for the UI.
+   * 
+   * Note to implementations, use the `addTag()` method as it propagates the "tag" value in the namespace.
    */
   tags: string[] = [];
 
@@ -203,7 +214,7 @@ export class DataProperty {
     if (!DataProperty.isDataProperty(init)) {
       throw new Error(`Not a data property.`);
     }
-    const { info, key = v4(), kind = Kind, multiple, required, type = DataPropertyList.string, index, primary, tags, taxonomy, schemas } = init;
+    const { info, key = v4(), kind = Kind, multiple, required, type = DataPropertyList.string, index, primary, tags, taxonomy, schemas, deprecated } = init;
     this.kind = kind;
     this.key = key;
     this.type = type;
@@ -226,6 +237,11 @@ export class DataProperty {
       this.index = index;
     } else {
       this.index = undefined;
+    }
+    if (typeof deprecated === 'boolean') {
+      this.deprecated = deprecated;
+    } else {
+      this.deprecated = undefined;
     }
     if (typeof primary === 'boolean') {
       this.primary = primary;
@@ -267,6 +283,9 @@ export class DataProperty {
     if (typeof this.index === 'boolean') {
       result.index = this.index;
     }
+    if (typeof this.deprecated === 'boolean') {
+      result.deprecated = this.deprecated;
+    }
     if (typeof this.primary === 'boolean') {
       result.primary = this.primary;
     }
@@ -301,6 +320,46 @@ export class DataProperty {
     const defIndex = this.root.definitions.properties.findIndex(i => i.key === this.key);
     if (defIndex >= 0) {
       this.root.definitions.properties.splice(defIndex, 1);
+    }
+  }
+
+  /**
+   * Adds a new tag to the property. It also populates the root namespace's tags when tag is new.
+   * 
+   * Note, it does nothing when the tag is already defined.
+   * 
+   * @param tag The tag to add.
+   */
+  addTag(tag: string): void {
+    if (!tag) {
+      return;
+    }
+    const lower = tag.toLowerCase();
+    const { tags } = this;
+    if (tags.some(t => t.toLowerCase() === lower)) {
+      return;
+    }
+    tags.push(tag);
+    const { definitions } = this.root;
+    if (!definitions.tags.some(t => t.toLowerCase() === lower)) {
+      definitions.tags.push(tag);
+    }
+  }
+
+  /**
+   * Removes a tag from the property. Unlike the `addTag()` this won't remove a `tag` from the root namespace.
+   * 
+   * @param tag The tag to remove.
+   */
+  removeTag(tag: string): void {
+    if (!tag) {
+      return;
+    }
+    const lower = tag.toLowerCase();
+    const { tags } = this;
+    const index = tags.findIndex(t => t.toLowerCase() === lower);
+    if (index >= 0) {
+      tags.splice(index, 1);
     }
   }
 }

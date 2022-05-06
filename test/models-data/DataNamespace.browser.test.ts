@@ -51,6 +51,11 @@ describe('models', () => {
             assert.deepEqual(ns.definitions.models, []);
           });
 
+          it('sets the default "definitions.tags"', () => {
+            const ns = new DataNamespace();
+            assert.deepEqual(ns.definitions.tags, []);
+          });
+
           it('sets the default "definitions.associations"', () => {
             const ns = new DataNamespace();
             assert.deepEqual(ns.definitions.associations, []);
@@ -160,6 +165,16 @@ describe('models', () => {
           assert.lengthOf(instance.definitions.models, 1);
           instance.new(base);
           assert.lengthOf(instance.definitions.models, 0);
+        });
+
+        it('sets the "definitions.tags"', () => {
+          const ns = new DataNamespace();
+          ns.definitions.tags = ['a'];
+          const instance = new DataNamespace();
+          instance.new(ns.toJSON());
+          assert.lengthOf(instance.definitions.tags, 1);
+          instance.new(base);
+          assert.lengthOf(instance.definitions.tags, 0);
         });
 
         it('sets the "definitions.entities"', () => {
@@ -292,6 +307,14 @@ describe('models', () => {
           assert.deepEqual(result.definitions.models, [created.toJSON()], 'has the models item');
         });
 
+        it('serializes the "definitions.tags"', () => {
+          base.definitions.tags = ['a'];
+          const result = base.toJSON();
+          assert.typeOf(result.definitions.tags, 'array', 'has the array');
+          assert.lengthOf(result.definitions.tags, 1, 'has a single tags item');
+          assert.deepEqual(result.definitions.tags, ['a'], 'has the tags item');
+        });
+
         it('serializes the "definitions.entities"', () => {
           const d1 = base.addDataModel('d1');
           const created = d1.addEntity('e1');
@@ -324,6 +347,11 @@ describe('models', () => {
         it('has no "definitions.models" when empty', () => {
           const result = base.toJSON();
           assert.isUndefined(result.definitions.models);
+        });
+
+        it('has no "definitions.tags" when empty', () => {
+          const result = base.toJSON();
+          assert.isUndefined(result.definitions.tags);
         });
 
         it('has no "definitions.entities" when empty', () => {

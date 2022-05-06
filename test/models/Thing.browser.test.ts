@@ -34,12 +34,14 @@ describe('Models', () => {
         const schema: IThing = {
           kind: ThingKind,
           name: 'a name',
+          displayName: 'a displayName',
           description: 'a desc',
           version: 'a ver',
         };
         const result = new Thing(schema);
         assert.equal(result.kind, ThingKind);
         assert.equal(result.name, 'a name');
+        assert.equal(result.displayName, 'a displayName');
         assert.equal(result.description, 'a desc');
         assert.equal(result.version, 'a ver');
       });
@@ -48,12 +50,14 @@ describe('Models', () => {
         const schema: IThing = {
           kind: ThingKind,
           name: 'a name',
+          displayName: 'a displayName',
           description: 'a desc',
           version: 'a ver',
         };
         const result = new Thing(JSON.stringify(schema));
         assert.equal(result.kind, ThingKind);
         assert.equal(result.name, 'a name');
+        assert.equal(result.displayName, 'a displayName');
         assert.equal(result.description, 'a desc');
         assert.equal(result.version, 'a ver');
       });
@@ -89,6 +93,17 @@ describe('Models', () => {
         assert.isUndefined(result.name);
       });
 
+      it('serializes the displayName', () => {
+        thing.displayName = 'a displayName';
+        const result = thing.toJSON();
+        assert.equal(result.displayName, 'a displayName');
+      });
+
+      it('does not serialize displayName when missing', () => {
+        const result = thing.toJSON();
+        assert.isUndefined(result.displayName);
+      });
+
       it('serializes the description', () => {
         thing.description = 'a description';
         const result = thing.toJSON();
@@ -109,6 +124,26 @@ describe('Models', () => {
       it('does not serialize version when missing', () => {
         const result = thing.toJSON();
         assert.isUndefined(result.version);
+      });
+    });
+
+    describe('#renderLabel', () => {
+      it('returns the default value', () => {
+        const t = new Thing();
+        assert.equal(t.renderLabel, 'Unnamed object');
+      });
+
+      it('returns the name value', () => {
+        const t = new Thing();
+        t.name = 'a thing';
+        assert.equal(t.renderLabel, 'a thing');
+      });
+
+      it('returns the displayName when set', () => {
+        const t = new Thing();
+        t.name = 'a thing';
+        t.displayName = 'better thing';
+        assert.equal(t.renderLabel, 'better thing');
       });
     });
   });

@@ -14,6 +14,7 @@ interface IDataDefinitions {
   properties?: IDataProperty[];
   associations?: IDataAssociation[];
   namespaces?: IDataNamespace[];
+  tags?: string[];
 }
 
 interface DataDefinitions {
@@ -22,6 +23,11 @@ interface DataDefinitions {
   properties: DataProperty[];
   associations: DataAssociation[];
   namespaces: DataNamespace[];
+  /**
+   * Common for the entire root namespace tags.
+   * These are kept separately so the UI can generate autocomplete for tags.
+   */
+  tags: string[];
 }
 
 interface IDataNamespaceParent {
@@ -289,6 +295,7 @@ export class DataNamespace extends DataNamespaceParent {
       entities: [],
       properties: [],
       namespaces: [],
+      tags: [],
     };
   }
 
@@ -359,6 +366,11 @@ export class DataNamespace extends DataNamespaceParent {
     } else {
       this.definitions.namespaces = [];
     }
+    if (Array.isArray(definitions.tags)) {
+      this.definitions.tags = [...definitions.tags];
+    } else {
+      this.definitions.tags = [];
+    }
   }
 
   toJSON(): IDataNamespace {
@@ -369,7 +381,7 @@ export class DataNamespace extends DataNamespaceParent {
       items: this.items.map(i => i.toJSON()),
       definitions: {},
     };
-    const { associations, entities, models, namespaces, properties } = this.definitions;
+    const { associations, entities, models, namespaces, properties, tags } = this.definitions;
     if (Array.isArray(associations) && associations.length) {
       result.definitions.associations = associations.map(i => i.toJSON());
     }
@@ -384,6 +396,9 @@ export class DataNamespace extends DataNamespaceParent {
     }
     if (Array.isArray(properties) && properties.length) {
       result.definitions.properties = properties.map(i => i.toJSON());
+    }
+    if (Array.isArray(tags) && tags.length) {
+      result.definitions.tags = [...tags];
     }
     return result;
   }

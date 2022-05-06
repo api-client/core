@@ -13,6 +13,11 @@ export declare interface IThing {
    */
   name?: string;
   /**
+   * Optional value to overwrite the `name` in the UI.
+   * The primary descriptive field is the `name`. The display name is only used in the presentation of the data.
+   */
+  displayName?: string;
+  /**
    * The description of the thing.
    */
   description?: string;
@@ -29,6 +34,11 @@ export class Thing {
    */
   name?: string;
   /**
+   * Optional value to overwrite the `name` in the UI.
+   * The primary descriptive field is the `name`. The display name is only used in the presentation of the data.
+   */
+  displayName?: string;
+  /**
    * The description of the thing.
    */
   description?: string;
@@ -36,6 +46,16 @@ export class Thing {
    * The version number of the thing.
    */
   version?: string;
+
+  /**
+   * Returns one in this order:
+   * - displayName
+   * - name
+   * - 'Unnamed object'
+   */
+  get renderLabel(): string {
+    return this.displayName || this.name || 'Unnamed object';
+  }
 
   /**
    * Creates a basic description from a name.
@@ -74,9 +94,10 @@ export class Thing {
     if (!Thing.isThing(init)) {
       throw new Error(`Not a thing.`);
     }
-    const { description, name, version } = init;
+    const { description, name, version, displayName } = init;
     this.kind = Kind;
     this.name = name;
+    this.displayName = displayName;
     this.description = description;
     this.version = version;
   }
@@ -98,6 +119,9 @@ export class Thing {
     };
     if (typeof this.name === 'string') {
       result.name = this.name;
+    }
+    if (typeof this.displayName === 'string') {
+      result.displayName = this.displayName;
     }
     if (this.description) {
       result.description = this.description;

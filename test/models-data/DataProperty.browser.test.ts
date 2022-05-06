@@ -71,6 +71,11 @@ describe('models', () => {
             const assoc = new DataProperty(root);
             assert.isUndefined(assoc.index);
           });
+
+          it('does not set deprecated', () => {
+            const assoc = new DataProperty(root);
+            assert.isUndefined(assoc.deprecated);
+          });
         });
 
         describe('From schema initialization', () => {
@@ -153,6 +158,13 @@ describe('models', () => {
             orig.index = true;
             const assoc = new DataProperty(root, orig);
             assert.isTrue(assoc.index);
+          });
+
+          it('sets the deprecated', () => {
+            const orig = new DataProperty(root).toJSON();
+            orig.deprecated = true;
+            const assoc = new DataProperty(root, orig);
+            assert.isTrue(assoc.deprecated);
           });
   
           it('initializes from JSON schema ', () => {
@@ -260,6 +272,18 @@ describe('models', () => {
           const assoc = new DataProperty(root);
           assoc.new(base);
           assert.isUndefined(assoc.index);
+        });
+
+        it('sets the deprecated', () => {
+          const assoc = new DataProperty(root);
+          assoc.new({ ...base, deprecated: true });
+          assert.isTrue(assoc.deprecated);
+        });
+
+        it('does not set deprecated when not in the input', () => {
+          const assoc = new DataProperty(root);
+          assoc.new(base);
+          assert.isUndefined(assoc.deprecated);
         });
 
         it('sets the primary', () => {
@@ -446,6 +470,87 @@ describe('models', () => {
           p1.remove();
           assert.deepEqual(e1.properties, [p2]);
           assert.deepEqual(root.definitions.properties, [p2]);
+        });
+      });
+
+      describe('addTag()', () => {
+        let root: DataNamespace;
+        let m1: DataModel;
+        let e1: DataEntity;
+        let p1: DataProperty;
+
+        beforeEach(() => {
+          root = new DataNamespace();
+          m1 = root.addDataModel('m1');
+          e1 = m1.addEntity('e1');
+          p1 = e1.addNamedProperty('test prop');
+        });
+
+        it('ignores when empty', () => {
+          p1.addTag('');
+          assert.deepEqual(p1.tags, []);
+        });
+
+        it('adds a tag to the property', () => {
+          p1.addTag('Test');
+          assert.deepEqual(p1.tags, ['Test']);
+        });
+
+        it('ignores a tag case insensitive', () => {
+          p1.addTag('Test');
+          p1.addTag('teSt');
+          assert.deepEqual(p1.tags, ['Test']);
+        });
+
+        it('adds a tag the root definitions', () => {
+          p1.addTag('Test');
+          assert.deepEqual(root.definitions.tags, ['Test']);
+        });
+
+        it('ignores adding to root definitions when tag exists case insensitive', () => {
+          p1.addTag('Test');
+          p1.addTag('TeSt');
+          assert.deepEqual(root.definitions.tags, ['Test']);
+        });
+      });
+
+      describe('removeTag()', () => {
+        let root: DataNamespace;
+        let m1: DataModel;
+        let e1: DataEntity;
+        let p1: DataProperty;
+
+        beforeEach(() => {
+          root = new DataNamespace();
+          m1 = root.addDataModel('m1');
+          e1 = m1.addEntity('e1');
+          p1 = e1.addNamedProperty('test prop');
+        });
+
+        it('ignores when empty', () => {
+          p1.addTag('t1');
+          p1.removeTag('');
+          assert.deepEqual(p1.tags, ['t1']);
+        });
+
+        it('removes the tag from the property', () => {
+          p1.addTag('t1');
+          p1.removeTag('t1');
+          assert.deepEqual(p1.tags, []);
+        });
+
+        it('removes only the selected tag', () => {
+          p1.addTag('t1');
+          p1.addTag('t2');
+          p1.addTag('t3');
+          p1.removeTag('t2');
+          assert.deepEqual(p1.tags, ['t1', 't3']);
+        });
+
+        it('does not remove root tags', () => {
+          p1.addTag('t1');
+          p1.removeTag('t1');
+          assert.deepEqual(root.definitions.tags, ['t1']);
         });
       });
     });

@@ -57,6 +57,11 @@ describe('models', () => {
             const assoc = new DataEntity(root);
             assert.deepEqual(assoc.parents, []);
           });
+
+          it('does not set deprecated', () => {
+            const assoc = new DataProperty(root);
+            assert.isUndefined(assoc.deprecated);
+          });
         });
 
         describe('From schema initialization', () => {
@@ -98,6 +103,13 @@ describe('models', () => {
             orig.key = 'test';
             const instance = new DataEntity(root, JSON.stringify(orig));
             assert.equal(instance.key, 'test');
+          });
+
+          it('sets the deprecated', () => {
+            const orig = new DataEntity(root).toJSON();
+            orig.deprecated = true;
+            const assoc = new DataEntity(root, orig);
+            assert.isTrue(assoc.deprecated);
           });
         });
       });
@@ -229,6 +241,18 @@ describe('models', () => {
           assoc.taxonomy = ['a'];
           assoc.new(base);
           assert.deepEqual(assoc.taxonomy, []);
+        });
+
+        it('sets the deprecated', () => {
+          const assoc = new DataEntity(root);
+          assoc.new({ ...base, deprecated: true });
+          assert.isTrue(assoc.deprecated);
+        });
+
+        it('does not set deprecated when not in the input', () => {
+          const assoc = new DataEntity(root);
+          assoc.new(base);
+          assert.isUndefined(assoc.deprecated);
         });
 
         it('throws when unknown input', () => {
@@ -878,6 +902,83 @@ describe('models', () => {
           assert.equal(result[2].key, n2.key, 'has the child-namespace');
           assert.equal(result[3].key, m1.key, 'has the model as parent');
           assert.equal(result[4].key, e1.key, 'has self last');
+        });
+      });
+
+      describe('addTag()', () => {
+        let root: DataNamespace;
+        let m1: DataModel;
+        let e1: DataEntity;
+
+        beforeEach(() => {
+          root = new DataNamespace();
+          m1 = root.addDataModel('m1');
+          e1 = m1.addEntity('e1');
+        });
+
+        it('ignores when empty', () => {
+          e1.addTag('');
+          assert.deepEqual(e1.tags, []);
+        });
+
+        it('adds a tag to the property', () => {
+          e1.addTag('Test');
+          assert.deepEqual(e1.tags, ['Test']);
+        });
+
+        it('ignores a tag case insensitive', () => {
+          e1.addTag('Test');
+          e1.addTag('teSt');
+          assert.deepEqual(e1.tags, ['Test']);
+        });
+
+        it('adds a tag the root definitions', () => {
+          e1.addTag('Test');
+          assert.deepEqual(root.definitions.tags, ['Test']);
+        });
+
+        it('ignores adding to root definitions when tag exists case insensitive', () => {
+          e1.addTag('Test');
+          e1.addTag('TeSt');
+          assert.deepEqual(root.definitions.tags, ['Test']);
+        });
+      });
+
+      describe('removeTag()', () => {
+        let root: DataNamespace;
+        let m1: DataModel;
+        let e1: DataEntity;
+
+        beforeEach(() => {
+          root = new DataNamespace();
+          m1 = root.addDataModel('m1');
+          e1 = m1.addEntity('e1');
+        });
+
+        it('ignores when empty', () => {
+          e1.addTag('t1');
+          e1.removeTag('');
+          assert.deepEqual(e1.tags, ['t1']);
+        });
+
+        it('removes the tag from the property', () => {
+          e1.addTag('t1');
+          e1.removeTag('t1');
+          assert.deepEqual(e1.tags, []);
+        });
+
+        it('removes only the selected tag', () => {
+          e1.addTag('t1');
+          e1.addTag('t2');
+          e1.addTag('t3');
+          e1.removeTag('t2');
+          assert.deepEqual(e1.tags, ['t1', 't3']);
+        });
+
+        it('does not remove root tags', () => {
+          e1.addTag('t1');
+          e1.removeTag('t1');
+          assert.deepEqual(root.definitions.tags, ['t1']);
         });
       });
     });
