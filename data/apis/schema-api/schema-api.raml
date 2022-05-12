@@ -1,0 +1,432 @@
+#%RAML 1.0
+title: API body demo
+version: v1
+baseUri: http://api.domain.com/
+
+uses:
+  ExampleType: library/demo-types.raml
+
+types:
+  ScalarType:
+    type: string
+    description: A description.
+    displayName: Scalar type
+  ScalarWithTraits:
+    type: string
+    description: ScalarWithTraits description.
+    displayName: Scalar traits
+    default: test
+    example: other
+    pattern: "[a-zA-Z]*"
+    maxLength: 15
+    minLength: 3
+    enum: 
+     - test
+     - other
+     - another
+  ScalarWithParent:
+    type: ScalarWithTraits
+    pattern: "[a-zA-Z0-9]*"
+  ScalarWithExample:
+    type: string
+    example: A string
+  ScalarWithEnum:
+    type: string
+    enum: 
+     - A
+     - B
+     - C
+  SimpleObject:
+    type: object
+    minProperties: 1
+    maxProperties: 20
+    additionalProperties: true
+    description: A simple object
+    displayName: Simple object
+    properties: 
+      id: string
+      name:
+        type: string
+        displayName: Name
+        example: Pawel Uchida-Psztyc
+      age?:
+        type: integer
+        example: 21
+        description: Optional person age.
+        minimum: 18
+      sex:
+        type: string
+        enum: 
+          - male
+          - female
+        description: An example of an enum.
+      newsletter:
+        type: boolean
+        required: false
+        description: Whether the user wants to be added to the newsletter
+      tosAccepted:
+        type: boolean
+        default: false
+        description: Whether terms of service is accepted by the user.
+  ObjectWithParent:
+    type: SimpleObject
+    properties: 
+      addedProperty:
+        type: time-only
+      age:
+        type: integer
+        required: true
+        example: 25
+        description: Age is not optional anymore.
+  ObjectWithArray:
+    type: object
+    properties: 
+      tags:
+        type: string[]
+        description: These are tags
+      exampleValue:
+        type: number[]
+        example: 123
+      examplesValue:
+        type: string[]
+        examples: 
+          named1: value 1
+          named2: value 2
+      defaultValue:
+        type: string[]
+        default: [A tag]
+      optionalValue:
+        type: object[]
+        required: false
+  ObjectWithArrayObject:
+    type: array
+    items: SimpleObject
+    description: Items that are another object.
+  ScalarUnion:
+    type: string | number
+  ScalarUnionDefaultNumber:
+    type: string | number
+    default: 123456
+  ScalarUnionDefaultString:
+    type: string | number
+    default: abc123
+  ScalarUnionDefaultBoolean:
+    type: string | boolean
+    default: true
+  ScalarUnionDefaultBoolean2:
+    type: string | boolean
+    default: false
+  ScalarUnionDefaultNil:
+    type: string | nil
+    default: null
+  ScalarUnionExampleNumber:
+    type: string | number
+    example: 987654
+  ScalarUnionExampleString:
+    type: string | number
+    example: 098poi
+  ScalarObjectUnion:
+    type: string | SimpleObject
+  ScalarObjectUnionExample:
+    type: string | SimpleObject
+    example:
+      id: 128a654bc54d898e43f
+      name: Pawel Uchida-Psztyc
+      age: 30
+      sex: male
+      newsletter: false
+      tosAccepted: true
+  ObjectUnions:
+    type: SimpleObject | ObjectWithParent
+  ObjectWithExample:
+    type: object
+    properties: 
+      error: boolean
+      message: string
+      optional?: number
+    example:
+      error: true
+      message: Error message
+  ObjectUnionWithExample:
+    type: ObjectWithExample | ObjectWithParent
+  ObjectScalarUnionNill:
+    type: object
+    properties: 
+      name: string | nil
+  UnionNill:
+    type: Address | nil
+  Parent:
+    type: object
+    properties: 
+      id: string
+  ChildLvl1:
+    type: Parent
+    properties: 
+      ch1: boolean
+  ChildLvl2:
+    type: ChildLvl1
+    properties: 
+      ch2: string
+  FileShape:
+    type: file
+    fileTypes: 
+      - application/*
+    maxLength: 100
+  Address:
+    properties:
+      street: string
+      city: string
+  XmlSerializationObject:
+    type: object
+    properties: 
+      id:
+        type: string
+        xml:
+          attribute: true
+          name: "uuid"
+      notNamedId:
+        type: string
+        xml:
+          attribute: true
+      attributeWithExample:
+        type: string
+        example: attr example value
+        xml:
+          attribute: true
+      attributeWithDefault:
+        type: string
+        default: attr default value
+        xml:
+          attribute: true
+      addresses: # This creates <addresses> <addresses><street></street>...</addresses> ... </addresses>
+        type: Address[]
+        xml:
+          wrapped: true
+      addresses2: # This creates <address-array-2> <Address><street></street>...</Address> ... </address-array-2>
+        type: array
+        items: 
+          type: Address
+          xml:
+            name: Address
+        xml:
+          wrapped: true
+          name: address-array-2
+      addresses3: # This creates <address-array-3> <address-array-3><street></street>...</address-array-3> ... </address-array-3>
+        type: Address[]
+        xml:
+          wrapped: true
+          name: address-array-3
+      addresses4: # This creates <address-array-4> <street></street>... </address-array-4>
+        type: Address[]
+        xml:
+          name: address-array-4
+      invalidAttribute:
+        type: SimpleObject
+        xml:
+          attribute: true
+      namespaceElement:
+        type: string
+        example: test namespace
+        xml:
+          namespace: urn:loc.gov:books
+      namespaceWithPrefix:
+        type: string
+        example: test namespace
+        xml:
+          namespace: urn:ISBN:0-395-36341-6
+          prefix: isbn
+      optionalAttribute?:
+        type: string
+        xml:
+          attribute: true
+      optionalProperty?:
+        type: string
+        example: abcd
+      
+  NoXmlSerializationObject:
+    type: object
+    properties: 
+      id:
+        type: string
+      addresses:
+        type: Address[]
+  XmlComplexProperty:
+    type: object
+    properties: 
+      complex:
+        type: object
+        xml:
+          wrapped: true # should not matter as this is not an array
+          namespace: urn:ISBN:0-395-36341-6
+          prefix: f
+        properties: 
+          abc:
+            xml:
+              attribute: true
+              name: correctedName
+          other:
+            type: string
+            example: some property
+  XmlArray:
+    type: Address[]
+  XmlArray2:
+    type: array
+    items: 
+      type: Address
+      xml:
+        name: address
+    xml: 
+      name: addresses-array
+      wrapped : true
+  XmlArrayExample:
+    type: Address[]
+    example:
+      street: 1234 Market street
+      city: San Francisco
+  XmlRefSchema:
+    description: This type has included xsd schema
+    type: !include schemas/person.xsd
+  XmlRefSchemaExample:
+    description: This type has included xsd schema
+    type: !include schemas/person.xsd
+    example: !include examples/person.xml
+  JsonRefSchema:
+    description: This type has included xsd schema
+    type: !include schemas/person.json
+  LibraryRef:
+    type: ExampleType.Pet
+    properties: 
+      type:
+        default: Doggie
+        xml:
+          name: petType
+      sound:
+        default: Woof
+      friendly: 
+        type: boolean
+        default: true
+  StringArray:
+    type: string[]
+  StringArrayExample:
+    type: string[]
+    example: [test, other]
+  StringArrayDefault:
+    type: string[]
+    example: [test, other]
+  NumberArray:
+    type: number[]
+  NumberArrayExample:
+    type: number[]
+    example: [1, 2]
+  NumberArrayDefault:
+    type: number[]
+    default: [3, 4]
+  ScalarNumber:
+    type: number
+  ScalarNumberWithExample:
+    type: number
+    example: 24
+
+securitySchemes: 
+  Basic:
+    type: Basic Authentication
+traits: 
+  Test:
+    headers: 
+      x-test: string
+
+/schemas:
+  post:
+    body: 
+      application/json:
+        type: JsonRefSchema
+      application/xml:
+        type: XmlRefSchema
+  put:
+    body:
+      application/json:
+        schema: !include schemas/person.json
+        example: !include examples/person.json
+      application/xml:
+        type: !include schemas/person.xsd
+        example: !include examples/person.xml
+        
+/parameters:
+  get:
+    queryParameters: 
+      arrableStringWithExample:
+        type: string[]
+        example: ["example 1", "example 2"]
+      arrableStringWithExamples:
+        type: string[]
+        examples: 
+          named1: ["example 1", "example 2"]
+          named2: ["example 3", "example 4"]
+      arrableNumberWithExamples:
+        type: number[]
+        examples: 
+          named1: [1, 2]
+          named2: [3, 4]
+      arrableNumber:
+        type: number[]
+      scalarString:
+        type: string
+      scalarStringWithExample:
+        type: string
+        example: a string
+      scalarStringWithDefault:
+        type: string
+        default: test default
+      scalarStringWithExamples:
+        type: string
+        examples:
+          named1: a string 1
+          named2: a string 2
+      scalarNumber:
+        type: number
+      scalarNumberWithExample:
+        type: number
+        example: 10
+      scalarNumberWithDefault:
+        type: number
+        default: 20
+      scalarNumberWithExamples:
+        type: number
+        examples:
+          named1: 30
+          named2: 40
+      scalarBoolean:
+        type: boolean
+      scalarBooleanWithExample:
+        type: boolean
+        example: true
+      scalarBooleanWithDefault:
+        type: boolean
+        default: false
+      scalarBooleanWithExamples:
+        type: boolean
+        examples:
+          named1: true
+          named2: false
+      notRequired:
+        type: string
+        required: false
+      notRequiredDefault:
+        type: string
+        required: false
+        default: test default
+      notRequiredExample:
+        type: string
+        required: false
+        example: test example
+      notRequiredArray:
+        type: string[]
+        required: false
+      notRequiredArrayDefault:
+        type: string[]
+        required: false
+        default: [test default]
+      notRequiredArrayExample:
+        type: string[]
+        required: false
+        example: [test example]

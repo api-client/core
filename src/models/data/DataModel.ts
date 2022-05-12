@@ -59,7 +59,7 @@ export class DataModel {
    * @param root the root namespace.
    * @param input The data model definition to restore.
    */
-  constructor(protected root: DataNamespace, input?: string | IDataModel) {
+  constructor(public root: DataNamespace, input?: string | IDataModel) {
     let init: IDataModel;
     if (typeof input === 'string') {
       init = JSON.parse(input);

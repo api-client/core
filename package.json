@@ -39,6 +39,7 @@
     "@web/dev-server-esbuild": "^0.3.0",
     "@web/test-runner": "^0.13.21",
     "@web/test-runner-playwright": "^0.8.8",
+    "amf-client-js": "^5.0.8",
     "chai": "^4.3.4",
     "chai-as-promised": "^7.1.1",
     "cors": "^2.8.5",
@@ -65,12 +66,13 @@
     "build-ts": "tsc",
     "build": "npm run build-ts && npm run lint",
     "lint": "tsc --noEmit && eslint \"**/*.{js,ts}\" --quiet --fix",
-    "prepare": "husky install && npm run build-ts",
+    "prepare": "husky install && npm run build-ts && npm run build:api-models",
     "tsc:watch": "tsc --watch",
     "test:browser": "wtr --playwright --browsers chromium firefox webkit --coverage",
     "test:browser:watch": "wtr --watch --playwright --browsers chromium",
     "test:node": "npm run build-ts && mocha",
-    "test": "npm run test:node && npm run test:browser"
+    "test": "npm run test:node && npm run test:browser",
+    "build:api-models": "node data/model.js"
   },
   "husky": {
     "hooks": {
@@ -88,6 +90,7 @@
     "@pawel-up/data-mock": "^0.3.0",
     "@pawel-up/jexl": "^3.0.0",
     "@xmldom/xmldom": "^0.8.2",
+    "amf-json-ld-lib": "^0.0.14",
     "console-table-printer": "^2.11.0",
     "ws": "^8.6.0",
     "xpath": "^0.0.32"

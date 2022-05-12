@@ -412,22 +412,22 @@ describe('models', () => {
         });
 
         it('adds the property to the entity', () => {
-          const p1 = e1.addTypedProperty('bytes');
+          const p1 = e1.addTypedProperty('boolean');
           assert.deepEqual(e1.properties, [p1]);
         });
 
         it('adds the property type', () => {
-          const p1 = e1.addTypedProperty('bytes');
-          assert.equal(p1.type, 'bytes');
+          const p1 = e1.addTypedProperty('boolean');
+          assert.equal(p1.type, 'boolean');
         });
 
         it('adds the property to the root definitions', () => {
-          const p1 = e1.addTypedProperty('bytes');
+          const p1 = e1.addTypedProperty('boolean');
           assert.deepEqual(root.definitions.properties, [p1]);
         });
 
         it('does not change other entities', () => {
-          e1.addTypedProperty('bytes');
+          e1.addTypedProperty('boolean');
           assert.deepEqual(e2.properties, []);
         });
       });
@@ -573,7 +573,7 @@ describe('models', () => {
 
         it('adds the association target', () => {
           const a1 = e1.addTargetAssociation(e2.key);
-          assert.deepEqual(a1.target, e2.key);
+          assert.deepEqual(a1.targets, [e2.key]);
         });
 
         it('does not change other entities', () => {
@@ -655,12 +655,21 @@ describe('models', () => {
           assert.deepEqual(result, [e2]);
         });
 
-        it('returns a parent with their parents', () => {
+        it('returns only direct parents by default', () => {
           const e2 = m1.addEntity('e2');
           const e3 = m1.addEntity('e3');
           e2.parents.push(e3.key);
           e1.parents.push(e2.key);
           const result = e1.getComputedParents();
+          assert.deepEqual(result, [e2]);
+        });
+
+        it('returns a parent with their parents', () => {
+          const e2 = m1.addEntity('e2');
+          const e3 = m1.addEntity('e3');
+          e2.parents.push(e3.key);
+          e1.parents.push(e2.key);
+          const result = e1.getComputedParents(true);
           assert.deepEqual(result, [e2, e3]);
         });
 
@@ -671,7 +680,7 @@ describe('models', () => {
           e2.parents.push(e3.key);
           e1.parents.push(e2.key);
           e1.parents.push(e4.key);
-          const result = e1.getComputedParents();
+          const result = e1.getComputedParents(true);
           assert.deepEqual(result, [e2, e3, e4]);
         });
       });
@@ -803,8 +812,8 @@ describe('models', () => {
             paths.push(path);
           }
           assert.lengthOf(paths, 2, 'has both paths');
-          assert.deepEqual(paths[0], [e1.key, e5.key], 'has the 1st path');
-          assert.deepEqual(paths[1], [e1.key, e2.key, e3.key, e4.key, e5.key], 'has the 1st path');
+          assert.deepEqual(paths[0], [e1.key, e2.key, e3.key, e4.key, e5.key], 'has the 1st path');
+          assert.deepEqual(paths[1], [e1.key, e5.key], 'has the 2nd path');
         });
 
         it('ignores broken paths', () => {
@@ -979,6 +988,81 @@ describe('models', () => {
           e1.addTag('t1');
           e1.removeTag('t1');
           assert.deepEqual(root.definitions.tags, ['t1']);
+        });
+      });
+
+      describe('createAdapted()', () => {
+        let root: DataNamespace;
+        let m1: DataModel;
+        let e1: DataEntity;
+
+        beforeEach(() => {
+          root = new DataNamespace();
+          m1 = root.addDataModel('m1');
+          e1 = m1.addEntity('e1');
+        });
+
+        it('returns the created entity', () => {
+          const result = e1.createAdapted();
+          assert.typeOf(result, 'object');
+          assert.equal(result.kind, DataEntityKind);
+        });
+
+        it('sets the adapts association', () => {
+          const result = e1.createAdapted();
+          assert.equal(e1.adapts, result.key);
+        });
+
+        it('adds the association to the definitions', () => {
+          const result = e1.createAdapted();
+          assert.deepEqual(root.definitions.entities[1], result);
+        });
+      });
+
+      describe('readAdapted()', () => {
+        let root: DataNamespace;
+        let m1: DataModel;
+        let e1: DataEntity;
+
+        beforeEach(() => {
+          root = new DataNamespace();
+          m1 = root.addDataModel('m1');
+          e1 = m1.addEntity('e1');
+        });
+
+        it('returns undefined when none', () => {
+          assert.isUndefined(e1.readAdapted());
+        });
+
+        it('returns the association', () => {
+          const result = e1.createAdapted();
+          assert.deepEqual(e1.readAdapted(), result);
+        });
+
+        it('returns undefined when definition not found', () => {
+          e1.adapts = '123';
+          assert.isUndefined(e1.readAdapted());
+        });
+      });
+
+      describe('toApiShape()', () => {
+        let root: DataNamespace;
+        let m1: DataModel;
+        let e1: DataEntity;
+
+        beforeEach(() => {
+          root = new DataNamespace();
+          m1 = root.addDataModel('m1');
+          e1 = m1.addEntity('e1');
+        });
+
+        // these tests only check whether the AmfShapeGenerator is called.
+        // specific tests are performed elsewhere
+
+        it('returns an object', () => {
+          const result = e1.toApiShape();
+          assert.typeOf(result, 'object');
+          assert.typeOf(result.inherits, 'array');
         });
       });
     });

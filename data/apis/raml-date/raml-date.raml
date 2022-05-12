@@ -1,0 +1,28 @@
+#%RAML 1.0
+title: OAS dates
+version: v1
+
+types:
+  DateTypes:
+    type: object
+    properties:
+      dateOnly: # http://www.w3.org/2001/XMLSchema#date (OAS for "date")
+        type: date-only
+      timeOnly: # http://www.w3.org/2001/XMLSchema#time
+        type: time-only
+      datetimeOnly: # http://a.ml/vocabularies/shapes#dateTimeOnly
+        type: datetime-only
+      datetimeDefault: # http://www.w3.org/2001/XMLSchema#dateTime (OAS for date-time)
+        type: datetime
+      datetimeRfc3339: # http://www.w3.org/2001/XMLSchema#dateTime
+        type: datetime
+        format: rfc3339
+      datetimeRfc2616: # http://www.w3.org/2001/XMLSchema#dateTime
+        type: datetime
+        format: rfc2616
+
+/dates:
+  post:
+    body: 
+      application/json:
+        type: DateTypes

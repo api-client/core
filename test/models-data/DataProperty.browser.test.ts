@@ -1,9 +1,10 @@
 import { assert } from '@esm-bundle/chai';
-import { DataProperty, IDataProperty, IPropertySchema, Kind as DataPropertyKind, } from '../../src/models/data/DataProperty.js';
+import { DataProperty, IDataProperty, Kind as DataPropertyKind, } from '../../src/models/data/DataProperty.js';
 import { DataEntity } from '../../src/models/data/DataEntity.js';
 import { DataNamespace } from '../../src/models/data/DataNamespace.js';
 import { Thing } from '../../src/models/Thing.js';
 import { DataModel } from '../../src/models/data/DataModel.js';
+import { IScalarShape } from '../../src/amf/definitions/Shapes.js';
 
 describe('models', () => {
   describe('data', () => {
@@ -47,9 +48,9 @@ describe('models', () => {
             assert.deepEqual(assoc.taxonomy, []);
           });
 
-          it('sets the default "schemas"', () => {
+          it('sets the default "schema"', () => {
             const assoc = new DataProperty(root);
-            assert.deepEqual(assoc.schemas, []);
+            assert.isUndefined(assoc.schema);
           });
 
           it('does not set multiple', () => {
@@ -70,6 +71,26 @@ describe('models', () => {
           it('does not set index', () => {
             const assoc = new DataProperty(root);
             assert.isUndefined(assoc.index);
+          });
+
+          it('does not set readOnly', () => {
+            const assoc = new DataProperty(root);
+            assert.isUndefined(assoc.readOnly);
+          });
+
+          it('does not set writeOnly', () => {
+            const assoc = new DataProperty(root);
+            assert.isUndefined(assoc.writeOnly);
+          });
+
+          it('does not set hidden', () => {
+            const assoc = new DataProperty(root);
+            assert.isUndefined(assoc.hidden);
+          });
+
+          it('does not set adapts', () => {
+            const assoc = new DataProperty(root);
+            assert.isUndefined(assoc.adapts);
           });
 
           it('does not set deprecated', () => {
@@ -114,9 +135,9 @@ describe('models', () => {
 
           it('sets the "type"', () => {
             const orig = new DataProperty(root).toJSON();
-            orig.type = 'datetime';
+            orig.type = 'date';
             const assoc = new DataProperty(root, orig);
-            assert.equal(assoc.type, 'datetime');
+            assert.equal(assoc.type, 'date');
           });
 
           it('sets the "tags"', () => {
@@ -133,17 +154,24 @@ describe('models', () => {
             assert.deepEqual(assoc.taxonomy, ['test']);
           });
 
-          it('sets the "schemas"', () => {
+          it('sets the "schema"', () => {
             const orig = new DataProperty(root).toJSON();
-            orig.schemas = [
-              {
-                value: {
-                  maximum: 10,
-                }
-              }
-            ];
+            orig.schema = {
+              id: '1',
+              types: [],
+              and: [],
+              examples: [],
+              inherits: [],
+              or: [],
+              values: [],
+              xmlSerialization: {
+                id: '2',
+                types: [],
+              },
+              xone: [],
+            };
             const assoc = new DataProperty(root, orig);
-            assert.deepEqual(assoc.schemas, orig.schemas);
+            assert.deepEqual(assoc.schema, orig.schema);
           });
 
           it('sets the primary', () => {
@@ -158,6 +186,34 @@ describe('models', () => {
             orig.index = true;
             const assoc = new DataProperty(root, orig);
             assert.isTrue(assoc.index);
+          });
+
+          it('sets the readOnly', () => {
+            const orig = new DataProperty(root).toJSON();
+            orig.readOnly = true;
+            const assoc = new DataProperty(root, orig);
+            assert.isTrue(assoc.readOnly);
+          });
+
+          it('sets the writeOnly', () => {
+            const orig = new DataProperty(root).toJSON();
+            orig.writeOnly = true;
+            const assoc = new DataProperty(root, orig);
+            assert.isTrue(assoc.writeOnly);
+          });
+
+          it('sets the hidden', () => {
+            const orig = new DataProperty(root).toJSON();
+            orig.hidden = true;
+            const assoc = new DataProperty(root, orig);
+            assert.isTrue(assoc.hidden);
+          });
+
+          it('sets the adapts', () => {
+            const orig = new DataProperty(root).toJSON();
+            orig.adapts = '123';
+            const assoc = new DataProperty(root, orig);
+            assert.equal(assoc.adapts, '123');
           });
 
           it('sets the deprecated', () => {
@@ -274,6 +330,54 @@ describe('models', () => {
           assert.isUndefined(assoc.index);
         });
 
+        it('sets the readOnly', () => {
+          const assoc = new DataProperty(root);
+          assoc.new({ ...base, readOnly: true });
+          assert.isTrue(assoc.readOnly);
+        });
+
+        it('does not set readOnly when not in the input', () => {
+          const assoc = new DataProperty(root);
+          assoc.new(base);
+          assert.isUndefined(assoc.readOnly);
+        });
+
+        it('sets the writeOnly', () => {
+          const assoc = new DataProperty(root);
+          assoc.new({ ...base, writeOnly: true });
+          assert.isTrue(assoc.writeOnly);
+        });
+
+        it('does not set writeOnly when not in the input', () => {
+          const assoc = new DataProperty(root);
+          assoc.new(base);
+          assert.isUndefined(assoc.writeOnly);
+        });
+
+        it('sets the hidden', () => {
+          const assoc = new DataProperty(root);
+          assoc.new({ ...base, hidden: true });
+          assert.isTrue(assoc.hidden);
+        });
+
+        it('does not set hidden when not in the input', () => {
+          const assoc = new DataProperty(root);
+          assoc.new(base);
+          assert.isUndefined(assoc.hidden);
+        });
+
+        it('sets the adapts', () => {
+          const assoc = new DataProperty(root);
+          assoc.new({ ...base, adapts: '123' });
+          assert.equal(assoc.adapts, '123');
+        });
+
+        it('does not set adapts when not in the input', () => {
+          const assoc = new DataProperty(root);
+          assoc.new(base);
+          assert.isUndefined(assoc.adapts);
+        });
+
         it('sets the deprecated', () => {
           const assoc = new DataProperty(root);
           assoc.new({ ...base, deprecated: true });
@@ -332,21 +436,46 @@ describe('models', () => {
 
         it('sets the schemas as a copy', () => {
           const assoc = new DataProperty(root);
-          const schema: IPropertySchema<string> = {
-            value: {},
+          const schema: IScalarShape = {
+            id: '1',
+            types: [],
+            and: [],
+            examples: [],
+            inherits: [],
+            or: [],
+            values: [],
+            xmlSerialization: {
+              id: '2',
+              types: [],
+            },
+            xone: [],
           };
-          const init = { ...base, schemas: [schema] };
+          const init = { ...base, schema };
           assoc.new(init);
-          assert.deepEqual(assoc.schemas, [schema]);
-          init.schemas.push({ value: { default: 'test' } })
-          assert.deepEqual(assoc.schemas, [schema]);
+          assert.deepEqual(assoc.schema, schema);
+          schema.types.push('other');
+          assert.deepEqual(assoc.schema.types, []);
         });
 
         it('resets schemas when not in the input', () => {
           const assoc = new DataProperty(root);
-          assoc.schemas = [{ value: {} }];
+          const schema: IScalarShape = {
+            id: '1',
+            types: [],
+            and: [],
+            examples: [],
+            inherits: [],
+            or: [],
+            values: [],
+            xmlSerialization: {
+              id: '2',
+              types: [],
+            },
+            xone: [],
+          };
+          assoc.schema = schema;
           assoc.new(base);
-          assert.deepEqual(assoc.schemas, []);
+          assert.isUndefined(assoc.schema);
         });
 
         it('throws when unknown input', () => {
@@ -396,6 +525,41 @@ describe('models', () => {
           assert.isUndefined(result.required);
         });
 
+        it('does not serialize the primary by default', () => {
+          const result = base.toJSON();
+          assert.isUndefined(result.primary);
+        });
+
+        it('does not serialize the index by default', () => {
+          const result = base.toJSON();
+          assert.isUndefined(result.index);
+        });
+
+        it('does not serialize the readOnly by default', () => {
+          const result = base.toJSON();
+          assert.isUndefined(result.readOnly);
+        });
+
+        it('does not serialize the writeOnly by default', () => {
+          const result = base.toJSON();
+          assert.isUndefined(result.writeOnly);
+        });
+
+        it('does not serialize the hidden by default', () => {
+          const result = base.toJSON();
+          assert.isUndefined(result.hidden);
+        });
+
+        it('does not serialize the adapts by default', () => {
+          const result = base.toJSON();
+          assert.isUndefined(result.adapts);
+        });
+
+        it('does not serialize the schema by default', () => {
+          const result = base.toJSON();
+          assert.isUndefined(result.schema);
+        });
+
         it('serialize the set multiple', () => {
           base.multiple = false;
           const result = base.toJSON();
@@ -406,6 +570,42 @@ describe('models', () => {
           base.required = false;
           const result = base.toJSON();
           assert.isFalse(result.required);
+        });
+
+        it('serialize the set primary', () => {
+          base.primary = false;
+          const result = base.toJSON();
+          assert.isFalse(result.primary);
+        });
+
+        it('serialize the set index', () => {
+          base.index = false;
+          const result = base.toJSON();
+          assert.isFalse(result.index);
+        });
+
+        it('serialize the set readOnly', () => {
+          base.readOnly = false;
+          const result = base.toJSON();
+          assert.isFalse(result.readOnly);
+        });
+
+        it('serialize the set writeOnly', () => {
+          base.writeOnly = false;
+          const result = base.toJSON();
+          assert.isFalse(result.writeOnly);
+        });
+
+        it('serialize the set hidden', () => {
+          base.hidden = false;
+          const result = base.toJSON();
+          assert.isFalse(result.hidden);
+        });
+
+        it('serialize the set adapts', () => {
+          base.adapts = '123';
+          const result = base.toJSON();
+          assert.equal(result.adapts, '123');
         });
 
         it('does not serialize taxonomy by default', () => {
@@ -552,6 +752,89 @@ describe('models', () => {
           p1.removeTag('t1');
           assert.deepEqual(root.definitions.tags, ['t1']);
         });
+      });
+
+      describe('createAdapted()', () => {
+        let root: DataNamespace;
+        let m1: DataModel;
+        let e1: DataEntity;
+        let p1: DataProperty;
+
+        beforeEach(() => {
+          root = new DataNamespace();
+          m1 = root.addDataModel('m1');
+          e1 = m1.addEntity('e1');
+          p1 = e1.addNamedProperty('test prop');
+        });
+
+        it('returns the created property', () => {
+          const result = p1.createAdapted();
+          assert.typeOf(result, 'object');
+          assert.equal(result.kind, DataPropertyKind);
+        });
+
+        it('sets the adapts property', () => {
+          const result = p1.createAdapted();
+          assert.equal(p1.adapts, result.key);
+        });
+
+        it('adds the property to the definitions', () => {
+          const result = p1.createAdapted();
+          assert.deepEqual(root.definitions.properties[1], result);
+        });
+      });
+
+      describe('readAdapted()', () => {
+        let root: DataNamespace;
+        let m1: DataModel;
+        let e1: DataEntity;
+        let p1: DataProperty;
+
+        beforeEach(() => {
+          root = new DataNamespace();
+          m1 = root.addDataModel('m1');
+          e1 = m1.addEntity('e1');
+          p1 = e1.addNamedProperty('test prop');
+        });
+
+        it('returns undefined when none', () => {
+          assert.isUndefined(p1.readAdapted());
+        });
+
+        it('returns the property', () => {
+          const result = p1.createAdapted();
+          assert.deepEqual(p1.readAdapted(), result);
+        });
+
+        it('returns undefined when definition not found', () => {
+          p1.adapts = '123';
+          assert.isUndefined(p1.readAdapted());
+        });
+      });
+
+      describe('toApiShape()', () => {
+        let root: DataNamespace;
+        let m1: DataModel;
+        let e1: DataEntity;
+        let p1: DataProperty;
+
+        beforeEach(() => {
+          root = new DataNamespace();
+          m1 = root.addDataModel('m1');
+          e1 = m1.addEntity('e1');
+          p1 = e1.addNamedProperty('test prop');
+        });
+
+        // these tests only check whether the AmfShapeGenerator is called.
+        // specific tests are performed elsewhere
+
+        it('returns an object', () => {
+          const result = p1.toApiShape();
+          
+          assert.typeOf(result, 'object');
+          assert.typeOf(result.range, 'object');
+        });
+
       });
     });
   });

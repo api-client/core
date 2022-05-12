@@ -5,6 +5,9 @@ import { DataProperty, DataPropertyType } from "./DataProperty.js";
 import { DataAssociation } from "./DataAssociation.js";
 import { IBreadcrumb } from "../store/Breadcrumb.js";
 import { DataModel } from "./DataModel.js";
+import { INodeShape, IShapeUnion } from "../../amf/definitions/Shapes.js";
+import { AmfShapeGenerator } from "../../amf/AmfShapeGenerator.js";
+import { ApiSchemaGenerator } from "../../amf/ApiSchemaGenerator.js";
 
 export const Kind = 'Core#DataEntity';
 
@@ -60,6 +63,24 @@ export interface IDataEntity {
    * Whether this entity is deprecated.
    */
   deprecated?: boolean;
+
+  /**
+   * The schema allowing to translate the model into a specific format (like JSON, RAML, XML, etc.)
+   * 
+   * Schema limitations:
+   * 
+   * - can only occur on an adapted property. Has no effect on the "main" property. 
+   */
+  schema?: INodeShape;
+
+  /**
+   * The key of the entity that is adapted by this entity.
+   * Adapted entities can manipulate the shape of the schema for the entity.
+   * 
+   * Each value defined on the adapted entity changes the original value defined on
+   * the entity.
+   */
+  adapts?: string;
 }
 
 /**
@@ -114,6 +135,15 @@ export class DataEntity {
    */
   deprecated?: boolean;
 
+  /**
+   * The key of the entity that is adapted by this entity.
+   * Adapted entities can manipulate the shape of the schema for the entity.
+   * 
+   * Each value defined on the adapted entity changes the original value defined on
+   * the entity.
+   */
+  adapts?: string;
+
   static fromName(root: DataNamespace, name: string): DataEntity {
     const entity = new DataEntity(root);
     entity.info = Thing.fromName(name);
@@ -123,7 +153,7 @@ export class DataEntity {
   /**
    * @param input The data entity definition to restore.
    */
-  constructor(protected root: DataNamespace, input?: string | IDataEntity) {
+  constructor(public root: DataNamespace, input?: string | IDataEntity) {
     let init: IDataEntity;
     if (typeof input === 'string') {
       init = JSON.parse(input);
@@ -143,7 +173,10 @@ export class DataEntity {
     if (!DataEntity.isDataEntity(init)) {
       throw new Error(`Not a data entity.`);
     }
-    const { info, key = v4(), kind = Kind, tags, taxonomy, parents, properties, associations, deprecated } = init;
+    const { 
+      info, key = v4(), kind = Kind, tags, taxonomy, parents, properties, associations, 
+      deprecated, adapts,
+    } = init;
     this.kind = kind;
     this.key = key;
     if (info) {
@@ -151,7 +184,6 @@ export class DataEntity {
     } else {
       this.info = Thing.fromName('');
     }
-    
     if (Array.isArray(tags)) {
       this.tags = [...tags];
     } else {
@@ -167,7 +199,6 @@ export class DataEntity {
     } else {
       this.parents = [];
     }
-
     this.properties = [];
     if (Array.isArray(properties)) {
       properties.forEach(key => {
@@ -177,7 +208,6 @@ export class DataEntity {
         }
       });
     }
-
     this.associations = [];
     if (Array.isArray(associations)) {
       associations.forEach(key => {
@@ -187,11 +217,15 @@ export class DataEntity {
         }
       });
     }
-
     if (typeof deprecated === 'boolean') {
       this.deprecated = deprecated;
     } else {
       this.deprecated = undefined;
+    }
+    if (typeof adapts === 'string') {
+      this.adapts = adapts;
+    } else {
+      this.adapts = undefined;
     }
   }
 
@@ -227,6 +261,9 @@ export class DataEntity {
     if (typeof this.deprecated === 'boolean') {
       result.deprecated = this.deprecated;
     }
+    if (this.adapts) {
+      result.adapts = this.adapts;
+    }
     return result;
   }
 
@@ -243,8 +280,11 @@ export class DataEntity {
    * @param type The type of the property
    * @returns The created property
    */
-  addTypedProperty(type: DataPropertyType): DataProperty {
+  addTypedProperty(type: DataPropertyType, name?: string): DataProperty {
     const property = DataProperty.fromType(this.root, type);
+    if (name) {
+      property.info.name = name;
+    }
     this.root.definitions.properties.push(property);
     this.properties.push(property);
     return property;
@@ -295,8 +335,11 @@ export class DataEntity {
    * @param target The target entity key of the association
    * @returns The created association
    */
-  addTargetAssociation(target: string): DataAssociation {
+  addTargetAssociation(target: string, name?: string): DataAssociation {
     const result = DataAssociation.fromTarget(this.root, target);
+    if (name) {
+      result.info.name = name;
+    }
     this.root.definitions.associations.push(result);
     this.associations.push(result);
     return result;
@@ -321,15 +364,18 @@ export class DataEntity {
   /**
    * Reads the list of parents for the entity, inside the root namespace. The computed list contains the list of all
    * parents in the inheritance chain in no particular order.
+   * @param recursive Whether to include parent parents as well.
    */
-  getComputedParents(): DataEntity[] {
+  getComputedParents(recursive?: boolean): DataEntity[] {
     const { entities } = this.root.definitions;
     let result: DataEntity[] = [];
     this.parents.forEach((key) => {
       const parent = entities.find(i => i.key === key);
       if (parent) {
         result.push(parent);
-        result = result.concat(parent.getComputedParents());
+        if (recursive) {
+          result = result.concat(parent.getComputedParents());
+        }
       }
     });
     return result;
@@ -352,10 +398,10 @@ export class DataEntity {
     const { entities } = root.definitions;
     const result: DataEntity[] = [];
     associations.forEach((assoc) => {
-      if (!assoc.target) {
+      if (!assoc.targets.length) {
         return;
       }
-      const entity = entities.find(i => i.key === assoc.target);
+      const entity = entities.find(i => assoc.targets.includes(i.key));
       if (entity) {
         result.push(entity);
       }
@@ -463,7 +509,7 @@ export class DataEntity {
     const graph: Record<string, string[]> = {};
     const { associations, entities } = this.root.definitions;
     for (const assoc of associations) {
-      if (!assoc.target) {
+      if (!assoc.targets.length) {
         continue;
       }
       const srcEntity = entities.find(i => i.associations.some(a => a === assoc));
@@ -473,7 +519,7 @@ export class DataEntity {
       if (!graph[srcEntity.key]) {
         graph[srcEntity.key] = [];
       }
-      graph[srcEntity.key].push(assoc.target);
+      graph[srcEntity.key].splice(0, 0, ...assoc.targets);
     }
     return graph;
   }
@@ -551,5 +597,55 @@ export class DataEntity {
     if (index >= 0) {
       tags.splice(index, 1);
     }
+  }
+
+  /**
+   * Creates a Shape of AMF.
+   * The property itself is auto-generated. If the `schema` is defined then it is used
+   * as the `range` of the property. Otherwise basic shape is generated for the range.
+   * 
+   * This is a preferred way of reading the AMF shape as this synchronizes changed 
+   * data properties with the shape definition.
+   * 
+   * @returns AMF property shape definition.
+   */
+  toApiShape(): IShapeUnion {
+    const serializer = new AmfShapeGenerator();
+    return serializer.entity(this);
+  }
+
+  /**
+   * Reads the schema of the Entity and generates an example for it.
+   */
+  toExample(mime: string): string | number | boolean | null | undefined {
+    const shape = this.toApiShape();
+    const generator = new ApiSchemaGenerator(mime, {
+      renderExamples: true,
+      renderMocked: true,
+      renderOptional: true,      
+    });
+    return generator.generate(shape);
+  }
+
+  /**
+   * @returns The adapted entity, if any
+   */
+  readAdapted(): DataEntity | undefined {
+    const { adapts } = this;
+    if (!adapts) {
+      return undefined;
+    }
+    return this.root.definitions.entities.find(i => i.key === adapts);
+  }
+
+  /**
+   * Creates new adapted entity and associates it with this entity.
+   * @returns The instance of the created entity.
+   */
+  createAdapted(): DataEntity {
+    const entity = new DataEntity(this.root);
+    this.root.definitions.entities.push(entity);
+    this.adapts = entity.key;
+    return entity;
   }
 }

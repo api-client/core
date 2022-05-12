@@ -29,10 +29,10 @@ describe('models', () => {
           it('sets the default "info"', () => {
             const assoc = new DataAssociation(root);
             assert.typeOf(assoc.info, 'object');
-            assert.equal(assoc.info.name, '');
+            assert.equal(assoc.info.name, 'Unnamed association');
           });
 
-          it('does not set schema', () => {
+          it('sets the default schema', () => {
             const assoc = new DataAssociation(root);
             assert.isUndefined(assoc.schema);
           });
@@ -47,9 +47,9 @@ describe('models', () => {
             assert.isUndefined(assoc.required);
           });
 
-          it('does not set target', () => {
+          it('sets the default targets', () => {
             const assoc = new DataAssociation(root);
-            assert.isUndefined(assoc.target);
+            assert.deepEqual(assoc.targets, []);
           });
         });
 
@@ -87,25 +87,25 @@ describe('models', () => {
             assert.isTrue(instance.required);
           });
   
-          it('sets the target', () => {
+          it('sets the targets', () => {
             const orig = new DataAssociation(root).toJSON();
-            orig.target = 'test';
+            orig.targets = ['test'];
             const instance = new DataAssociation(root, orig);
-            assert.equal(instance.target, 'test');
+            assert.deepEqual(instance.targets, ['test']);
           });
   
           it('sets the schema', () => {
             const orig = new DataAssociation(root).toJSON();
-            orig.schema = { embedded: true };
+            orig.schema = { linked: true };
             const instance = new DataAssociation(root, orig);
-            assert.deepEqual(instance.schema, { embedded: true });
+            assert.deepEqual(instance.schema, { linked: true });
           });
   
           it('initializes from JSON schema ', () => {
             const orig = new DataAssociation(root).toJSON();
-            orig.schema = { embedded: true };
+            orig.schema = { linked: true };
             const instance = new DataAssociation(root, JSON.stringify(orig));
-            assert.deepEqual(instance.schema, { embedded: true });
+            assert.deepEqual(instance.schema, { linked: true });
           });
         });
       });
@@ -118,7 +118,7 @@ describe('models', () => {
 
         it('sets the target', () => {
           const assoc = DataAssociation.fromTarget(root, 'test');
-          assert.equal(assoc.target, 'test');
+          assert.deepEqual(assoc.targets, ['test']);
         });
       });
 
@@ -167,11 +167,11 @@ describe('models', () => {
 
         it('sets the schema', () => {
           const assoc = new DataAssociation(root);
-          assoc.new({ ...base, schema: { embedded: true }});
-          assert.deepEqual(assoc.schema, { embedded: true });
+          assoc.new({ ...base, schema: { linked: true }});
+          assert.deepEqual(assoc.schema, { linked: true });
         });
 
-        it('does not set schema when not in the input', () => {
+        it('sets default schema', () => {
           const assoc = new DataAssociation(root);
           assoc.new(base);
           assert.isUndefined(assoc.schema);
@@ -201,16 +201,17 @@ describe('models', () => {
           assert.isUndefined(assoc.required);
         });
 
-        it('sets the target', () => {
+        it('sets the targets', () => {
           const assoc = new DataAssociation(root);
-          assoc.new({ ...base, target: 'target-id' });
-          assert.equal(assoc.target, 'target-id');
+          assoc.new({ ...base, targets: ['target-id'] });
+          assert.deepEqual(assoc.targets, ['target-id']);
         });
 
-        it('does not set required when not in the input', () => {
+        it('re-sets targets when not in the input', () => {
           const assoc = new DataAssociation(root);
+          assoc.targets = ['test1'];
           assoc.new(base);
-          assert.isUndefined(assoc.target);
+          assert.deepEqual(assoc.targets, []);
         });
 
         it('throws when unknown input', () => {
@@ -264,15 +265,15 @@ describe('models', () => {
           assert.isUndefined(result.required);
         });
 
-        it('does not serialize the target by default', () => {
+        it('does not serialize targets when empty', () => {
           const result = base.toJSON();
-          assert.isUndefined(result.target);
+          assert.isUndefined(result.targets);
         });
 
         it('serializes the schema', () => {
-          base.schema = { embedded: true };
+          base.schema = { linked: true };
           const result = base.toJSON();
-          assert.deepEqual(result.schema, { embedded: true });
+          assert.deepEqual(result.schema, { linked: true });
         });
 
         it('serialize the set multiple', () => {
@@ -287,14 +288,45 @@ describe('models', () => {
           assert.isFalse(result.required);
         });
 
-        it('serialize the set target', () => {
-          base.target = 'abc';
+        it('serializes targets as a copy', () => {
+          base.targets = ['abc'];
           const result = base.toJSON();
-          assert.equal(result.target, 'abc');
+          assert.deepEqual(result.targets, ['abc']);
+          base.targets.push('def');
+          assert.deepEqual(result.targets, ['abc']);
         });
       });
 
-      describe('getTarget()', () => {
+      describe('#isSingle', () => {
+        let root: DataNamespace;
+        let e1: DataEntity;
+        let e2: DataEntity;
+
+        beforeEach(() => {
+          root = new DataNamespace();
+          const model = root.addDataModel('m1');
+          e1 = model.addEntity('e1');
+          e2 = model.addEntity('e2');
+        });
+
+        it('returns true when no targets', () => {
+          const assoc = e1.addNamedAssociation('a1');
+          assert.isTrue(assoc.isSingle);
+        });
+
+        it('returns true when a single target', () => {
+          const assoc = e1.addTargetAssociation(e2.key);
+          assert.isTrue(assoc.isSingle);
+        });
+
+        it('returns false when multiple targets', () => {
+          const assoc = e1.addTargetAssociation(e2.key);
+          assoc.targets.push('other')
+          assert.isFalse(assoc.isSingle);
+        });
+      });
+
+      describe('getTargets()', () => {
         let root: DataNamespace;
         let e1: DataEntity;
         let e2: DataEntity;
@@ -308,21 +340,21 @@ describe('models', () => {
 
         it('returns the entity', () => {
           const assoc = e1.addTargetAssociation(e2.key);
-          const result = assoc.getTarget();
-          assert.deepEqual(result, e2);
+          const result = assoc.getTargets();
+          assert.deepEqual(result, [e2]);
         });
 
-        it('returns undefined when no target', () => {
+        it('returns empty array when no target', () => {
           const assoc = e1.addNamedAssociation('test');
-          const result = assoc.getTarget();
-          assert.isUndefined(result);
+          const result = assoc.getTargets();
+          assert.deepEqual(result, []);
         });
 
         it('returns undefined when target has no definition', () => {
           const assoc = e1.addNamedAssociation('test');
-          assoc.target = 'nothing';
-          const result = assoc.getTarget();
-          assert.isUndefined(result);
+          assoc.targets = ['nothing'];
+          const result = assoc.getTargets();
+          assert.deepEqual(result, []);
         });
       });
 
@@ -365,6 +397,159 @@ describe('models', () => {
           a1.remove();
           assert.deepEqual(e1.associations, [a2]);
           assert.deepEqual(root.definitions.associations, [a2]);
+        });
+      });
+
+      describe('addTarget()', () => {
+        let root: DataNamespace;
+        let e1: DataEntity;
+        let e2: DataEntity;
+        let a1: DataAssociation;
+
+        beforeEach(() => {
+          root = new DataNamespace();
+          const model = root.addDataModel('m1');
+          e1 = model.addEntity('e1');
+          e2 = model.addEntity('e2');
+          a1 = e1.addNamedAssociation('a1');
+        });
+
+        it('adds the target from the key', () => {
+          a1.addTarget(e2.key);
+          assert.deepEqual(a1.targets, [e2.key]);
+        });
+
+        it('adds the target from an entity', () => {
+          a1.addTarget(e2);
+          assert.deepEqual(a1.targets, [e2.key]);
+        });
+
+        it('adds the target from an entity schema', () => {
+          a1.addTarget(e2.toJSON());
+          assert.deepEqual(a1.targets, [e2.key]);
+        });
+      });
+
+      describe('removeTarget()', () => {
+        let root: DataNamespace;
+        let e1: DataEntity;
+        let e2: DataEntity;
+        let a1: DataAssociation;
+
+        beforeEach(() => {
+          root = new DataNamespace();
+          const model = root.addDataModel('m1');
+          e1 = model.addEntity('e1');
+          e2 = model.addEntity('e2');
+          a1 = e1.addTargetAssociation(e2.key);
+        });
+
+        it('removes the target from the key', () => {
+          a1.removeTarget(e2.key);
+          assert.deepEqual(a1.targets, []);
+        });
+
+        it('removes the target from an entity', () => {
+          a1.removeTarget(e2);
+          assert.deepEqual(a1.targets, []);
+        });
+
+        it('removes the target from an entity schema', () => {
+          a1.removeTarget(e2.toJSON());
+          assert.deepEqual(a1.targets, []);
+        });
+
+        it('does nothing when the target does not exist', () => {
+          a1.removeTarget('other');
+          assert.deepEqual(a1.targets, [e2.key]);
+        });
+      });
+
+      describe('createAdapted()', () => {
+        let root: DataNamespace;
+        let m1: DataModel;
+        let e1: DataEntity;
+        let e2: DataEntity;
+        let a1: DataAssociation;
+
+        beforeEach(() => {
+          root = new DataNamespace();
+          m1 = root.addDataModel('m1');
+          e1 = m1.addEntity('e1');
+          e2 = m1.addEntity('e2');
+          a1 = e1.addTargetAssociation(e2.key);
+        });
+
+        it('returns the created association', () => {
+          const result = a1.createAdapted();
+          assert.typeOf(result, 'object');
+          assert.equal(result.kind, DataAssociationKind);
+        });
+
+        it('sets the adapts association', () => {
+          const result = a1.createAdapted();
+          assert.equal(a1.adapts, result.key);
+        });
+
+        it('adds the association to the definitions', () => {
+          const result = a1.createAdapted();
+          assert.deepEqual(root.definitions.associations[1], result);
+        });
+      });
+
+      describe('readAdapted()', () => {
+        let root: DataNamespace;
+        let m1: DataModel;
+        let e1: DataEntity;
+        let e2: DataEntity;
+        let a1: DataAssociation;
+
+        beforeEach(() => {
+          root = new DataNamespace();
+          m1 = root.addDataModel('m1');
+          e1 = m1.addEntity('e1');
+          e2 = m1.addEntity('e2');
+          a1 = e1.addTargetAssociation(e2.key);
+        });
+
+        it('returns undefined when none', () => {
+          assert.isUndefined(a1.readAdapted());
+        });
+
+        it('returns the association', () => {
+          const result = a1.createAdapted();
+          assert.deepEqual(a1.readAdapted(), result);
+        });
+
+        it('returns undefined when definition not found', () => {
+          a1.adapts = '123';
+          assert.isUndefined(a1.readAdapted());
+        });
+      });
+
+      describe('toApiShape()', () => {
+        let root: DataNamespace;
+        let m1: DataModel;
+        let e1: DataEntity;
+        let e2: DataEntity;
+        let a1: DataAssociation;
+
+        beforeEach(() => {
+          root = new DataNamespace();
+          m1 = root.addDataModel('m1');
+          e1 = m1.addEntity('e1');
+          e2 = m1.addEntity('e2');
+          a1 = e1.addTargetAssociation(e2.key);
+        });
+
+        // these tests only check whether the AmfShapeGenerator is called.
+        // specific tests are performed elsewhere
+
+        it('returns an object', () => {
+          const result = a1.toApiShape();
+          
+          assert.typeOf(result, 'object');
+          assert.typeOf(result.range, 'object');
         });
       });
     });

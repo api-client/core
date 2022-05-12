@@ -58,3 +58,4 @@ node_modules
 coverage
 build
 test/express.lock
+data/models

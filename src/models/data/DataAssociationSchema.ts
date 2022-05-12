@@ -29,4 +29,42 @@ export interface IDataAssociationSchema {
    * ```
    */
   embedded?: boolean;
+
+  /**
+   * Describes XML specific serialization.
+   */
+  xml?: {
+    /**
+     * The name of the attribute or a wrapped property to use when serializing the property.
+     * 
+     * ```
+     * <Person fullName="John Doe"></Person>
+     * ```
+     */
+    name?: string;
+
+    /**
+     * When the property is an array (has the `multiple` set to true)
+     * then it tells that the list of values should be wrapped with a parent
+     * element:
+     * 
+     * ```
+     * <Person>
+     *  <Person fullName="John Doe"></Person>
+     * </Person>
+     * ```
+     * 
+     * Use this with the combination with `name` to describe the name of the wrapped
+     * element
+     * 
+     * ```
+     * <people>
+     *  <Person fullName="John Doe"></Person>
+     * </people>
+     * ```
+     * 
+     * Note, this is mutually exclusive with `attribute`.
+     */
+    wrapped?: boolean;
+  }
 }

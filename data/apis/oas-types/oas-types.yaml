@@ -1,0 +1,159 @@
+openapi: '3.0.2'
+info:
+  title: OAS types
+  version: '1.0'
+  description: Different OAS types
+
+components:
+  schemas:
+    NumberTypes:
+      type: object
+      properties:
+        simpleNumber:
+          type: number
+        simpleFloat:
+          type: number
+          format: float
+        simpleDouble:
+          type: number
+          format: double
+        simpleInteger:
+          type: integer
+        simpleInt32:
+          type: integer
+          format: int32
+        simpleInt64:
+          type: integer
+          format: int64
+        minMaxInteger:
+          type: integer
+          minimum: 1
+          maximum: 20
+          exclusiveMinimum: true
+        multipleInteger:
+          type: integer
+          multipleOf: 4
+    StringTypes:
+      type: object
+      properties:
+        simpleString:
+          type: string
+        minMaxString:
+          type: string
+          minLength: 3
+          maxLength: 20
+        dateString: # http://www.w3.org/2001/XMLSchema#date
+          type: string
+          format: date
+        dateTimeString: # http://www.w3.org/2001/XMLSchema#dateTime
+          type: string
+          format: date-time
+        passwordString:
+          type: string
+          format: password
+        byteString:
+          type: string
+          format: byte
+        binaryString:
+          type: string
+          format: binary
+        emailString:
+          type: string
+          format: email
+        uuidString:
+          type: string
+          format: uuid
+        uriString:
+          type: string
+          format: uri
+        hostnameString:
+          type: string
+          format: hostname
+        jsonPointerString:
+          type: string
+          format: json-pointer
+        patternString:
+          type: string
+          pattern: '^\d{3}-\d{2}-\d{4}$'
+        enumString:
+          type: string
+          enum: [asc, desc]
+    BooleanTypes:
+      type: object
+      properties:
+        simpleBoolean:
+          type: boolean
+        defaultBoolean:
+          type: boolean
+          default: true
+    NullableTypes:
+      type: object
+      properties:
+        nullableString:
+          type: string
+          nullable: true
+        nullableEnumString:
+          type: string
+          nullable: true
+          enum: [asc, desc, null]
+    FileTypes:
+      type: object
+      properties:
+        binaryFile:
+          type: string
+          format: binary
+        byteString:
+          type: string
+          format: byte
+
+paths:
+  /numbers:
+    get:
+      summary: NumberTypes
+      responses:
+        '200':
+          description: NumberTypes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NumberTypes"
+  /strings:
+    get:
+      summary: StringTypes
+      responses:
+        '200':
+          description: StringTypes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StringTypes"
+  /booleans:
+    get:
+      summary: BooleanTypes
+      responses:
+        '200':
+          description: BooleanTypes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BooleanTypes"
+  /nullables:
+    get:
+      summary: NullableTypes
+      responses:
+        '200':
+          description: NullableTypes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NullableTypes"
+  /files:
+    get:
+      summary: FileTypes
+      responses:
+        '200':
+          description: FileTypes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileTypes"

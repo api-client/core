@@ -1,50 +1,43 @@
+import { Core as JsonCore } from '@api-client/json';
 import { IThing, Thing } from "../Thing.js";
 import v4 from '../../lib/uuid.js';
 import { DataNamespace } from "./DataNamespace.js";
-import { IDataPropertySchema } from "./DataPropertySchema.js";
+import { IPropertyShape } from "../../amf/definitions/Shapes.js";
+import { AmfShapeGenerator } from '../../amf/AmfShapeGenerator.js';
+import { IPropertyBindings, IPropertySchema } from './Bindings.js';
 
-export type DataPropertyType = 'string' | 'number' | 'nil' | 'boolean' | 'date' | 'datetime' |
-  'time' | 'bytes' | 'any' | 'file';
+export type DataPropertyType = 'string' | 'number' | 'integer' | 'nil' | 'boolean' | 'date' | 'datetime' | 'time' | 'any' | 'binary';
 export const DataPropertyTypes: DataPropertyType[] = [
-  'string', 'number', 'nil', 'boolean', 'date', 'datetime', 'time', 'bytes', 'any', 'file'
+  'string', 'number', 'integer', 'nil', 'boolean', 'date', 'datetime', 'time' , 'any', 'binary'
 ];
 
 export enum DataPropertyList {
   string = 'string',
   number = 'number',
+  integer = 'integer', // RAML, OAS and JSON schema define numbers and integers separately
   nil = 'nil',
   boolean = 'boolean',
   date = 'date',
   datetime = 'datetime',
   time = 'time',
-  bytes = 'bytes',
   any = 'any',
-  file = 'file',
+  file = 'binary',
+}
+
+export type DateFormat = 'rfc3339' | 'rfc2616';
+export const DateFormats: DateFormat[] = ['rfc3339', 'rfc2616'];
+export enum DateFormatList {
+  /**
+   * The "date-time" notation of RFC3339
+   */
+  rfc3339 = 'rfc3339',
+  /**
+   * The format defined in RFC2616.
+   */
+  rfc2616 = 'rfc2616',
 }
 
 export const Kind = 'Core#DataProperty';
-
-export interface IPropertySchema<T> {
-  /**
-   * Whether it is a general schema for the property.
-   * All other schemas inherit from this one. This allows creating global schema description 
-   * like examples, default values, minimum value, etc and then use it as a base to generate specific formats.
-   * 
-   * A property may not have a global schema.
-   */
-  global?: boolean;
-  /**
-   * The mime type this schema describes.
-   * For JSON it is `application/json`, for XML it is `application/xml` (or `text/xml`) adn so on.
-   * 
-   * Note, when this value is missing then it is assumed that the schema is `global`.
-   */
-  format?: string;
-  /**
-   * The schema definition.
-   */
-  value: IDataPropertySchema<T>;
-}
 
 export interface IDataProperty {
   kind: typeof Kind;
@@ -73,6 +66,21 @@ export interface IDataProperty {
    */
   index?: boolean;
   /**
+   * Whether the property is read only in the schema.
+   */
+  readOnly?: boolean;
+  /**
+   * Whether the property is write only in the schema.
+   */
+  writeOnly?: boolean;
+  /**
+   * Whether the attribute is hidden in the schema (not a part of it).
+   * 
+   * The hidden attribute should only appear in the adapted attribute. 
+   * Has no effect when added to the "main" attribute.
+   */
+  hidden?: boolean;
+  /**
    * Whether this property is deprecated.
    */
   deprecated?: boolean;
@@ -94,16 +102,30 @@ export interface IDataProperty {
    * a derivative entity for specific schema to describe specific schema case.
    */
   type: DataPropertyType;
-
   /**
-   * While the `DataProperty` describes the general shape of the data and can be used to 
-   * model the structure of the data in the system, a schema describes hwo the data 
-   * should be serialized into a specific format. This allows adding example values,
-   * default values, specifying data format, etc. The assumption here is
-   * that with enough specifics provided by the user (a domain specialist)
-   * we can automatically generate a schema for the given format.
+   * The general schema definition of this property. 
+   * This is propagated to all bindings (when they support these properties).
+   * 
+   * Note, schema can only occur on an adapted property. Has no effect on the "main"
+   * property.
    */
-  schemas?: IPropertySchema<unknown>[];
+  schema?: IPropertySchema;
+  /**
+   * The list of bindings for this property.
+   * 
+   * A binding defines a translation from a data model to a specific format.
+   * For example allows to define properties required to generate AMF shape and therefore RAML/OAS shapes for web APIs
+   * or a protocol buffer schema.
+   */
+  bindings?: IPropertyBindings[];
+  /**
+   * The key of the property that is adapted by this property.
+   * Adapted properties can manipulate the shape of the schema for the property.
+   * 
+   * Each value defined on the adapted property changes the original value defined on
+   * the property.
+   */
+  adapts?: string;
 }
 
 export class DataProperty {
@@ -137,6 +159,23 @@ export class DataProperty {
   index?: boolean;
 
   /**
+   * Whether the property is read only in the schema.
+   */
+  readOnly?: boolean;
+
+  /**
+   * Whether the property is write only in the schema.
+   */
+  writeOnly?: boolean;
+
+  /**
+   * Whether the attribute is hidden in the schema (not a part of it).
+   * The hidden attribute should only appear in the adapted attribute. 
+   * Has no effect when added to the "main" attribute.
+   */
+  hidden?: boolean;
+
+  /**
    * Whether this property is deprecated.
    */
   deprecated?: boolean;
@@ -165,14 +204,30 @@ export class DataProperty {
   type: DataPropertyType = 'string';
 
   /**
-   * While the `DataProperty` describes the general shape of the data and can be used to 
-   * model the structure of the data in the system, a schema describes hwo the data 
-   * should be serialized into a specific format. This allows adding example values,
-   * default values, specifying data format, etc. The assumption here is
-   * that with enough specifics provided by the user (a domain specialist)
-   * we can automatically generate a schema for the given format.
+   * The general schema definition of this property. 
+   * This is propagated to all bindings (when they support these properties).
+   * 
+   * Note, schema can only occur on an adapted property. Has no effect on the "main"
+   * property.
    */
-  schemas: IPropertySchema<unknown>[] = [];
+  schema?: IPropertySchema;
+  /**
+   * The list of bindings for this property.
+   * 
+   * A binding defines a translation from a data model to a specific format.
+   * For example allows to define properties required to generate AMF shape and therefore RAML/OAS shapes for web APIs
+   * or a protocol buffer schema.
+   */
+  bindings: IPropertyBindings[] = [];
+
+  /**
+   * The key of the property that is adapted by this property.
+   * Adapted properties can manipulate the shape of the schema for the property.
+   * 
+   * Each value defined on the adapted property changes the original value defined on
+   * the property.
+   */
+  adapts?: string;
 
   static get supportedTypes(): DataPropertyType[] {
     return [...DataPropertyTypes];
@@ -193,7 +248,7 @@ export class DataProperty {
   /**
    * @param input The data property definition to restore.
    */
-  constructor(protected root: DataNamespace, input?: string | IDataProperty) {
+  constructor(public root: DataNamespace, input?: string | IDataProperty) {
     let init: IDataProperty;
     if (typeof input === 'string') {
       init = JSON.parse(input);
@@ -214,7 +269,11 @@ export class DataProperty {
     if (!DataProperty.isDataProperty(init)) {
       throw new Error(`Not a data property.`);
     }
-    const { info, key = v4(), kind = Kind, multiple, required, type = DataPropertyList.string, index, primary, tags, taxonomy, schemas, deprecated } = init;
+    const { 
+      info, key = v4(), kind = Kind, multiple, required, type = DataPropertyList.string, 
+      index, primary, readOnly, writeOnly, adapts, hidden, tags, taxonomy, deprecated,
+      schema, bindings,
+    } = init;
     this.kind = kind;
     this.key = key;
     this.type = type;
@@ -248,6 +307,26 @@ export class DataProperty {
     } else {
       this.primary = undefined;
     }
+    if (typeof readOnly === 'boolean') {
+      this.readOnly = readOnly;
+    } else {
+      this.readOnly = undefined;
+    }
+    if (typeof writeOnly === 'boolean') {
+      this.writeOnly = writeOnly;
+    } else {
+      this.writeOnly = undefined;
+    }
+    if (typeof hidden === 'boolean') {
+      this.hidden = hidden;
+    } else {
+      this.hidden = undefined;
+    }
+    if (typeof adapts === 'string') {
+      this.adapts = adapts;
+    } else {
+      this.adapts = undefined;
+    }
     if (Array.isArray(tags)) {
       this.tags = [...tags];
     } else {
@@ -258,10 +337,15 @@ export class DataProperty {
     } else {
       this.taxonomy = [];
     }
-    if (Array.isArray(schemas)) {
-      this.schemas = schemas.map(i => ({ ...i }));
+    if (schema) {
+      this.schema = JsonCore.clone(schema);
     } else {
-      this.schemas = [];
+      this.schema = undefined;
+    }
+    if (Array.isArray(bindings)) {
+      this.bindings = bindings.map(i => JsonCore.clone(i));
+    } else {
+      this.bindings = [];
     }
   }
 
@@ -295,14 +379,29 @@ export class DataProperty {
     if (typeof this.required === 'boolean') {
       result.required = this.required;
     }
+    if (typeof this.readOnly === 'boolean') {
+      result.readOnly = this.readOnly;
+    }
+    if (typeof this.writeOnly === 'boolean') {
+      result.writeOnly = this.writeOnly;
+    }
+    if (typeof this.hidden === 'boolean') {
+      result.hidden = this.hidden;
+    }
+    if (this.adapts) {
+      result.adapts = this.adapts;
+    }
     if (Array.isArray(this.tags) && this.tags.length) {
       result.tags = [...this.tags];
     }
     if (Array.isArray(this.taxonomy) && this.taxonomy.length) {
       result.taxonomy = [...this.taxonomy];
     }
-    if (Array.isArray(this.schemas) && this.schemas.length) {
-      result.schemas = this.schemas.map(i => ({ ...i }));
+    if (this.schema) {
+      result.schema = JsonCore.clone(this.schema);
+    }
+    if (Array.isArray(this.bindings) && this.bindings.length) {
+      result.taxonomy = this.taxonomy.map(i => JsonCore.clone(i));
     }
     return result;
   }
@@ -311,7 +410,7 @@ export class DataProperty {
    * Removes self from the parent entity and the namespace definition.
    */
   remove(): void {
-    const { root } = this;
+    const { root, adapts } = this;
     const entity = root.definitions.entities.find(i => i.properties.some(j => j === this));
     if (entity) {
       const assocIndex = entity.properties.findIndex(i => i === this);
@@ -320,6 +419,12 @@ export class DataProperty {
     const defIndex = this.root.definitions.properties.findIndex(i => i.key === this.key);
     if (defIndex >= 0) {
       this.root.definitions.properties.splice(defIndex, 1);
+    }
+    if (adapts) {
+      const adaptsIndex = this.root.definitions.properties.findIndex(i => i.key === adapts);
+      if (adaptsIndex >= 0) {
+        this.root.definitions.properties.splice(adaptsIndex, 1);
+      }
     }
   }
 
@@ -361,5 +466,42 @@ export class DataProperty {
     if (index >= 0) {
       tags.splice(index, 1);
     }
+  }
+
+  /**
+   * Creates a Property Shape of AMF.
+   * The property itself is auto-generated. If the `schema` is defined then it is used
+   * as the `range` of the property. Otherwise basic shape is generated for the range.
+   * 
+   * This is a preferred way of reading the AMF shape as this synchronizes changed 
+   * data properties with the shape definition.
+   * 
+   * @returns AMF property shape definition.
+   */
+  toApiShape(): IPropertyShape {
+    const serializer = new AmfShapeGenerator();
+    return serializer.property(this);
+  }
+
+  /**
+   * @returns The adapted property, if any
+   */
+  readAdapted(): DataProperty | undefined {
+    const { adapts } = this;
+    if (!adapts) {
+      return undefined;
+    }
+    return this.root.definitions.properties.find(i => i.key === adapts);
+  }
+
+  /**
+   * Creates new adapted property and associates it with this property.
+   * @returns The instance of the created property.
+   */
+  createAdapted(): DataProperty {
+    const property = new DataProperty(this.root);
+    this.root.definitions.properties.push(property);
+    this.adapts = property.key;
+    return property;
   }
 }
