@@ -100,6 +100,17 @@ export class ShapeJsonSchemaGenerator extends ShapeBase {
   }
 
   protected _unionShapeObject(schema: IUnionShape): any {
+    if (schema.and && schema.and.length) {
+      return this._allOfUnion(schema);
+    }
+    if (schema.xone && schema.xone.length) {
+      return this._oneOfUnion(schema);
+    }
+    // the default
+    return this._anyOfUnion(schema);
+  }
+
+  protected _anyOfUnion(schema: IUnionShape): any {
     let { anyOf=[], examples=[] } = schema;
     if (Array.isArray(schema.inherits) && schema.inherits) {
       schema.inherits.forEach((parent) => {
@@ -114,35 +125,97 @@ export class ShapeJsonSchemaGenerator extends ShapeBase {
       });
     }
     const { opts } = this;
-    if (Array.isArray(anyOf) && anyOf.length) {
-      if (this._isNotRequiredUnion(anyOf)) {
-        // This generates schema for required values.
-        // This implicitly mean that the property is not required therefore the value should 
-        // not be generated.
-        return undefined;
-      }
-      if (this.opts.renderExamples) {
-        const example = examples.find((item) => !!item.structuredValue);
-        const value = this._exampleToObject(example);
-        if (value !== undefined) {
-          return value;
-        }
-      }
-      if (schema.defaultValue) {
-        return this._unionDefaultValue(anyOf, schema.defaultValue);
-      }
-      const { selectedUnions } = opts;
-      let renderedItem: IShapeUnion | undefined;
-      if (selectedUnions && selectedUnions.length) {
-        renderedItem = anyOf.find((item) => selectedUnions.includes(item.id));
-      } else {
-        [renderedItem] = anyOf;
-      }
-      if (renderedItem) {
-        return this.toObject(renderedItem);
+    if (this._isNotRequiredUnion(anyOf)) {
+      // This generates schema for required values.
+      // This implicitly mean that the property is not required therefore the value should 
+      // not be generated.
+      return undefined;
+    }
+    if (this.opts.renderExamples) {
+      const example = examples.find((item) => !!item.structuredValue);
+      const value = this._exampleToObject(example);
+      if (value !== undefined) {
+        return value;
       }
     }
+    if (schema.defaultValue) {
+      return this._unionDefaultValue(anyOf, schema.defaultValue);
+    }
+    const { selectedUnions } = opts;
+    let renderedItem: IShapeUnion | undefined;
+    if (selectedUnions && selectedUnions.length) {
+      renderedItem = anyOf.find((item) => selectedUnions.includes(item.id));
+    } else {
+      [renderedItem] = anyOf;
+    }
+    if (renderedItem) {
+      return this.toObject(renderedItem);
+    }
     return undefined;
+  }
+
+  protected _oneOfUnion(schema: IUnionShape): any {
+    let { xone=[], examples=[] } = schema;
+    if (Array.isArray(schema.inherits) && schema.inherits) {
+      schema.inherits.forEach((parent) => {
+        const anyParent = parent as IAnyShape;
+        if (Array.isArray(anyParent.examples) && anyParent.examples.length) {
+          examples = examples.concat(anyParent.examples);
+        }
+      });
+    }
+    const { opts } = this;
+    if (this.opts.renderExamples) {
+      const example = examples.find((item) => !!item.structuredValue);
+      const value = this._exampleToObject(example);
+      if (value !== undefined) {
+        return value;
+      }
+    }
+    if (schema.defaultValue) {
+      return this._unionDefaultValue(xone, schema.defaultValue);
+    }
+    const { selectedUnions } = opts;
+    let renderedItem: IShapeUnion | undefined;
+    if (selectedUnions && selectedUnions.length) {
+      renderedItem = xone.find((item) => selectedUnions.includes(item.id));
+    } else {
+      [renderedItem] = xone;
+    }
+    if (renderedItem) {
+      return this.toObject(renderedItem);
+    }
+    return undefined;
+  }
+
+  /**
+   * Combines all properties from both all shapes in the union
+   */
+  protected _allOfUnion(schema: IUnionShape): any {
+    let { examples=[], and=[] } = schema;
+    if (Array.isArray(schema.inherits) && schema.inherits) {
+      schema.inherits.forEach((parent) => {
+        const anyParent = parent as IAnyShape;
+        if (Array.isArray(anyParent.examples) && anyParent.examples.length) {
+          examples = examples.concat(anyParent.examples);
+        }
+      });
+    }
+    if (this.opts.renderExamples) {
+      const example = examples.find((item) => !!item.structuredValue);
+      const value = this._exampleToObject(example);
+      if (value !== undefined) {
+        return value;
+      }
+    }
+    let result: any = {};
+    and.forEach((item) => {
+      const props = this.toObject(item);
+      if (typeof props === 'object') {
+        result = { ...result, ...props };
+      }
+    });
+    return result;
   }
 
   /**
@@ -271,7 +344,7 @@ export class ShapeJsonSchemaGenerator extends ShapeBase {
   }
 
   protected _anyShapeObject(schema: IAnyShape): any {
-    const { and=[] } = schema;
+    const { and=[], xone=[], or=[] } = schema;
     if (and.length) {
       let result: any = {};
       and.forEach((item) => {
@@ -281,6 +354,24 @@ export class ShapeJsonSchemaGenerator extends ShapeBase {
         }
       });
       return result;
+    }
+    if (xone.length) {
+      const { selectedUnions=[] } = this.opts;
+      let selected = xone.find(i => selectedUnions.includes(i.id));
+      if (!selected) {
+        // select firs available
+        selected = xone[0];
+      }
+      return this.toObject(selected);
+    }
+    if (or.length) {
+      const { selectedUnions=[] } = this.opts;
+      let selected = or.find(i => selectedUnions.includes(i.id));
+      if (!selected) {
+        // select firs available
+        selected = or[0];
+      }
+      return this.toObject(selected);
     }
     return this._scalarShapeObject(schema);
   }

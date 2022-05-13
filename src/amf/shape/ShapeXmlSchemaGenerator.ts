@@ -1,3 +1,4 @@
+import { Core as JsonCore } from '@api-client/json';
 import { AmfNamespace as ns } from "../definitions/Namespace.js";
 import { ShapeBase } from './ShapeBase.js';
 import { XmlDataNodeGenerator } from '../data-node/XmlDataNodeGenerator.js';
@@ -430,6 +431,47 @@ export class ShapeXmlSchemaGenerator extends ShapeBase {
   }
 
    protected _anyShapeObject(schema: IAnyShape): string {
+    const { and=[], xone=[], or=[] } = schema;
+    if (and.length) {
+      // we combine all properties together under `schema` with changed properties
+      const copy = JsonCore.clone(schema) as INodeShape;
+      copy.and = [];
+      copy.properties = [];
+      and.forEach((item) => {
+        const { types } = item;
+        if (types.includes(ns.aml.vocabularies.shapes.ScalarShape)) {
+          const typed = item as IScalarShape;
+          copy.properties.push(typed);
+        } else if (types.includes(ns.w3.shacl.NodeShape)) {
+          const typed = item as INodeShape;
+          typed.properties.forEach(i => copy.properties.push(i));
+        } else if (types.includes(ns.aml.vocabularies.shapes.ArrayShape) || types.includes(ns.aml.vocabularies.shapes.MatrixShape)) {
+          const typed = item as IArrayShape;
+          if (typed.items) {
+            copy.properties.push(typed.items)
+          }
+        }
+      });
+      return this._nodeShapeObject(copy);
+    }
+    if (xone.length) {
+      const { selectedUnions=[] } = this.opts;
+      let selected = xone.find(i => selectedUnions.includes(i.id));
+      if (!selected) {
+        // select firs available
+        selected = xone[0];
+      }
+      return this.processNode(selected);
+    }
+    if (or.length) {
+      const { selectedUnions=[] } = this.opts;
+      let selected = or.find(i => selectedUnions.includes(i.id));
+      if (!selected) {
+        // select firs available
+        selected = or[0];
+      }
+      return this.processNode(selected);
+    }
     const { examples=[] } = schema;
     const label = shapeToXmlTagName(schema);
     if (this.opts.renderExamples && examples && examples.length) {
@@ -444,6 +486,6 @@ export class ShapeXmlSchemaGenerator extends ShapeBase {
       }
       return parts.join('\n');
     }
-    return '';
+    return this._scalarShapeObject(schema);
   }
 }

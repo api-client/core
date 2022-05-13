@@ -1,4 +1,5 @@
-import { DataPropertyType } from "browser.js";
+import { DataPropertyType } from "../models/data/DataProperty.js";
+import { IPropertyWebBindings } from "../models/data/Bindings.js";
 import { AmfNamespace } from "./definitions/Namespace.js";
 
 export const ScalarTypes = [
@@ -106,7 +107,7 @@ export const ExampleTypes = [
  * @param type The property data type
  * @returns AMF shape dataType
  */
-export function modelTypeToAmfDataType(type: DataPropertyType): string {
+export function modelTypeToAmfDataType(type: DataPropertyType, bindings?: IPropertyWebBindings): string {
   switch (type) {
     case 'boolean': return AmfNamespace.aml.vocabularies.shapes.boolean;
     case 'nil': return AmfNamespace.aml.vocabularies.shapes.nil;
@@ -116,6 +117,10 @@ export function modelTypeToAmfDataType(type: DataPropertyType): string {
     case 'number': return AmfNamespace.w3.xmlSchema.number;
     case 'integer': return AmfNamespace.w3.xmlSchema.integer;
     case 'any': return AmfNamespace.aml.vocabularies.shapes.AnyShape;
-    default: return AmfNamespace.w3.xmlSchema.string;
+    default:
+      if (bindings && bindings.format === 'binary') {
+        return AmfNamespace.w3.xmlSchema.base64Binary;
+      }
+      return AmfNamespace.w3.xmlSchema.string;
   }
 }

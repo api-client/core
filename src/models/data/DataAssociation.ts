@@ -377,6 +377,8 @@ export class DataAssociation {
    */
   createAdapted(): DataAssociation {
     const association = new DataAssociation(this.root);
+    // disallow defaults as this would influence the schema generation
+    association.info.name = undefined;
     this.root.definitions.associations.push(association);
     this.adapts = association.key;
     return association;

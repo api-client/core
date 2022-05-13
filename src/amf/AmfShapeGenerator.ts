@@ -4,7 +4,7 @@ import { DataEntity } from "../models/data/DataEntity.js";
 import { DataProperty } from "../models/data/DataProperty.js";
 import { ExampleTypes, modelTypeToAmfDataType } from "./AmfTypes.js";
 import { AmfNamespace } from "./definitions/Namespace.js";
-import { anyShape, arrayShape, fileShape, IAnyShape, IArrayShape, IDataExample, IFileShape, INodeShape, IPropertyShape, IScalarShape, IShape, IShapeUnion, nodeShape, propertyShape, scalarShape, unionShape } from "./definitions/Shapes.js";
+import { anyShape, arrayShape, fileShape, IAnyShape, IArrayShape, IDataExample, IFileShape, INodeShape, IPropertyShape, IRecursiveShape, IScalarShape, IShape, IShapeUnion, nodeShape, propertyShape, recursiveShape, scalarShape, unionShape } from "./definitions/Shapes.js";
 import { AmfDataNode } from "./models/AmfDataNode.js";
 import v4 from '../lib/uuid.js';
 
@@ -16,9 +16,15 @@ export class AmfShapeGenerator {
    * Serializes the Entity to the AMF node shape.
    * 
    * @param input The Property to serialize.
+   * @param generatedEntities The list keys of already generated entities. This prohibits recursive shape generation.
    */
-  entity(input: DataEntity): INodeShape {
+  entity(input: DataEntity, generatedEntities: string[] = []): INodeShape | IRecursiveShape {
     // const adapted = input.readAdapted();
+    if (generatedEntities.includes(input.key)) {
+      // create a recursive shape.
+      return this._recursiveShape(input);
+    }
+    generatedEntities.push(input.key);
     const result = nodeShape(input.key);
     result.id = input.key;
     this._updateBaseProperties(input, result);
@@ -38,11 +44,11 @@ export class AmfShapeGenerator {
       result.properties.push(shape);
     });
     input.associations.forEach((assoc) => {
-      const prop = this.associationProperty(assoc);
+      const prop = this.associationProperty(assoc, generatedEntities);
       result.properties.push(prop);
     });
     input.getComputedParents().forEach((parent) => {
-      const shape = this.entity(parent);
+      const shape = this.entity(parent, generatedEntities);
       result.inherits.push(shape);
     });
     return result;
@@ -78,23 +84,15 @@ export class AmfShapeGenerator {
    * 
    * @param input The Property to serialize.
    */
-  associationProperty(input: DataAssociation): IPropertyShape {
+  associationProperty(input: DataAssociation, generatedEntities: string[] = []): IPropertyShape {
     const { required, key } = input;
     const result = propertyShape(key);
     result.path = `${AmfNamespace.aml.vocabularies.data.key}${input.info.name}`;
     if (required) {
       result.minCount = 1;
     }
-    if (input.info.name) {
-      result.name = input.info.name;
-    }
-    if (input.info.displayName) {
-      result.displayName = input.info.displayName;
-    }
-    if (input.info.description) {
-      result.description = input.info.description;
-    }
-    result.range = this.associationShape(input);
+    result.range = this.associationShape(input, generatedEntities);
+    this._updateBaseProperties(input, result);
     return result;
   }
 
@@ -104,7 +102,7 @@ export class AmfShapeGenerator {
    * @param input The data association instance.
    * @returns The range value for the PropertyShape.
    */
-  associationShape(input: DataAssociation): IShapeUnion | undefined {
+  associationShape(input: DataAssociation, generatedEntities: string[] = []): IShapeUnion | undefined {
     const adapted = input.readAdapted();
     let schema = adapted && adapted.schema;
     if (schema && schema.linked) {
@@ -115,13 +113,14 @@ export class AmfShapeGenerator {
       range.dataType = modelTypeToAmfDataType('string');
       return range;
     }
-    const items = this.associationUnion(input);
+    const items = this.associationUnion(input, generatedEntities);
     if (!items) {
       return;
     }
     const unionType = schema && schema.unionType || 'anyOf';
     if (Array.isArray(items)) {
       const range = unionShape(input.key);
+      this._updateBaseProperties(input, range);
       range.anyOf = [];
       if (unionType === 'anyOf') {
         range.anyOf = items;
@@ -155,8 +154,8 @@ export class AmfShapeGenerator {
    * @param input The data association instance.
    * @returns The range value for the PropertyShape.
    */
-  associationUnion(input: DataAssociation): IShapeUnion | IShapeUnion[] | undefined {
-    const targets = input.getTargets().map(i => this.entity(i));
+  associationUnion(input: DataAssociation, generatedEntities: string[] = []): IShapeUnion | IShapeUnion[] | undefined {
+    const targets = input.getTargets().map(i => this.entity(i, generatedEntities));
     if (!targets.length) {
       return undefined;
     }
@@ -194,7 +193,7 @@ export class AmfShapeGenerator {
     if (multiple) {
       return this._generateArrayShape(input, schema, bindings);
     }
-    if (type === 'binary') {
+    if (type === 'binary' && !(bindings && bindings.format === 'binary')) {
       return this._generateFileShape(input, schema, bindings);
     }
     return this._generateScalarShape(input, schema, bindings);
@@ -252,7 +251,7 @@ export class AmfShapeGenerator {
       this._fillScalarShapeCommonProperties(result, input, bindings);
     }
     if (!result.dataType) {
-      result.dataType = modelTypeToAmfDataType(input.type);
+      result.dataType = modelTypeToAmfDataType(input.type, bindings);
     }
     if (schema) {
       this._setShapeSchema(result, schema, result.dataType as string, input.multiple);
@@ -291,6 +290,9 @@ export class AmfShapeGenerator {
   }
 
   protected _generateFileShape(input: DataProperty, schema?: IPropertySchema, bindings?: IPropertyWebBindings): IFileShape {
+    if (bindings && bindings.dataType === AmfNamespace.w3.xmlSchema.base64Binary) {
+      // this is a binary format of a string shape
+    }
     const result = fileShape(input.key);
     this._updateBaseProperties(input, result);
     if (bindings) {
@@ -366,6 +368,10 @@ export class AmfShapeGenerator {
     } else if ((input as DataProperty).deprecated) {
       target.deprecated = (input as DataProperty).deprecated;
     }
+  }
+
+  protected _recursiveShape(input: DataEntity): IRecursiveShape {
+    return recursiveShape(input.key, input.key);
   }
 
   /**

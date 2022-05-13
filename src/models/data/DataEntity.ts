@@ -644,6 +644,8 @@ export class DataEntity {
    */
   createAdapted(): DataEntity {
     const entity = new DataEntity(this.root);
+    // disallow defaults as this would influence the schema generation
+    entity.info.name = undefined;
     this.root.definitions.entities.push(entity);
     this.adapts = entity.key;
     return entity;

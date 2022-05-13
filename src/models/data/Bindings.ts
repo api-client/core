@@ -28,8 +28,8 @@ export interface IPropertySchema {
  * Data type translation (type to dataType)
  * 
  * - `string` -> `string` with appropriate format
- * - `number` -> `number` with format `float`, `double`, or none for OAS
- * - `integer` -> `int32`, `int64`, or none for OAS
+ * - `number` -> `number` data type with format `float`, `double`, or none format for OAS
+ * - `integer` -> `integer` data type with `int32`, `int64`, or none format for OAS
  * - `nil` -> `nullable` property on OAS or `nil` type in RAML
  * - `boolean` -> `boolean` (both the same)
  * - `date` -> 
@@ -46,7 +46,7 @@ export interface IPropertySchema {
  * 
  * RAML
  * 
- * HAs it's own AMF shape: FileShape.
+ * Has it's own AMF shape: FileShape.
  * 
  * The `data` type
  * 
@@ -71,7 +71,6 @@ export interface IPropertyWebBindings {
   name?: string;
   /**
    * The data type of the property consistent with AMF's data types.
-   * This is not set when the property type  is `binary`
    */
   dataType?: string;
   /**

@@ -23,8 +23,10 @@ const {
 const config = new Map();
 config.set('schema-api/schema-api.raml', { type: "RAML 1.0" });
 config.set('raml-date/raml-date.raml', { type: "RAML 1.0" });
+config.set('recursive/recursive.raml', { type: "RAML 1.0" });
 config.set('oas-types/oas-types.yaml', { type: "OAS 3.0" });
 config.set('oas-date/oas-date.yaml', { type: "OAS 3.0" });
+config.set('oas-unions/oas-unions.yaml', { type: "OAS 3.0" });
 
 const srcFolder = path.join('data', 'apis');
 const descFolder = path.join('data', 'models');

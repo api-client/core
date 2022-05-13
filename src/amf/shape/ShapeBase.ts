@@ -93,7 +93,6 @@ export abstract class ShapeBase {
   protected _isNotRequiredUnion(union: IShapeUnion[]): boolean {
     let scalars = 0;
     let hasNil = false;
-
     union.forEach((i) => {
       if (i.types.includes(ns.aml.vocabularies.shapes.NilShape)) {
         hasNil = true;

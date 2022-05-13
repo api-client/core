@@ -1,4 +1,4 @@
-import { AnyTypes, ArrayTypes, FileTypes, NodeTypes, PropertyTypes, ScalarTypes, TupleTypes, UnionTypes, XmlSerializationTypes } from '../AmfTypes.js';
+import { AnyTypes, ArrayTypes, FileTypes, NodeTypes, PropertyTypes, RecursiveTypes, ScalarTypes, TupleTypes, UnionTypes, XmlSerializationTypes } from '../AmfTypes.js';
 import { ApiDocumentation, ApiDocumentSourceMaps } from './Api.js';
 import { IDomainProperty } from './Base.js';
 
@@ -76,18 +76,26 @@ export function xmlSerializer(id: string): IXmlSerializer {
   };
 }
 
-export function anyShape(id: string): IAnyShape {
-  const result: IAnyShape = {
+export function shape(id: string): IShape {
+  const result: IShape = {
     id,
-    types: AnyTypes,
+    types: [],
     values: [], 
     inherits: [], 
     or: [], 
     and: [], 
     xone: [],
+    customDomainProperties: [],
+  };
+  return result;
+}
+
+export function anyShape(id: string): IAnyShape {
+  const result: IAnyShape = {
+    ...shape(id),
+    types: AnyTypes,
     examples: [],
     xmlSerialization: xmlSerializer(id),
-    customDomainProperties: [],
   };
   return result;
 }
@@ -143,6 +151,16 @@ export function tupleShape(id: string): ITupleShape {
 export function propertyShape(id: string): IPropertyShape {
   const result = anyShape(id);
   result.types = PropertyTypes;
+  return result;
+}
+
+export function recursiveShape(id: string, fixedId?: string): IRecursiveShape {
+  const result: IRecursiveShape = {
+    ...shape(id),
+    id: `recursive-${id}`,
+    types: RecursiveTypes,
+    fixPoint: fixedId || '',
+  };
   return result;
 }
 

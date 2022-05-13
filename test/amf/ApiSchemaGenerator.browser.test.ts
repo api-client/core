@@ -155,8 +155,6 @@ describe('ApiSchemaGenerator', () => {
 
       it('has default values and examples', async () => {
         const shape = loader.getShape(model, 'SimpleObject');
-        // console.log(shape);
-        
         const result = ApiSchemaGenerator.asSchema(shape, jsonMime, {
           renderExamples: true,
         });
@@ -839,6 +837,135 @@ describe('ApiSchemaGenerator', () => {
         const shape = loader.getShape(model, 'UnionNill');
         const result = ApiSchemaGenerator.asSchema(shape, xmlMime);
         assert.equal(result, '<UnionNill></UnionNill>', 'is a string');
+      });
+    });
+  });
+
+  describe('OAS union types', () => {
+    let model: AmfDocument;
+
+    before(async () => {
+      model = await loader.getGraph('oas-unions');
+    });
+
+    describe(jsonMime, () => {
+      it('generates schema for a oneOf union', async () => {
+        const shape = loader.getShape(model, 'OneOfSchema');
+        const result = ApiSchemaGenerator.asSchema(shape, jsonMime, {
+          renderOptional: true,
+          renderExamples: true,
+          renderMocked: true,
+        }) as string;
+        assert.typeOf(result, 'string', 'is a string');
+        const value = JSON.parse(result);
+        assert.typeOf(value.hunts, 'boolean');
+        assert.typeOf(value.age, 'number');
+      });
+
+      it('generates schema for a allOf union', async () => {
+        const shape = loader.getShape(model, 'AllOfSchema');
+        const result = ApiSchemaGenerator.asSchema(shape, jsonMime, {
+          renderOptional: true,
+          renderExamples: true,
+          renderMocked: true,
+        }) as string;
+        
+        assert.typeOf(result, 'string', 'is a string');
+        const value = JSON.parse(result);
+        assert.typeOf(value.hunts, 'boolean');
+        assert.typeOf(value.bark, 'boolean');
+        assert.typeOf(value.age, 'number');
+        assert.equal(value.breed, 'Dingo', 'has the example value');
+      });
+
+      it('generates schema for a anyOf union', async () => {
+        const shape = loader.getShape(model, 'AnyOfSchema');
+        const result = ApiSchemaGenerator.asSchema(shape, jsonMime, {
+          renderOptional: true,
+          renderExamples: true,
+          renderMocked: true,
+        }) as string;
+        assert.typeOf(result, 'string', 'is a string');
+        const value = JSON.parse(result);
+        assert.typeOf(value.hunts, 'boolean');
+        assert.typeOf(value.age, 'number');
+      });
+    });
+
+    describe(xmlMime, () => {
+      it('generates schema for a oneOf union', async () => {
+        const shape = loader.getShape(model, 'OneOfSchema');
+        const result = ApiSchemaGenerator.asSchema(shape, xmlMime, {
+          renderExamples: true,
+          renderMocked: true,
+          renderOptional: true,
+        }) as string;
+        assert.typeOf(result, 'string', 'generates a string');
+        assert.isNotEmpty(result, 'generates a value');
+        
+        const parser = new DOMParser();
+        const schema = parser.parseFromString(result, xmlMime);
+
+        const root = schema.querySelector('Cat');
+        assert.ok(root, 'has the Cat parent');
+        const hunts = root.querySelector('hunts');
+        assert.ok(hunts, 'has the hunts node');
+        assert.match(hunts.textContent!.trim(), /true|false/, 'hunts node has a generated value');
+        const age = root.querySelector('age');
+        assert.ok(age, 'has the age node');
+        assert.match(age.textContent!.trim(), /\d+/, 'age node has a generated value');
+      });
+
+      it('generates schema for a allOf union', async () => {
+        const shape = loader.getShape(model, 'AllOfSchema');
+        const result = ApiSchemaGenerator.asSchema(shape, xmlMime, {
+          renderExamples: true,
+          renderMocked: true,
+          renderOptional: true,
+        }) as string;
+        assert.typeOf(result, 'string', 'generates a string');
+        assert.isNotEmpty(result, 'generates a value');
+
+        const parser = new DOMParser();
+        const schema = parser.parseFromString(result, xmlMime);
+
+        const root = schema.querySelector('AllOfSchema');
+        assert.ok(root, 'has the AllOfSchema parent');
+        const hunts = root.querySelector('hunts');
+        assert.ok(hunts, 'has the hunts node');
+        assert.match(hunts.textContent!.trim(), /true|false/, 'hunts node has a generated value');
+        const age = root.querySelector('age');
+        assert.ok(age, 'has the age node');
+        assert.match(age.textContent!.trim(), /\d+/, 'age node has a generated value');
+        const bark = root.querySelector('bark');
+        assert.ok(bark, 'has the bark node');
+        assert.match(bark.textContent!.trim(), /true|false/, 'bark node has a generated value');
+        const breed = root.querySelector('breed');
+        assert.ok(breed, 'has the breed node');
+        assert.equal(breed.textContent!.trim(), 'Dingo', 'breed node has the example value');
+      });
+
+      it('generates schema for a anyOf union', async () => {
+        const shape = loader.getShape(model, 'AnyOfSchema');
+        const result = ApiSchemaGenerator.asSchema(shape, xmlMime, {
+          renderExamples: true,
+          renderMocked: true,
+          renderOptional: true,
+        }) as string;
+        assert.typeOf(result, 'string', 'generates a string');
+        assert.isNotEmpty(result, 'generates a value');
+        
+        const parser = new DOMParser();
+        const schema = parser.parseFromString(result, xmlMime);
+
+        const root = schema.querySelector('Cat');
+        assert.ok(root, 'has the Cat parent');
+        const hunts = root.querySelector('hunts');
+        assert.ok(hunts, 'has the hunts node');
+        assert.match(hunts.textContent!.trim(), /true|false/, 'hunts node has a generated value');
+        const age = root.querySelector('age');
+        assert.ok(age, 'has the age node');
+        assert.match(age.textContent!.trim(), /\d+/, 'age node has a generated value');
       });
     });
   });

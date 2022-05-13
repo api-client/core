@@ -500,6 +500,8 @@ export class DataProperty {
    */
   createAdapted(): DataProperty {
     const property = new DataProperty(this.root);
+    // disallow defaults as this would influence the schema generation
+    property.info.name = undefined;
     this.root.definitions.properties.push(property);
     this.adapts = property.key;
     return property;

@@ -145,7 +145,6 @@ export class ApiSchemaValues {
    */
   static generateDefaultValue(schema: IScalarShape): any {
     const { dataType } = schema;
-    
     switch (dataType) {
       case ns.w3.xmlSchema.string: return this.generateStringValue(schema);
       // XML schema, for DataNode
