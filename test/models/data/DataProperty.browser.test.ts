@@ -4,7 +4,7 @@ import { DataEntity } from '../../../src/models/data/DataEntity.js';
 import { DataNamespace } from '../../../src/models/data/DataNamespace.js';
 import { Thing } from '../../../src/models/Thing.js';
 import { DataModel } from '../../../src/models/data/DataModel.js';
-import { IScalarShape } from '../../../src/amf/definitions/Shapes.js';
+import { IPropertySchema } from '../../../src/models/data/Bindings.js';
 
 describe('models', () => {
   describe('data', () => {
@@ -425,43 +425,20 @@ describe('models', () => {
 
         it('sets the schemas as a copy', () => {
           const assoc = new DataProperty(root);
-          const schema: IScalarShape = {
-            id: '1',
-            types: [],
-            and: [],
-            examples: [],
-            inherits: [],
-            or: [],
-            values: [],
-            xmlSerialization: {
-              id: '2',
-              types: [],
-              customDomainProperties: [],
-            },
-            xone: [],
+          const schema: IPropertySchema = {
+            enum: ['1']
           };
           const init = { ...base, schema };
           assoc.new(init);
           assert.deepEqual(assoc.schema, schema);
-          schema.types.push('other');
-          assert.deepEqual(assoc.schema.types, []);
+          schema.enum.push('other');
+          assert.deepEqual(assoc.schema.enum, ['1']);
         });
 
         it('resets schemas when not in the input', () => {
           const assoc = new DataProperty(root);
-          const schema: IScalarShape = {
-            id: '1',
-            types: [],
-            and: [],
-            examples: [],
-            inherits: [],
-            or: [],
-            values: [],
-            xmlSerialization: {
-              id: '2',
-              types: [],
-            },
-            xone: [],
+          const schema: IPropertySchema = {
+            enum: ['1']
           };
           assoc.schema = schema;
           assoc.new(base);
@@ -661,6 +638,13 @@ describe('models', () => {
           assert.deepEqual(e1.properties, [p2]);
           assert.deepEqual(root.definitions.properties, [p2]);
         });
+
+        it('removes the adapted property', () => {
+          p1.createAdapted();
+          assert.lengthOf(root.definitions.properties, 2);
+          p1.remove();
+          assert.lengthOf(root.definitions.properties, 0);
+        });
       });
 
       describe('addTag()', () => {
@@ -824,7 +808,6 @@ describe('models', () => {
           assert.typeOf(result, 'object');
           assert.typeOf(result.range, 'object');
         });
-
       });
     });
   });
