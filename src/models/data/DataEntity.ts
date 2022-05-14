@@ -465,63 +465,39 @@ export class DataEntity {
    * @yields The path containing keys of entities from this entity to the `toEntity` (inclusive) and all entities in between.
    */
   * associationPath(toEntity: string): Generator<string[]> {
-    const graph = this._associationGraph();
-    for (const path of this._associationPath(this.key, toEntity, graph)) {
+    const graph = this.root.associationGraph();
+    for (const path of this.root.associationPath(this.key, toEntity, graph)) {
       yield path;
     }
   }
 
   /**
-   * The actual implementation of the graph search.
+   * Returns a list of entities that are association with this entity through an association
+   * that the target property points to this entity.
    * 
-   * @param from The current from node
-   * @param to The target node
-   * @param g The graph
-   * @param path The current list of entity ids.
-   * @param visited The list of visited paths to avoid cycles
+   * In other words, if entity `A` has association target with `B`, then asking `B` for related entities will
+   * result with `[A]`.
+   * 
+   * ```plain
+   * A -> B -> C
+   * D -> C
+   * 
+   * C => [B, D]
+   * ```
    */
-  protected * _associationPath(from: string, to: string, g: Record<string, string[]>, path: string[] = [], visited: Set<string> = new Set()): Generator<string[]> {
-    if (from === to) {
-      yield path.concat(to);
-      return;
-    }
-    if (visited.has(from)) {
-      // it's a cycle
-      return;
-    }
-    if (g[from]) {
-      visited.add(from);
-      path.push(from);
+  getRelatedEntities(): DataEntity[] {
+    const { key, root } = this;
+    const result: DataEntity[] = [];
+    const inverse = root.definitions.associations.filter(i => i.targets.includes(key));
 
-      for (const neighbor of g[from]) {
-        yield *this._associationPath(neighbor, to, g, path, visited);
+    inverse.forEach((assoc) => {
+      const entity = root.definitions.entities.find(e => e.associations.includes(assoc));
+      if (entity) {
+        result.push(entity);
       }
-      
-      visited.delete(from);
-      path.pop();
-    }
-  }
+    });
 
-  /**
-   * @returns The graph of associations where keys are the source entities and the value is the list of all target entities.
-   */
-  protected _associationGraph(): Record<string, string[]> {
-    const graph: Record<string, string[]> = {};
-    const { associations, entities } = this.root.definitions;
-    for (const assoc of associations) {
-      if (!assoc.targets.length) {
-        continue;
-      }
-      const srcEntity = entities.find(i => i.associations.some(a => a === assoc));
-      if (!srcEntity) {
-        continue;
-      }
-      if (!graph[srcEntity.key]) {
-        graph[srcEntity.key] = [];
-      }
-      graph[srcEntity.key].splice(0, 0, ...assoc.targets);
-    }
-    return graph;
+    return result;
   }
 
   /**
@@ -649,5 +625,33 @@ export class DataEntity {
     this.root.definitions.entities.push(entity);
     this.adapts = entity.key;
     return entity;
+  }
+
+  /**
+   * Checks whether the `target` creates a cycle in the graph (whether this creates a recursive association).
+   * @param target 
+   */
+  hasForwardCycle(target: string, g = this.root.associationGraph(), key = this.key): boolean {
+    if (target === key) {
+      return true;
+    }
+    const neighbors: string[] = [];
+    Object.keys(g).forEach(prop => {
+      if (g[prop].includes(key)) {
+        neighbors.push(prop);
+      }
+    });
+    if (neighbors.includes(target)) {
+      return true;
+    }
+    for (const neighbor of neighbors) {
+      if (neighbor === key) {
+        return true;
+      }
+      if (this.hasForwardCycle(target, g, neighbor)) {
+        return true;
+      }
+    }
+    return false;
   }
 }

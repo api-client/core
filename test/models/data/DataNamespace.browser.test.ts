@@ -1,4 +1,5 @@
 import { assert } from '@esm-bundle/chai';
+import { DataEntity } from '../../../src/models/data/DataEntity.js';
 import { DataModel } from '../../../src/models/data/DataModel.js';
 import { DataNamespace, IDataNamespace, Kind as DataNamespaceKind } from '../../../src/models/data/DataNamespace.js';
 import { Thing } from '../../../src/models/Thing.js';
@@ -623,6 +624,159 @@ describe('models', () => {
         it('does nothing when not found', () => {
           root.removeDataModel('other');
           assert.lengthOf(root.definitions.models, 2, 'has all data models');
+        });
+      });
+
+      describe('associationGraph()', () => {
+        let root: DataNamespace;
+        let d1: DataModel;
+        let d2: DataModel;
+
+        beforeEach(() => {
+          root = new DataNamespace();
+          d1 = root.addDataModel('d1');
+          d2 = root.addDataModel('d2');
+        });
+
+        it('returns empty object when no entities and associations', () => {
+          const result = root.associationGraph();
+          assert.deepEqual(result, {});
+        });
+
+        it('returns empty object when no associations', () => {
+          d1.addEntity('e1');
+          d2.addEntity('e2');
+          const result = root.associationGraph();
+          assert.deepEqual(result, {});
+        });
+
+        it('returns simple association graph', () => {
+          const e1 = d1.addEntity('e1');
+          const e2 = d2.addEntity('e2');
+          e1.addTargetAssociation(e2.key);
+          const result = root.associationGraph();
+          assert.deepEqual(result, {
+            [e1.key]: [e2.key]
+          });
+        });
+
+        it('returns multiple associations from the same entity', () => {
+          const e1 = d1.addEntity('e1');
+          const e2 = d2.addEntity('e2');
+          const e3 = d2.addEntity('e3');
+          e1.addTargetAssociation(e2.key);
+          e1.addTargetAssociation(e3.key);
+          const result = root.associationGraph();
+          assert.deepEqual(result, {
+            [e1.key]: [e3.key, e2.key]
+          });
+        });
+
+        it('returns multiple associations to the same entity', () => {
+          const e1 = d1.addEntity('e1');
+          const e2 = d2.addEntity('e2');
+          const e3 = d2.addEntity('e3');
+          e2.addTargetAssociation(e1.key);
+          e3.addTargetAssociation(e1.key);
+          const result = root.associationGraph();
+          assert.deepEqual(result, {
+            [e2.key]: [e1.key],
+            [e3.key]: [e1.key]
+          });
+        });
+
+        it('captures self-association', () => {
+          const e1 = d1.addEntity('e1');
+          e1.addTargetAssociation(e1.key);
+          const result = root.associationGraph();
+          assert.deepEqual(result, {
+            [e1.key]: [e1.key],
+          });
+        });
+      });
+
+      describe('associationPath()', () => {
+        let root: DataNamespace;
+        let m1: DataModel;
+        let e1: DataEntity;
+        let e2: DataEntity;
+        let e3: DataEntity;
+        let e4: DataEntity;
+        let e5: DataEntity;
+
+        beforeEach(() => {
+          root = new DataNamespace();
+          m1 = root.addDataModel('m1');
+          e1 = m1.addEntity('e1');
+          e2 = m1.addEntity('e2');
+          e3 = m1.addEntity('e3');
+          e4 = m1.addEntity('e4');
+          e5 = m1.addEntity('e5');
+        });
+
+        it('finds a direct connection', () => {
+          e1.addTargetAssociation(e2.key);
+          const graph = root.associationGraph();
+          const paths: string[][] = [];
+          for (const path of root.associationPath(e1.key, e2.key, graph)) {
+            paths.push(path);
+          }
+          assert.lengthOf(paths, 1, 'has a single path');
+          assert.deepEqual(paths[0], [e1.key, e2.key], 'has the path');
+        });
+
+        it('finds a connection through another entity', () => {
+          e1.addTargetAssociation(e2.key);
+          e2.addTargetAssociation(e3.key);
+          const graph = root.associationGraph();
+          const paths: string[][] = [];
+          for (const path of root.associationPath(e1.key, e3.key, graph)) {
+            paths.push(path);
+          }
+          assert.lengthOf(paths, 1, 'has a single path');
+          assert.deepEqual(paths[0], [e1.key, e2.key, e3.key], 'has the path');
+        });
+
+        it('returns a connection to self', () => {
+          e1.addTargetAssociation(e1.key);
+          const graph = root.associationGraph();
+          const paths: string[][] = [];
+          for (const path of root.associationPath(e1.key, e1.key, graph)) {
+            paths.push(path);
+          }
+          assert.lengthOf(paths, 1, 'has a single path');
+          assert.deepEqual(paths[0], [e1.key], 'has the path');
+        });
+
+        it('yields multiple directions', () => {
+          e1.addTargetAssociation(e5.key);
+          e1.addTargetAssociation(e2.key);
+          e2.addTargetAssociation(e3.key);
+          e3.addTargetAssociation(e4.key);
+          e4.addTargetAssociation(e5.key);
+          const graph = root.associationGraph();
+          const paths: string[][] = [];
+          for (const path of root.associationPath(e1.key, e5.key, graph)) {
+            paths.push(path);
+          }
+          assert.lengthOf(paths, 2, 'has both paths');
+          assert.deepEqual(paths[0], [e1.key, e2.key, e3.key, e4.key, e5.key], 'has the 1st path');
+          assert.deepEqual(paths[1], [e1.key, e5.key], 'has the 2nd path');
+        });
+
+        it('ignores broken paths', () => {
+          e1.addTargetAssociation(e5.key);
+          e1.addTargetAssociation(e2.key);
+          e2.addTargetAssociation(e3.key);
+          // no e3 -> e4
+          e4.addTargetAssociation(e5.key);
+          const graph = root.associationGraph();
+          const paths: string[][] = [];
+          for (const path of root.associationPath(e1.key, e5.key, graph)) {
+            paths.push(path);
+          }
+          assert.lengthOf(paths, 1, 'has both paths');
+          assert.deepEqual(paths[0], [e1.key, e5.key], 'has the 1st path');
         });
       });
     });

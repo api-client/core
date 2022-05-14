@@ -534,4 +534,58 @@ export class DataNamespace extends DataNamespaceParent {
       model.remove();
     }
   }
+
+  /**
+   * @returns The graph of associations where keys are the source entities and the value is the list of all target entities.
+   */
+  associationGraph(): Record<string, string[]> {
+    const graph: Record<string, string[]> = {};
+    const { definitions } = this.root || this;
+    const { associations, entities } = definitions;
+    for (const assoc of associations) {
+      if (!assoc.targets.length) {
+        continue;
+      }
+      const srcEntity = entities.find(i => i.associations.some(a => a === assoc));
+      if (!srcEntity) {
+        continue;
+      }
+      if (!graph[srcEntity.key]) {
+        graph[srcEntity.key] = [];
+      }
+      graph[srcEntity.key].splice(0, 0, ...assoc.targets);
+    }
+    return graph;
+  }
+
+  /**
+   * Prints out all associations from one entity to another through all entities that may be in between.
+   * 
+   * @param from The key of the from entity
+   * @param to The key of the target entity
+   * @param g The graph generated with `associationGraph()`
+   * @param path The current list of entity ids. Do not set this, it is for the recursive processing of the graph.
+   * @param visited The list of visited paths to avoid cycles. Do not set this, it is for the recursive processing of the graph.
+   */
+  * associationPath(from: string, to: string, g: Record<string, string[]>, path: string[] = [], visited: Set<string> = new Set()): Generator<string[]> {
+    if (from === to) {
+      yield path.concat(to);
+      return;
+    }
+    if (visited.has(from)) {
+      // it's a cycle
+      return;
+    }
+    if (g[from]) {
+      visited.add(from);
+      path.push(from);
+
+      for (const neighbor of g[from]) {
+        yield *this.associationPath(neighbor, to, g, path, visited);
+      }
+      
+      visited.delete(from);
+      path.pop();
+    }
+  }
 }
