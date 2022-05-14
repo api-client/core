@@ -1,4 +1,4 @@
-import { IPropertyBindings, IPropertySchema, IPropertyWebBindings } from "src/models/data/Bindings.js";
+import { IPropertyBindings, IPropertySchema, IPropertyWebBindings } from "../models/data/Bindings.js";
 import { DataAssociation } from "../models/data/DataAssociation.js";
 import { DataEntity } from "../models/data/DataEntity.js";
 import { DataProperty } from "../models/data/DataProperty.js";
