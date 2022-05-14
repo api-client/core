@@ -176,6 +176,178 @@ types:
     properties:
       street: string
       city: string
+  XmlSimpleArray:
+    # <XmlSimpleArray>
+    #   <books>one</books>
+    #   <books>two</books>
+    #   <books>three</books>
+    # </XmlSimpleArray>
+    properties:
+      books:
+        type: array
+        items: string
+        example: [one, two, three]
+  XmlSimpleArrayWrapped:
+    # <XmlSimpleArrayWrapped>
+    #   <books>
+    #     <books>one</books>
+    #     <books>two</books>
+    #     <books>three</books>
+    #   </books>
+    # </XmlSimpleArrayWrapped>
+    properties:
+      books:
+        type: array
+        items: string
+        example: [one, two, three]
+        xml:
+          wrapped: true
+  XmlSimpleArrayWrappedNamed:
+    # <XmlSimpleArrayWrapped>
+    #   <books-array>
+    #     <books>one</books>
+    #     <books>two</books>
+    #     <books>three</books>
+    #   </books-array>
+    # </XmlSimpleArrayWrapped>
+    properties:
+      books:
+        type: array
+        items: string
+        example: [one, two, three]
+        xml:
+          wrapped: true
+          name: books-array
+  XmlAttributes:
+    type: object
+    properties:
+      id:
+        type: string
+        xml:
+          attribute: true
+          name: "uuid"
+      notNamedId:
+        type: string
+        xml:
+          attribute: true
+      attributeWithExample:
+        type: string
+        example: attr example value
+        xml:
+          attribute: true
+      attributeWithDefault:
+        type: string
+        default: attr default value
+        xml:
+          attribute: true
+      optionalAttribute?:
+        type: string
+        example: a1s2
+        xml:
+          attribute: true
+      optionalProperty?:
+        type: string
+        example: abcd
+      requiredProperty:
+        type: string
+        example: efgh
+
+  XmlObjectSimple:
+    # <XmlObjectSimple>
+    #   <address>
+    #     <street></street>
+    #     <city></city>
+    #   </address>
+    # </XmlObjectSimple>
+    type: object
+    properties:
+      address:
+        type: Address
+  XmlArraySimple:
+    # <XmlArraySimple>
+    #   <address>
+    #     <street></street>
+    #     <city></city>
+    #     <street></street>
+    #     <city></city>
+    #   </address>
+    # </XmlArraySimple>
+    type: object
+    properties:
+      address:
+        type: Address[]
+        examples: 
+          e1: 
+            street: 1234 Market street
+            city: San Francisco
+          e2: 
+            street: Oxford street
+            city: London
+  XmlArraySimpleWrapped:
+    # <XmlArraySimpleWrapped>
+    #   <address>
+    #     <Address>
+    #       <street></street>
+    #       <city></city>
+    #     </Address>
+    #     <Address>
+    #       <street></street>
+    #       <city></city>
+    #     </Address>
+    #   </address>
+    # </XmlArraySimpleWrapped>
+    type: object
+    properties:
+      address:
+        type: Address[]
+        examples: 
+          e1: 
+            street: 1234 Market street
+            city: San Francisco
+          e2: 
+            street: Oxford street
+            city: London
+        xml:
+          wrapped: true
+  XmlArraySimpleWrappedNamed:
+    # <XmlArraySimpleWrappedNamed>
+    #   <Residency>
+    #     <Address>
+    #       <street></street>
+    #       <city></city>
+    #     </Address>
+    #     <Address>
+    #       <street></street>
+    #       <city></city>
+    #     </Address>
+    #   </Residency>
+    # </XmlArraySimpleWrappedNamed>
+    type: object
+    properties:
+      address:
+        type: Address[]
+        xml:
+          wrapped: true
+          name: Residency
+  XmlArrayWrappedNamed:
+    # <XmlArrayWrappedNamed>
+    #   <address-array-2>
+    #     <Address>
+    #       <street></street>
+    #       <city></city>
+    #     </Address>
+    #   </address-array-2>
+    # </XmlArrayWrappedNamed>
+    type: object
+    properties:
+      address:
+        type: array
+        items: 
+          type: Address
+        xml:
+          wrapped: true
+          name: address-array-2
+
   XmlSerializationObject:
     type: object
     properties: 
@@ -198,25 +370,65 @@ types:
         default: attr default value
         xml:
           attribute: true
-      addresses: # This creates <addresses> <addresses><street></street>...</addresses> ... </addresses>
+      object:
+        # <XmlSerializationObject>
+        #   ...
+        #    <object>
+        # 
+        #     <street>one</street>
+        #     <city>one</city>
+        # 
+        #     <street>one</street>
+        #     <city>one</city>
+        # 
+        #    </object>
+        #   ...
+        # </XmlSerializationObject>
+        type: Address[]
+      addresses:
+        # <XmlSerializationObject>
+        #   ...
+        #   <addresses>
+        #     <Address>
+        #       <street>one</street>
+        #     </Address>
+        #   </addresses>
+        #   ...
+        # </XmlSerializationObject>
         type: Address[]
         xml:
           wrapped: true
-      addresses2: # This creates <address-array-2> <Address><street></street>...</Address> ... </address-array-2>
+      addresses2:
+        # <XmlSerializationObject>
+        #   ...
+        #   <address-array-2>  <- renamed by xml.name on the `addresses2` property
+        #     <Address>
+        #       <street></street>
+        #       <city></city>
+        #     </Address>
+        #   </address-array-2>
+        #   ...
+        # </XmlSerializationObject>
         type: array
         items: 
           type: Address
-          xml:
-            name: Address
         xml:
           wrapped: true
           name: address-array-2
-      addresses3: # This creates <address-array-3> <address-array-3><street></street>...</address-array-3> ... </address-array-3>
+      addresses3: # This creates <address-array-3> <Address><street></street>...</Address> ... </address-array-3>
+        # <XmlSerializationObject>
+        #   ...
+        #   <address-array-3>
+        #     <street></street> <- items is not wrapped!
+        #     <city></city>
+        #   </address-array-3>
+        #   ...
+        # </XmlSerializationObject>
         type: Address[]
         xml:
-          wrapped: true
+          wrapped: true # This has no use here as it relates to an object property.
           name: address-array-3
-      addresses4: # This creates <address-array-4> <street></street>... </address-array-4>
+      addresses4: # This creates <Address> <street></street>... </Address>
         type: Address[]
         xml:
           name: address-array-4

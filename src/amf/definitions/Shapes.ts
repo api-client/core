@@ -282,13 +282,14 @@ export interface IXmlSerializer extends IDomainProperty {
    */
   attribute?: boolean;
   /**
-   * When the property is an array (has the `multiple` set to true)
+   * When the property is an array (has the `multiple` set to true in the data model)
    * then it tells that the list of values should be wrapped with a parent
    * element:
    * 
    * ```
    * <Person>
    *  <Person fullName="John Doe"></Person>
+   *  <Person fullName="Other Doe"></Person>
    * </Person>
    * ```
    * 

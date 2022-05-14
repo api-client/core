@@ -65,6 +65,13 @@ export { DataProperty, IDataProperty, Kind as DataPropertyKind, DataPropertyType
 // 
 
 export { AmfNamespace } from './src/amf/definitions/Namespace.js';
+export { ApiExampleGenerator } from './src/amf/ApiExampleGenerator.js';
+export { ApiMonacoSchemaGenerator } from './src/amf/ApiMonacoSchemaGenerator.js';
+export { ApiSchemaValues } from './src/amf/ApiSchemaValues.js';
+export { ApiSchemaGenerator } from './src/amf/ApiSchemaGenerator.js';
+export { AmfShapeGenerator } from './src/amf/AmfShapeGenerator.js';
+export { AmfSerializer } from './src/amf/AmfSerializer.js';
+export { AmfMixin } from './src/amf/AmfMixin.js';
 
 //
 // Libs
@@ -131,13 +138,6 @@ export { Reporter, IProjectExecutionLog, IProjectExecutionIteration } from './sr
 // Mocking
 // 
 export * from './src/mocking/ProjectMock.js';
-export { ApiExampleGenerator } from './src/amf/ApiExampleGenerator.js';
-export { ApiMonacoSchemaGenerator } from './src/amf/ApiMonacoSchemaGenerator.js';
-export { ApiSchemaValues } from './src/amf/ApiSchemaValues.js';
-export { ApiSchemaGenerator } from './src/amf/ApiSchemaGenerator.js';
-export { AmfShapeGenerator } from './src/amf/AmfShapeGenerator.js';
-export { AmfSerializer } from './src/amf/AmfSerializer.js';
-export { AmfMixin } from './src/amf/AmfMixin.js';
 
 //
 // Calculators
