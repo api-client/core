@@ -1,0 +1,14 @@
+#%RAML 1.0
+
+title: Recursive shape
+
+types:
+  T1:
+    type: object
+    properties:
+      p1: T2
+  T2:
+    type: object
+    properties:
+      p2: string
+      p3: T1

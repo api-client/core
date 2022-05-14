@@ -26,6 +26,7 @@
     "processloadingerror",
     "processloadingstart",
     "processloadingstop",
+    "Protobuf",
     "rehandshake",
     "removetoken",
     "reporterror",
@@ -79,6 +80,7 @@
     "telemetrysocial",
     "telemetrystateset",
     "telemetrytiming",
-    "Untrash"
+    "Untrash",
+    "xone"
   ]
 }

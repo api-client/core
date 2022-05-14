@@ -1,0 +1,28 @@
+openapi: '3.0.2'
+info:
+  title: OAS dates
+  version: '1.0'
+
+components:
+  schemas:
+    DateTypes:
+      type: object
+      properties:
+        dateString: # http://www.w3.org/2001/XMLSchema#date
+          type: string
+          format: date
+        dateTimeString: # http://www.w3.org/2001/XMLSchema#dateTime
+          type: string
+          format: date-time
+
+paths:
+  /strings:
+    get:
+      summary: DateTypes
+      responses:
+        '200':
+          description: DateTypes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DateTypes"

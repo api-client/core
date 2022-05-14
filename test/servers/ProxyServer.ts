@@ -74,8 +74,8 @@ export class ProxyServer {
     const assignedPort = await getPort({port: portNumbers(8000, 8100)});
     this.httpsPort = assignedPort
     
-    const key = await readFile(path.join('test', 'lib-http-engine', 'certs', 'privkey.pem'));
-    const cert = await readFile(path.join('test', 'lib-http-engine', 'certs', 'fullchain.pem'));
+    const key = await readFile(path.join('test', 'lib', 'http-engine', 'certs', 'privkey.pem'));
+    const cert = await readFile(path.join('test', 'lib', 'http-engine', 'certs', 'fullchain.pem'));
     
     return new Promise((resolve) => {
       const options = {

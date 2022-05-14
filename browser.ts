@@ -58,8 +58,20 @@ export { DataEntity, IDataEntity, Kind as DataEntityKind } from './src/models/da
 export { DataFile, IDataFile, Kind as DataFileKind } from './src/models/data/DataFile.js';
 export { DataModel, IDataModel, Kind as DataModelKind } from './src/models/data/DataModel.js';
 export { DataNamespace, IDataNamespace, Kind as DataNamespaceKind, DataItem, IDataItem } from './src/models/data/DataNamespace.js';
-export { DataProperty, IDataProperty, Kind as DataPropertyKind, DataPropertyType, DataPropertyTypes, DataPropertyList, IPropertySchema } from './src/models/data/DataProperty.js';
-export { IDataPropertySchema, DateFormat, DateFormatList, DateFormats, NumberFormat, NumberFormatList, NumberFormats } from './src/models/data/DataPropertySchema.js';
+export { DataProperty, IDataProperty, Kind as DataPropertyKind, DataPropertyType, DataPropertyTypes, DataPropertyList, DateFormat, DateFormats, DateFormatList } from './src/models/data/DataProperty.js';
+
+// 
+// AMF
+// 
+
+export { AmfNamespace } from './src/amf/definitions/Namespace.js';
+export { ApiExampleGenerator } from './src/amf/ApiExampleGenerator.js';
+export { ApiMonacoSchemaGenerator } from './src/amf/ApiMonacoSchemaGenerator.js';
+export { ApiSchemaValues } from './src/amf/ApiSchemaValues.js';
+export { ApiSchemaGenerator } from './src/amf/ApiSchemaGenerator.js';
+export { AmfShapeGenerator } from './src/amf/AmfShapeGenerator.js';
+export { AmfSerializer } from './src/amf/AmfSerializer.js';
+export { AmfMixin } from './src/amf/AmfMixin.js';
 
 //
 // Libs

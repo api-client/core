@@ -9,6 +9,9 @@ export interface IDataFile extends IFile {
   kind: typeof Kind;
 }
 
+/**
+ * Used by the store. A file definition for the DataNamespace
+ */
 export class DataFile extends File {
   kind = Kind;
 

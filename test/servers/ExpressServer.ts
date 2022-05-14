@@ -75,8 +75,8 @@ export class ExpressServer {
   async startHttps(port?: number): Promise<number> {
     const assignedPort = port || await getPort({port: portNumbers(8000, 8100)});
     this.httpsPort = assignedPort;
-    const key = await readFile(path.join('test', 'lib-http-engine', 'certs', 'privkey.pem'));
-    const cert = await readFile(path.join('test', 'lib-http-engine', 'certs', 'fullchain.pem'));
+    const key = await readFile(path.join('test', 'lib', 'http-engine', 'certs', 'privkey.pem'));
+    const cert = await readFile(path.join('test', 'lib', 'http-engine', 'certs', 'fullchain.pem'));
     const options: https.ServerOptions = {
       key,
       cert,
