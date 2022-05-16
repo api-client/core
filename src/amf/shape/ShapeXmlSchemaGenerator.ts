@@ -115,7 +115,7 @@ export class ShapeXmlSchemaGenerator extends ShapeBase {
     const properties = this._collectProperties(schema);
     properties.forEach((property) => {
       const { range, minCount=0 } = property;
-      if (minCount === 0 && !this.opts.renderOptional) {
+      if (minCount === 0 && !this.opts.renderOptional || !range) {
         return;
       }
       const anyRange = range as IAnyShape;

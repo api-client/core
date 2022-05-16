@@ -4,7 +4,7 @@ import { ApiSchemaValues } from '../ApiSchemaValues.js';
 import { JsonDataNodeGenerator } from '../data-node/JsonDataNodeGenerator.js';
 import { IAnyShape, IArrayShape, IDataExample, IFileShape, INodeShape, IPropertyShape, IScalarNode, IScalarShape, ISchemaShape, IShapeUnion, ITupleShape, IUnionShape } from '../definitions/Shapes.js';
 
-export interface ShapeRenderOptions {
+export interface IShapeRenderOptions {
   /**
    * All selected unions in the current view.
    * When the processor encounter an union it checks this array
@@ -35,10 +35,10 @@ export interface ShapeRenderOptions {
  * A base class for generators that generates a schema from AMF's shape definition.
  */
 export abstract class ShapeBase {
-  opts: Readonly<ShapeRenderOptions>;
+  opts: Readonly<IShapeRenderOptions>;
   time = new Time();
 
-  constructor(opts: ShapeRenderOptions = {}) {
+  constructor(opts: IShapeRenderOptions = {}) {
     this.opts = Object.freeze({ ...opts });
   }
 
@@ -75,6 +75,9 @@ export abstract class ShapeBase {
           return result;
         }
       }
+    }
+    if (this.opts.renderMocked) {
+      return ApiSchemaValues.generateMockedValue(schema);
     }
     // return this[dataTypeToExample](dataType, format);
     // create a default value.

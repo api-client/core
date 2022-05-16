@@ -552,6 +552,26 @@ describe('models', () => {
           assert.typeOf(result.range, 'object');
         });
       });
+
+      describe('getParent()', () => {
+        let root: DataNamespace;
+        let m1: DataModel;
+        let e1: DataEntity;
+        let e2: DataEntity;
+
+        beforeEach(() => {
+          root = new DataNamespace();
+          m1 = root.addDataModel('m1');
+          e1 = m1.addEntity('e1');
+          e2 = m1.addEntity('e2');
+        });
+        
+        it('returns the reference to the parent entity', () => {
+          const a1 = e1.addTargetAssociation(e2.key);
+          const result = a1.getParent();
+          assert.deepEqual(result, e1);
+        });
+      });
     });
   });
 });

@@ -384,7 +384,10 @@ export class ShapeJsonSchemaGenerator extends ShapeBase {
     if (minCount === 0 && !this.opts.renderOptional) {
       return undefined;
     }
-    const range = schema.range!;
+    const { range } = schema;
+    if (!range) {
+      return undefined;
+    }
     const { types } = range;
     if (types.includes(ns.aml.vocabularies.shapes.ScalarShape)) {
       // const defaultValue = schema.defaultValue || range.defaultValue;

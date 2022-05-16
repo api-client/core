@@ -1,6 +1,6 @@
 import { AmfNamespace as ns } from "./definitions/Namespace.js";
 import { IAnyShape, IDataExample, IShapeUnion } from "./definitions/Shapes.js";
-import { ShapeBase, ShapeRenderOptions } from "./shape/ShapeBase.js";
+import { ShapeBase, IShapeRenderOptions } from "./shape/ShapeBase.js";
 import { ShapeJsonSchemaGenerator } from './shape/ShapeJsonSchemaGenerator.js';
 import { ShapeXmlSchemaGenerator } from './shape/ShapeXmlSchemaGenerator.js';
 
@@ -19,7 +19,7 @@ export interface ISchemaExample extends IDataExample {
  * If examples can be found directly in the shape, use the `ApiExampleGenerator` instead.
  */
 export class ApiSchemaGenerator {
-  opts: Readonly<ShapeRenderOptions>;
+  opts: Readonly<IShapeRenderOptions>;
 
   generator?: ShapeBase;
 
@@ -28,7 +28,7 @@ export class ApiSchemaGenerator {
    * @param mime The example mime type to format the generated example.
    * @param opts Optional configuration.
    */
-  constructor(public mime: string, opts: ShapeRenderOptions = {}) {
+  constructor(public mime: string, opts: IShapeRenderOptions = {}) {
     this.opts = Object.freeze({ ...opts });
     if (mime.includes('json')) {
       this.generator = new ShapeJsonSchemaGenerator(opts);
@@ -42,7 +42,7 @@ export class ApiSchemaGenerator {
    * @param mime The mime type for the value.
    * @returns Customized Example with the `renderValue` that is the generated Example value.
    */
-  static asExample(shape: IShapeUnion, mime: string, opts?: ShapeRenderOptions): ISchemaExample | undefined {
+  static asExample(shape: IShapeUnion, mime: string, opts?: IShapeRenderOptions): ISchemaExample | undefined {
     const generator = new ApiSchemaGenerator(mime, opts);
     return generator.toExample(shape);
   }
@@ -52,7 +52,7 @@ export class ApiSchemaGenerator {
    * @param mime The mime type for the value.
    * @returns The generated schema
    */
-  static asSchema(shape: IShapeUnion, mime: string, opts?: ShapeRenderOptions): string | number | boolean | null | undefined {
+  static asSchema(shape: IShapeUnion, mime: string, opts?: IShapeRenderOptions): string | number | boolean | null | undefined {
     const generator = new ApiSchemaGenerator(mime, opts);
     return generator.toValue(shape);
   }

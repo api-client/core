@@ -383,4 +383,13 @@ export class DataAssociation {
     this.adapts = association.key;
     return association;
   }
+
+  /**
+   * @returns The definition of the parent entity of this association.
+   */
+  getParent(): DataEntity {
+    // this is forced as an association is only created when an entity is created
+    // so it has to be defined.
+    return this.root.definitions.entities.find(i => i.associations.includes(this)) as DataEntity;
+  }
 }

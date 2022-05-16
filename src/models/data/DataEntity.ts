@@ -8,6 +8,7 @@ import { DataModel } from "./DataModel.js";
 import { INodeShape, IShapeUnion } from "../../amf/definitions/Shapes.js";
 import { AmfShapeGenerator } from "../../amf/AmfShapeGenerator.js";
 import { ApiSchemaGenerator } from "../../amf/ApiSchemaGenerator.js";
+import { IShapeRenderOptions } from "../../amf/shape/ShapeBase.js";
 
 export const Kind = 'Core#DataEntity';
 
@@ -483,20 +484,19 @@ export class DataEntity {
    * D -> C
    * 
    * C => [B, D]
+   * B => [A, C]
    * ```
    */
   getRelatedEntities(): DataEntity[] {
     const { key, root } = this;
     const result: DataEntity[] = [];
     const inverse = root.definitions.associations.filter(i => i.targets.includes(key));
-
     inverse.forEach((assoc) => {
       const entity = root.definitions.entities.find(e => e.associations.includes(assoc));
       if (entity) {
         result.push(entity);
       }
     });
-
     return result;
   }
 
@@ -593,12 +593,13 @@ export class DataEntity {
   /**
    * Reads the schema of the Entity and generates an example for it.
    */
-  toExample(mime: string): string | number | boolean | null | undefined {
+  toExample(mime: string, opts: IShapeRenderOptions = {}): string | number | boolean | null | undefined {
     const shape = this.toApiShape();
     const generator = new ApiSchemaGenerator(mime, {
-      renderExamples: true,
-      renderMocked: true,
-      renderOptional: true,      
+      renderExamples: typeof opts.renderExamples === 'boolean' ? opts.renderExamples : true,
+      renderMocked: typeof opts.renderMocked === 'boolean' ? opts.renderMocked : true,
+      renderOptional: typeof opts.renderOptional === 'boolean' ? opts.renderOptional : true,
+      selectedUnions: opts.selectedUnions,
     });
     return generator.generate(shape);
   }
@@ -627,29 +628,27 @@ export class DataEntity {
     return entity;
   }
 
-  /**
-   * Checks whether the `target` creates a cycle in the graph (whether this creates a recursive association).
-   * @param target 
-   */
-  hasForwardCycle(target: string, g = this.root.associationGraph(), key = this.key): boolean {
-    if (target === key) {
+  hasClosedCycle(rootEntity: string, targetEntity: string): boolean {
+    if (targetEntity === this.key) {
+      // self association
       return true;
     }
-    const neighbors: string[] = [];
-    Object.keys(g).forEach(prop => {
-      if (g[prop].includes(key)) {
-        neighbors.push(prop);
-      }
-    });
-    if (neighbors.includes(target)) {
-      return true;
+    const g = this.root.associationGraph();
+    const selfPaths: string[][] = [];
+    const targetPaths: string[][] = [];
+    for (const path of this.root.associationPath(rootEntity, this.key, g)) {
+      selfPaths.push(path);
     }
-    for (const neighbor of neighbors) {
-      if (neighbor === key) {
-        return true;
-      }
-      if (this.hasForwardCycle(target, g, neighbor)) {
-        return true;
+    for (const path of this.root.associationPath(targetEntity, this.key, g)) {
+      targetPaths.push(path);
+    }
+    const checker = (arr: string[], target: string[]): boolean => target.every(v => arr.includes(v));
+    for (const sp of selfPaths) {
+      for (const tp of targetPaths) {
+        const result = checker(sp, tp);
+        if (result) {
+          return result;
+        }
       }
     }
     return false;

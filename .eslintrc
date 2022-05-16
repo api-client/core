@@ -15,7 +15,8 @@
     }],
     "unused-imports/no-unused-imports": "error",
     "no-only-tests/no-only-tests": "error",
-    "no-dupe-class-members": "off"
+    "no-dupe-class-members": "off",
+    "no-console": "error"
   },
   "env": {
     "mocha": true,

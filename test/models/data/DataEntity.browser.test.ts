@@ -1066,7 +1066,7 @@ describe('models', () => {
         });
       });
 
-      describe('isRecursive()', () => {
+      describe('hasClosedCycle()', () => {
         let root: DataNamespace;
         let m1: DataModel;
         let e1: DataEntity;
@@ -1082,51 +1082,70 @@ describe('models', () => {
         });
 
         it('returns false when no association', () => {
-          const result = e1.hasForwardCycle(e2.key);
+          const result = e1.hasClosedCycle(e1.key, e2.key);
           assert.isFalse(result);
         });
 
         it('returns false when not recursive', () => {
           e1.addTargetAssociation(e2.key);
-          const result = e2.hasForwardCycle(e3.key);
+          const result = e2.hasClosedCycle(e1.key, e3.key);
           assert.isFalse(result);
         });
 
         it('returns true when testing self-association', () => {
-          const result = e1.hasForwardCycle(e1.key);
+          const result = e1.hasClosedCycle(e1.key, e1.key);
           assert.isTrue(result);
         });
 
         it('returns true when referencing a closest neighbor', () => {
           e1.addTargetAssociation(e2.key);
-          const result = e2.hasForwardCycle(e1.key);
+          const result = e2.hasClosedCycle(e1.key, e1.key);
           assert.isTrue(result);
         });
 
-        it('returns true when referencing a far neighbors', () => {
+        it('multiple cycles', () => {
           const e4 = m1.addEntity('e4');
           e1.addTargetAssociation(e2.key);
           e2.addTargetAssociation(e3.key);
           e3.addTargetAssociation(e4.key);
-          assert.isTrue(e4.hasForwardCycle(e1.key));
-          assert.isTrue(e4.hasForwardCycle(e2.key));
-          assert.isTrue(e4.hasForwardCycle(e3.key));
-          assert.isTrue(e4.hasForwardCycle(e4.key));
-        });
 
-        it('returns false when has no forward cycle', () => {
-          const e4 = m1.addEntity('e4');
-          e1.addTargetAssociation(e2.key);
-          e2.addTargetAssociation(e3.key);
-          e3.addTargetAssociation(e4.key);
-          assert.isFalse(e1.hasForwardCycle(e3.key));
-          assert.isFalse(e1.hasForwardCycle(e2.key));
-          assert.isFalse(e1.hasForwardCycle(e3.key));
-          assert.isFalse(e1.hasForwardCycle(e4.key));
-          assert.isFalse(e2.hasForwardCycle(e3.key));
+          assert.isTrue(e1.hasClosedCycle(e1.key, e1.key), 'e1 -> e1');
+          assert.isFalse(e1.hasClosedCycle(e1.key, e2.key), 'e1 -> e2');
+          assert.isFalse(e1.hasClosedCycle(e1.key, e3.key), 'e1 -> e3');
+          assert.isFalse(e1.hasClosedCycle(e1.key, e4.key), 'e1 -> e4');
+
+          assert.isTrue(e2.hasClosedCycle(e1.key, e1.key), 'e2 -> e1');
+          assert.isTrue(e2.hasClosedCycle(e1.key, e2.key), 'e2 -> e2');
+          assert.isFalse(e2.hasClosedCycle(e1.key, e3.key), 'e2 -> e3');
           // this does not create a forward cycle just yet. It is safe to render this connection in the UI
           // but it is unsafe to render connection e4 -> e2.
-          assert.isFalse(e2.hasForwardCycle(e4.key));
+          assert.isFalse(e2.hasClosedCycle(e1.key, e4.key), 'e2 -> e4');
+
+          assert.isTrue(e3.hasClosedCycle(e1.key, e1.key), 'e3 -> e1');
+          assert.isTrue(e3.hasClosedCycle(e1.key, e2.key), 'e3 -> e2');
+          assert.isTrue(e3.hasClosedCycle(e1.key, e3.key), 'e3 -> e3');
+          assert.isFalse(e3.hasClosedCycle(e1.key, e4.key), 'e3 -> e4');
+
+          assert.isTrue(e4.hasClosedCycle(e1.key, e1.key), 'e4 -> e1');
+          assert.isTrue(e4.hasClosedCycle(e1.key, e2.key), 'e4 -> e2');
+          assert.isTrue(e4.hasClosedCycle(e1.key, e3.key), 'e4 -> e3');
+          assert.isTrue(e4.hasClosedCycle(e1.key, e4.key), 'e4 -> e4');
+        });
+
+        it('returns false when testing for the next associated node', () => {
+          e1.addTargetAssociation(e2.key);
+          e2.addTargetAssociation(e3.key);
+          e3.addTargetAssociation(e2.key);
+          
+          assert.isFalse(e2.hasClosedCycle(e1.key, e3.key));
+        });
+
+        it('returns true when testing for last node going back to the parent', () => {
+          e1.addTargetAssociation(e2.key);
+          e2.addTargetAssociation(e3.key);
+          e3.addTargetAssociation(e2.key);
+          
+          assert.isTrue(e3.hasClosedCycle(e1.key, e2.key));
         });
       });
     });

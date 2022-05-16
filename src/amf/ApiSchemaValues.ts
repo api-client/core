@@ -146,6 +146,38 @@ export class ApiSchemaValues {
   static generateDefaultValue(schema: IScalarShape): any {
     const { dataType } = schema;
     switch (dataType) {
+      case ns.w3.xmlSchema.string: return '';
+      // XML schema, for DataNode
+      case ns.w3.xmlSchema.number:
+      case ns.w3.xmlSchema.integer:
+      case ns.w3.xmlSchema.float:
+      case ns.w3.xmlSchema.long:
+      case ns.w3.xmlSchema.double:
+      case ns.aml.vocabularies.shapes.number:
+      case ns.aml.vocabularies.shapes.integer:
+      case ns.aml.vocabularies.shapes.float:
+      case ns.aml.vocabularies.shapes.long:
+      case ns.aml.vocabularies.shapes.double: return 0;
+      case ns.aml.vocabularies.shapes.boolean:
+      case ns.w3.xmlSchema.boolean: return false;
+      case ns.aml.vocabularies.shapes.nil:
+      case ns.w3.xmlSchema.nil: return null;
+      case ns.w3.xmlSchema.date: return '';
+      case ns.w3.xmlSchema.dateTime: return '';
+      case ns.aml.vocabularies.shapes.dateTimeOnly: return '';
+      case ns.w3.xmlSchema.time:  return '';
+      default: return undefined;
+    }
+  }
+
+  /**
+   * Generates a default value from the schema type.
+   * For booleans it returns `false`, for numbers `0`, nulls `null`, etc.
+   * It does not generate a value for `string` types!
+   */
+  static generateMockedValue(schema: IScalarShape): any {
+    const { dataType } = schema;
+    switch (dataType) {
       case ns.w3.xmlSchema.string: return this.generateStringValue(schema);
       // XML schema, for DataNode
       case ns.w3.xmlSchema.number:

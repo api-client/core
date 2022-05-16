@@ -778,6 +778,23 @@ describe('models', () => {
           assert.lengthOf(paths, 1, 'has both paths');
           assert.deepEqual(paths[0], [e1.key, e5.key], 'has the 1st path');
         });
+
+        it('respects the order of nodes in paths', () => {
+          e1.addTargetAssociation(e2.key);
+          e2.addTargetAssociation(e1.key);
+          const paths: string[][] = [];
+          const graph = root.associationGraph();
+          for (const path of root.associationPath(e1.key, e2.key, graph)) {
+            paths.push(path);
+          }
+          for (const path of root.associationPath(e2.key, e1.key, graph)) {
+            paths.push(path);
+          }
+          assert.lengthOf(paths, 2, 'has only 2 paths');
+          const [p1, p2] = paths;
+          assert.deepEqual(p1, [e1.key, e2.key], 'has ordered paths from e1 to e2');
+          assert.deepEqual(p2, [e2.key, e1.key], 'has ordered paths from e2 to e1');
+        });
       });
     });
   });
