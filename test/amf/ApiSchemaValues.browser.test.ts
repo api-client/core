@@ -467,31 +467,117 @@ describe('ApiSchemaValues', () => {
       });
     });
 
-    it(`returns a random value for ${ns.w3.xmlSchema.date}`, () => {
+    it(`returns a default value for ${ns.w3.xmlSchema.date}`, () => {
       const shape = scalarShape('');
       shape.dataType = ns.w3.xmlSchema.date;
       const result = ApiSchemaValues.generateDefaultValue(shape);
+      assert.equal(result, '');
+    });
+
+    it(`returns a default value for ${ns.w3.xmlSchema.time}`, () => {
+      const shape = scalarShape('');
+      shape.dataType = ns.w3.xmlSchema.time;
+      const result = ApiSchemaValues.generateDefaultValue(shape);
+      assert.equal(result, '');
+    });
+
+    it(`returns a default value for ${ns.aml.vocabularies.shapes.dateTimeOnly}`, () => {
+      const shape = scalarShape('');
+      shape.dataType = ns.aml.vocabularies.shapes.dateTimeOnly;
+      const result = ApiSchemaValues.generateDefaultValue(shape);
+      assert.equal(result, '');
+    });
+
+    it(`returns a default value for ${ns.w3.xmlSchema.dateTime} without format`, () => {
+      const shape = scalarShape('');
+      shape.dataType = ns.w3.xmlSchema.dateTime;
+      const result = ApiSchemaValues.generateDefaultValue(shape);
+      assert.equal(result, '');
+    });
+
+    it(`returns a default value for ${ns.w3.xmlSchema.dateTime} with rfc3339 format`, () => {
+      const shape = scalarShape('');
+      shape.dataType = ns.w3.xmlSchema.dateTime;
+      shape.format = 'rfc3339';
+      const result = ApiSchemaValues.generateDefaultValue(shape);
+      assert.equal(result, '');
+    });
+
+    it(`returns a default value for ${ns.w3.xmlSchema.dateTime} with date-time format`, () => {
+      const shape = scalarShape('');
+      shape.dataType = ns.w3.xmlSchema.dateTime;
+      shape.format = 'date-time';
+      const result = ApiSchemaValues.generateDefaultValue(shape);
+      assert.equal(result, '');
+    });
+
+    it(`returns a default value for ${ns.w3.xmlSchema.dateTime} with rfc2616 format`, () => {
+      const shape = scalarShape('');
+      shape.dataType = ns.w3.xmlSchema.dateTime;
+      shape.format = 'rfc2616';
+      const result = ApiSchemaValues.generateDefaultValue(shape);
+      assert.equal(result, '');
+    });
+  });
+
+  describe('generateMockedValue()', () => {
+    [
+      ns.w3.xmlSchema.number,
+      ns.aml.vocabularies.shapes.number,
+      ns.w3.xmlSchema.integer,
+      ns.aml.vocabularies.shapes.integer,
+      ns.w3.xmlSchema.float,
+      ns.aml.vocabularies.shapes.float,
+      ns.w3.xmlSchema.long,
+      ns.aml.vocabularies.shapes.long,
+      ns.w3.xmlSchema.double,
+      ns.aml.vocabularies.shapes.double,
+    ].forEach((key) => {
+      it(`returns a default type value for ${key}`, () => {
+        const shape = scalarShape('');
+        shape.dataType = key as string;
+        const result = ApiSchemaValues.generateMockedValue(shape);
+        assert.typeOf(result,  'number');
+      });
+    });
+
+    [
+      ns.w3.xmlSchema.boolean,
+      ns.aml.vocabularies.shapes.boolean,
+    ].forEach((key) => {
+      it(`returns a default type value for ${key}`, () => {
+        const shape = scalarShape('');
+        shape.dataType = key as string;
+        const result = ApiSchemaValues.generateMockedValue(shape);
+        assert.typeOf(result,  'boolean');
+      });
+    });
+
+    it(`returns a random value for ${ns.w3.xmlSchema.date}`, () => {
+      const shape = scalarShape('');
+      shape.dataType = ns.w3.xmlSchema.date;
+      const result = ApiSchemaValues.generateMockedValue(shape);
       assert.match(result, /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/);
     });
 
     it(`returns a random value for ${ns.w3.xmlSchema.time}`, () => {
       const shape = scalarShape('');
       shape.dataType = ns.w3.xmlSchema.time;
-      const result = ApiSchemaValues.generateDefaultValue(shape);
+      const result = ApiSchemaValues.generateMockedValue(shape);
       assert.match(result, /^[0-9]{2}:[0-9]{2}:[0-9]{2}$/);
     });
 
     it(`returns a random value for ${ns.aml.vocabularies.shapes.dateTimeOnly}`, () => {
       const shape = scalarShape('');
       shape.dataType = ns.aml.vocabularies.shapes.dateTimeOnly;
-      const result = ApiSchemaValues.generateDefaultValue(shape);
+      const result = ApiSchemaValues.generateMockedValue(shape);
       assert.match(result, /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}$/);
     });
 
     it(`returns a random value for ${ns.w3.xmlSchema.dateTime} without format`, () => {
       const shape = scalarShape('');
       shape.dataType = ns.w3.xmlSchema.dateTime;
-      const result = ApiSchemaValues.generateDefaultValue(shape);
+      const result = ApiSchemaValues.generateMockedValue(shape);
       assert.match(result, /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}Z$/);
     });
 
@@ -499,7 +585,7 @@ describe('ApiSchemaValues', () => {
       const shape = scalarShape('');
       shape.dataType = ns.w3.xmlSchema.dateTime;
       shape.format = 'rfc3339';
-      const result = ApiSchemaValues.generateDefaultValue(shape);
+      const result = ApiSchemaValues.generateMockedValue(shape);
       assert.match(result, /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}Z$/);
     });
 
@@ -507,7 +593,7 @@ describe('ApiSchemaValues', () => {
       const shape = scalarShape('');
       shape.dataType = ns.w3.xmlSchema.dateTime;
       shape.format = 'date-time';
-      const result = ApiSchemaValues.generateDefaultValue(shape);
+      const result = ApiSchemaValues.generateMockedValue(shape);
       assert.match(result, /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}Z$/);
     });
 
@@ -515,7 +601,7 @@ describe('ApiSchemaValues', () => {
       const shape = scalarShape('');
       shape.dataType = ns.w3.xmlSchema.dateTime;
       shape.format = 'rfc2616';
-      const result = ApiSchemaValues.generateDefaultValue(shape);
+      const result = ApiSchemaValues.generateMockedValue(shape);
       assert.match(result, /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun), ([0-3][0-9]) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) ([0-9]{4}) ([01][0-9]|2[0-3])(:[0-5][0-9]){2} GMT$/);
     });
   });

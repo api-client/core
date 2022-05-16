@@ -24,6 +24,15 @@ describe('ApiSchemaGenerator', () => {
         assert.typeOf(result, 'string');
       });
 
+      it('generates a schema without mocked value', async () => {
+        const shape = loader.getShape(model, 'ScalarType');
+        const result = ApiSchemaGenerator.asSchema(shape, jsonMime, {
+          renderMocked: true,
+        });
+        assert.typeOf(result, 'string', 'is a string');
+        assert.isNotEmpty(result, 'has a value');
+      });
+
       it('generates a schema with the default value', async () => {
         const shape = loader.getShape(model, 'ScalarWithTraits');
         const result = ApiSchemaGenerator.asSchema(shape, jsonMime);
@@ -68,6 +77,19 @@ describe('ApiSchemaGenerator', () => {
       it('generates a schema without a value', async () => {
         const shape = loader.getShape(model, 'ScalarType');
         const result = ApiSchemaGenerator.asSchema(shape, xmlMime);
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(result as string, "application/xml");
+        const node = doc.querySelector('ScalarType');
+        assert.ok(node, 'has the schema name');
+        assert.equal(node.textContent.trim(), '');
+      });
+
+      it('generates a schema without a mocked value', async () => {
+        const shape = loader.getShape(model, 'ScalarType');
+        const result = ApiSchemaGenerator.asSchema(shape, xmlMime, {
+          renderMocked: true,
+        });
 
         const parser = new DOMParser();
         const doc = parser.parseFromString(result as string, "application/xml");
@@ -179,6 +201,7 @@ describe('ApiSchemaGenerator', () => {
         const result = ApiSchemaGenerator.asSchema(shape, jsonMime, {
           renderOptional: true,
           renderExamples: true,
+          renderMocked: true,
         });
         const parsed = JSON.parse(String(result));
         assert.strictEqual(parsed.name, 'Pawel Uchida-Psztyc', 'has parent name');
@@ -225,7 +248,9 @@ describe('ApiSchemaGenerator', () => {
     describe(xmlMime, () => {
       it('has only required fields with default values or enums', async () => {
         const shape = loader.getShape(model, 'SimpleObject');
-        const result = ApiSchemaGenerator.asSchema(shape, xmlMime);
+        const result = ApiSchemaGenerator.asSchema(shape, xmlMime, {
+          renderMocked: true,
+        });
         assert.typeOf(result, 'string', 'is a string');
         const parser = new DOMParser();
         const schema = parser.parseFromString(String(result), xmlMime);
@@ -275,6 +300,7 @@ describe('ApiSchemaGenerator', () => {
         const result = ApiSchemaGenerator.asSchema(shape, xmlMime, {
           renderOptional: true,
           renderExamples: true,
+          renderMocked: true,
         });
         const parser = new DOMParser();
         const schema = parser.parseFromString(String(result), xmlMime);
@@ -306,7 +332,9 @@ describe('ApiSchemaGenerator', () => {
 
       it('renders object with multiple level parents', async () => {
         const shape = loader.getShape(model, 'ChildLvl2');
-        const result = ApiSchemaGenerator.asSchema(shape, xmlMime);
+        const result = ApiSchemaGenerator.asSchema(shape, xmlMime, {
+          renderMocked: true,
+        });
         const parser = new DOMParser();
         const schema = parser.parseFromString(String(result), xmlMime);
 
@@ -389,6 +417,7 @@ describe('ApiSchemaGenerator', () => {
         const shape = loader.getShape(model, 'ObjectWithArrayObject');
         const result = ApiSchemaGenerator.asSchema(shape, jsonMime, {
           renderExamples: true,
+          renderMocked: true,
         });
         assert.typeOf(result, 'string', 'is a string');
         const parsed = JSON.parse(String(result));
@@ -417,7 +446,9 @@ describe('ApiSchemaGenerator', () => {
     describe(xmlMime, () => {
       it('has only required fields', async () => {
         const shape = loader.getShape(model, 'ObjectWithArray');
-        const result = ApiSchemaGenerator.asSchema(shape, xmlMime);
+        const result = ApiSchemaGenerator.asSchema(shape, xmlMime, {
+          renderMocked: true,
+        });
         const parser = new DOMParser();
         const schema = parser.parseFromString(String(result), xmlMime);
 
@@ -439,10 +470,11 @@ describe('ApiSchemaGenerator', () => {
         assert.strictEqual(defaultValue.textContent.trim(), 'A tag', 'has a default value (defaultValue)');
       });
 
-      it('has default values and examples', async () => {
+      it('has default values, mocked values, and examples', async () => {
         const shape = loader.getShape(model, 'ObjectWithArray');
         const result = ApiSchemaGenerator.asSchema(shape, xmlMime, {
           renderExamples: true,
+          renderMocked: true,
         });
         const parser = new DOMParser();
         const schema = parser.parseFromString(String(result), xmlMime);
@@ -487,7 +519,9 @@ describe('ApiSchemaGenerator', () => {
 
       it('generates the example', async () => {
         const shape = loader.getShape(model, 'ObjectWithArray');
-        const result = ApiSchemaGenerator.asExample(shape, xmlMime);
+        const result = ApiSchemaGenerator.asExample(shape, xmlMime, {
+          renderMocked: true,
+        });
         assert.typeOf(result, 'object', 'returns an object');
         assert.isTrue(result.strict, 'has the strict property');
         assert.deepEqual(result.types, [ns.aml.vocabularies.apiContract.Example], 'has the types property');
@@ -514,7 +548,9 @@ describe('ApiSchemaGenerator', () => {
     describe(jsonMime, () => {
       it('generates schema for a scalar union', async () => {
         const shape = loader.getShape(model, 'ScalarUnion');
-        const result = ApiSchemaGenerator.asSchema(shape, jsonMime);
+        const result = ApiSchemaGenerator.asSchema(shape, jsonMime, {
+          renderMocked: true,
+        });
         assert.typeOf(result, 'string', 'is a string');
         assert.isNotEmpty(result, 'the result has auto-generated value');
       });
@@ -570,7 +606,9 @@ describe('ApiSchemaGenerator', () => {
 
       it('generates a string value for scalar-object union', async () => {
         const shape = loader.getShape(model, 'ScalarObjectUnion');
-        const result = ApiSchemaGenerator.asSchema(shape, jsonMime);
+        const result = ApiSchemaGenerator.asSchema(shape, jsonMime, {
+          renderMocked: true,
+        });
         assert.typeOf(result, 'string', 'the result is a string');
         assert.isNotEmpty(result, 'has a value');
       });
@@ -607,6 +645,7 @@ describe('ApiSchemaGenerator', () => {
         const id = shape.anyOf[1].id;
         const result = ApiSchemaGenerator.asSchema(shape, jsonMime, {
           selectedUnions: [id],
+          renderMocked: true,
         });
         assert.typeOf(result, 'string', 'the result is a string');
         const parsed = JSON.parse(String(result));
@@ -660,7 +699,9 @@ describe('ApiSchemaGenerator', () => {
     describe(xmlMime, () => {
       it('generates schema for a scalar union', async () => {
         const shape = loader.getShape(model, 'ScalarUnion');
-        const result = ApiSchemaGenerator.asSchema(shape, xmlMime);
+        const result = ApiSchemaGenerator.asSchema(shape, xmlMime, {
+          renderMocked: true,
+        });
         const parser = new DOMParser();
         const schema = parser.parseFromString(String(result), xmlMime);
 
@@ -738,6 +779,19 @@ describe('ApiSchemaGenerator', () => {
 
         const root = schema.querySelector('ScalarObjectUnion');
         assert.ok(root, 'has the root node');
+        assert.equal(root.textContent.trim(), '', 'the root node is empty');
+      });
+
+      it('generates mocked string for scalar-object union', async () => {
+        const shape = loader.getShape(model, 'ScalarObjectUnion');
+        const result = ApiSchemaGenerator.asSchema(shape, xmlMime, {
+          renderMocked: true,
+        });
+        const parser = new DOMParser();
+        const schema = parser.parseFromString(String(result), xmlMime);
+
+        const root = schema.querySelector('ScalarObjectUnion');
+        assert.ok(root, 'has the root node');
         assert.isNotEmpty(root.textContent.trim(), 'the root node is not empty');
       });
 
@@ -759,7 +813,9 @@ describe('ApiSchemaGenerator', () => {
 
       it('generates schema for objects union', async () => {
         const shape = loader.getShape(model, 'ObjectUnions');
-        const result = ApiSchemaGenerator.asSchema(shape, xmlMime);
+        const result = ApiSchemaGenerator.asSchema(shape, xmlMime, {
+          renderMocked: true,
+        });
         const parser = new DOMParser();
         const schema = parser.parseFromString(String(result), xmlMime);
 
@@ -779,6 +835,7 @@ describe('ApiSchemaGenerator', () => {
         const id = shape.anyOf[1].id;
         const result = ApiSchemaGenerator.asSchema(shape, xmlMime, {
           selectedUnions: [id],
+          renderMocked: true,
         });
         const parser = new DOMParser();
         const schema = parser.parseFromString(String(result), xmlMime);
@@ -812,7 +869,9 @@ describe('ApiSchemaGenerator', () => {
 
       it('does not renders example from an union object when not configured', async () => {
         const shape = loader.getShape(model, 'ObjectUnionWithExample');
-        const result = ApiSchemaGenerator.asSchema(shape, xmlMime);
+        const result = ApiSchemaGenerator.asSchema(shape, xmlMime, {
+          renderMocked: true,
+        });
         const parser = new DOMParser();
         const schema = parser.parseFromString(String(result), xmlMime);
 
@@ -1294,7 +1353,9 @@ describe('ApiSchemaGenerator', () => {
 
     it('serializes required properties', async () => {
       const shape = loader.getShape(model, 'XmlSerializationObject');
-      const result = ApiSchemaGenerator.asSchema(shape, xmlMime);
+      const result = ApiSchemaGenerator.asSchema(shape, xmlMime, {
+        renderMocked: true,
+      });
       const parser = new DOMParser();
       const schema = parser.parseFromString(String(result), xmlMime);
       const root = schema.querySelector('XmlSerializationObject');
@@ -1322,6 +1383,7 @@ describe('ApiSchemaGenerator', () => {
       const shape = loader.getShape(model, 'XmlSerializationObject');
       const result = ApiSchemaGenerator.asSchema(shape, xmlMime, {
         renderOptional: true,
+        renderMocked: true,
       });
       const parser = new DOMParser();
       const schema = parser.parseFromString(String(result), xmlMime);
@@ -1488,6 +1550,7 @@ describe('ApiSchemaGenerator', () => {
       const result = ApiSchemaGenerator.asSchema(shape, xmlMime, {
         renderOptional: true,
         renderExamples: true,
+        renderMocked: true,
       });
       
       const parser = new DOMParser();
@@ -1580,6 +1643,7 @@ describe('ApiSchemaGenerator', () => {
       const result = ApiSchemaGenerator.asSchema(shape, xmlMime, {
         renderOptional: true,
         renderExamples: true,
+        renderMocked: true,
       });
       
       const parser = new DOMParser();
