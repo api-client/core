@@ -14,22 +14,22 @@ export class AuthorizationEvents {
 
 class OAuth2Events {
   /**
-   * @param target A node on which to dispatch the event.
    * @param config Authorization options.
+   * @param target A node on which to dispatch the event.
    * @returns Promise resolved with authorization result
    */
-  static async authorize(target: EventTarget, config: IOAuth2Authorization): Promise<ITokenInfo | undefined> {
+  static async authorize(config: IOAuth2Authorization, target: EventTarget = window): Promise<ITokenInfo | undefined> {
     const e = new ContextEvent<IOAuth2Authorization, ITokenInfo>(AuthorizationEventTypes.OAuth2.authorize, config);
     target.dispatchEvent(e);
     return e.detail.result;
   }
 
   /**
-   * @param target A node on which to dispatch the event.
    * @param config Authorization options.
+   * @param target A node on which to dispatch the event.
    * @returns Promise resolved when the token is removed
    */
-  static async removeToken(target: EventTarget, config: ITokenRemoveOptions): Promise<void> {
+  static async removeToken(config: ITokenRemoveOptions, target: EventTarget = window): Promise<void> {
     const e = new ContextEvent<ITokenRemoveOptions, void>(AuthorizationEventTypes.OAuth2.removeToken, config);
     target.dispatchEvent(e);
     return e.detail.result;
@@ -38,22 +38,22 @@ class OAuth2Events {
 
 class OidcEvents {
   /**
-   * @param target A node on which to dispatch the event.
    * @param config Authorization options.
+   * @param target A node on which to dispatch the event.
    * @returns Promise resolved with authorization result
    */
-  static async authorize(target: EventTarget, config: IOAuth2Authorization): Promise<(IOidcTokenInfo|IOidcTokenError)[] | undefined> {
+  static async authorize(config: IOAuth2Authorization, target: EventTarget = window): Promise<(IOidcTokenInfo|IOidcTokenError)[] | undefined> {
     const e = new ContextEvent<IOAuth2Authorization, (IOidcTokenInfo|IOidcTokenError)[]>(AuthorizationEventTypes.Oidc.authorize, config);
     target.dispatchEvent(e);
     return e.detail.result;
   }
 
   /**
-   * @param target A node on which to dispatch the event.
    * @param config Authorization options.
+   * @param target A node on which to dispatch the event.
    * @returns Promise resolved when the token is removed
    */
-  static async removeToken(target: EventTarget, config: ITokenRemoveOptions): Promise<void> {
+  static async removeToken(config: ITokenRemoveOptions, target: EventTarget = window): Promise<void> {
     const e = new ContextEvent<ITokenRemoveOptions, void>(AuthorizationEventTypes.Oidc.removeTokens, config);
     target.dispatchEvent(e);
     return e.detail.result;

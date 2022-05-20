@@ -19,7 +19,7 @@ export class DeleteCookieRunnable extends ActionRunnable {
     if (!url) {
       return;
     }
-    Events.Cookie.deleteUrl(this.eventTarget, url, config.name);
+    Events.Cookie.deleteUrl(url, config.name, this.eventTarget);
   }
 
   async request(request: IHttpRequest): Promise<void> {
@@ -34,6 +34,6 @@ export class DeleteCookieRunnable extends ActionRunnable {
     if (!url) {
       return;
     }
-    Events.Cookie.deleteUrl(this.eventTarget, url, config.name);
+    Events.Cookie.deleteUrl(url, config.name, this.eventTarget);
   } 
 }

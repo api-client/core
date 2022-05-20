@@ -68,7 +68,7 @@ export class SetCookieRunnable extends ActionRunnable {
     if (typeof config.secure === 'boolean') {
       cookie.secure = config.secure;
     }
-    Events.Cookie.update(this.eventTarget, cookie);
+    Events.Cookie.update(cookie, this.eventTarget);
   }
 
   async response(log: IRequestLog): Promise<void> {

@@ -73,7 +73,7 @@ describe('Events', () => {
         it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Cookie.listDomain, spy);
-          Events.Cookie.listDomain(document.body, domain);
+          Events.Cookie.listDomain(domain);
           window.removeEventListener(EventTypes.Cookie.listDomain, spy);
           assert.isTrue(spy.calledOnce);
         });
@@ -81,7 +81,7 @@ describe('Events', () => {
         it('has the domain property', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Cookie.listDomain, spy);
-          Events.Cookie.listDomain(document.body, domain);
+          Events.Cookie.listDomain(domain);
           window.removeEventListener(EventTypes.Cookie.listDomain, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.deepEqual(e.detail.domain, domain);
@@ -94,7 +94,7 @@ describe('Events', () => {
         it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Cookie.listUrl, spy);
-          Events.Cookie.listUrl(document.body, url);
+          Events.Cookie.listUrl(url);
           window.removeEventListener(EventTypes.Cookie.listUrl, spy);
           assert.isTrue(spy.calledOnce);
         });
@@ -102,7 +102,7 @@ describe('Events', () => {
         it('has the url property', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Cookie.listUrl, spy);
-          Events.Cookie.listUrl(document.body, url);
+          Events.Cookie.listUrl(url);
           window.removeEventListener(EventTypes.Cookie.listUrl, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.deepEqual(e.detail.url, url);
@@ -119,7 +119,7 @@ describe('Events', () => {
         it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Cookie.delete, spy);
-          Events.Cookie.delete(document.body, [cookie]);
+          Events.Cookie.delete([cookie]);
           window.removeEventListener(EventTypes.Cookie.delete, spy);
           assert.isTrue(spy.calledOnce);
         });
@@ -127,7 +127,7 @@ describe('Events', () => {
         it('has the cookies property', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Cookie.delete, spy);
-          Events.Cookie.delete(document.body, [cookie]);
+          Events.Cookie.delete([cookie]);
           window.removeEventListener(EventTypes.Cookie.delete, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.deepEqual(e.detail.cookies, [cookie]);
@@ -140,7 +140,7 @@ describe('Events', () => {
         it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Cookie.deleteUrl, spy);
-          Events.Cookie.deleteUrl(document.body, url);
+          Events.Cookie.deleteUrl(url);
           window.removeEventListener(EventTypes.Cookie.deleteUrl, spy);
           assert.isTrue(spy.calledOnce);
         });
@@ -148,7 +148,7 @@ describe('Events', () => {
         it('has the url property', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Cookie.deleteUrl, spy);
-          Events.Cookie.deleteUrl(document.body, url);
+          Events.Cookie.deleteUrl(url);
           window.removeEventListener(EventTypes.Cookie.deleteUrl, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.deepEqual(e.detail.url, url);
@@ -158,7 +158,7 @@ describe('Events', () => {
           const name = 'test name';
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Cookie.deleteUrl, spy);
-          Events.Cookie.deleteUrl(document.body, url, name);
+          Events.Cookie.deleteUrl(url, name);
           window.removeEventListener(EventTypes.Cookie.deleteUrl, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.deepEqual(e.detail.name, name);
@@ -175,7 +175,7 @@ describe('Events', () => {
         it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Cookie.update, spy);
-          Events.Cookie.update(document.body, cookie);
+          Events.Cookie.update(cookie);
           window.removeEventListener(EventTypes.Cookie.update, spy);
           assert.isTrue(spy.calledOnce);
         });
@@ -183,7 +183,7 @@ describe('Events', () => {
         it('has the detail property', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Cookie.update, spy);
-          Events.Cookie.update(document.body, cookie);
+          Events.Cookie.update(cookie);
           window.removeEventListener(EventTypes.Cookie.update, spy);
           const e = spy.args[0][0] as ContextUpdateEvent<IHttpCookie>;
           const detail = e.detail as ContextUpdateEventDetail<IHttpCookie>;
@@ -201,7 +201,7 @@ describe('Events', () => {
         it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Cookie.updateBulk, spy);
-          Events.Cookie.updateBulk(document.body, [cookie]);
+          Events.Cookie.updateBulk([cookie]);
           window.removeEventListener(EventTypes.Cookie.updateBulk, spy);
           assert.isTrue(spy.calledOnce);
         });
@@ -209,7 +209,7 @@ describe('Events', () => {
         it('has the cookies property', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Cookie.updateBulk, spy);
-          Events.Cookie.updateBulk(document.body, [cookie]);
+          Events.Cookie.updateBulk([cookie]);
           window.removeEventListener(EventTypes.Cookie.updateBulk, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.deepEqual(e.detail.cookies, [cookie]);
@@ -226,7 +226,7 @@ describe('Events', () => {
         it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Cookie.State.delete, spy);
-          Events.Cookie.State.delete(document.body, cookie);
+          Events.Cookie.State.delete(cookie);
           window.removeEventListener(EventTypes.Cookie.State.delete, spy);
           assert.isTrue(spy.calledOnce);
         });
@@ -234,7 +234,7 @@ describe('Events', () => {
         it('has the cookie property', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Cookie.State.delete, spy);
-          Events.Cookie.State.delete(document.body, cookie);
+          Events.Cookie.State.delete(cookie);
           window.removeEventListener(EventTypes.Cookie.State.delete, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.deepEqual(e.detail.cookie, cookie);
@@ -256,7 +256,7 @@ describe('Events', () => {
         it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Cookie.State.update, spy);
-          Events.Cookie.State.update(document.body, record);
+          Events.Cookie.State.update(record);
           window.removeEventListener(EventTypes.Cookie.State.update, spy);
           assert.isTrue(spy.calledOnce);
         });
@@ -264,7 +264,7 @@ describe('Events', () => {
         it('has the change record', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Cookie.State.update, spy);
-          Events.Cookie.State.update(document.body, record);
+          Events.Cookie.State.update(record);
           window.removeEventListener(EventTypes.Cookie.State.update, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.deepEqual(e.detail, record);

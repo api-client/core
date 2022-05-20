@@ -35,7 +35,7 @@ describe('Events', () => {
         it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Telemetry.view, spy);
-          Events.Telemetry.view(document.body, screenName);
+          Events.Telemetry.view(screenName);
           window.removeEventListener(EventTypes.Telemetry.view, spy);
           assert.isTrue(spy.calledOnce);
         });
@@ -43,7 +43,7 @@ describe('Events', () => {
         it('the event has screen name on the detail', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Telemetry.view, spy);
-          Events.Telemetry.view(document.body, screenName);
+          Events.Telemetry.view(screenName);
           window.removeEventListener(EventTypes.Telemetry.view, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.equal(e.detail.screenName, screenName);
@@ -56,7 +56,7 @@ describe('Events', () => {
             customDimensions: [{ index: 1, value: 'test' }],
           };
           window.addEventListener(EventTypes.Telemetry.view, spy);
-          Events.Telemetry.view(document.body, screenName, custom);
+          Events.Telemetry.view(screenName, document.body, custom);
           window.removeEventListener(EventTypes.Telemetry.view, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.deepEqual(e.detail.customMetrics, custom.customMetrics, 'has customMetrics');
@@ -75,7 +75,7 @@ describe('Events', () => {
         it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Telemetry.event, spy);
-          Events.Telemetry.event(document.body, init);
+          Events.Telemetry.event(init);
           window.removeEventListener(EventTypes.Telemetry.event, spy);
           assert.isTrue(spy.calledOnce);
         });
@@ -83,7 +83,7 @@ describe('Events', () => {
         it('the event has the detail object', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Telemetry.event, spy);
-          Events.Telemetry.event(document.body, init);
+          Events.Telemetry.event(init);
           window.removeEventListener(EventTypes.Telemetry.event, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.deepEqual(e.detail, init);
@@ -97,7 +97,7 @@ describe('Events', () => {
         it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Telemetry.exception, spy);
-          Events.Telemetry.exception(document.body, description);
+          Events.Telemetry.exception(description);
           window.removeEventListener(EventTypes.Telemetry.exception, spy);
           assert.isTrue(spy.calledOnce);
         });
@@ -105,7 +105,7 @@ describe('Events', () => {
         it('the event has the description', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Telemetry.exception, spy);
-          Events.Telemetry.exception(document.body, description);
+          Events.Telemetry.exception(description);
           window.removeEventListener(EventTypes.Telemetry.exception, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.equal(e.detail.description, description);
@@ -114,7 +114,7 @@ describe('Events', () => {
         it('the event has the fatal', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Telemetry.exception, spy);
-          Events.Telemetry.exception(document.body, description, fatal);
+          Events.Telemetry.exception(description, fatal);
           window.removeEventListener(EventTypes.Telemetry.exception, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.equal(e.detail.fatal, fatal);
@@ -127,7 +127,7 @@ describe('Events', () => {
             customDimensions: [{ index: 1, value: 'test' }],
           };
           window.addEventListener(EventTypes.Telemetry.exception, spy);
-          Events.Telemetry.exception(document.body, description, fatal, custom);
+          Events.Telemetry.exception(description, fatal, document.body, custom);
           window.removeEventListener(EventTypes.Telemetry.exception, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.deepEqual(e.detail.customMetrics, custom.customMetrics, 'has customMetrics');
@@ -145,7 +145,7 @@ describe('Events', () => {
         it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Telemetry.social, spy);
-          Events.Telemetry.social(document.body, init.network, init.action, init.target);
+          Events.Telemetry.social(init.network, init.action, init.target);
           window.removeEventListener(EventTypes.Telemetry.social, spy);
           assert.isTrue(spy.calledOnce);
         });
@@ -153,7 +153,7 @@ describe('Events', () => {
         it('the event has the detail object', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Telemetry.social, spy);
-          Events.Telemetry.social(document.body, init.network, init.action, init.target);
+          Events.Telemetry.social(init.network, init.action, init.target);
           window.removeEventListener(EventTypes.Telemetry.social, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.deepEqual(e.detail, init);
@@ -166,7 +166,7 @@ describe('Events', () => {
             customDimensions: [{ index: 1, value: 'test' }],
           };
           window.addEventListener(EventTypes.Telemetry.social, spy);
-          Events.Telemetry.social(document.body, init.network, init.action, init.target, custom);
+          Events.Telemetry.social(init.network, init.action, init.target, document.body, custom);
           window.removeEventListener(EventTypes.Telemetry.social, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.deepEqual(e.detail.customMetrics, custom.customMetrics, 'has customMetrics');
@@ -185,7 +185,7 @@ describe('Events', () => {
         it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Telemetry.timing, spy);
-          Events.Telemetry.timing(document.body, init.category, init.variable, init.value, init.label);
+          Events.Telemetry.timing(init.category, init.variable, init.value, init.label);
           window.removeEventListener(EventTypes.Telemetry.timing, spy);
           assert.isTrue(spy.calledOnce);
         });
@@ -193,7 +193,7 @@ describe('Events', () => {
         it('the event has the detail object', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Telemetry.timing, spy);
-          Events.Telemetry.timing(document.body, init.category, init.variable, init.value, init.label);
+          Events.Telemetry.timing(init.category, init.variable, init.value, init.label);
           window.removeEventListener(EventTypes.Telemetry.timing, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.deepEqual(e.detail, init);
@@ -206,7 +206,7 @@ describe('Events', () => {
             customDimensions: [{ index: 1, value: 'test' }],
           };
           window.addEventListener(EventTypes.Telemetry.timing, spy);
-          Events.Telemetry.timing(document.body, init.category, init.variable, init.value, init.label, custom);
+          Events.Telemetry.timing(init.category, init.variable, init.value, init.label, document.body, custom);
           window.removeEventListener(EventTypes.Telemetry.timing, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.deepEqual(e.detail.customMetrics, custom.customMetrics, 'has customMetrics');

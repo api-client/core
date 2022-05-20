@@ -1,6 +1,7 @@
 // eslint-disable-next-line import/no-unresolved
 import { assert } from '@esm-bundle/chai';
 import { OAuth2Authorization } from '../../src/authorization/OAuth2Authorization.js';
+import { IOAuth2Authorization } from '../../src/models/Authorization.js';
 
 // responses are defined in the ./ServerMock.js
 
@@ -78,7 +79,7 @@ describe('OAuth2', () => {
     });
 
     describe('Headers delivery method', () => {
-      const baseConfig = /** @type OAuth2Settings */ (Object.freeze({
+      const baseConfig: IOAuth2Authorization = (Object.freeze({
         grantType: 'client_credentials',
         clientId: 'auth-code-cid',
         clientSecret: 'cc-secret',

@@ -34,7 +34,7 @@ describe('Events', () => {
         it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Process.loadingStart, spy);
-          Events.Process.loadingStart(document.body, pid, message);
+          Events.Process.loadingStart(pid, message);
           window.removeEventListener(EventTypes.Process.loadingStart, spy);
           assert.isTrue(spy.calledOnce);
         });
@@ -42,7 +42,7 @@ describe('Events', () => {
         it('has the pid on the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Process.loadingStart, spy);
-          Events.Process.loadingStart(document.body, pid, message);
+          Events.Process.loadingStart(pid, message);
           window.removeEventListener(EventTypes.Process.loadingStart, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.equal(e.detail.pid, pid);
@@ -51,7 +51,7 @@ describe('Events', () => {
         it('has the message on the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Process.loadingStart, spy);
-          Events.Process.loadingStart(document.body, pid, message);
+          Events.Process.loadingStart(pid, message);
           window.removeEventListener(EventTypes.Process.loadingStart, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.equal(e.detail.message, message);
@@ -64,7 +64,7 @@ describe('Events', () => {
         it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Process.loadingStop, spy);
-          Events.Process.loadingStop(document.body, pid);
+          Events.Process.loadingStop(pid);
           window.removeEventListener(EventTypes.Process.loadingStop, spy);
           assert.isTrue(spy.calledOnce);
         });
@@ -72,7 +72,7 @@ describe('Events', () => {
         it('has the pid on the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Process.loadingStop, spy);
-          Events.Process.loadingStop(document.body, pid);
+          Events.Process.loadingStop(pid);
           window.removeEventListener(EventTypes.Process.loadingStop, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.equal(e.detail.pid, pid);
@@ -87,7 +87,7 @@ describe('Events', () => {
         it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Process.loadingError, spy);
-          Events.Process.loadingError(document.body, pid, message);
+          Events.Process.loadingError(pid, message);
           window.removeEventListener(EventTypes.Process.loadingError, spy);
           assert.isTrue(spy.calledOnce);
         });
@@ -95,7 +95,7 @@ describe('Events', () => {
         it('has the pid on the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Process.loadingError, spy);
-          Events.Process.loadingError(document.body, pid, message);
+          Events.Process.loadingError(pid, message);
           window.removeEventListener(EventTypes.Process.loadingError, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.equal(e.detail.pid, pid);
@@ -104,7 +104,7 @@ describe('Events', () => {
         it('has the message on the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Process.loadingError, spy);
-          Events.Process.loadingError(document.body, pid, message);
+          Events.Process.loadingError(pid, message);
           window.removeEventListener(EventTypes.Process.loadingError, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.equal(e.detail.message, message);
@@ -113,7 +113,7 @@ describe('Events', () => {
         it('has the optional error on the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Process.loadingError, spy);
-          Events.Process.loadingError(document.body, pid, message, error);
+          Events.Process.loadingError(pid, message, error);
           window.removeEventListener(EventTypes.Process.loadingError, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.deepEqual(e.detail.error, error);

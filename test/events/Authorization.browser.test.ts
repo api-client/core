@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { assert } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { EventTypes } from  '../../src/events/EventTypes.js';
@@ -64,7 +65,7 @@ describe('Events', () => {
           it('dispatches the event', () => {
             const spy = sinon.spy();
             window.addEventListener(EventTypes.Authorization.OAuth2.authorize, spy);
-            Events.Authorization.OAuth2.authorize(document.body, config);
+            Events.Authorization.OAuth2.authorize(config);
             window.removeEventListener(EventTypes.Authorization.OAuth2.authorize, spy);
             assert.isTrue(spy.calledOnce);
           });
@@ -72,7 +73,7 @@ describe('Events', () => {
           it('has the configuration on the detail', () => {
             const spy = sinon.spy();
             window.addEventListener(EventTypes.Authorization.OAuth2.authorize, spy);
-            Events.Authorization.OAuth2.authorize(document.body, config);
+            Events.Authorization.OAuth2.authorize(config);
             window.removeEventListener(EventTypes.Authorization.OAuth2.authorize, spy);
             const e = spy.args[0][0];
             const cnf = e.detail;
@@ -87,7 +88,7 @@ describe('Events', () => {
           it('dispatches the event', () => {
             const spy = sinon.spy();
             window.addEventListener(EventTypes.Authorization.OAuth2.removeToken, spy);
-            Events.Authorization.OAuth2.removeToken(document.body, config);
+            Events.Authorization.OAuth2.removeToken(config);
             window.removeEventListener(EventTypes.Authorization.OAuth2.removeToken, spy);
             assert.isTrue(spy.calledOnce);
           });
@@ -95,7 +96,7 @@ describe('Events', () => {
           it('has the configuration on the detail', () => {
             const spy = sinon.spy();
             window.addEventListener(EventTypes.Authorization.OAuth2.removeToken, spy);
-            Events.Authorization.OAuth2.removeToken(document.body, config);
+            Events.Authorization.OAuth2.removeToken(config);
             window.removeEventListener(EventTypes.Authorization.OAuth2.removeToken, spy);
             const e = spy.args[0][0];
             const cnf = e.detail;
@@ -112,7 +113,7 @@ describe('Events', () => {
           it('dispatches the event', () => {
             const spy = sinon.spy();
             window.addEventListener(EventTypes.Authorization.Oidc.authorize, spy);
-            Events.Authorization.Oidc.authorize(document.body, config);
+            Events.Authorization.Oidc.authorize(config);
             window.removeEventListener(EventTypes.Authorization.Oidc.authorize, spy);
             assert.isTrue(spy.calledOnce);
           });
@@ -120,7 +121,7 @@ describe('Events', () => {
           it('has the configuration on the detail', () => {
             const spy = sinon.spy();
             window.addEventListener(EventTypes.Authorization.Oidc.authorize, spy);
-            Events.Authorization.Oidc.authorize(document.body, config);
+            Events.Authorization.Oidc.authorize(config);
             window.removeEventListener(EventTypes.Authorization.Oidc.authorize, spy);
             const e = spy.args[0][0];
             
@@ -137,7 +138,7 @@ describe('Events', () => {
           it('dispatches the event', () => {
             const spy = sinon.spy();
             window.addEventListener(EventTypes.Authorization.Oidc.removeTokens, spy);
-            Events.Authorization.Oidc.removeToken(document.body, config);
+            Events.Authorization.Oidc.removeToken(config);
             window.removeEventListener(EventTypes.Authorization.Oidc.removeTokens, spy);
             assert.isTrue(spy.calledOnce);
           });
@@ -145,7 +146,7 @@ describe('Events', () => {
           it('has the configuration on the detail', () => {
             const spy = sinon.spy();
             window.addEventListener(EventTypes.Authorization.Oidc.removeTokens, spy);
-            Events.Authorization.Oidc.removeToken(document.body, config);
+            Events.Authorization.Oidc.removeToken(config);
             window.removeEventListener(EventTypes.Authorization.Oidc.removeTokens, spy);
             const e = spy.args[0][0];
             const cnf = e.detail;

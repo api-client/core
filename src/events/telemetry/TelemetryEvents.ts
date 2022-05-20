@@ -48,7 +48,7 @@ export class TelemetryEvents {
    * @param screenName The screen name
    * @param info Analytics base configuration
    */
-  static view(target: EventTarget, screenName: string, info: ITelemetryDetail = {}): void {
+  static view(screenName: string, target: EventTarget = window, info: ITelemetryDetail = {}): void {
     const detail: ITelemetryScreenViewDetail = {
       ...info, screenName,
     };
@@ -66,7 +66,7 @@ export class TelemetryEvents {
    * @param target A node on which to dispatch the event
    * @param detail The event configuration
    */
-  static event(target: EventTarget, detail: ITelemetryEventDetail): void {
+  static event(detail: ITelemetryEventDetail, target: EventTarget = window): void {
     const e = new CustomEvent(TelemetryEventTypes.event, {
       bubbles: true,
       composed: true,
@@ -83,7 +83,7 @@ export class TelemetryEvents {
    * @param fatal Whether the exception was fatal to the application
    * @param info Analytics base configuration
    */
-  static exception(target: EventTarget, description: string, fatal?: boolean, info: ITelemetryDetail = {}): void {
+  static exception(description: string, fatal?: boolean, target: EventTarget = window, info: ITelemetryDetail = {}): void {
     const detail: ITelemetryExceptionDetail = { ...info, description, fatal };
     const e = new CustomEvent(TelemetryEventTypes.exception, {
       bubbles: true,
@@ -102,7 +102,7 @@ export class TelemetryEvents {
    * @param url The share url
    * @param info Analytics base configuration
    */
-  static social(target: EventTarget, network: string, action: string, url: string, info: ITelemetryDetail = {}): void {
+  static social(network: string, action: string, url: string, target: EventTarget = window, info: ITelemetryDetail = {}): void {
     const detail: ITelemetrySocialDetail = { ...info, network, action, target: url };
     const e = new CustomEvent(TelemetryEventTypes.social, {
       bubbles: true,
@@ -122,7 +122,7 @@ export class TelemetryEvents {
    * @param label The timing label
    * @param info Analytics base configuration
    */
-  static timing(target: EventTarget, category: string, variable: string, value: number, label?: string, info: ITelemetryDetail = {}): void {
+  static timing(category: string, variable: string, value: number, label?: string, target: EventTarget = window, info: ITelemetryDetail = {}): void {
     const detail: ITelemetryTimingDetail = { ...info, category, variable, value, label };
     const e = new CustomEvent(TelemetryEventTypes.timing, {
       bubbles: true,
@@ -145,7 +145,7 @@ class StateEvents {
    * 
    * @param target The node on which to dispatch the event.
    */
-  static set(target: EventTarget): void {
+  static set(target: EventTarget = window): void {
     const e = new Event(TelemetryEventTypes.State.set, {
       composed: true,
       cancelable: true,

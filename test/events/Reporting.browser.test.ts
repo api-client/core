@@ -33,7 +33,7 @@ describe('Events', () => {
         it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Reporting.error, spy);
-          Events.Reporting.error(document.body, desc);
+          Events.Reporting.error(desc);
           window.removeEventListener(EventTypes.Reporting.error, spy);
           assert.isTrue(spy.calledOnce);
         });
@@ -41,7 +41,7 @@ describe('Events', () => {
         it('has the description on the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Reporting.error, spy);
-          Events.Reporting.error(document.body, desc);
+          Events.Reporting.error(desc);
           window.removeEventListener(EventTypes.Reporting.error, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.equal(e.detail.description, desc);
@@ -50,7 +50,7 @@ describe('Events', () => {
         it('has the error on the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Reporting.error, spy);
-          Events.Reporting.error(document.body, desc, err);
+          Events.Reporting.error(desc, err);
           window.removeEventListener(EventTypes.Reporting.error, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.deepEqual(e.detail.error, err);
@@ -59,7 +59,7 @@ describe('Events', () => {
         it('has the component on the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Reporting.error, spy);
-          Events.Reporting.error(document.body, desc, err, cmp);
+          Events.Reporting.error(desc, err, cmp);
           window.removeEventListener(EventTypes.Reporting.error, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.deepEqual(e.detail.component, cmp);

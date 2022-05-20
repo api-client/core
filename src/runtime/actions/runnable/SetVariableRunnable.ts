@@ -29,7 +29,7 @@ export class SetVariableRunnable extends ActionRunnable {
 
   async setVariable(config: ISetVariableAction, value: string): Promise<void> {
     const { name } = config;
-    Events.Environment.set(this.eventTarget, name, value);
+    Events.Environment.set(name, value, this.eventTarget);
   }
 
   async response(log: IRequestLog): Promise<void> {

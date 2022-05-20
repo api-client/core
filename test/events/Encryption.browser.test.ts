@@ -34,7 +34,7 @@ describe('Events', () => {
         it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Encryption.encrypt, spy);
-          Events.Encryption.encrypt(document.body, data, passphrase, method);
+          Events.Encryption.encrypt(data, passphrase, method);
           window.removeEventListener(EventTypes.Encryption.encrypt, spy);
           assert.isTrue(spy.calledOnce);
         });
@@ -42,7 +42,7 @@ describe('Events', () => {
         it('has the data on the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Encryption.encrypt, spy);
-          Events.Encryption.encrypt(document.body, data, passphrase, method);
+          Events.Encryption.encrypt(data, passphrase, method);
           window.removeEventListener(EventTypes.Encryption.encrypt, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.equal(e.detail.data, data);
@@ -51,7 +51,7 @@ describe('Events', () => {
         it('has the passphrase on the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Encryption.encrypt, spy);
-          Events.Encryption.encrypt(document.body, data, passphrase, method);
+          Events.Encryption.encrypt(data, passphrase, method);
           window.removeEventListener(EventTypes.Encryption.encrypt, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.equal(e.detail.passphrase, passphrase);
@@ -60,7 +60,7 @@ describe('Events', () => {
         it('has the method on the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Encryption.encrypt, spy);
-          Events.Encryption.encrypt(document.body, data, passphrase, method);
+          Events.Encryption.encrypt(data, passphrase, method);
           window.removeEventListener(EventTypes.Encryption.encrypt, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.equal(e.detail.method, method);
@@ -75,7 +75,7 @@ describe('Events', () => {
         it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Encryption.decrypt, spy);
-          Events.Encryption.decrypt(document.body, data, passphrase, method);
+          Events.Encryption.decrypt(data, passphrase, method);
           window.removeEventListener(EventTypes.Encryption.decrypt, spy);
           assert.isTrue(spy.calledOnce);
         });
@@ -83,7 +83,7 @@ describe('Events', () => {
         it('has the data on the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Encryption.decrypt, spy);
-          Events.Encryption.decrypt(document.body, data, passphrase, method);
+          Events.Encryption.decrypt(data, passphrase, method);
           window.removeEventListener(EventTypes.Encryption.decrypt, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.equal(e.detail.data, data);
@@ -92,7 +92,7 @@ describe('Events', () => {
         it('has the passphrase on the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Encryption.decrypt, spy);
-          Events.Encryption.decrypt(document.body, data, passphrase, method);
+          Events.Encryption.decrypt(data, passphrase, method);
           window.removeEventListener(EventTypes.Encryption.decrypt, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.equal(e.detail.passphrase, passphrase);
@@ -101,7 +101,7 @@ describe('Events', () => {
         it('has the method on the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Encryption.decrypt, spy);
-          Events.Encryption.decrypt(document.body, data, passphrase, method);
+          Events.Encryption.decrypt(data, passphrase, method);
           window.removeEventListener(EventTypes.Encryption.decrypt, spy);
           const e = spy.args[0][0] as CustomEvent<any>;
           assert.equal(e.detail.method, method);

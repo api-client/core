@@ -7,8 +7,10 @@ import { ReportingEventTypes } from './reporting/ReportingEventTypes.js';
 import { TelemetryEventTypes } from './telemetry/TelemetryEventTypes.js';
 import { EnvironmentEventTypes } from './environment/EnvironmentEventTypes.js';
 import { TransportEventTypes } from './transport/TransportEventTypes.js';
+import { AmfEventTypes } from './amf/AmfEventTypes.js';
 
 export const EventTypes = Object.freeze({
+  Amf: AmfEventTypes,
   Authorization: AuthorizationEventTypes,
   Cookie: CookieEventTypes,
   Encryption: EncryptionEventTypes,

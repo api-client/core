@@ -39,7 +39,7 @@ export const TransportEvent = Object.freeze({
      * @param config Optional request configuration.
      * @returns The execution log or `undefined` when the event was not handled.
      */
-    send: async (target: EventTarget, request: IHttpRequest, authorization?: IRequestAuthorization[], config?: IRequestBaseConfig): Promise<IRequestLog | undefined> => {
+    send: async (request: IHttpRequest, authorization?: IRequestAuthorization[], config?: IRequestBaseConfig, target: EventTarget = window): Promise<IRequestLog | undefined> => {
       const e = new ContextEvent<ICoreRequestDetail, IRequestLog>(TransportEventTypes.Core.send, {
         request,
         authorization,
@@ -62,7 +62,7 @@ export const TransportEvent = Object.freeze({
      * @param init Optional request init options compatible with the Fetch API.
      * @returns Compatible with the Fetch API Response object or `undefined` when the event was not handled.
      */
-    send: async (target: EventTarget, request: IHttpRequest, init?: RequestInit): Promise<Response | undefined> => {
+    send: async (request: IHttpRequest, init?: RequestInit, target: EventTarget = window): Promise<Response | undefined> => {
       const e = new ContextEvent<IHttpRequestDetail, Response>(TransportEventTypes.Http.send, {
         request,
         init,
@@ -82,7 +82,7 @@ export const TransportEvent = Object.freeze({
      * @param opts The project execution options.
      * @returns 
      */
-    send: async (target: EventTarget, project: HttpProject | string, opts: IProjectRunnerOptions): Promise<IProjectExecutionLog | undefined> => {
+    send: async (project: HttpProject | string, opts: IProjectRunnerOptions, target: EventTarget = window): Promise<IProjectExecutionLog | undefined> => {
       const e = new ContextEvent<IProjectRequestDetail, IProjectExecutionLog>(TransportEventTypes.Project.send, {
         project,
         opts,

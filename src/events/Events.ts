@@ -7,8 +7,10 @@ import { ReportingEvents } from './reporting/ReportingEvents.js';
 import { TelemetryEvents } from './telemetry/TelemetryEvents.js';
 import { TransportEvent } from './transport/TransportEvents.js';
 import { EnvironmentEvents } from './environment/EnvironmentEvents.js';
+import { AmfEvents } from './amf/AmfEvents.js';
 
 export const Events = Object.freeze({
+  Amf: AmfEvents,
   Authorization: AuthorizationEvents,
   Cookie: CookieEvents,
   Encryption: EncryptionEvents,

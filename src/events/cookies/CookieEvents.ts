@@ -48,7 +48,7 @@ export class CookieEvents {
    * @param domain The cookie domain
    * @returns The list of project index objects.
    */
-  static async listDomain(target: EventTarget, domain: string): Promise<IHttpCookie[] | undefined> {
+  static async listDomain(domain: string, target: EventTarget = window): Promise<IHttpCookie[] | undefined> {
     const detail: ICookieDomainListDetail = { domain };
     const e = new ContextEvent<ICookieDomainListDetail, IHttpCookie[]>(CookieEventTypes.listDomain, detail);
     target.dispatchEvent(e);
@@ -60,7 +60,7 @@ export class CookieEvents {
    * @param url The cookie URL
    * @returns The list of project index objects.
    */
-  static async listUrl(target: EventTarget, url: string): Promise<IHttpCookie[] | undefined> {
+  static async listUrl(url: string, target: EventTarget = window): Promise<IHttpCookie[] | undefined> {
     const detail: ICookieUrlListDetail = { url };
     const e = new ContextEvent<ICookieUrlListDetail, IHttpCookie[]>(CookieEventTypes.listUrl, detail);
     target.dispatchEvent(e);
@@ -73,7 +73,7 @@ export class CookieEvents {
    * @param target The target on which to dispatch the event
    * @param cookies The list of cookies to remove
    */
-  static async delete(target: EventTarget, cookies: IHttpCookie[]): Promise<void> {
+  static async delete(cookies: IHttpCookie[], target: EventTarget = window): Promise<void> {
     const detail: ICookieItemsDetail = { cookies };
     const e = new ContextEvent<ICookieItemsDetail, void>(CookieEventTypes.delete, detail);
     target.dispatchEvent(e);
@@ -87,7 +87,7 @@ export class CookieEvents {
    * @param url The url associated with the cookie. Depending on the session mechanism the URL or the domain and the path is used.
    * @param name The name of the cookie to remove. When not set all cookies are removed for the given URL.
    */
-  static async deleteUrl(target: EventTarget, url: string, name?: string): Promise<void> {
+  static async deleteUrl(url: string, name?: string, target: EventTarget = window): Promise<void> {
     const detail: ICookieDeleteUrlDetail = { url, name };
     const e = new ContextEvent<ICookieDeleteUrlDetail, void>(CookieEventTypes.deleteUrl, detail);
     target.dispatchEvent(e);
@@ -101,7 +101,7 @@ export class CookieEvents {
    * @param cookie A cookie to update
    * @returns The change record of the updated cookie.
    */
-  static async update(target: EventTarget, cookie: IHttpCookie): Promise<ContextChangeRecord<IHttpCookie> | undefined> {
+  static async update(cookie: IHttpCookie, target: EventTarget = window): Promise<ContextChangeRecord<IHttpCookie> | undefined> {
     const e = new ContextUpdateEvent(CookieEventTypes.update, { item: cookie });
     target.dispatchEvent(e);
     return e.detail.result;
@@ -114,7 +114,7 @@ export class CookieEvents {
    * @param cookies A list of cookies to update
    * @returns The change record of the updated cookie.
    */
-  static async updateBulk(target: EventTarget, cookies: IHttpCookie[]): Promise<void> {
+  static async updateBulk(cookies: IHttpCookie[], target: EventTarget = window): Promise<void> {
     const detail: ICookieItemsDetail = { cookies };
     const e = new ContextEvent<ICookieItemsDetail, void>(CookieEventTypes.updateBulk, detail);
     target.dispatchEvent(e);
@@ -135,7 +135,7 @@ class StateEvents {
    * @param target The target on which to dispatch the event
    * @param cookie The schema of the removed cookie
    */
-  static delete(target: EventTarget, cookie: IHttpCookie): void {
+  static delete(cookie: IHttpCookie, target: EventTarget = window): void {
     const e = new CustomEvent<ICookieDetail>(CookieEventTypes.State.delete, {
       bubbles: true,
       composed: true,
@@ -150,7 +150,7 @@ class StateEvents {
    * @param target The target on which to dispatch the event
    * @param record The change record.
    */
-  static update(target: EventTarget, record: ContextChangeRecord<IHttpCookie>): void {
+  static update(record: ContextChangeRecord<IHttpCookie>, target: EventTarget = window): void {
     const e = new ContextStateUpdateEvent<IHttpCookie>(CookieEventTypes.State.update, record);
     target.dispatchEvent(e);
   }

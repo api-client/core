@@ -6,11 +6,11 @@ export class ClientCertificateEvents {
   /**
    * Dispatches an event handled by the data store to read the client certificate.
    *
-   * @param target A node on which to dispatch the event.
    * @param id The id of the client certificate
+   * @param target A node on which to dispatch the event.
    * @returns Promise resolved to a client certificate model.
    */
-  static async read(target: EventTarget, id: string): Promise<HttpCertificate | undefined> {
+  static async read(id: string, target: EventTarget = window): Promise<HttpCertificate | undefined> {
     const e = new ContextReadEvent<HttpCertificate>(ModelEventTypes.ClientCertificate.read, id);
     target.dispatchEvent(e);
     return e.detail.result;
@@ -19,11 +19,11 @@ export class ClientCertificateEvents {
   /**
    * Dispatches an event to list the client certificates data.
    *
-   * @param target A node on which to dispatch the event.
    * @param opts Query options.
+   * @param target A node on which to dispatch the event.
    * @returns The list result.
    */
-  static async list(target: EventTarget, opts?: ContextListOptions): Promise<ContextListResult<HttpCertificate> | undefined> {
+  static async list(opts?: ContextListOptions, target: EventTarget = window): Promise<ContextListResult<HttpCertificate> | undefined> {
     const e = new ContextListEvent<HttpCertificate>(ModelEventTypes.ClientCertificate.list, opts);
     target.dispatchEvent(e);
     return e.detail.result;
@@ -32,11 +32,11 @@ export class ClientCertificateEvents {
   /**
    * Dispatches an event handled by the data store to delete a client certificate
    *
-   * @param target A node on which to dispatch the event.
    * @param id The id of the project to delete.
+   * @param target A node on which to dispatch the event.
    * @returns Promise resolved to a new revision after delete.
    */
-  static async delete(target: EventTarget, id: string): Promise<ContextDeleteRecord | undefined> {
+  static async delete(id: string, target: EventTarget = window): Promise<ContextDeleteRecord | undefined> {
     const e = new ContextDeleteEvent(ModelEventTypes.ClientCertificate.delete, id, undefined);
     target.dispatchEvent(e);
     return e.detail.result;
@@ -45,11 +45,11 @@ export class ClientCertificateEvents {
   /**
    * Dispatches an event handled by the data store to insert a new client certificate.
    *
-   * @param target A node on which to dispatch the event.
    * @param item The certificate object.
+   * @param target A node on which to dispatch the event.
    * @returns Promise resolved to the change record
    */
-  static async insert(target: EventTarget, item: ICertificateCreateOptions): Promise<ContextChangeRecord<HttpCertificate> | undefined> {
+  static async insert(item: ICertificateCreateOptions, target: EventTarget = window): Promise<ContextChangeRecord<HttpCertificate> | undefined> {
     const e = new ContextUpdateEvent<ICertificateCreateOptions, HttpCertificate>(ModelEventTypes.ClientCertificate.insert, { item, });
     target.dispatchEvent(e);
     return e.detail.result;
@@ -67,7 +67,7 @@ class StateEvents {
    * @param target A node on which to dispatch the event.
    * @param record Change record
    */
-  static update(target: EventTarget, record: ContextChangeRecord<HttpCertificate>): void {
+  static update(record: ContextChangeRecord<HttpCertificate>, target: EventTarget = window): void {
     const e = new ContextStateUpdateEvent<HttpCertificate>(ModelEventTypes.ClientCertificate.State.update, record);
     target.dispatchEvent(e);
   }
@@ -75,10 +75,10 @@ class StateEvents {
   /**
    * Dispatches an event after a client certificate was deleted
    *
-   * @param target A node on which to dispatch the event.
    * @param record The context store delete record
+   * @param target A node on which to dispatch the event.
    */
-  static delete(target: EventTarget, record: ContextDeleteRecord): void {
+  static delete(record: ContextDeleteRecord, target: EventTarget = window): void {
     const e = new ContextStateDeleteEvent(ModelEventTypes.ClientCertificate.State.delete, record);
     target.dispatchEvent(e);
   }

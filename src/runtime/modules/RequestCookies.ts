@@ -19,7 +19,7 @@ import { Cookie } from '../../lib/cookies/Cookie.js';
  * @returns A promise that resolves to header value string.
  */
 async function getCookiesHeaderValue(eventsTarget: EventTarget, url: string): Promise<string> {
-  const cookies = await CookieEvents.listUrl(eventsTarget, url);
+  const cookies = await CookieEvents.listUrl(url, eventsTarget);
   if (!cookies || !cookies.length) {
     return '';
   }
@@ -141,6 +141,6 @@ export async function processResponseCookies(log: IRequestLog, context: Executio
   const typedResponse = log.response as IResponse;
   const result = extract(typedResponse, log.request.url, log.redirects);
   if (result.cookies.length) {
-    await CookieEvents.updateBulk(context.eventsTarget, result.cookies.map(c => HttpCookie.fromCookieParser(c).toJSON()));
+    await CookieEvents.updateBulk(result.cookies.map(c => HttpCookie.fromCookieParser(c).toJSON()), context.eventsTarget);
   }
 }
