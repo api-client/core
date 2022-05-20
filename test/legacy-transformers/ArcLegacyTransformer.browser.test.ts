@@ -1,7 +1,6 @@
 import { assert } from '@esm-bundle/chai';
 import { DataTestHelper } from './DataTestHelper.js';
-import { ArcLegacyTransformer } from '../../src/models/transformers/ArcLegacyTransformer.js';
-import { ArcExportObject } from '../../src/models/legacy/DataExport.js';
+import { ArcExportObject, ArcLegacyTransformer } from '../../legacy.js';
 
 describe('ArcLegacyTransformer', () => {
   describe('Single request import', () => {

@@ -24,6 +24,7 @@
     "src/**/*",
     "index.ts",
     "browser.ts",
+    "legacy.ts",
     "test/servers/ssl-root-cas.d.ts"
   ]
 }

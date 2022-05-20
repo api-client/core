@@ -1,7 +1,6 @@
 import { assert } from '@esm-bundle/chai';
 import { DataTestHelper } from './DataTestHelper.js';
-import { ArcPouchTransformer } from '../../src/models/transformers/ArcPouchTransformer.js';
-import { ArcExportObject } from '../../src/models/legacy/DataExport.js';
+import { ArcExportObject, ArcPouchTransformer } from '../../legacy.js';
 
 describe('ArcPouchTransformer', () => {
   describe('previous version', () => {

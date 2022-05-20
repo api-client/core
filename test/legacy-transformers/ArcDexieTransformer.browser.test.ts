@@ -1,7 +1,6 @@
 import { assert } from '@esm-bundle/chai';
 import { DataTestHelper } from './DataTestHelper.js';
-import { ArcDexieTransformer } from '../../src/models/transformers/ArcDexieTransformer.js';
-import { ArcExportObject } from '../../src/models/legacy/DataExport.js';
+import { ArcExportObject, ArcDexieTransformer } from '../../legacy.js';
 
 describe('ArcDexieTransformer', () => {
   describe('Dexie export', () => {

@@ -1,10 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { assert } from '@esm-bundle/chai';
-import { LegacyMock } from '../../src/mocking/LegacyMock.js';
-import { LegacyExportProcessor } from '../../src/models/transformers/LegacyExportProcessor.js';
-import { ARCSavedRequest } from '../../src/models/legacy/request/ArcRequest.js';
-import { ARCProject } from '../../src/models/legacy/models/ArcLegacyProject.js';
-import { ARCVariable } from '../../src/models/legacy/models/Variable.js';
-import { ExportArcHistoryRequest, ExportArcWebsocketUrl, ExportArcUrlHistory, ExportArcVariable, ExportArcAuthData, ExportArcHostRule } from '../../src/models/legacy/DataExport.js';
+import { ExportArcHistoryRequest, ExportArcWebsocketUrl, ExportArcUrlHistory, ExportArcVariable, ExportArcAuthData, ExportArcHostRule, ARCVariable, ARCProject, ARCSavedRequest, LegacyExportProcessor, LegacyMock } from '../../legacy.js';
 
 describe('LegacyExportProcessor', () => {
   const generator = new LegacyMock();
