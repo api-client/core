@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import v4 from '../../lib/uuid.js';
 import { BaseTransformer, dataValue } from './BaseTransformer.js';
 import {
@@ -35,7 +37,7 @@ export class ArcPouchTransformer extends BaseTransformer {
    * @returns New data model object.
    */
   async transform(): Promise<ArcExportObject> {
-    const data = /** @type ArcExportObject */ ({ ...this[dataValue] });
+    const data = ({ ...this[dataValue] }) as ArcExportObject;
     if (data.projects && data.projects.length) {
       data.projects = this.transformProjects(data.projects);
     }
@@ -51,19 +53,19 @@ export class ArcPouchTransformer extends BaseTransformer {
     if (data.history && data.history.length) {
       data.history = this.transformHistory(data.history);
     }
-    const socketUrls = /** @type ExportArcWebsocketUrl[] */ (data['websocket-url-history'] || data.websocketurlhistory);
+    const socketUrls = (data['websocket-url-history'] || data.websocketurlhistory);
     if (socketUrls && socketUrls.length) {
       data.websocketurlhistory = socketUrls;
     }
-    const urls = /** @type ExportArcUrlHistory[] */ (data['url-history'] || data.urlhistory);
+    const urls = (data['url-history'] || data.urlhistory);
     if (urls && urls.length) {
       data.urlhistory = urls;
     }
-    const authData = /** @type ExportArcAuthData[] */ (data['auth-data'] || data.authdata);
+    const authData = (data['auth-data'] || data.authdata);
     if (authData && authData.length) {
       data.authdata = authData;
     }
-    const hostRules = /** @type ExportArcHostRule[] */ (data['host-rules'] || data.hostrules);
+    const hostRules = (data['host-rules'] || data.hostrules);
     if (hostRules && hostRules.length) {
       data.hostrules = hostRules;
     }
@@ -73,7 +75,7 @@ export class ArcPouchTransformer extends BaseTransformer {
     if (!data.loadToWorkspace) {
       data.kind = 'ARC#Import';
     }
-    const ccs = /** @type ExportArcClientCertificateData[] */ (data['client-certificates'] || data.clientcertificates);
+    const ccs = (data['client-certificates'] || data.clientcertificates);
     if (ccs && ccs.length) {
       data.clientcertificates = this.transformClientCertificates(ccs);
     }
@@ -152,7 +154,6 @@ export class ArcPouchTransformer extends BaseTransformer {
    * Transforms ARC's client certificate export object into intermediate structure
    * used by the import panel.
    *
-   * @param items [description]
    * @return A list of certificates to import. In each element
    * first item is the index data and the second is the certificates data.
    */

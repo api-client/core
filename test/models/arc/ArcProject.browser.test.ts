@@ -13,6 +13,8 @@ import {
   ArcProjectKind, ArcProject, IArcProject, ArcProjectFolderKind, ArcProjectFolder, ArcProjectRequest, 
   IArcProjectRequest, IProjectParent, ArcProjectItem, ArcProjectRequestKind,
 } from '../../../src/models/arc/ArcProject.js';
+import { ArcLegacyProject } from '../../../src/models/legacy/models/ArcLegacyProject.js';
+import { ARCSavedRequest } from '../../../src/models/legacy/request/ArcRequest.js';
 
 describe('Models', () => {
   describe('arc', () => {
@@ -139,19 +141,84 @@ describe('Models', () => {
             assert.ok(result.findRequest('https://api.com'), 'restores a request');
           });
         });
-  
-        describe('ArcProject.fromName()', () => {
-          it('creates an empty project with a name', () => {
-            const project = ArcProject.fromName('Test project');
-            assert.equal(project.kind, ArcProjectKind, 'sets the kind property');
-            assert.deepEqual(project.definitions.folders, [], 'sets the definitions.folders property');
-            assert.deepEqual(project.definitions.requests, [], 'sets the definitions.requests property');
-            assert.deepEqual(project.items, [], 'sets the items property');
-            const { info } = project;
-            assert.typeOf(info, 'object', 'sets the default info property');
-            assert.equal(info.kind, ThingKind, 'sets the info.kind property');
-            assert.equal(info.name, 'Test project', 'sets the info.name property');
-          });
+      });
+      
+      describe('ArcProject.fromName()', () => {
+        it('creates an empty project with a name', () => {
+          const project = ArcProject.fromName('Test project');
+          assert.equal(project.kind, ArcProjectKind, 'sets the kind property');
+          assert.deepEqual(project.definitions.folders, [], 'sets the definitions.folders property');
+          assert.deepEqual(project.definitions.requests, [], 'sets the definitions.requests property');
+          assert.deepEqual(project.items, [], 'sets the items property');
+          const { info } = project;
+          assert.typeOf(info, 'object', 'sets the default info property');
+          assert.equal(info.kind, ThingKind, 'sets the info.kind property');
+          assert.equal(info.name, 'Test project', 'sets the info.name property');
+        });
+      });
+
+      describe('HttpProject.fromLegacy()', () => {
+        it('sets the name', async () => {
+          const init: ArcLegacyProject = {
+            name: 'abc',
+          };
+          const result = await ArcProject.fromLegacyProject(init, []);
+          assert.equal(result.info.name, 'abc');
+        });
+
+        it('sets the description', async () => {
+          const init: ArcLegacyProject = {
+            name: 'abc',
+            description: 'test'
+          };
+          const result = await ArcProject.fromLegacyProject(init, []);
+          assert.equal(result.info.description, 'test');
+        });
+
+        it('adds the requests', async () => {
+          const init: ArcLegacyProject = {
+            name: 'abc',
+            description: 'test',
+            requests: ['1'],
+          };
+          const requests: ARCSavedRequest[] = [
+            {
+              method: 'PUT',
+              name: 'r1',
+              url: 'https://',
+              _id: '1',
+            }
+          ];
+          const result = await ArcProject.fromLegacyProject(init, requests);
+          const projectRequests = result.listRequests();
+          assert.lengthOf(projectRequests, 1, 'has a single request');
+          assert.equal(projectRequests[0].info.name, 'r1');
+        });
+
+        it('ignores missing requests', async () => {
+          const init: ArcLegacyProject = {
+            name: 'abc',
+            description: 'test',
+            requests: ['1', '2'],
+          };
+          const requests: ARCSavedRequest[] = [
+            {
+              method: 'PUT',
+              name: 'r1',
+              url: 'https://',
+              _id: '1',
+            },
+            {
+              method: 'DELETE',
+              name: 'r3',
+              url: 'https://api.com',
+              _id: '3',
+            }
+          ];
+          const result = await ArcProject.fromLegacyProject(init, requests);
+          const projectRequests = result.listRequests();
+          assert.lengthOf(projectRequests, 1, 'has a single request');
+          assert.equal(projectRequests[0].info.name, 'r1');
         });
       });
 

@@ -79,12 +79,17 @@ export interface ArcExportObject {
   history?: ExportArcHistoryRequest[];
   projects?: ExportArcProjects[];
   websocketurlhistory?: ExportArcWebsocketUrl[];
+  'websocket-url-history'?: ExportArcWebsocketUrl[];
   urlhistory?: ExportArcUrlHistory[];
+  'url-history'?: ExportArcUrlHistory[];
   clientcertificates?: ExportArcClientCertificateData[];
+  'client-certificates'?: ExportArcClientCertificateData[];
   cookies?: ExportArcCookie[];
   hostrules?: ExportArcHostRule[];
+  'host-rules'?: ExportArcHostRule[];
   variables?: ExportArcVariable[];
   authdata?: ExportArcAuthData[];
+  'auth-data'?: ExportArcAuthData[];
 }
 
 /**

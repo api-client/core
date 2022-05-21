@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { HttpProject } from '../HttpProject.js';
 import { ArcExportObject, ExportArcSavedRequest, ExportArcProjects, ExportArcVariable } from '../legacy/DataExport.js';
 import { ARCProject } from '../legacy/models/ArcLegacyProject.js';

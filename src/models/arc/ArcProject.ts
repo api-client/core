@@ -9,6 +9,7 @@ import { HttpRequest, IHttpRequest } from "../HttpRequest.js";
 import { IRequest, Request } from "../Request.js";
 import { IThing, Thing } from "../Thing.js";
 import { ARCHistoryRequest, ARCSavedRequest } from "../legacy/request/ArcRequest.js";
+import { ARCProject } from "../legacy/models/ArcLegacyProject.js";
 
 export const ArcProjectKind = 'ARC#HttpProject';
 export const ArcProjectFolderKind = 'ARC#HttpProjectFolder';
@@ -901,6 +902,38 @@ export class ArcProject extends ArcProjectParent {
     const info = Thing.fromName(name);
     project.info = info;
     return project;
+  }
+
+  /**
+   * Creates an HTTP project instance from ARC's legacy project definition.
+   * 
+   * Note, the `requests` should be processed and the payload restored to it's original value.
+   */
+  static async fromLegacyProject(project: ARCProject, requests: ARCSavedRequest[]): Promise<ArcProject> {
+    const { name = 'Unnamed project', description, requests: ids } = project;
+    const result = ArcProject.fromName(name);
+    if (project._id) {
+      result.key = project._id;
+    }
+    if (description) {
+      result.info.description = description;
+    }
+    if (Array.isArray(ids) && ids.length) {
+      const promises = ids.map(async (id) => {
+        const old = requests.find((item) => item._id === id);
+        if (!old) {
+          return;
+        }
+        const request = await Request.fromLegacy(old);
+        const projectRequest = ArcProjectRequest.fromRequest(request.toJSON(), result);
+        if (old._id) {
+          projectRequest.key = old._id;
+        }
+        result.addRequest(projectRequest);
+      });
+      await Promise.allSettled(promises);
+    }
+    return result;
   }
 
   constructor(input?: string | IArcProject) {
