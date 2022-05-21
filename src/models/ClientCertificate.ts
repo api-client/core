@@ -1,5 +1,6 @@
 import { base64ToBuffer, bufferToBase64 } from '../lib/Buffer.js';
 import v4 from '../lib/uuid.js';
+import { Certificate as LegacyCertificate, ARCCertificateIndex, RequestCertificate } from './legacy/models/ClientCertificate.js';
 
 export type CertificateType = 'p12' | 'pem';
 
@@ -77,15 +78,15 @@ export interface IPemCreateOptions {
   /**
    * The certificate contents.
    */
-  cert: CertificateDataFormat; 
+  cert: CertificateDataFormat;
   /**
    * The key contents.
    */
-  key: CertificateDataFormat; 
+  key: CertificateDataFormat;
   /**
    * Optional name for the certificate.
    */
-  name?: string; 
+  name?: string;
   /**
    * Optional passphrase for the key.
    */
@@ -101,7 +102,7 @@ export interface IP12CreateOptions {
   /**
    * Optional name for the certificate.
    */
-  name?: string; 
+  name?: string;
   /**
    * Optional passphrase for the certificate.
    */
@@ -140,7 +141,7 @@ export class Certificate {
    * The key for the `pem` type certificate.
    */
   certKey?: ICertificateData;
-  
+
   /**
    * Creates a new certificate instance for a PEM key
    * 
@@ -191,17 +192,55 @@ export class Certificate {
     return new Certificate(init);
   }
 
+  /**
+   * Creates a certificate object from the ARC's legacy certificate definition.
+   * 
+   * @param index The legacy certificate index object. If it has set `_id` it will be used as the `key`.
+   * @param index The certificate data object as read from the data store. Do not restore the data to its original format.
+   */
+  static fromLegacy(index: ARCCertificateIndex, cert: RequestCertificate): Certificate {
+    const { name = '', type, created = Date.now(), _id = v4() } = index;
+    if (type === 'pem') {
+      const data = Array.isArray(cert.cert) ? cert.cert[0] : cert.cert;
+      const key = Array.isArray(cert.key) ? cert.key[0] : cert.key as LegacyCertificate;
+      if (!key) {
+        throw new Error(`Unable to create a PEM certificate without the key.`);
+      }
+      const init: IPemCertificate = {
+        kind: Kind,
+        cert: data as ICertificateData, // these are compatible.
+        certKey: key as ICertificateData,
+        key: _id,
+        name,
+        type: 'pem',
+        created,
+      };
+      return new Certificate(init);
+    } else if (type === 'p12') {
+      const data = Array.isArray(cert.cert) ? cert.cert[0] : cert.cert;
+      const init: IP12Certificate = {
+        kind: Kind,
+        cert: data as ICertificateData, // these are compatible.
+        key: _id,
+        name,
+        type: 'p12',
+      };
+      return new Certificate(init);
+    }
+    throw new Error(`Unable to create a certificate. Unknown type: ${type}.`);
+  }
+
   constructor(certificate: HttpCertificate) {
-    const { type, cert, key=v4(), name='', created } = certificate;
+    const { type, cert, key = v4(), name = '', created } = certificate;
     this.key = key;
     this.name = name;
     this.type = type;
-    this.cert = this.fromStore(cert);
+    this.cert = Certificate.fromStore(cert);
     if (typeof created === 'number') {
       this.created = created;
     }
     if (type === 'pem') {
-      this.certKey = this.fromStore(certificate.certKey);
+      this.certKey = Certificate.fromStore(certificate.certKey);
     }
   }
 
@@ -210,7 +249,7 @@ export class Certificate {
    * @param data The certificate data.
    * @returns The restored certificate.
    */
-  fromStore(data: ICertificateData): ICertificateData {
+  static fromStore(data: ICertificateData): ICertificateData {
     if (data.type) {
       delete data.type;
       const content = data.data as string;
@@ -233,7 +272,7 @@ export class Certificate {
    * @param data The certificate data object.
    * @throws When data is not set
    */
-  toStore(data: ICertificateData): ICertificateData {
+  static toStore(data: ICertificateData): ICertificateData {
     if (!data) {
       throw new Error('Certificate data is missing.');
     }
@@ -252,14 +291,14 @@ export class Certificate {
     const result: IP12Certificate = {
       kind: Kind,
       key: this.key,
-      cert: this.toStore(this.cert),
+      cert: Certificate.toStore(this.cert),
       name: this.name,
       type: 'p12',
     };
 
     if (this.type === 'pem' && this.certKey) {
       const typed = (result as unknown) as IPemCertificate;
-      typed.certKey = this.toStore(this.certKey);
+      typed.certKey = Certificate.toStore(this.certKey);
     }
 
     return result;

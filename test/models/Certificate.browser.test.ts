@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { assert } from '@esm-bundle/chai';
-import { Certificate, Kind as CertificateKind, IP12Certificate, IPemCertificate } from '../../src/models/ClientCertificate.js';
+import { Certificate, Kind as CertificateKind, IP12Certificate, IPemCertificate, ICertificateData } from '../../src/models/ClientCertificate.js';
 import { fileToBuffer, bufferToBase64 } from '../../src/lib/Buffer.js';
+import { ARCCertificateIndex, RequestCertificate } from '../../src/models/legacy/models/ClientCertificate.js';
 
 describe('Models', () => {
   describe('Certificate', () => {
     describe('fromPem()', () => {
-      let data = 'test-cert';
-      let key = 'test-key';
+      const data = 'test-cert';
+      const key = 'test-key';
 
       it('sets the kind', () => {
         const result = Certificate.fromPem(data, key);
@@ -32,7 +33,8 @@ describe('Models', () => {
 
       it('sets the certificate key', () => {
         const result = Certificate.fromPem(data, key);
-        assert.equal(result.certKey!.data, key);
+        const keyData = result.certKey as ICertificateData;
+        assert.equal(keyData.data, key);
       });
 
       it('sets the type', () => {
@@ -47,7 +49,8 @@ describe('Models', () => {
 
       it('sets the passed passphrase on the key', () => {
         const result = Certificate.fromPem(data, key, '', 'test-pass');
-        assert.equal(result.certKey!.passphrase, 'test-pass');
+        const keyData = result.certKey as ICertificateData;
+        assert.equal(keyData.passphrase, 'test-pass');
       });
 
       it('creates a certificate from a buffer', async () => {
@@ -61,12 +64,13 @@ describe('Models', () => {
         const blob = new Blob(['test value'], { type: 'text/plain' });
         const contents = await fileToBuffer(blob);
         const result = Certificate.fromPem(data, contents);
-        assert.typeOf(result.certKey!.data, 'Uint8Array');
+        const keyData = result.certKey as ICertificateData;
+        assert.typeOf(keyData.data, 'Uint8Array');
       });
     });
 
     describe('fromP12()', () => {
-      let data = 'test-cert';
+      const data = 'test-cert';
 
       it('sets the kind', () => {
         const result = Certificate.fromP12(data);
@@ -109,6 +113,117 @@ describe('Models', () => {
         const contents = await fileToBuffer(blob);
         const result = Certificate.fromP12(contents);
         assert.typeOf(result.cert.data, 'Uint8Array');
+      });
+    });
+
+    describe('fromLegacy()', () => {
+      it('creates a PEM certificate', async () => {
+        const blob = new Blob(['test value'], { type: 'text/plain' });
+        const contents = await fileToBuffer(blob);
+        const index: ARCCertificateIndex = {
+          _id: 'a',
+          _rev: 'b',
+          name: 'pem-legacy',
+          type: 'pem',
+          created: 1234,
+        };
+        const cert: RequestCertificate = {
+          type: 'pem',
+          cert: Certificate.toStore({
+            data: contents,
+            type: 'buffer',
+          }),
+          key: Certificate.toStore({
+            data: contents,
+            type: 'buffer',
+            passphrase: 'test-pass',
+          })
+        };
+        const result = Certificate.fromLegacy(index, cert);
+        assert.ok(result, 'returns the certificate');
+        assert.equal(result.key, 'a', 'sets the key from the index _id');
+        assert.equal(result.name, 'pem-legacy', 'sets the name');
+        assert.equal(result.type, 'pem', 'sets the type');
+        assert.typeOf(result.cert, 'object', 'sets the cert');
+        assert.deepEqual(result.cert.data, contents, 'sets the contents');
+        assert.isUndefined(result.cert.type, 'removes the data type');
+        const key = result.certKey as ICertificateData;
+        assert.typeOf(key, 'object', 'sets the key');
+        assert.deepEqual(key.data, contents, 'sets the key cert data');
+        assert.equal(key.passphrase, 'test-pass', 'sets the key passphrase');
+      });
+
+      it('creates a P12 certificate', async () => {
+        const blob = new Blob(['test value'], { type: 'text/plain' });
+        const contents = await fileToBuffer(blob);
+        const index: ARCCertificateIndex = {
+          _id: 'a',
+          _rev: 'b',
+          name: 'p12-legacy',
+          type: 'p12',
+          created: 1234,
+        };
+        const cert: RequestCertificate = {
+          type: 'p12',
+          cert: Certificate.toStore({
+            data: contents,
+            type: 'buffer',
+          }),
+        };
+        const result = Certificate.fromLegacy(index, cert);
+        assert.ok(result, 'returns the certificate');
+        assert.equal(result.key, 'a', 'sets the key from the index _id');
+        assert.equal(result.name, 'p12-legacy', 'sets the name');
+        assert.equal(result.type, 'p12', 'sets the type');
+        assert.typeOf(result.cert, 'object', 'sets the cert');
+        assert.deepEqual(result.cert.data, contents, 'sets the contents');
+        assert.isUndefined(result.cert.type, 'removes the data type');
+        const key = result.certKey as ICertificateData;
+        assert.isUndefined(key, 'has no key');
+      });
+
+      it('throws when creating a PEM certificate without the key', async () => {
+        const blob = new Blob(['test value'], { type: 'text/plain' });
+        const contents = await fileToBuffer(blob);
+        const index: ARCCertificateIndex = {
+          _id: 'a',
+          _rev: 'b',
+          name: 'pem-legacy',
+          type: 'pem',
+          created: 1234,
+        };
+        const cert: RequestCertificate = {
+          type: 'pem',
+          cert: Certificate.toStore({
+            data: contents,
+            type: 'buffer',
+          }),
+        };
+        assert.throws(() => {
+          Certificate.fromLegacy(index, cert)
+        }, 'Unable to create a PEM certificate without the key.');
+      });
+
+      it('throws when creating an unknown certificate', async () => {
+        const blob = new Blob(['test value'], { type: 'text/plain' });
+        const contents = await fileToBuffer(blob);
+        const index: ARCCertificateIndex = {
+          _id: 'a',
+          _rev: 'b',
+          name: 'other-legacy',
+          type: 'other',
+          created: 1234,
+        };
+        const cert: RequestCertificate = {
+          type: 'other',
+          cert: Certificate.toStore({
+            data: contents,
+            type: 'buffer',
+          }),
+        };
+        assert.throws(() => {
+          Certificate.fromLegacy(index, cert)
+        }, 'Unable to create a certificate. Unknown type: other.');
       });
     });
 
@@ -172,8 +287,9 @@ describe('Models', () => {
         const blob = new Blob(['test value'], { type: 'text/plain' });
         const contents = await fileToBuffer(blob);
         const result = new Certificate({ ...base, type: 'pem', certKey: { data: bufferToBase64(contents), type: 'buffer' } });
-        assert.typeOf(result.certKey!.data, 'Uint8Array', 'has the restored data');
-        assert.isUndefined(result.certKey!.type, 'removes the type property');
+        const keyData = result.certKey as ICertificateData;
+        assert.typeOf(keyData.data, 'Uint8Array', 'has the restored data');
+        assert.isUndefined(keyData.type, 'removes the type property');
       });
     });
 
