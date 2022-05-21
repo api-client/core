@@ -1,9 +1,16 @@
+import v4 from '../lib/uuid.js';
+
 export const Kind = 'Core#HostRule';
 
 /**
  * API Client host rule definition.
  */
 export interface IHostRule {
+  /**
+   * The key of the rule.
+   */
+  key: string;
+
   kind?: typeof Kind;
   /**
    * The from rule (may contain asterisks)
@@ -24,6 +31,11 @@ export interface IHostRule {
 }
 
 export class HostRule {
+  /**
+   * The key of the rule.
+   */
+  key = '';
+
   kind = Kind;
   /**
    * The from rule (may contain asterisks)
@@ -44,6 +56,7 @@ export class HostRule {
 
   static fromValues(from: string, to: string ): HostRule {
     const result = new HostRule({
+      key: v4(),
       kind: Kind,
       from,
       to,
@@ -63,6 +76,7 @@ export class HostRule {
       init = input;
     } else {
       init = {
+        key: v4(),
         kind: Kind,
         from: '',
         to: '',
@@ -80,8 +94,9 @@ export class HostRule {
     if (!HostRule.isHostRule(init)) {
       throw new Error(`Not a HostRule.`);
     }
-    const { from='', to='', enabled, comment } = init;
+    const { from='', to='', enabled, comment, key = v4() } = init;
     this.kind = Kind;
+    this.key = key;
     this.from = from;
     this.to = to;
     this.enabled = enabled;
@@ -102,6 +117,7 @@ export class HostRule {
   toJSON(): IHostRule {
     const result: IHostRule = {
       kind: Kind,
+      key: this.key,
       from : this.from,
       to : this.to,
     };

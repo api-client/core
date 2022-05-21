@@ -60,6 +60,9 @@ export { DataModel, IDataModel, Kind as DataModelKind } from './src/models/data/
 export { DataNamespace, IDataNamespace, Kind as DataNamespaceKind, DataItem, IDataItem } from './src/models/data/DataNamespace.js';
 export { DataProperty, IDataProperty, Kind as DataPropertyKind, DataPropertyType, DataPropertyTypes, DataPropertyList, DateFormat, DateFormats, DateFormatList } from './src/models/data/DataProperty.js';
 
+export { ArcHttpRequest, IArcHttpRequest, Kind as ArcHttpRequestKind } from './src/models/arc/ArcHttpRequest.js';
+export * from './src/models/arc/ArcProject.js';
+
 // 
 // AMF
 // 

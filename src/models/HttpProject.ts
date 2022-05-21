@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-empty-interface */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-this-alias */
 import { ProjectParent } from './ProjectParent.js';
 import { IProjectDefinitionProperty } from './ProjectDefinitionProperty.js';
 import { Environment, IEnvironment, Kind as EnvironmentKind } from './Environment.js';

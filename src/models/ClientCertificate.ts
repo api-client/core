@@ -257,9 +257,9 @@ export class Certificate {
       type: 'p12',
     };
 
-    if (this.type === 'pem') {
+    if (this.type === 'pem' && this.certKey) {
       const typed = (result as unknown) as IPemCertificate;
-      typed.certKey = this.toStore(this.certKey!);
+      typed.certKey = this.toStore(this.certKey);
     }
 
     return result;

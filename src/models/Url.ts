@@ -9,9 +9,9 @@ export interface IUrl {
    */
   time: number;
   /**
-   * The request URL stored in the history.
+   * The request URL stored in the history. This is also the store key.
    */
-  url: string;
+  key: string;
   /**
    * A timestamp of the midnight that corresponds to the `time` property.
    */
@@ -30,11 +30,11 @@ export class Url {
   /**
    * Last use timestamp.
    */
-  time:number = Date.now();
+  time: number = Date.now();
   /**
-   * The request URL stored in the history.
+   * The request URL stored in the history. This is also the store key.
    */
-  url = '';
+  key = '';
   /**
    * A timestamp of the midnight that corresponds to the `time` property.
    */
@@ -43,7 +43,7 @@ export class Url {
   /**
    * @param input The URL definition used to restore the state.
    */
-  constructor(input: string|IUrl) {
+  constructor(input: string | IUrl) {
     let init: IUrl;
     if (typeof input === 'string') {
       init = JSON.parse(input);
@@ -53,7 +53,7 @@ export class Url {
       init = {
         cnt: 0,
         time: Date.now(),
-        url: '',
+        key: '',
       };
     }
     this.new(init);
@@ -63,8 +63,8 @@ export class Url {
    * Creates a new URL clearing anything that is so far defined.
    */
   new(init: IUrl): void {
-    const { url='', cnt=0, time = Date.now(), midnight } = init;
-    this.url = url;
+    const { key = '', cnt = 0, time = Date.now(), midnight } = init;
+    this.key = key;
     this.cnt = cnt;
     this.time = time;
     if (midnight) {
@@ -78,7 +78,7 @@ export class Url {
 
   toJSON(): IUrl {
     const result: IUrl = {
-      url: this.url,
+      key: this.key,
       cnt: this.cnt,
       time: this.time,
       midnight: this.midnight,

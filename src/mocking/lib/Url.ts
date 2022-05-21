@@ -16,7 +16,7 @@ export class Url {
   url(): IUrl {
     const date = this.types.datetime();
     const result: IUrl = {
-      url: this.internet.uri(),
+      key: this.internet.uri(),
       cnt: this.types.number({ min: 0 }),
       time: date.getTime(),
     };

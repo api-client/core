@@ -1,4 +1,7 @@
+import v4 from '../lib/uuid.js';
+
 export interface IAuthorizationData {
+  key: string;
   username?: string;
   password?: string;
   domain?: string;
@@ -12,6 +15,7 @@ export interface IAuthorizationData {
  * Each entry represent a Basic or NTLM authorization.
  */
 export class AuthorizationData {
+  key = '';
   username?: string;
   password?: string;
   domain?: string;
@@ -26,7 +30,9 @@ export class AuthorizationData {
     } else if (typeof input === 'object') {
       init = input;
     } else {
-      init = {};
+      init = {
+        key: v4(),
+      };
     }
     this.new(init);
   }
@@ -37,14 +43,16 @@ export class AuthorizationData {
    * Note, this throws an error when the provider is not an API Client provider object.
    */
   new(init: IAuthorizationData): void {
-    const { username, password, domain } = init;
+    const { username, password, domain, key = v4() } = init;
     this.username = username;
     this.password = password;
     this.domain = domain;
+    this.key = key;
   }
 
   toJSON(): IAuthorizationData {
     const result:IAuthorizationData = {
+      key: this.key,
     };
     if (this.username) {
       result.username = this.username;

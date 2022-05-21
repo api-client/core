@@ -14,6 +14,12 @@ describe('Models', () => {
           const result = new HostRule();
           assert.equal(result.kind, HostRuleKind, 'sets the kind property');
         });
+
+        it('generates the key', () => {
+          const result = new HostRule();
+          assert.typeOf(result.key, 'string', 'sets the key property');
+          assert.isNotEmpty(result.key, 'the key has a value');
+        });
       });
 
       describe('From schema initialization', () => {
@@ -23,6 +29,7 @@ describe('Models', () => {
             kind: HostRuleKind,
             from: '',
             to: '',
+            key: '',
           }
         });
 
@@ -31,12 +38,30 @@ describe('Models', () => {
           const rule = new HostRule(init);
           assert.equal(rule.from, 'test');
         });
+
+        it('sets the to property', () => {
+          const init: IHostRule = { ...base, ...{ to: 'test' }};
+          const rule = new HostRule(init);
+          assert.equal(rule.to, 'test');
+        });
+
+        it('sets the key property', () => {
+          const init: IHostRule = { ...base, ...{ key: 'test' }};
+          const rule = new HostRule(init);
+          assert.equal(rule.key, 'test');
+        });
       });
 
       describe('fromValues()', () => {
         it('creates a rule with required values', () => {
           const rule = HostRule.fromValues('a', 'b');
           assert.equal(rule.from, 'a');
+        });
+
+        it('generates a key', () => {
+          const result = HostRule.fromValues('a', 'b');
+          assert.typeOf(result.key, 'string', 'sets the key property');
+          assert.isNotEmpty(result.key, 'the key has a value');
         });
       });
     });
@@ -46,6 +71,9 @@ describe('Models', () => {
         const rule = HostRule.fromValues('a', 'b');
         const result = rule.toJSON();
         assert.equal(result.from, 'a');
+        assert.equal(result.to, 'b');
+        assert.equal(result.kind, HostRuleKind);
+        assert.equal(result.key, rule.key, 'sets the key property');
       });
     });
   });
