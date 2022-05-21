@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { assert } from 'chai';
 import fs from 'fs';
@@ -59,6 +60,7 @@ describe('http-engine', () => {
             kind: HostRuleKind,
             from: 'domain.com',
             to: 'test.com',
+            key: '1',
           }],
           logger,
         };
@@ -98,6 +100,7 @@ describe('http-engine', () => {
             kind: HostRuleKind,
             from: 'domain.com',
             to: 'test.com',
+            key: '1',
           }],
           logger,
         };
@@ -147,6 +150,7 @@ describe('http-engine', () => {
               kind: HostRuleKind,
               from: 'domain.com',
               to: 'test.com',
+              key: '1',
             }],
             logger,
           };
@@ -693,7 +697,7 @@ describe('http-engine', () => {
         });
       
         it('applies host rules', () => {
-          const hosts: IHostRule[] = [{ from: 'domain.com', to: 'other.com', kind: HostRuleKind }];
+          const hosts: IHostRule[] = [{ from: 'domain.com', to: 'other.com', kind: HostRuleKind, key: '1' }];
           const engine = new CoreEngine(request, {
             hosts,
           });
@@ -1952,6 +1956,7 @@ describe('http-engine', () => {
             kind: HostRuleKind,
             from: 'domain.com',
             to: 'test.com',
+            key: '1',
           }],
           logger,
         };
@@ -2181,6 +2186,7 @@ describe('http-engine', () => {
             kind: HostRuleKind,
             from: 'domain.com',
             to: 'test.com',
+            key: '1',
           }],
         };
       });
