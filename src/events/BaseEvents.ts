@@ -68,7 +68,7 @@ export interface ContextReadBulkEventDetail {
 /**
  * An event to be used to read a list of object from the API store.
  */
-export class ContextReadBulkEvent<T> extends ContextEvent<ContextReadBulkEventDetail, T> {
+export class ContextReadBulkEvent<T> extends ContextEvent<ContextReadBulkEventDetail, T[]> {
   /**
    * @param type The type of the event
    * @param ids The list of domain ids to read. These must be of the same domain type.
