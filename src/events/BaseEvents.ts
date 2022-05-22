@@ -142,7 +142,7 @@ export class ContextDeleteEvent extends ContextEvent<ContextDeleteEventDetail, C
 /**
  * An event to be used to delete a number of entities in the context provider.
  */
-export class ContextDeleteBulkEvent extends ContextEvent<ContextDeleteBulkEventDetail, ContextDeleteRecord> {
+export class ContextDeleteBulkEvent extends ContextEvent<ContextDeleteBulkEventDetail, ContextDeleteRecord[]> {
   /**
    * An event to be used to delete a number of entities in the context provider.
    * @param type The type of the event to dispatch.
@@ -173,7 +173,7 @@ export interface ContextDeleteRecord {
 /**
  * An event dispatched to the context store to restore previously deleted items.
  */
-export class ContextRestoreEvent<T> extends ContextEvent<ContextDeleteRecord[], ContextChangeRecord<T>> {
+export class ContextRestoreEvent<T> extends ContextEvent<ContextDeleteRecord[], ContextChangeRecord<T>[]> {
   /**
    * An event dispatched to the context store to restore previously deleted items.
    * 
@@ -237,6 +237,17 @@ export interface ContextUpdateEventDetail<T> {
   parent?: string;
 }
 
+export interface ContextUpdateBulkEventDetail<T> {
+  /**
+   * The list of context store objects to be updated by the context provider.
+   */
+  items: T[];
+  /**
+   * The id of the parent object, if applicable.
+   */
+  parent?: string;
+}
+
 /**
  * An event that is dispatched to update the entire object in the store.
  * This is equivalent to PUT operation in REST HTTP.
@@ -266,7 +277,7 @@ export class ContextUpdateEvent<T extends object, U = T> extends ContextEvent<Co
  * @template T The object that is being updated.
  * @template U The object that is returned by the context store after updating. By default it is the `T`.
  */
-export class ContextUpdateBulkEvent<T extends object, U = T> extends ContextEvent<ContextUpdateEventDetail<T[]>, ContextChangeRecord<U>[]> {
+export class ContextUpdateBulkEvent<T extends object, U = T> extends ContextEvent<ContextUpdateBulkEventDetail<T>, ContextChangeRecord<U>[]> {
   /**
    * An event that is dispatched to update the entire object in the store.
    * This is equivalent to PUT operation in REST HTTP.
@@ -274,7 +285,7 @@ export class ContextUpdateBulkEvent<T extends object, U = T> extends ContextEven
    * @param type The type of the event to dispatch
    * @param updateInfo The update information.
    */
-  constructor(type: string, updateInfo: ContextUpdateEventDetail<T[]>) {
+  constructor(type: string, updateInfo: ContextUpdateBulkEventDetail<T>) {
     super(type, updateInfo);
   }
 }
