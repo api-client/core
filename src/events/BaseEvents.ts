@@ -113,17 +113,44 @@ export interface ContextDeleteEventDetail {
   parent?: string;
 }
 
+export interface ContextDeleteBulkEventDetail {
+  /**
+   * The list of ids of the domain object to remove.
+   */
+  ids: string[];
+  /**
+   * The id of the parent object, if applicable.
+   */
+  parent?: string;
+}
+
 /**
  * An event to be used to delete a state in the context provider.
  */
 export class ContextDeleteEvent extends ContextEvent<ContextDeleteEventDetail, ContextDeleteRecord> {
   /**
+   * An event to be used to delete a state in the context provider.
    * @param type The type of the event to dispatch.
    * @param id The id of the object to delete
    * @param parent The id of the parent object, if applicable.
    */
   constructor(type: string, id: string, parent?: string) {
     super(type, { id, parent });
+  }
+}
+
+/**
+ * An event to be used to delete a number of entities in the context provider.
+ */
+export class ContextDeleteBulkEvent extends ContextEvent<ContextDeleteBulkEventDetail, ContextDeleteRecord> {
+  /**
+   * An event to be used to delete a number of entities in the context provider.
+   * @param type The type of the event to dispatch.
+   * @param ids The list of ids of the domain object to remove.
+   * @param parent The id of the parent object, if applicable.
+   */
+  constructor(type: string, ids: string[], parent?: string) {
+    super(type, { ids, parent });
   }
 }
 
@@ -141,6 +168,23 @@ export interface ContextDeleteRecord {
    * The id of the parent object, if applicable.
    */
   parent?: string;
+}
+
+/**
+ * An event dispatched to the context store to restore previously deleted items.
+ */
+export class ContextRestoreEvent<T> extends ContextEvent<ContextDeleteRecord[], ContextChangeRecord<T>> {
+  /**
+   * An event dispatched to the context store to restore previously deleted items.
+   * 
+   * The result of the event is the list of `ContextChangeRecord` for the restored items.
+   * 
+   * @param type The type of the event.
+   * @param records The records of previously deleted items.
+   */
+  constructor(type: string, records: ContextDeleteRecord[]) {
+    super(type, records);
+  }
 }
 
 /**
@@ -198,9 +242,39 @@ export interface ContextUpdateEventDetail<T> {
  * This is equivalent to PUT operation in REST HTTP.
  * 
  * @template T The object that is being updated.
+ * @template U The object that is returned by the context store after updating. By default it is the `T`.
  */
 export class ContextUpdateEvent<T extends object, U = T> extends ContextEvent<ContextUpdateEventDetail<T>, ContextChangeRecord<U>> {
+  /**
+   * An event that is dispatched to update the entire object in the store.
+   * This is equivalent to PUT operation in REST HTTP.
+   * 
+   * @param type The type of the event to dispatch
+   * @param updateInfo The update information.
+   */
   constructor(type: string, updateInfo: ContextUpdateEventDetail<T>) {
+    super(type, updateInfo);
+  }
+}
+
+/**
+ * An event that is dispatched to update a list of objects in the store.
+ * This is equivalent to PUT operation in REST HTTP.
+ * 
+ * If there's a parent, this event only allows to update entities in bulk for the same parent.
+ * 
+ * @template T The object that is being updated.
+ * @template U The object that is returned by the context store after updating. By default it is the `T`.
+ */
+export class ContextUpdateBulkEvent<T extends object, U = T> extends ContextEvent<ContextUpdateEventDetail<T[]>, ContextChangeRecord<U>[]> {
+  /**
+   * An event that is dispatched to update the entire object in the store.
+   * This is equivalent to PUT operation in REST HTTP.
+   * 
+   * @param type The type of the event to dispatch
+   * @param updateInfo The update information.
+   */
+  constructor(type: string, updateInfo: ContextUpdateEventDetail<T[]>) {
     super(type, updateInfo);
   }
 }
@@ -241,6 +315,56 @@ export class ContextListEvent<T> extends ContextEvent<ContextListOptions, Contex
    * @param opts Query options.
    */
   constructor(type: string, opts: ContextListOptions = {}) {
+    super(type, opts);
+  }
+}
+
+export interface IQueryDetail {
+  /**
+   * The query term. All values are always passed as string. Context store must parse value if it requires other types.
+   */
+  term: string;
+
+  /**
+   * If the context store supports it, the tags to use with the query function to limit the results.
+   */
+  tags?: string[];
+
+  /**
+   * General purpose type to be defined by the context store.
+   * Allows to specify the type of the query to perform.
+   */
+  type?: string;
+
+  /**
+   * General purpose keyword to be defined by the context store.
+   * The purpose is to instruct the context store to perform detailed search.
+   * Usually this means longer search time but more accurate results.
+   */
+  detailed?: boolean;
+}
+
+/**
+ * An event dispatched to the context store to perform a query operation.
+ * If the context store supports the query operation, it should use the definition of `IQueryDetail` to perform the query.
+ * The result is the list of objects ordered by the store from the most relevant items to the least.
+ * 
+ * The implementation should not assume pagination and return enough results for the user to find what they were looking for
+ * or to redefine the query. Suggested limit is `50` which in many cases is equivalent of 2 pages of results.
+ */
+export class ContextQueryEvent<T = unknown> extends ContextEvent<IQueryDetail, T[]> {
+  /**
+   * An event dispatched to the context store to perform a query operation.
+   * If the context store supports the query operation, it should use the definition of `IQueryDetail` to perform the query.
+   * The result is the list of objects ordered by the store from the most relevant items to the least.
+   * 
+   * The implementation should not assume pagination and return enough results for the user to find what they were looking for
+   * or to redefine the query. Suggested limit is `50` which in many cases is equivalent of 2 pages of results.
+   * 
+   * @param type The type of the event.
+   * @param opts The query options.
+   */
+  constructor(type: string, opts: IQueryDetail) {
     super(type, opts);
   }
 }
