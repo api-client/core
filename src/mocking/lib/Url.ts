@@ -1,31 +1,38 @@
-import { IDataMockInit, Internet, Types } from "@pawel-up/data-mock";
-import { IUrl } from "../../models/Url.js";
+import { Internet, Types, Time, IDataMockInit } from '@pawel-up/data-mock';
+import { IUrl } from '../../models/Url.js';
 
-/**
- * Mocks the URL data.
- */
 export class Url {
   types: Types;
   internet: Internet;
-  
+  time: Time;
+
   constructor(init: IDataMockInit={}) {
     this.types = new Types(init.seed);
     this.internet = new Internet(init);
+    this.time = new Time(init);
   }
 
+  /**
+   * Generates a single ARC URL model item.
+   */
   url(): IUrl {
-    const date = this.types.datetime();
+    const url = this.internet.uri();
+    const time = this.types.datetime().getTime();
     const result: IUrl = {
-      key: this.internet.uri(),
-      cnt: this.types.number({ min: 0 }),
-      time: date.getTime(),
+      time,
+      cnt: this.types.number({ min: 100, max: 1000 }),
+      key: url,
+      midnight: this.time.midnight(time),
     };
-    date.setHours(0, 0, 0, 0);
-    result.midnight = date.getTime();
     return result;
   }
 
-  urls(size=25): IUrl[] {
+  /**
+   * Generates list of ARC URL models.
+   *
+   * @returns List of datastore entries.
+   */
+  urls(size = 25): IUrl[] {
     const result: IUrl[] = [];
     for (let i = 0; i < size; i++) {
       result.push(this.url());

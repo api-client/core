@@ -4,6 +4,8 @@ import { Response } from './lib/Response.js';
 import { User } from './lib/User.js';
 import { History } from './lib/History.js';
 import { Url } from './lib/Url.js';
+import { Certificates } from './lib/Certificates.js';
+import { HostRules } from './lib/HostRules.js';
 
 export { IRequestLogInit } from './lib/Request.js';
 export { IResponseInit } from './lib/Response.js';
@@ -16,6 +18,8 @@ export class ProjectMock extends DataMock {
   user: User;
   history: History;
   url: Url;
+  certificates: Certificates;
+  hostRules: HostRules;
   
   /**
    * @param init The library init options.
@@ -27,5 +31,7 @@ export class ProjectMock extends DataMock {
     this.user = new User(init);
     this.history = new History(init);
     this.url = new Url(init);
+    this.certificates = new Certificates(init);
+    this.hostRules = new HostRules(init);
   }
 }
