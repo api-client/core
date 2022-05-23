@@ -1,5 +1,4 @@
 import { IRequest, Request } from "../Request.js";
-import v4 from "../../lib/uuid.js";
 import { HttpRequest, IHttpRequest } from "../HttpRequest.js";
 import { Thing } from "../Thing.js";
 
@@ -15,6 +14,7 @@ export class ArcHttpRequest extends Request {
 
   /**
    * The identifier of the request.
+   * The key is related to the `created` property. It is the `new Date(created).toJSON()` value.
    */
   key = '';
 
@@ -24,9 +24,10 @@ export class ArcHttpRequest extends Request {
    * @param url The Request URL. This is required.
    */
   static fromUrl(url: string): ArcHttpRequest {
-    const now: number = Date.now();
+    const d = new Date();
+    const now: number = d.getTime();
     const request = new ArcHttpRequest({
-      key: v4(),
+      key: d.toJSON(),
       kind: Kind,
       created: now,
       updated: now,
@@ -42,9 +43,10 @@ export class ArcHttpRequest extends Request {
    * @param name The Request name.
    */
   static fromName(name: string): ArcHttpRequest {
-    const now: number = Date.now();
+    const d = new Date();
+    const now: number = d.getTime();
     const request = new ArcHttpRequest({
-      key: v4(),
+      key: d.toJSON(),
       kind: Kind,
       created: now,
       updated: now,
@@ -60,9 +62,10 @@ export class ArcHttpRequest extends Request {
    * @param info The request data.
    */
   static fromHttpRequest(info: IHttpRequest): ArcHttpRequest {
-    const now: number = Date.now();
+    const d = new Date();
+    const now: number = d.getTime();
     const request = new ArcHttpRequest({
-      key: v4(),
+      key: d.toJSON(),
       kind: Kind,
       created: now,
       updated: now,
@@ -76,11 +79,13 @@ export class ArcHttpRequest extends Request {
    * Creates a request for a schema of a Request.
    */
   static fromRequest(request: IArcHttpRequest): ArcHttpRequest {
-    const key = v4();
+    const d = new Date(request.created || Date.now());
+    const now: number = d.getTime();
     const init: IArcHttpRequest = { 
       ...request, 
-      key, 
-      kind: Kind 
+      key: d.toJSON(), 
+      kind: Kind,
+      created: now,
     };
     const result = new ArcHttpRequest(init);
     return result;
@@ -96,7 +101,10 @@ export class ArcHttpRequest extends Request {
       init = input;
     }
     if (init) {
-      this.key = init.key || v4();
+      this.key = init.key;
+    }
+    if (!this.key) {
+      this.key = new Date(this.created || Date.now()).toJSON();
     }
     this.kind = Kind;
   }
@@ -105,7 +113,7 @@ export class ArcHttpRequest extends Request {
     super.new(init);
     
     const { key } = init;
-    this.key = key || v4();
+    this.key = key || new Date(init.created || Date.now()).toJSON();
     this.kind = Kind;
   }
 

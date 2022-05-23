@@ -29,6 +29,11 @@ describe('Models', () => {
             assert.isUndefined(result.actions, 'does not set the actions property');
             assert.isUndefined(result.clientCertificate, 'does not set the clientCertificate property');
           });
+
+          it('creates the key from the created time', () => {
+            const result = new ArcHttpRequest();
+            assert.equal(result.key, new Date(result.created).toJSON());
+          });
         });
   
         describe('From schema initialization', () => {
@@ -59,8 +64,7 @@ describe('Models', () => {
             const init: IArcHttpRequest = { ...base };
             delete init.key;
             const request = new ArcHttpRequest(init);
-            assert.typeOf(request.key, 'string');
-            assert.isNotEmpty(request.key);
+            assert.equal(request.key, new Date(request.created).toJSON());
           });
   
           it('sets the key property', () => {
@@ -209,6 +213,11 @@ describe('Models', () => {
             assert.typeOf(request.created, 'number', 'sets the created');
             assert.equal(request.updated, request.created, 'sets the updated');
           });
+
+          it('creates the key from the created time', () => {
+            const result = new ArcHttpRequest();
+            assert.equal(result.key, new Date(result.created).toJSON());
+          });
         });
   
         describe('ArcHttpRequest.fromName()', () => {
@@ -235,6 +244,11 @@ describe('Models', () => {
             assert.equal(request.kind, ArcHttpRequestKind, 'sets the kind');
             assert.typeOf(request.created, 'number', 'sets the created');
             assert.equal(request.updated, request.created, 'sets the updated');
+          });
+
+          it('creates the key from the created time', () => {
+            const result = new ArcHttpRequest();
+            assert.equal(result.key, new Date(result.created).toJSON());
           });
         });
   
@@ -274,6 +288,11 @@ describe('Models', () => {
             assert.equal(request.kind, ArcHttpRequestKind, 'sets the kind');
             assert.typeOf(request.created, 'number', 'sets the created');
             assert.equal(request.updated, request.created, 'sets the updated');
+          });
+
+          it('creates the key from the created time', () => {
+            const result = new ArcHttpRequest();
+            assert.equal(result.key, new Date(result.created).toJSON());
           });
         });
   
@@ -316,6 +335,11 @@ describe('Models', () => {
             assert.equal(request.kind, ArcHttpRequestKind, 'sets the kind');
             assert.typeOf(request.created, 'number', 'sets the created');
             assert.equal(request.updated, request.created, 'sets the updated');
+          });
+
+          it('creates the key from the created time', () => {
+            const result = new ArcHttpRequest();
+            assert.equal(result.key, new Date(result.created).toJSON());
           });
         });
       });
