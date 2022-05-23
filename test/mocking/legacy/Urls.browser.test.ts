@@ -1,6 +1,6 @@
 import { assert } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { Urls } from '../../src/mocking/legacy/Urls.js';
+import { Urls } from '../../../src/mocking/legacy/Urls.js';
 
 describe('Urls', () => {
   describe('url()', () => {

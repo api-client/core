@@ -1,6 +1,6 @@
 import { assert } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { Authorization } from '../../src/mocking/legacy/Authorization.js';
+import { Authorization } from '../../../src/mocking/legacy/Authorization.js';
 
 describe('Authorization', () => {
   describe('basic()', () => {

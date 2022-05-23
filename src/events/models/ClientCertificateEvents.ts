@@ -6,12 +6,12 @@ export class ClientCertificateEvents {
   /**
    * Dispatches an event handled by the data store to read the client certificate.
    *
-   * @param id The id of the client certificate
+   * @param key The key of the client certificate
    * @param target A node on which to dispatch the event.
    * @returns Promise resolved to a client certificate model.
    */
-  static async read(id: string, target: EventTarget = window): Promise<HttpCertificate | undefined> {
-    const e = new ContextReadEvent<HttpCertificate>(ModelEventTypes.ClientCertificate.read, id);
+  static async read(key: string, target: EventTarget = window): Promise<HttpCertificate | undefined> {
+    const e = new ContextReadEvent<HttpCertificate>(ModelEventTypes.ClientCertificate.read, key);
     target.dispatchEvent(e);
     return e.detail.result;
   }
@@ -32,12 +32,12 @@ export class ClientCertificateEvents {
   /**
    * Dispatches an event handled by the data store to delete a client certificate
    *
-   * @param id The id of the project to delete.
+   * @param key The key of the project to delete.
    * @param target A node on which to dispatch the event.
    * @returns Promise resolved to a new revision after delete.
    */
-  static async delete(id: string, target: EventTarget = window): Promise<ContextDeleteRecord | undefined> {
-    const e = new ContextDeleteEvent(ModelEventTypes.ClientCertificate.delete, id, undefined);
+  static async delete(key: string, target: EventTarget = window): Promise<ContextDeleteRecord | undefined> {
+    const e = new ContextDeleteEvent(ModelEventTypes.ClientCertificate.delete, key, undefined);
     target.dispatchEvent(e);
     return e.detail.result;
   }

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { assert } from '@esm-bundle/chai';
-import { Certificate, Kind as CertificateKind, IP12Certificate, IPemCertificate, ICertificateData } from '../../src/models/ClientCertificate.js';
+import { Certificate, Kind as CertificateKind, IP12Certificate, IPemCertificate, ICertificateData, HttpCertificate } from '../../src/models/ClientCertificate.js';
 import { fileToBuffer, bufferToBase64 } from '../../src/lib/Buffer.js';
 import { ARCCertificateIndex, RequestCertificate } from '../../src/models/legacy/models/ClientCertificate.js';
 
@@ -67,6 +67,14 @@ describe('Models', () => {
         const keyData = result.certKey as ICertificateData;
         assert.typeOf(keyData.data, 'Uint8Array');
       });
+
+      it('sets the created timestamp', async () => {
+        const blob = new Blob(['test value'], { type: 'text/plain' });
+        const contents = await fileToBuffer(blob);
+        const result = Certificate.fromPem(data, contents);
+        assert.typeOf(result.created, 'number');
+        assert.isAbove(result.created, 0);
+      });
     });
 
     describe('fromP12()', () => {
@@ -114,6 +122,14 @@ describe('Models', () => {
         const result = Certificate.fromP12(contents);
         assert.typeOf(result.cert.data, 'Uint8Array');
       });
+
+      it('sets the created timestamp', async () => {
+        const blob = new Blob(['test value'], { type: 'text/plain' });
+        const contents = await fileToBuffer(blob);
+        const result = Certificate.fromP12(contents);
+        assert.typeOf(result.created, 'number');
+        assert.isAbove(result.created, 0);
+      });
     });
 
     describe('fromLegacy()', () => {
@@ -144,6 +160,7 @@ describe('Models', () => {
         assert.equal(result.key, 'a', 'sets the key from the index _id');
         assert.equal(result.name, 'pem-legacy', 'sets the name');
         assert.equal(result.type, 'pem', 'sets the type');
+        assert.equal(result.created, 1234, 'sets the created');
         assert.typeOf(result.cert, 'object', 'sets the cert');
         assert.deepEqual(result.cert.data, contents, 'sets the contents');
         assert.isUndefined(result.cert.type, 'removes the data type');
@@ -175,6 +192,7 @@ describe('Models', () => {
         assert.equal(result.key, 'a', 'sets the key from the index _id');
         assert.equal(result.name, 'p12-legacy', 'sets the name');
         assert.equal(result.type, 'p12', 'sets the type');
+        assert.equal(result.created, 1234, 'sets the created');
         assert.typeOf(result.cert, 'object', 'sets the cert');
         assert.deepEqual(result.cert.data, contents, 'sets the contents');
         assert.isUndefined(result.cert.type, 'removes the data type');
@@ -275,6 +293,12 @@ describe('Models', () => {
         assert.equal(result.created, 123456);
       });
 
+      it('sets the default created', () => {
+        const result = new Certificate({ ...base, created: undefined });
+        assert.typeOf(result.created, 'number');
+        assert.isAbove(result.created, 0);
+      });
+
       it('restores stored certificate data', async () => {
         const blob = new Blob(['test value'], { type: 'text/plain' });
         const contents = await fileToBuffer(blob);
@@ -297,7 +321,7 @@ describe('Models', () => {
       const cert = 'test-cert';
       const key = 'test-key';
 
-      const base: IP12Certificate = {
+      const base: HttpCertificate = {
         cert: { data: cert },
         key: '123',
         kind: 'Core#Certificate',
@@ -324,10 +348,16 @@ describe('Models', () => {
         assert.equal(result.name, 'name');
       });
 
-      it('sets the type', () => {
+      it('sets the type for the p12', () => {
         const c = new Certificate(base);
         const result = c.toJSON();
         assert.equal(result.type, 'p12');
+      });
+
+      it('sets the type for the pem', () => {
+        const c = new Certificate({ ...base, type: 'pem', certKey: { data: cert } });
+        const result = c.toJSON();
+        assert.equal(result.type, 'pem');
       });
 
       it('sets the cert from string', () => {

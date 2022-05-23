@@ -1,5 +1,5 @@
 import { assert } from '@esm-bundle/chai';
-import { LegacyMock } from '../../legacy.js';
+import { LegacyMock } from '../../../legacy.js';
 
 describe('LegacyMock', () => {
   describe('constructor()', () => {

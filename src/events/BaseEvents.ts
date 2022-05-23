@@ -35,9 +35,9 @@ export class ContextEvent<S extends object, R> extends CustomEvent<S & ContextEv
 
 export interface ContextReadEventDetail {
   /**
-   * The id of the state object to read.
+   * The key of the state object to read.
    */
-  id: string;
+  key: string;
   /**
    * Optional parent, when needed.
    */
@@ -50,19 +50,19 @@ export interface ContextReadEventDetail {
 export class ContextReadEvent<T> extends ContextEvent<ContextReadEventDetail, T> {
   /**
    * @param type The type of the event
-   * @param id The domain id of the object to read
+   * @param key The domain key of the object to read
    * @param parent Optional parent, when needed.
    */
-  constructor(type: string, id: string, parent?: string) {
-    super(type, { id, parent });
+  constructor(type: string, key: string, parent?: string) {
+    super(type, { key, parent });
   }
 }
 
 export interface ContextReadBulkEventDetail {
   /**
-   * The list of ids to read.
+   * The list of keys to read.
    */
-  ids: string[];
+  keys: string[];
 }
 
 /**
@@ -71,10 +71,10 @@ export interface ContextReadBulkEventDetail {
 export class ContextReadBulkEvent<T> extends ContextEvent<ContextReadBulkEventDetail, T[]> {
   /**
    * @param type The type of the event
-   * @param ids The list of domain ids to read. These must be of the same domain type.
+   * @param keys The list of domain keys to read. These must be of the same domain type.
    */
-  constructor(type: string, ids: string[]) {
-    super(type, { ids });
+  constructor(type: string, keys: string[]) {
+    super(type, { keys });
   }
 }
 
@@ -89,7 +89,7 @@ export interface ContextChangeRecord<T> {
    */
   kind?: string;
   /**
-   * The ID of the changed context state object.
+   * The key of the changed context state object.
    */
   key: string;
   /**
@@ -97,29 +97,29 @@ export interface ContextChangeRecord<T> {
    */
   item?: T;
   /**
-   * Optionally, when relevant, the id of the parent of the changed object.
+   * Optionally, when relevant, the key of the parent of the changed object.
    */
   parent?: string;
 }
 
 export interface ContextDeleteEventDetail {
   /**
-   * The id of the domain object to remove.
+   * The key of the domain object to remove.
    */
-  id: string;
+  key: string;
   /**
-   * The id of the parent object, if applicable.
+   * The key of the parent object, if applicable.
    */
   parent?: string;
 }
 
 export interface ContextDeleteBulkEventDetail {
   /**
-   * The list of ids of the domain object to remove.
+   * The list of keys of the domain object to remove.
    */
-  ids: string[];
+  keys: string[];
   /**
-   * The id of the parent object, if applicable.
+   * The key of the parent object, if applicable.
    */
   parent?: string;
 }
@@ -131,11 +131,11 @@ export class ContextDeleteEvent extends ContextEvent<ContextDeleteEventDetail, C
   /**
    * An event to be used to delete a state in the context provider.
    * @param type The type of the event to dispatch.
-   * @param id The id of the object to delete
-   * @param parent The id of the parent object, if applicable.
+   * @param key The key of the object to delete
+   * @param parent The key of the parent object, if applicable.
    */
-  constructor(type: string, id: string, parent?: string) {
-    super(type, { id, parent });
+  constructor(type: string, key: string, parent?: string) {
+    super(type, { key, parent });
   }
 }
 
@@ -146,11 +146,11 @@ export class ContextDeleteBulkEvent extends ContextEvent<ContextDeleteBulkEventD
   /**
    * An event to be used to delete a number of entities in the context provider.
    * @param type The type of the event to dispatch.
-   * @param ids The list of ids of the domain object to remove.
-   * @param parent The id of the parent object, if applicable.
+   * @param keys The list of ids of the domain object to remove.
+   * @param parent The key of the parent object, if applicable.
    */
-  constructor(type: string, ids: string[], parent?: string) {
-    super(type, { ids, parent });
+  constructor(type: string, keys: string[], parent?: string) {
+    super(type, { keys, parent });
   }
 }
 
@@ -161,11 +161,11 @@ export interface ContextDeleteRecord {
    */
   kind?: string;
   /**
-   * The id of the removed object.
+   * The key of the removed object.
    */
-  id: string;
+  key: string;
   /**
-   * The id of the parent object, if applicable.
+   * The key of the parent object, if applicable.
    */
   parent?: string;
 }
@@ -173,7 +173,7 @@ export interface ContextDeleteRecord {
 /**
  * An event dispatched to the context store to restore previously deleted items.
  */
-export class ContextRestoreEvent<T> extends ContextEvent<ContextDeleteRecord[], ContextChangeRecord<T>[]> {
+export class ContextRestoreEvent<T> extends ContextEvent<{ records: ContextDeleteRecord[] }, (ContextChangeRecord<T> | undefined)[]> {
   /**
    * An event dispatched to the context store to restore previously deleted items.
    * 
@@ -183,7 +183,7 @@ export class ContextRestoreEvent<T> extends ContextEvent<ContextDeleteRecord[], 
    * @param records The records of previously deleted items.
    */
   constructor(type: string, records: ContextDeleteRecord[]) {
-    super(type, records);
+    super(type, { records });
   }
 }
 
@@ -232,7 +232,7 @@ export interface ContextUpdateEventDetail<T> {
    */
   item: T;
   /**
-   * The id of the parent object, if applicable.
+   * The key of the parent object, if applicable.
    */
   parent?: string;
 }
@@ -243,7 +243,7 @@ export interface ContextUpdateBulkEventDetail<T> {
    */
   items: T[];
   /**
-   * The id of the parent object, if applicable.
+   * The key of the parent object, if applicable.
    */
   parent?: string;
 }

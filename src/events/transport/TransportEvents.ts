@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { IRequestAuthorization } from "../../models/RequestAuthorization.js";
 import { IHttpRequest } from "../../models/HttpRequest.js";
 import { IRequestBaseConfig } from "../../models/RequestConfig.js";

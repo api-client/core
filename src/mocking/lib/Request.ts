@@ -1,7 +1,7 @@
 import { Http, Types, Lorem, Time, IDataMockInit, IHttpRequestInit } from '@pawel-up/data-mock';
 // import { randomValue } from '@pawel-up/data-mock/src/lib/Http.js';
 import { IHttpRequest, Kind as HttpRequestKind } from '../../models/HttpRequest.js';
-import { IRequest, Kind as RequestKind } from '../../models/Request.js';
+import { IRequest, Kind as RequestKind, Request as RequestModel } from '../../models/Request.js';
 import { ISentRequest } from '../../models/SentRequest.js';
 import { IRequestLog, Kind as RequestLogKind } from '../../models/RequestLog.js';
 import { IResponseInit, Response } from './Response.js';
@@ -45,14 +45,17 @@ export class Request {
   }
 
   request(init?: IHttpRequestInit): IRequest {
-    return {
+    const schema = {
       kind: RequestKind,
       expects: this.httpRequest(init),
       info: {
         name: this.lorem.words(2),
         description: this.lorem.paragraph(),
       },
-    }
+      created: this.time.timestamp(),
+    };
+    const instance = new RequestModel(schema);
+    return instance.toJSON();
   }
 
   httpRequest(init?: IHttpRequestInit): IHttpRequest {

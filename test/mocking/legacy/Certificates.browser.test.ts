@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { assert } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { Certificates } from '../../src/mocking/legacy/Certificates.js';
-import { Certificate } from '../../src/models/legacy/models/ClientCertificate.js';
+import { Certificates } from '../../../src/mocking/legacy/Certificates.js';
+import { Certificate } from '../../../src/models/legacy/models/ClientCertificate.js';
 
 describe('Certificates', () => {
   describe('toStore()', () => {

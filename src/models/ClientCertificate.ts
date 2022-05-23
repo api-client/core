@@ -71,7 +71,7 @@ export interface IPemCertificate extends ICertificate {
   certKey: ICertificateData;
 }
 
-export type HttpCertificate = IP12Certificate | IPemCertificate;
+export type HttpCertificate = IP12Certificate | IPemCertificate | ICertificate;
 
 export interface IPemCreateOptions {
   type: 'p12';
@@ -128,7 +128,7 @@ export class Certificate {
    * Timestamp when the certificate was inserted into the data store.
    * Required when returning a result. Auto-generated when inserting, if missing.
    */
-  created?: number;
+  created = 0;
   /**
    * Certificate type. Either `p12` or `pem`.
    */
@@ -162,6 +162,7 @@ export class Certificate {
       key: v4(),
       name,
       type: 'pem',
+      created: Date.now(),
     };
     if (keyPassphrase) {
       init.certKey.passphrase = keyPassphrase;
@@ -185,6 +186,7 @@ export class Certificate {
       key: v4(),
       name,
       type: 'p12',
+      created: Date.now(),
     };
     if (passphrase) {
       init.cert.passphrase = passphrase;
@@ -224,6 +226,7 @@ export class Certificate {
         key: _id,
         name,
         type: 'p12',
+        created,
       };
       return new Certificate(init);
     }
@@ -231,16 +234,15 @@ export class Certificate {
   }
 
   constructor(certificate: HttpCertificate) {
-    const { type, cert, key = v4(), name = '', created } = certificate;
+    const { type, cert, key = v4(), name = '', created = Date.now() } = certificate;
     this.key = key;
     this.name = name;
     this.type = type;
     this.cert = Certificate.fromStore(cert);
-    if (typeof created === 'number') {
-      this.created = created;
-    }
+    this.created = created;
     if (type === 'pem') {
-      this.certKey = Certificate.fromStore(certificate.certKey);
+      const typed = certificate as IPemCertificate;
+      this.certKey = Certificate.fromStore(typed.certKey);
     }
   }
 
@@ -288,12 +290,13 @@ export class Certificate {
   }
 
   toJSON(): HttpCertificate {
-    const result: IP12Certificate = {
+    const result: HttpCertificate = {
       kind: Kind,
       key: this.key,
       cert: Certificate.toStore(this.cert),
       name: this.name,
-      type: 'p12',
+      type: this.type,
+      created: this.created,
     };
 
     if (this.type === 'pem' && this.certKey) {

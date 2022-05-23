@@ -1,8 +1,9 @@
 import { assert } from '@esm-bundle/chai';
 import sinon from 'sinon';
+import { ContextDeleteEvent, ContextDeleteEventDetail, ContextListEvent, ContextReadEvent } from '../../src/events/BaseEvents.js';
 import { Events } from '../../src/events/Events.js';
 import { EventTypes } from '../../src/events/EventTypes.js';
-import { ICertificateCreateOptions } from '../../src/models/ClientCertificate.js';
+import { ICertificateCreateOptions, ICertificate } from '../../src/models/ClientCertificate.js';
 
 describe('Events', () => {
   describe('Models', () => {
@@ -34,23 +35,23 @@ describe('Events', () => {
       });
 
       describe('read()', () => {
-        const id = 'test-cc-id';
+        const key = 'test-cc-id';
 
         it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Model.ClientCertificate.read, spy);
-          Events.Model.ClientCertificate.read(id);
+          Events.Model.ClientCertificate.read(key);
           window.removeEventListener(EventTypes.Model.ClientCertificate.read, spy);
           assert.isTrue(spy.calledOnce);
         });
 
-        it('has the id property', () => {
+        it('has the key property', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Model.ClientCertificate.read, spy);
-          Events.Model.ClientCertificate.read(id);
+          Events.Model.ClientCertificate.read(key);
           window.removeEventListener(EventTypes.Model.ClientCertificate.read, spy);
-          const e = spy.args[0][0] as CustomEvent<any>;
-          assert.deepEqual(e.detail.id, id);
+          const e = spy.args[0][0] as ContextReadEvent<ICertificate>;
+          assert.deepEqual(e.detail.key, key);
         });
       });
 
@@ -70,29 +71,29 @@ describe('Events', () => {
           window.addEventListener(EventTypes.Model.ClientCertificate.list, spy);
           Events.Model.ClientCertificate.list(opts);
           window.removeEventListener(EventTypes.Model.ClientCertificate.list, spy);
-          const e = spy.args[0][0] as CustomEvent<any>;
+          const e = spy.args[0][0] as ContextListEvent<ICertificate>;
           assert.include(e.detail, opts);
         });
       });
 
       describe('delete()', () => {
-        const id = 'test-cc-id';
+        const key = 'test-cc-id';
 
         it('dispatches the event', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Model.ClientCertificate.delete, spy);
-          Events.Model.ClientCertificate.delete(id);
+          Events.Model.ClientCertificate.delete(key);
           window.removeEventListener(EventTypes.Model.ClientCertificate.delete, spy);
           assert.isTrue(spy.calledOnce);
         });
 
-        it('has the id property', () => {
+        it('has the key property', () => {
           const spy = sinon.spy();
           window.addEventListener(EventTypes.Model.ClientCertificate.delete, spy);
-          Events.Model.ClientCertificate.delete(id);
+          Events.Model.ClientCertificate.delete(key);
           window.removeEventListener(EventTypes.Model.ClientCertificate.delete, spy);
-          const e = spy.args[0][0] as CustomEvent<any>;
-          assert.equal(e.detail.id, id);
+          const e = spy.args[0][0] as ContextReadEvent<ICertificate>;
+          assert.equal(e.detail.key, key);
         });
       });
 
@@ -123,7 +124,7 @@ describe('Events', () => {
         });
 
         describe('delete()', () => {
-          const record = { id: 'test', parent: 'other' };
+          const record: ContextDeleteEventDetail = { key: 'test', parent: 'other' };
   
           it('dispatches the event', () => {
             const spy = sinon.spy();
@@ -138,7 +139,7 @@ describe('Events', () => {
             window.addEventListener(EventTypes.Model.ClientCertificate.State.delete, spy);
             Events.Model.ClientCertificate.State.delete(record);
             window.removeEventListener(EventTypes.Model.ClientCertificate.State.delete, spy);
-            const e = spy.args[0][0] as CustomEvent<any>;
+            const e = spy.args[0][0] as ContextDeleteEvent;
             assert.deepEqual(e.detail, record);
           });
         });

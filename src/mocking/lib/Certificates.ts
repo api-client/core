@@ -28,8 +28,10 @@ export class Certificates {
     let instance: Certificate;
     if (type === 'p12') {
       instance = Certificate.fromP12(cert, this.lorem.word());
+    } else if (type === 'pem') {
+      instance = Certificate.fromPem(cert, cert, this.lorem.word());
     } else {
-      instance = Certificate.fromPem(cert, '', this.lorem.word());
+      throw new Error(`Invalid certificate type.`);
     }
     if (!opts.noPassphrase) {
       instance.cert.passphrase = this.lorem.word();
@@ -38,6 +40,7 @@ export class Certificates {
         key.passphrase = this.lorem.word();
       }
     }
+    
     return instance.toJSON();
   }
 

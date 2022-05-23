@@ -951,12 +951,15 @@ export class ArcProject extends ArcProjectParent {
         init.kind = ArcProjectKind;
       }
     } else {
+      const now = Date.now();
       init = {
         kind: ArcProjectKind,
         key: v4(),
         definitions: {},
         items: [],
         info: Thing.fromName('').toJSON(),
+        created: now,
+        updated: now,
       }
     }
     this.new(init);
@@ -1001,6 +1004,8 @@ export class ArcProject extends ArcProjectParent {
       definitions: {},
       items: [],
       info: this.info.toJSON(),
+      created: this.created,
+      updated: this.updated,
     };
     if (Array.isArray(this.definitions.requests) && this.definitions.requests.length) {
       result.definitions.requests = this.definitions.requests.map(i => i.toJSON());

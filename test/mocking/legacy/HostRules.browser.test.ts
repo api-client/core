@@ -1,6 +1,6 @@
 import { assert } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { HostRules } from '../../src/mocking/legacy/HostRules.js';
+import { HostRules } from '../../../src/mocking/legacy/HostRules.js';
 
 describe('HostRules', () => {
   describe('rule()', () => {

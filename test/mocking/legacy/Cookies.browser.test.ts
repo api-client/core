@@ -1,6 +1,6 @@
 import { assert } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { Cookies } from '../../src/mocking/legacy/Cookies.js';
+import { Cookies } from '../../../src/mocking/legacy/Cookies.js';
 
 describe('Cookies', () => {
   describe('cookie()', () => {

@@ -1,6 +1,6 @@
 import { assert } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { Variables } from '../../src/mocking/legacy/Variables.js';
+import { Variables } from '../../../src/mocking/legacy/Variables.js';
 
 describe('Variables', () => {
   describe('variable()', () => {

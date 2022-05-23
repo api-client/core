@@ -6,6 +6,7 @@ import { History } from './lib/History.js';
 import { Url } from './lib/Url.js';
 import { Certificates } from './lib/Certificates.js';
 import { HostRules } from './lib/HostRules.js';
+import { Arc } from './lib/Arc.js';
 
 export { IRequestLogInit } from './lib/Request.js';
 export { IResponseInit } from './lib/Response.js';
@@ -20,6 +21,7 @@ export class ProjectMock extends DataMock {
   url: Url;
   certificates: Certificates;
   hostRules: HostRules;
+  arc: Arc;
   
   /**
    * @param init The library init options.
@@ -33,5 +35,6 @@ export class ProjectMock extends DataMock {
     this.url = new Url(init);
     this.certificates = new Certificates(init);
     this.hostRules = new HostRules(init);
+    this.arc = new Arc(init);
   }
 }

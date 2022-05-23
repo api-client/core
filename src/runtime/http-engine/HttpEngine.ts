@@ -10,7 +10,7 @@ import { IHttpRequest, HttpRequest } from '../../models/HttpRequest.js';
 import { IRequestBaseConfig } from '../../models/RequestConfig.js';
 import { IRequestAuthorization } from '../../models/RequestAuthorization.js';
 import { HostRule } from '../../models/HostRule.js';
-import { HttpCertificate } from '../../models/ClientCertificate.js';
+import { HttpCertificate, IPemCertificate } from '../../models/ClientCertificate.js';
 import { SentRequest } from '../../models/SentRequest.js';
 import { Response } from '../../models/Response.js';
 import { ErrorResponse } from '../../models/ErrorResponse.js';
@@ -645,6 +645,7 @@ Check your request parameters.`);
       this.finalizeRequest(result);
     } catch (e) {
       const error = e as Error;
+      // eslint-disable-next-line no-console
       console.error(error);
       this._errorRequest({
         message: (error && error.message) || 'Unknown error occurred',
@@ -797,6 +798,7 @@ Check your request parameters.`);
       }
       options.pfx.push(struct);
     } else if (cert.type === 'pem') {
+      const typed = cert as IPemCertificate;
       if (!options.cert) {
         options.cert = [];
       }
@@ -807,9 +809,9 @@ Check your request parameters.`);
           options.cert = [];
         }
       }
-      const added = Buffer.from(cert.cert.data as string);
+      const added = Buffer.from(typed.cert.data as string);
       options.cert.push(added);
-      if (cert.certKey) {
+      if (typed.certKey) {
         if (!Array.isArray(options.key)) {
           if (options.key) {
             options.key = [options.key];
@@ -818,10 +820,10 @@ Check your request parameters.`);
           }
         }
         const struct: tls.KeyObject = {
-          pem: Buffer.from(cert.certKey.data as string),
+          pem: Buffer.from(typed.certKey.data as string),
         };
-        if (cert.certKey.passphrase) {
-          struct.passphrase = cert.certKey.passphrase;
+        if (typed.certKey.passphrase) {
+          struct.passphrase = typed.certKey.passphrase;
         }
         options.key.push(struct);
       }

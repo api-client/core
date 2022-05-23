@@ -1,6 +1,6 @@
 import { assert } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { RestApi } from '../../src/mocking/legacy/RestApi.js';
+import { RestApi } from '../../../src/mocking/legacy/RestApi.js';
 
 describe('RestApi', () => {
   describe('generateApiIndex()', () => {

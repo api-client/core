@@ -1,7 +1,7 @@
 import { assert } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { Http } from '../../src/mocking/legacy/Http.js';
-import { ARCProject } from '../../src/models/legacy/models/ArcLegacyProject.js';
+import { Http } from '../../../src/mocking/legacy/Http.js';
+import { ARCProject } from '../../../src/models/legacy/models/ArcLegacyProject.js';
 
 describe('Http', () => {
   describe('project()', () => {
