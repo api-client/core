@@ -1,0 +1,49 @@
+#%Arc Project 1.0
+
+kind: ARC#HttpProject
+key: ec8dcc51-a2b1-48a4-a063-1f023e717381
+
+info:
+  kind: Core#Thing # most likely this will be always optional.
+  name: HTTP Bin
+  description: A definition of the HTTP Bin API.
+
+created: 1653592878403
+updated: 1653592878403
+
+items:
+  - kind: ARC#HttpProjectFolder
+    key: f045ff7c-5f7b-4232-ac84-2b5ce5d3f6fd
+
+definitions:
+  folders:
+    - kind: ARC#HttpProjectFolder # most likely this will be optional in this place but required when the folder is defined in another file.
+      key: f045ff7c-5f7b-4232-ac84-2b5ce5d3f6fd
+      info:
+        name: Status codes
+      created: 1653593047514
+      updated: 1653593047514
+      items:
+        - kind: ARC#HttpProjectRequest
+          key: e4c08ed6-c566-449b-8c09-3af36fe0af48
+        - kind: ARC#HttpProjectRequest
+          key: b2977e38-a7de-47f9-acbe-4492745bcf40
+  requests:
+    - kind: ARC#HttpProjectRequest
+      key: e4c08ed6-c566-449b-8c09-3af36fe0af48
+      created: 1653593207486
+      updated: 1653593207486
+      info:
+        name: GET Status
+      expects:
+        url: https://httpbin.org/status/{code}
+        method: GET
+    - kind: ARC#HttpProjectRequest
+      key: b2977e38-a7de-47f9-acbe-4492745bcf40
+      created: 1653593404216
+      updated: 1653593404216
+      info:
+        name: POST Status
+      expects:
+        url: https://httpbin.org/status/{code}
+        method: POST
