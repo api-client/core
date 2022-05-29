@@ -68,9 +68,9 @@ export interface IRequest {
 }
 
 export class Request {
-  [createdSymbol]: number;
-  [updatedSymbol]: number;
-  [midnightSymbol]: number;
+  [createdSymbol] = 0;
+  [updatedSymbol] = 0;
+  [midnightSymbol] = 0;
   kind = Kind;
   /**
    * The basic information about the project.

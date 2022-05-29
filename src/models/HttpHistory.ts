@@ -85,8 +85,10 @@ export interface IHttpHistoryBulkAdd {
  * Note, history object are not mutable. Can only be created or deleted.
  */
 export class HttpHistory {
-  [createdSymbol]: number;
-  [midnightSymbol]: number;
+  [createdSymbol] = 0;
+
+  [midnightSymbol] = 0;
+  
   kind = Kind;
   /**
    * The data store key. Only present when the object was already inserted into the data store.
