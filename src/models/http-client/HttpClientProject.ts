@@ -7,15 +7,30 @@
 import v4 from "../../lib/uuid.js";
 import { HttpRequest, IHttpRequest } from "../HttpRequest.js";
 import { IRequest, Request } from "../Request.js";
+import { Environment, IEnvironment, Kind as EnvironmentKind } from '../Environment.js';
 import { IThing, Thing } from "../Thing.js";
 import { ARCHistoryRequest, ARCSavedRequest } from "../legacy/request/ArcRequest.js";
 import { ARCProject } from "../legacy/models/ArcLegacyProject.js";
 
-export const ArcProjectKind = 'ARC#HttpProject';
-export const ArcProjectFolderKind = 'ARC#HttpProjectFolder';
-export const ArcProjectRequestKind = 'ARC#HttpProjectRequest';
+export const HttpClientProjectKind = 'HttpClient#Project';
+export const HttpClientFolderKind = 'HttpClient#ProjectFolder';
+export const HttpClientRequestKind = 'HttpClient#ProjectRequest';
 
-export interface IArcRequestCloneOptions {
+export interface IHttpClientItemOptions {
+  /**
+   * The parent folder to add the item to.
+   */
+  parent?: string;
+}
+
+export interface IHttpClientItemCreateOptions extends IHttpClientItemOptions{
+  /**
+   * The position at which to add the item.
+   */
+  index?: number;
+}
+
+export interface IHttpClientRequestCloneOptions {
   /**
    * By default it revalidates (re-creates) keys in the request.
    * Set this to true to not make any changes to the keys.
@@ -29,14 +44,14 @@ export interface IArcRequestCloneOptions {
   withoutAttach?: boolean;
 }
 
-export interface IArcFolderAddOptions {
+export interface IHttpClientFolderAddOptions {
   /**
    * Optionally the position at which to add the request into the list of items.
    */
   index?: number;
 }
 
-export interface IArcFolderCloneOptions {
+export interface IHttpClientFolderCloneOptions {
   /**
    * By default it clones the folder with all requests in it.
    * Set this to `true` to skip copying the requests along with the folder.
@@ -53,7 +68,7 @@ export interface IArcFolderCloneOptions {
    * is put into the project root rather than the parent folder (as it would when cloning
    * a folder inside the same project).
    */
-  targetProject?: ArcProject;
+  targetProject?: HttpClientProject;
   /**
    * The **key** of the target folder.
    * 
@@ -63,23 +78,19 @@ export interface IArcFolderCloneOptions {
   targetFolder?: string;
 }
 
-export interface IArcFolderCreateOptions {
+export interface IHttpClientFolderCreateOptions extends IHttpClientItemOptions {
   /**
    * Ignores the operation when the folder with the same name already exists. 
    * This command can be used used to ensure that the folder exists.
    */
   skipExisting?: boolean;
   /**
-   * The id of the parent folder. When not set it adds the folder to the project root.
-   */
-  parent?: string;
-  /**
    * Optionally the position at which to add the folder into the list of items.
    */
   index?: number;
 }
 
-export interface IArcFolderSearchOptions {
+export interface IHttpClientFolderSearchOptions {
   /**
    * When set it searches for a folder using keys only. 
    * By default it searches for a key and the name.
@@ -87,25 +98,21 @@ export interface IArcFolderSearchOptions {
   keyOnly?: boolean;
 }
 
-export interface IArcFolderDeleteOptions {
+export interface IHttpClientFolderDeleteOptions {
   /**
    * When set it won't throw an error when the folder is not found in the project.
    */
   safe?: boolean;
 }
 
-export interface IArcRequestAddOptions {
-  /**
-   * The id of the parent folder. When not set it adds the request to the project root.
-   */
-  parent?: string;
+export interface IHttpClientRequestAddOptions extends IHttpClientItemOptions {
   /**
    * Optionally the position at which to add the request into the list of items.
    */
   index?: number;
 }
 
-export interface IArcRequestSearchOptions {
+export interface IHttpClientRequestSearchOptions {
   /**
    * When set it searches for a request using keys only. 
    * By default it searches for a key and the name.
@@ -113,33 +120,28 @@ export interface IArcRequestSearchOptions {
   keyOnly?: boolean;
 }
 
-export interface IArcRequestDeleteOptions {
+export interface IHttpClientRequestDeleteOptions {
   /**
    * When set it won't throw an error when the request is not found in the project.
    */
   safe?: boolean;
 }
 
-export interface IArcProjectMoveOptions {
+export interface IHttpClientProjectMoveOptions extends IHttpClientItemOptions {
   /**
    * The position at which to insert the object in the destination. BY default it adds the object at the end.
    */
   index?: number;
-  /**
-   * The name or the key of the parent folder to move the item into. 
-   * When not set it moves the item to the project's root.
-   */
-  parent?: string;
 }
 
-export interface IArcFolderListOptions {
+export interface IHttpClientFolderListOptions {
   /**
    * Folder name or key to list folders for.
    */
   folder?: string;
 }
 
-export interface IArcProjectCloneOptions {
+export interface IHttpClientProjectCloneOptions {
   /**
    * By default it revalidates (re-creates) keys in the request.
    * Set this to true to not make any changes to the keys.
@@ -147,17 +149,36 @@ export interface IArcProjectCloneOptions {
   withoutRevalidate?: boolean;
 }
 
-export interface IArcProjectRequest extends IRequest {
-  kind: typeof ArcProjectRequestKind;
+export interface IHttpClientEnvironmentCreateOptions extends IHttpClientItemOptions {
+  /**
+   * The position at which to add the item.
+   */
+  index?: number;
+}
+
+export interface IHttpClientReadEnvironmentOptions extends IHttpClientItemOptions {
+  /**
+   * The name or the key of the environment to select.
+   * 
+   * When the name is not specified it selects: 
+   * - the first environment from the project, if any
+   * - any parent folder's first environment to the requested folder, if any (if parent is set)
+   * - the requested folder's first environment, if any (if parent is set)
+   */
+  nameOrKey?: string;
+}
+
+export interface IHttpClientProjectRequest extends IRequest {
+  kind: typeof HttpClientRequestKind;
   key: string;
 }
 
-export interface IArcProjectItem {
-  kind: typeof ArcProjectFolderKind | typeof ArcProjectRequestKind;
+export interface IHttpClientProjectItem {
+  kind: typeof HttpClientFolderKind | typeof HttpClientRequestKind | typeof EnvironmentKind;
   key: string;
 }
 
-export interface IArcProjectDefinitions {
+export interface IHttpClientProjectDefinitions {
   /**
    * The list of all folders defined in the project.
    */
@@ -165,22 +186,24 @@ export interface IArcProjectDefinitions {
   /**
    * The list of all requests defined in the project.
    */
-  requests?: IArcProjectRequest[];
+  requests?: IHttpClientProjectRequest[];
+  environments?: IEnvironment[];
 }
 
-export interface ArcProjectDefinitions {
+export interface HttpClientProjectDefinitions {
   /**
    * The list of all folders defined in the project.
    */
-  folders: ArcProjectFolder[];
+  folders: HttpClientProjectFolder[];
   /**
    * The list of all requests defined in the project.
    */
-  requests: ArcProjectRequest[];
+  requests: HttpClientProjectRequest[];
+  environments: Environment[];
 }
 
-export interface IArcProject extends IProjectParent {
-  definitions: IArcProjectDefinitions;
+export interface IHttpClientProject extends IProjectParent {
+  definitions: IHttpClientProjectDefinitions;
 }
 
 export interface IProjectParent {
@@ -189,7 +212,7 @@ export interface IProjectParent {
    * The auto-generated key for the folder object.
    * For the project root this is the same as the `_id`.
    */
-  kind: typeof ArcProjectKind | typeof ArcProjectFolderKind;
+  kind: typeof HttpClientProjectKind | typeof HttpClientFolderKind;
   /**
    * Folder meta
    */
@@ -199,7 +222,7 @@ export interface IProjectParent {
    * It is an ordered list of requests and folders.
    * The actual definition is kept in the root's `definitions`.
    */
-  items: IArcProjectItem[];
+  items: IHttpClientProjectItem[];
   /**
    * Timestamp when the project was last updated.
    */
@@ -210,8 +233,8 @@ export interface IProjectParent {
   created?: number;
 }
 
-export class ArcProjectRequest extends Request {
-  kind = ArcProjectRequestKind;
+export class HttpClientProjectRequest extends Request {
+  kind = HttpClientRequestKind;
 
   /**
    * The identifier of the request.
@@ -221,7 +244,7 @@ export class ArcProjectRequest extends Request {
   /**
    * A reference to the top level project object.
    */
-  project: ArcProject;
+  project: HttpClientProject;
 
   /**
    * Creates a project request from an URL.
@@ -230,14 +253,14 @@ export class ArcProjectRequest extends Request {
    * @param url The Request URL. This is required.
    * @param project The parent project.
    */
-  static fromUrl(url: string, project?: ArcProject): ArcProjectRequest {
+  static fromUrl(url: string, project?: HttpClientProject): HttpClientProjectRequest {
     if (!project) {
       throw new Error(`The project is required.`);
     }
     const now: number = Date.now();
-    const request = new ArcProjectRequest(project, {
+    const request = new HttpClientProjectRequest(project, {
       key: v4(),
-      kind: ArcProjectRequestKind,
+      kind: HttpClientRequestKind,
       created: now,
       updated: now,
       expects: HttpRequest.fromBaseValues({ url, method: 'GET' }).toJSON(),
@@ -253,14 +276,14 @@ export class ArcProjectRequest extends Request {
    * @param name The Request name.
    * @param project The parent project.This is required.
    */
-  static fromName(name: string, project?: ArcProject): ArcProjectRequest {
+  static fromName(name: string, project?: HttpClientProject): HttpClientProjectRequest {
     if (!project) {
       throw new Error(`The project is required.`);
     }
     const now: number = Date.now();
-    const request = new ArcProjectRequest(project, {
+    const request = new HttpClientProjectRequest(project, {
       key: v4(),
-      kind: ArcProjectRequestKind,
+      kind: HttpClientRequestKind,
       created: now,
       updated: now,
       expects: new HttpRequest().toJSON(),
@@ -276,14 +299,14 @@ export class ArcProjectRequest extends Request {
    * @param project The parent project This is required.
    * @param info The request data.
    */
-  static fromHttpRequest(info: IHttpRequest, project?: ArcProject): ArcProjectRequest {
+  static fromHttpRequest(info: IHttpRequest, project?: HttpClientProject): HttpClientProjectRequest {
     if (!project) {
       throw new Error(`The project is required.`);
     }
     const now: number = Date.now();
-    const request = new ArcProjectRequest(project, {
+    const request = new HttpClientProjectRequest(project, {
       key: v4(),
-      kind: ArcProjectRequestKind,
+      kind: HttpClientRequestKind,
       created: now,
       updated: now,
       expects: HttpRequest.fromBaseValues({ method: info.method, url: info.url, headers: info.headers, payload: info.payload }).toJSON(),
@@ -295,18 +318,18 @@ export class ArcProjectRequest extends Request {
   /**
    * Creates a project request for a schema of a Request.
    */
-  static fromRequest(request: IRequest, project: ArcProject): ArcProjectRequest {
+  static fromRequest(request: IRequest, project: HttpClientProject): HttpClientProjectRequest {
     const key = v4();
-    const init: IArcProjectRequest = { ...request, key, kind: ArcProjectRequestKind };
-    const result = new ArcProjectRequest(project, init);
+    const init: IHttpClientProjectRequest = { ...request, key, kind: HttpClientRequestKind };
+    const result = new HttpClientProjectRequest(project, init);
     return result;
   }
 
-  constructor(project: ArcProject, input?: string | IArcProjectRequest) {
+  constructor(project: HttpClientProject, input?: string | IHttpClientProjectRequest) {
     super(input);
     this.project = project;
 
-    let init: IArcProjectRequest | undefined;
+    let init: IHttpClientProjectRequest | undefined;
     if (typeof input === 'string') {
       init = JSON.parse(input);
     } else if (typeof input === 'object') {
@@ -315,27 +338,27 @@ export class ArcProjectRequest extends Request {
     if (init) {
       this.key = init.key || v4();
     }
-    this.kind = ArcProjectRequestKind;
+    this.kind = HttpClientRequestKind;
   }
 
-  new(init: IArcProjectRequest): void {
+  new(init: IHttpClientProjectRequest): void {
     super.new(init);
 
     const { key = v4() } = init;
     this.key = key;
-    this.kind = ArcProjectRequestKind;
+    this.kind = HttpClientRequestKind;
   }
 
-  toJSON(): IArcProjectRequest {
+  toJSON(): IHttpClientProjectRequest {
     const request = super.toJSON();
-    const result: IArcProjectRequest = { ...request, key: this.key, kind: ArcProjectRequestKind };
+    const result: IHttpClientProjectRequest = { ...request, key: this.key, kind: HttpClientRequestKind };
     return result;
   }
 
   /**
    * @returns The instance of the ArcProject or a ArcProjectFolder that is a closes parent of this instance.
    */
-  getParent(): ArcProjectFolder | ArcProject | undefined {
+  getParent(): HttpClientProjectFolder | HttpClientProject | undefined {
     const { project, key } = this;
     return project.findParent(key);
   }
@@ -343,7 +366,7 @@ export class ArcProjectRequest extends Request {
   /**
    * @returns A reference to the parent folder or the top-level HTTP project.
    */
-  getProject(): ArcProject {
+  getProject(): HttpClientProject {
     return this.project;
   }
 
@@ -359,8 +382,8 @@ export class ArcProjectRequest extends Request {
    * By default it attaches the copied request to the same parent.
    * Use the options dictionary to control this behavior.
    */
-  clone(opts: IArcRequestCloneOptions = {}): ArcProjectRequest {
-    const copy = new ArcProjectRequest(this.project, this.toJSON());
+  clone(opts: IHttpClientRequestCloneOptions = {}): HttpClientProjectRequest {
+    const copy = new HttpClientProjectRequest(this.project, this.toJSON());
     if (!opts.withoutRevalidate) {
       copy.key = v4();
     }
@@ -382,17 +405,17 @@ export class ArcProjectRequest extends Request {
    * @param opts Optional options.
    * @returns The copied request.
    */
-  static clone(request: IArcProjectRequest, project: ArcProject, opts: IArcRequestCloneOptions = {}): ArcProjectRequest {
-    const obj = new ArcProjectRequest(project, request);
+  static clone(request: IHttpClientProjectRequest, project: HttpClientProject, opts: IHttpClientRequestCloneOptions = {}): HttpClientProjectRequest {
+    const obj = new HttpClientProjectRequest(project, request);
     return obj.clone(opts);
   }
 }
 
-export class ArcProjectItem {
+export class HttpClientProjectItem {
   /**
    * The kind of the item.
    */
-  kind: typeof ArcProjectFolderKind | typeof ArcProjectRequestKind = ArcProjectRequestKind;
+  kind: typeof HttpClientFolderKind | typeof HttpClientRequestKind | typeof EnvironmentKind = HttpClientRequestKind;
 
   /**
    * The identifier of the object in the `definitions` array of the project.
@@ -402,14 +425,14 @@ export class ArcProjectItem {
   /**
    * A reference to the top level project object.
    */
-  project: ArcProject;
+  project: HttpClientProject;
 
   /**
    * Checks whether the input is a definition of a project item.
    */
   static isProjectItem(input: unknown): boolean {
-    const typed = input as IArcProjectItem;
-    if (!input || ![ArcProjectFolderKind, ArcProjectRequestKind].includes(typed.kind)) {
+    const typed = input as IHttpClientProjectItem;
+    if (!input || ![HttpClientFolderKind, HttpClientRequestKind, EnvironmentKind].includes(typed.kind)) {
       return false;
     }
     return true;
@@ -418,9 +441,9 @@ export class ArcProjectItem {
   /**
    * @return An instance that represents a request item
    */
-  static projectRequest(project: ArcProject, key: string): ArcProjectItem {
-    const item = new ArcProjectItem(project, {
-      kind: ArcProjectRequestKind,
+  static projectRequest(project: HttpClientProject, key: string): HttpClientProjectItem {
+    const item = new HttpClientProjectItem(project, {
+      kind: HttpClientRequestKind,
       key,
     });
     return item;
@@ -429,9 +452,20 @@ export class ArcProjectItem {
   /**
    * @return An instance that represents a folder item
    */
-  static projectFolder(project: ArcProject, key: string): ArcProjectItem {
-    const item = new ArcProjectItem(project, {
-      kind: ArcProjectFolderKind,
+  static projectFolder(project: HttpClientProject, key: string): HttpClientProjectItem {
+    const item = new HttpClientProjectItem(project, {
+      kind: HttpClientFolderKind,
+      key,
+    });
+    return item;
+  }
+
+  /**
+   * @return An instance that represents an environment item
+   */
+  static projectEnvironment(project: HttpClientProject, key: string): HttpClientProjectItem {
+    const item = new HttpClientProjectItem(project, {
+      kind: EnvironmentKind,
       key,
     });
     return item;
@@ -441,18 +475,23 @@ export class ArcProjectItem {
    * @param project The top-most project.
    * @param input The project item definition used to restore the state.
    */
-  constructor(project: ArcProject, input: string | IArcProjectItem) {
+  constructor(project: HttpClientProject, input: string | IHttpClientProjectItem) {
     this.project = project;
-    let init: IArcProjectItem;
+    let init: IHttpClientProjectItem;
     if (typeof input === 'string') {
       if (input === 'http-request') {
         init = {
-          kind: ArcProjectRequestKind,
+          kind: HttpClientRequestKind,
           key: '',
         };
       } else if (input === 'folder') {
         init = {
-          kind: ArcProjectFolderKind,
+          kind: HttpClientFolderKind,
+          key: '',
+        };
+      } else if (input === 'environment') {
+        init = {
+          kind: EnvironmentKind,
           key: '',
         };
       } else {
@@ -471,8 +510,8 @@ export class ArcProjectItem {
    * 
    * Note, this throws an error when the project item is not a project item. 
    */
-  new(init: IArcProjectItem): void {
-    if (!ArcProjectItem.isProjectItem(init)) {
+  new(init: IHttpClientProjectItem): void {
+    if (!HttpClientProjectItem.isProjectItem(init)) {
       throw new Error(`Not a project item.`);
     }
     const { kind, key } = init;
@@ -480,8 +519,8 @@ export class ArcProjectItem {
     this.key = key;
   }
 
-  toJSON(): IArcProjectItem {
-    const result: IArcProjectItem = {
+  toJSON(): IHttpClientProjectItem {
+    const result: IHttpClientProjectItem = {
       kind: this.kind,
       key: this.key,
     };
@@ -491,14 +530,17 @@ export class ArcProjectItem {
   /**
    * @returns The instance of the definition associated with this item.
    */
-  getItem(): ArcProjectFolder | ArcProjectRequest | undefined {
+  getItem(): HttpClientProjectFolder | HttpClientProjectRequest | Environment | undefined {
     const { project, key, kind } = this;
     const { definitions } = project;
-    if (kind === ArcProjectRequestKind) {
+    if (kind === HttpClientRequestKind) {
       return definitions.requests.find(i => i.key === key);
     }
-    if (kind === ArcProjectFolderKind) {
+    if (kind === HttpClientFolderKind) {
       return definitions.folders.find(i => i.key === key);
+    }
+    if (kind === EnvironmentKind) {
+      return definitions.environments.find(i => i.key === key);
     }
     return undefined;
   }
@@ -506,18 +548,18 @@ export class ArcProjectItem {
   /**
    * @returns The instance of the ArcProject or a ArcProjectFolder that is a closest parent of this item.
    */
-  getParent(): ArcProjectFolder | ArcProject | undefined {
+  getParent(): HttpClientProjectFolder | HttpClientProject | undefined {
     const { project, key } = this;
     return project.findParent(key);
   }
 }
 
-export abstract class ArcProjectParent {
+export abstract class HttpClientProjectParent {
   /**
    * The auto-generated key for the folder object.
    * For the project root this is the same as the `_id`.
    */
-  kind: typeof ArcProjectKind | typeof ArcProjectFolderKind;
+  kind: typeof HttpClientProjectKind | typeof HttpClientFolderKind;
 
   /**
    * The key of the project / folder.
@@ -534,7 +576,7 @@ export abstract class ArcProjectParent {
    * It is an ordered list of requests and folders.
    * The actual definition is kept in the root's `definitions`.
    */
-  items: ArcProjectItem[] = [];
+  items: HttpClientProjectItem[] = [];
 
   /**
    * Timestamp when the project was last updated.
@@ -546,7 +588,7 @@ export abstract class ArcProjectParent {
    */
   created: number = Date.now();
 
-  constructor(kind: typeof ArcProjectKind | typeof ArcProjectFolderKind, input?: string | IProjectParent) {
+  constructor(kind: typeof HttpClientProjectKind | typeof HttpClientFolderKind, input?: string | IProjectParent) {
     this.kind = kind;
 
     let init: IProjectParent;
@@ -587,51 +629,51 @@ export abstract class ArcProjectParent {
     }
   }
 
-  abstract setItems(items?: IArcProjectItem[]): void;
+  abstract setItems(items?: IHttpClientProjectItem[]): void;
 
   /**
    * Lists items (not the actual definitions!) that are folders.
    */
-  listFolderItems(): ArcProjectItem[] {
+  listFolderItems(): HttpClientProjectItem[] {
     const { items = [] } = this;
-    return items.filter(i => i.kind === ArcProjectFolderKind);
+    return items.filter(i => i.kind === HttpClientFolderKind);
   }
 
   /**
    * Lists items (not the actual definitions!) that are requests.
    */
-  listRequestItems(): ArcProjectItem[] {
+  listRequestItems(): HttpClientProjectItem[] {
     const { items = [] } = this;
-    return items.filter(i => i.kind === ArcProjectRequestKind);
+    return items.filter(i => i.kind === HttpClientRequestKind);
   }
 }
 
-export class ArcProjectFolder extends ArcProjectParent {
+export class HttpClientProjectFolder extends HttpClientProjectParent {
 
-  project: ArcProject;
+  project: HttpClientProject;
 
   /**
    * Creates a new ArcProjectFolder object from a name.
    * @param project The top-most project.
    * @param name The name to set.
    */
-  static fromName(project: ArcProject, name = 'New folder'): ArcProjectFolder {
+  static fromName(project: HttpClientProject, name = 'New folder'): HttpClientProjectFolder {
     const now = Date.now();
     const key = v4();
     const info = Thing.fromName(name);
-    const definition = new ArcProjectFolder(project, {
+    const definition = new HttpClientProjectFolder(project, {
       key,
       created: now,
       updated: now,
       items: [],
-      kind: ArcProjectFolderKind,
+      kind: HttpClientFolderKind,
       info: info.toJSON(),
     });
     return definition;
   }
 
-  constructor(project: ArcProject, input?: string | IProjectParent) {
-    super(ArcProjectFolderKind, input);
+  constructor(project: HttpClientProject, input?: string | IProjectParent) {
+    super(HttpClientFolderKind, input);
     this.project = project;
 
     let init: IProjectParent | undefined;
@@ -643,12 +685,12 @@ export class ArcProjectFolder extends ArcProjectParent {
     if (init) {
       this.key = init.key || v4();
     }
-    this.kind = ArcProjectFolderKind;
+    this.kind = HttpClientFolderKind;
   }
 
   toJSON(): IProjectParent {
     const result: IProjectParent = {
-      kind: ArcProjectFolderKind,
+      kind: HttpClientFolderKind,
       info: this.info.toJSON(),
       key: this.key,
       created: this.created,
@@ -661,9 +703,9 @@ export class ArcProjectFolder extends ArcProjectParent {
     return result;
   }
 
-  setItems(items?: IArcProjectItem[]): void {
+  setItems(items?: IHttpClientProjectItem[]): void {
     if (Array.isArray(items)) {
-      this.items = items.map(i => new ArcProjectItem(this.project, i));
+      this.items = items.map(i => new HttpClientProjectItem(this.project, i));
     } else {
       this.items = [];
     }
@@ -675,7 +717,7 @@ export class ArcProjectFolder extends ArcProjectParent {
    * @param folder The folder to add to this project.
    * @returns The added folder.
    */
-  addFolder(folder: ArcProjectFolder): ArcProjectFolder;
+  addFolder(folder: HttpClientProjectFolder): HttpClientProjectFolder;
 
   /**
    * Appends new folder to a project from a full folder schema.
@@ -685,7 +727,7 @@ export class ArcProjectFolder extends ArcProjectParent {
    * @param folder The folder schema to add to this project.
    * @returns The added folder.
    */
-  addFolder(folder: IProjectParent): ArcProjectFolder;
+  addFolder(folder: IProjectParent): HttpClientProjectFolder;
 
   /**
    * Appends a new folder to the project or a sub-folder.
@@ -693,15 +735,15 @@ export class ArcProjectFolder extends ArcProjectParent {
    * @param name The name to set. Optional.
    * @returns The newly inserted folder. If the folder already existed it returns its instance.
    */
-  addFolder(name?: string): ArcProjectFolder;
+  addFolder(name?: string): HttpClientProjectFolder;
 
   /**
    * Appends a new folder to the folder. It updates the project to add the request definition.
    * @param name The name to set. Optional.
    * @returns The key of newly inserted folder.
    */
-  addFolder(name: string | IProjectParent | ArcProjectFolder | undefined): ArcProjectFolder {
-    return this.project.addFolder(name as ArcProjectFolder, { parent: this.key });
+  addFolder(name: string | IProjectParent | HttpClientProjectFolder | undefined): HttpClientProjectFolder {
+    return this.project.addFolder(name as HttpClientProjectFolder, { parent: this.key });
   }
 
   /**
@@ -711,7 +753,7 @@ export class ArcProjectFolder extends ArcProjectParent {
    * @param opts The request add options.
    * @returns The inserted into the definitions request.
    */
-  addRequest(url: string, opts?: IArcFolderAddOptions): ArcProjectRequest;
+  addRequest(url: string, opts?: IHttpClientFolderAddOptions): HttpClientProjectRequest;
 
   /**
    * Adds a request to the project or a sub-folder.
@@ -720,14 +762,14 @@ export class ArcProjectFolder extends ArcProjectParent {
    * @param opts The request add options.
    * @returns The inserted into the definitions request.
    */
-  addRequest(request: IArcProjectRequest | ArcProjectRequest, opts?: IArcFolderAddOptions): ArcProjectRequest;
+  addRequest(request: IHttpClientProjectRequest | HttpClientProjectRequest, opts?: IHttpClientFolderAddOptions): HttpClientProjectRequest;
 
   /**
    * Appends a new request to the folder. It updates the project to add the request definition.
    * @param request The request to append to the folder.
    * @returns The key of newly inserted request.
    */
-  addRequest(request: IArcProjectRequest | ArcProjectRequest | string, opts: IArcFolderAddOptions = {}): ArcProjectRequest {
+  addRequest(request: IHttpClientProjectRequest | HttpClientProjectRequest | string, opts: IHttpClientFolderAddOptions = {}): HttpClientProjectRequest {
     const addOptions = { parent: this.key, ...opts };
     if (typeof request === 'string') {
       return this.project.addRequest(request, addOptions);
@@ -738,7 +780,7 @@ export class ArcProjectFolder extends ArcProjectParent {
   /**
    * @returns The instance of the ArcProject or a ArcProjectFolder that is a closes parent of this instance.
    */
-  getParent(): ArcProjectFolder | ArcProject | undefined {
+  getParent(): HttpClientProjectFolder | HttpClientProject | undefined {
     const { project, key } = this;
     return project.findParent(key);
   }
@@ -746,7 +788,7 @@ export class ArcProjectFolder extends ArcProjectParent {
   /**
    * @returns A reference to the parent folder or the top-level HTTP project.
    */
-  getProject(): ArcProject {
+  getProject(): HttpClientProject {
     return this.project;
   }
 
@@ -766,9 +808,9 @@ export class ArcProjectFolder extends ArcProjectParent {
    * 
    * @param opts Cloning options
    */
-  clone(opts: IArcFolderCloneOptions = {}): ArcProjectFolder {
+  clone(opts: IHttpClientFolderCloneOptions = {}): HttpClientProjectFolder {
     const { targetProject = this.project, targetFolder } = opts;
-    const copy = new ArcProjectFolder(targetProject, this.toJSON());
+    const copy = new HttpClientProjectFolder(targetProject, this.toJSON());
     copy.key = v4();
 
     const extProject = targetProject !== this.project;
@@ -808,8 +850,8 @@ export class ArcProjectFolder extends ArcProjectParent {
    * @param folder The target folder into which to put the requests. The folder has to have the target project attached to it.
    * @param project The originating project where the definitions are stored
    */
-  protected cloneRequests(folder: ArcProjectFolder, project: ArcProject): void {
-    const requests = this.items.filter(i => i.kind === ArcProjectRequestKind);
+  protected cloneRequests(folder: HttpClientProjectFolder, project: HttpClientProject): void {
+    const requests = this.items.filter(i => i.kind === HttpClientRequestKind);
     requests.forEach(r => {
       const request = project.findRequest(r.key, { keyOnly: true });
       if (!request) {
@@ -835,14 +877,14 @@ export class ArcProjectFolder extends ArcProjectParent {
    * @param project The originating project where the definitions are stored
    * @param withRequests Whether to clone requests with the folder.
    */
-  protected cloneSubFolders(folder: ArcProjectFolder, project: ArcProject, withRequests = true): void {
-    const folders = this.items.filter(i => i.kind === ArcProjectFolderKind);
+  protected cloneSubFolders(folder: HttpClientProjectFolder, project: HttpClientProject, withRequests = true): void {
+    const folders = this.items.filter(i => i.kind === HttpClientFolderKind);
     folders.forEach(f => {
       const definition = project.findFolder(f.key, { keyOnly: true });
       if (!definition) {
         return;
       }
-      const copy = new ArcProjectFolder(folder.getProject(), definition.toJSON());
+      const copy = new HttpClientProjectFolder(folder.getProject(), definition.toJSON());
       copy.key = v4();
       copy.items = [];
       folder.addFolder(copy);
@@ -856,14 +898,14 @@ export class ArcProjectFolder extends ArcProjectParent {
   /**
    * Lists folders in this folder.
    */
-  listFolders(): ArcProjectFolder[] {
+  listFolders(): HttpClientProjectFolder[] {
     return this.project.listFolders({ folder: this.key });
   }
 
   /**
    * Lists requests in this folder.
    */
-  listRequests(): ArcProjectRequest[] {
+  listRequests(): HttpClientProjectRequest[] {
     return this.project.listRequests(this.key);
   }
 
@@ -873,14 +915,72 @@ export class ArcProjectFolder extends ArcProjectParent {
    * @param legacy The legacy request definition.
    * @returns The created project request.
    */
-  async addLegacyRequest(legacy: ARCSavedRequest | ARCHistoryRequest): Promise<ArcProjectRequest> {
+  async addLegacyRequest(legacy: ARCSavedRequest | ARCHistoryRequest): Promise<HttpClientProjectRequest> {
     const request = await Request.fromLegacy(legacy);
-    const projectRequest = ArcProjectRequest.fromRequest(request.toJSON(), this.project);
+    const projectRequest = HttpClientProjectRequest.fromRequest(request.toJSON(), this.project);
     return this.addRequest(projectRequest);
+  }
+
+  /**
+   * Adds an environment to the project.
+   * 
+   * @param env The definition of the environment to use to create the environment
+   * @returns The same or created environment.
+   */
+  addEnvironment(env: IEnvironment, opts?: IHttpClientEnvironmentCreateOptions): Environment;
+
+  /**
+   * Adds an environment to the project.
+   * 
+   * @param env The instance of the environment to add
+   * @returns The same or created environment.
+   */
+  addEnvironment(env: Environment, opts?: IHttpClientEnvironmentCreateOptions): Environment;
+
+  /**
+   * Adds an environment to the project.
+   * 
+   * @param env The name of the environment to create
+   * @returns The same or created environment.
+   */
+  addEnvironment(env: string, opts?: IHttpClientEnvironmentCreateOptions): Environment;
+
+  /**
+   * Adds an environment to the project.
+   * @returns The same or created environment.
+   */
+  addEnvironment(env: IEnvironment | Environment | string, opts: IHttpClientEnvironmentCreateOptions = {}): Environment {
+    const newOptions: IHttpClientEnvironmentCreateOptions = { ...opts, parent: this.key };
+    return this.project.addEnvironment(env as Environment, newOptions);
+  }
+
+  /**
+   * @param key The environment key to read.
+   */
+  getEnvironment(key: string): Environment | undefined {
+    return this.project.getEnvironment(key, { parent: this.key });
+  }
+
+  /**
+   * Removes an environment from the folder or a sub-folder.
+   * 
+   * @param key the key of the environment to remove
+   * @returns The removed environment, if any.
+   */
+  removeEnvironment(key: string): Environment | undefined {
+    return this.project.removeEnvironment(key, { parent: this.key });
+  }
+
+  /**
+   * This is a link to the `getEnvironments()`. The difference is that on the 
+   * project level it won't return environments defined with the class initialization.
+   */
+  listEnvironments(): Environment[] {
+    return this.project.listEnvironments({ parent: this.key });
   }
 }
 
-export class ArcProject extends ArcProjectParent {
+export class HttpClientProject extends HttpClientProjectParent {
   /**
    * Timestamp when the project was last updated.
    */
@@ -891,14 +991,14 @@ export class ArcProject extends ArcProjectParent {
    */
   created: number = Date.now();
 
-  definitions: ArcProjectDefinitions;
+  definitions: HttpClientProjectDefinitions;
 
   /**
    * Creates a new ARC project from a name.
    * @param name The name to set.
    */
-  static fromName(name: string): ArcProject {
-    const project = new ArcProject();
+  static fromName(name: string): HttpClientProject {
+    const project = new HttpClientProject();
     const info = Thing.fromName(name);
     project.info = info;
     return project;
@@ -909,9 +1009,9 @@ export class ArcProject extends ArcProjectParent {
    * 
    * Note, the `requests` should be processed and the payload restored to it's original value.
    */
-  static async fromLegacyProject(project: ARCProject, requests: ARCSavedRequest[]): Promise<ArcProject> {
+  static async fromLegacyProject(project: ARCProject, requests: ARCSavedRequest[]): Promise<HttpClientProject> {
     const { name = 'Unnamed project', description, requests: ids } = project;
-    const result = ArcProject.fromName(name);
+    const result = HttpClientProject.fromName(name);
     if (project._id) {
       result.key = project._id;
     }
@@ -925,7 +1025,7 @@ export class ArcProject extends ArcProjectParent {
           return;
         }
         const request = await Request.fromLegacy(old);
-        const projectRequest = ArcProjectRequest.fromRequest(request.toJSON(), result);
+        const projectRequest = HttpClientProjectRequest.fromRequest(request.toJSON(), result);
         if (old._id) {
           projectRequest.key = old._id;
         }
@@ -936,24 +1036,25 @@ export class ArcProject extends ArcProjectParent {
     return result;
   }
 
-  constructor(input?: string | IArcProject) {
-    super(ArcProjectKind);
+  constructor(input?: string | IHttpClientProject) {
+    super(HttpClientProjectKind);
     this.definitions = {
       folders: [],
       requests: [],
+      environments: [],
     };
-    let init: IArcProject;
+    let init: IHttpClientProject;
     if (typeof input === 'string') {
       init = JSON.parse(input);
     } else if (typeof input === 'object') {
       init = input;
       if (!init.kind) {
-        init.kind = ArcProjectKind;
+        init.kind = HttpClientProjectKind;
       }
     } else {
       const now = Date.now();
       init = {
-        kind: ArcProjectKind,
+        kind: HttpClientProjectKind,
         key: v4(),
         definitions: {},
         items: [],
@@ -965,7 +1066,7 @@ export class ArcProject extends ArcProjectParent {
     this.new(init);
   }
 
-  new(init: IArcProject): void {
+  new(init: IHttpClientProject): void {
     if (!init || !init.items) {
       throw new Error(`Not a project.`);
     }
@@ -982,24 +1083,28 @@ export class ArcProject extends ArcProjectParent {
     this.definitions = {
       folders: [],
       requests: [],
+      environments: [],
     };
     if (Array.isArray(definitions.requests)) {
       this.definitions.requests = definitions.requests.map(i => {
-        const instance = new ArcProjectRequest(this, i);
+        const instance = new HttpClientProjectRequest(this, i);
         return instance;
       });
     }
     if (Array.isArray(definitions.folders)) {
       this.definitions.folders = definitions.folders.map(i => {
-        const instance = new ArcProjectFolder(this, i);
+        const instance = new HttpClientProjectFolder(this, i);
         return instance;
       });
     }
+    if (Array.isArray(definitions.environments)) {
+      this.definitions.environments = definitions.environments.map(i => new Environment(i));
+    }
   }
 
-  toJSON(): IArcProject {
-    const result: IArcProject = {
-      kind: ArcProjectKind,
+  toJSON(): IHttpClientProject {
+    const result: IHttpClientProject = {
+      kind: HttpClientProjectKind,
       key: this.key,
       definitions: {},
       items: [],
@@ -1013,15 +1118,18 @@ export class ArcProject extends ArcProjectParent {
     if (Array.isArray(this.definitions.folders) && this.definitions.folders.length) {
       result.definitions.folders = this.definitions.folders.map(i => i.toJSON());
     }
+    if (Array.isArray(this.definitions.environments) && this.definitions.environments.length) {
+      result.definitions.environments = this.definitions.environments.map(i => i.toJSON());
+    }
     if (Array.isArray(this.items) && this.items.length) {
       result.items = this.items.map(i => i.toJSON());
     }
     return result;
   }
 
-  setItems(items?: IArcProjectItem[]): void {
+  setItems(items?: IHttpClientProjectItem[]): void {
     if (Array.isArray(items)) {
-      this.items = items.map(i => new ArcProjectItem(this, i));
+      this.items = items.map(i => new HttpClientProjectItem(this, i));
     } else {
       this.items = [];
     }
@@ -1033,7 +1141,7 @@ export class ArcProject extends ArcProjectParent {
    * @param  key The key of the definition.
    * @returns The parent or undefine when not found.
    */
-  findParent(key: string): ArcProjectFolder | ArcProject | undefined {
+  findParent(key: string): HttpClientProjectFolder | HttpClientProject | undefined {
     const { definitions, items = [] } = this;
     const projectItemsIndex = items.findIndex(i => i.key === key);
     if (projectItemsIndex > -1) {
@@ -1053,7 +1161,7 @@ export class ArcProject extends ArcProjectParent {
    * @param opts Optional folder add options.
    * @returns The added folder.
    */
-  addFolder(folder: ArcProjectFolder, opts?: IArcFolderCreateOptions): ArcProjectFolder;
+  addFolder(folder: HttpClientProjectFolder, opts?: IHttpClientFolderCreateOptions): HttpClientProjectFolder;
 
   /**
    * Appends new folder to a project from a full folder schema.
@@ -1064,7 +1172,7 @@ export class ArcProject extends ArcProjectParent {
    * @param opts Optional folder add options.
    * @returns The added folder.
    */
-  addFolder(folder: IProjectParent, opts?: IArcFolderCreateOptions): ArcProjectFolder;
+  addFolder(folder: IProjectParent, opts?: IHttpClientFolderCreateOptions): HttpClientProjectFolder;
 
   /**
    * Appends a new folder to the project or a sub-folder.
@@ -1073,7 +1181,7 @@ export class ArcProject extends ArcProjectParent {
    * @param opts Folder create options.
    * @returns The newly inserted folder. If the folder already existed it returns its instance.
    */
-  addFolder(name?: string, opts?: IArcFolderCreateOptions): ArcProjectFolder;
+  addFolder(name?: string, opts?: IHttpClientFolderCreateOptions): HttpClientProjectFolder;
 
   /**
    * Appends a new folder to the project or a sub-folder.
@@ -1085,7 +1193,7 @@ export class ArcProject extends ArcProjectParent {
    * @param opts Folder create options.
    * @returns The newly inserted folder. If the folder already existed it returns its instance.
    */
-  addFolder(init: string | IProjectParent | ArcProjectFolder = 'New Folder', opts: IArcFolderCreateOptions = {}): ArcProjectFolder {
+  addFolder(init: string | IProjectParent | HttpClientProjectFolder = 'New Folder', opts: IHttpClientFolderCreateOptions = {}): HttpClientProjectFolder {
     if (!Array.isArray(this.items)) {
       this.items = [];
     }
@@ -1093,7 +1201,7 @@ export class ArcProject extends ArcProjectParent {
       this.definitions.folders = [];
     }
     const { skipExisting, parent } = opts;
-    let root: ArcProjectFolder | ArcProject;
+    let root: HttpClientProjectFolder | HttpClientProject;
     if (parent) {
       const rootCandidate = this.findFolder(parent);
       if (!rootCandidate) {
@@ -1103,13 +1211,13 @@ export class ArcProject extends ArcProjectParent {
     } else {
       root = this;
     }
-    let definition: ArcProjectFolder;
+    let definition: HttpClientProjectFolder;
     if (typeof init === 'string') {
-      definition = ArcProjectFolder.fromName(this, init);
-    } else if (init instanceof ArcProjectFolder) {
+      definition = HttpClientProjectFolder.fromName(this, init);
+    } else if (init instanceof HttpClientProjectFolder) {
       definition = init;
     } else {
-      definition = new ArcProjectFolder(this, init);
+      definition = new HttpClientProjectFolder(this, init);
     }
     if (skipExisting) {
       const folders = root.listFolderItems();
@@ -1122,7 +1230,7 @@ export class ArcProject extends ArcProjectParent {
     }
 
     this.definitions.folders.push(definition);
-    const item = ArcProjectItem.projectFolder(this, definition.key);
+    const item = HttpClientProjectItem.projectFolder(this, definition.key);
     if (!Array.isArray(root.items)) {
       root.items = [];
     }
@@ -1141,13 +1249,13 @@ export class ArcProject extends ArcProjectParent {
    * @param opts Optional search options.
    * @returns Found project folder or undefined.
    */
-  findFolder(nameOrKey: string, opts: IArcFolderSearchOptions = {}): ArcProjectFolder | undefined {
+  findFolder(nameOrKey: string, opts: IHttpClientFolderSearchOptions = {}): HttpClientProjectFolder | undefined {
     const { definitions } = this;
     const item = definitions.folders.find((i) => {
-      if (i.kind !== ArcProjectFolderKind) {
+      if (i.kind !== HttpClientFolderKind) {
         return false;
       }
-      const folder = (i as ArcProjectFolder);
+      const folder = (i as HttpClientProjectFolder);
       if (folder.key === nameOrKey) {
         return true;
       }
@@ -1157,7 +1265,7 @@ export class ArcProject extends ArcProjectParent {
       return !!folder.info && folder.info.name === nameOrKey;
     });
     if (item) {
-      return item as ArcProjectFolder;
+      return item as HttpClientProjectFolder;
     }
     return undefined;
   }
@@ -1168,7 +1276,7 @@ export class ArcProject extends ArcProjectParent {
    * @param opts Folder remove options.
    * @returns The removed folder definition or undefined when not removed.
    */
-  removeFolder(key: string, opts: IArcFolderDeleteOptions = {}): ArcProjectFolder | undefined {
+  removeFolder(key: string, opts: IHttpClientFolderDeleteOptions = {}): HttpClientProjectFolder | undefined {
     const { definitions } = this;
     const folder = this.findFolder(key, { keyOnly: true });
     if (!folder) {
@@ -1207,7 +1315,7 @@ export class ArcProject extends ArcProjectParent {
    * @param key The key of the request to move.
    * @param opts The moving options.
    */
-  moveFolder(key: string, opts: IArcProjectMoveOptions = {}): void {
+  moveFolder(key: string, opts: IHttpClientProjectMoveOptions = {}): void {
     const { index, parent } = opts;
     const movedFolder = this.findFolder(key);
     if (!movedFolder) {
@@ -1263,7 +1371,7 @@ export class ArcProject extends ArcProjectParent {
       if (item.key === child) {
         return true;
       }
-      if (item.kind === ArcProjectFolderKind) {
+      if (item.kind === HttpClientFolderKind) {
         const hasChild = this.hasChild(child, item.key);
         if (hasChild) {
           return true;
@@ -1280,7 +1388,7 @@ export class ArcProject extends ArcProjectParent {
    * @param opts The request add options.
    * @returns The inserted into the definitions request.
    */
-  addRequest(url: string, opts?: IArcRequestAddOptions): ArcProjectRequest;
+  addRequest(url: string, opts?: IHttpClientRequestAddOptions): HttpClientProjectRequest;
 
   /**
    * Adds a request to the project or a sub-folder.
@@ -1289,7 +1397,7 @@ export class ArcProject extends ArcProjectParent {
    * @param opts The request add options.
    * @returns The inserted into the definitions request.
    */
-  addRequest(request: IArcProjectRequest | ArcProjectRequest, opts?: IArcRequestAddOptions): ArcProjectRequest;
+  addRequest(request: IHttpClientProjectRequest | HttpClientProjectRequest, opts?: IHttpClientRequestAddOptions): HttpClientProjectRequest;
 
   /**
    * Adds a request to the project or a sub-folder.
@@ -1297,7 +1405,7 @@ export class ArcProject extends ArcProjectParent {
    * @param opts Thew request add options.
    * @returns The inserted into the definitions request.
    */
-  addRequest(request: IArcProjectRequest | ArcProjectRequest | string, opts: IArcRequestAddOptions = {}): ArcProjectRequest {
+  addRequest(request: IHttpClientProjectRequest | HttpClientProjectRequest | string, opts: IHttpClientRequestAddOptions = {}): HttpClientProjectRequest {
     if (!Array.isArray(this.definitions.requests)) {
       this.definitions.requests = [];
     }
@@ -1308,7 +1416,7 @@ export class ArcProject extends ArcProjectParent {
     if (typeof request === 'object' && request.key) {
       const existing = this.definitions.requests.find(i => i.key === request.key);
       if (existing) {
-        existing.new(request as IArcProjectRequest);
+        existing.new(request as IHttpClientProjectRequest);
         return existing;
       }
     }
@@ -1317,18 +1425,18 @@ export class ArcProject extends ArcProjectParent {
 
     let finalRequest;
     if (typeof request === 'string') {
-      finalRequest = ArcProjectRequest.fromUrl(request, this);
-    } else if (request instanceof ArcProjectRequest) {
+      finalRequest = HttpClientProjectRequest.fromUrl(request, this);
+    } else if (request instanceof HttpClientProjectRequest) {
       finalRequest = request;
       finalRequest.project = this;
     } else {
-      finalRequest = new ArcProjectRequest(this, request);
+      finalRequest = new HttpClientProjectRequest(this, request);
     }
     if (!finalRequest.key) {
       finalRequest.key = v4();
     }
 
-    let root: ArcProjectFolder | ArcProject;
+    let root: HttpClientProjectFolder | HttpClientProject;
     if (opts.parent) {
       const rootCandidate = this.findFolder(opts.parent);
       if (!rootCandidate) {
@@ -1351,7 +1459,7 @@ export class ArcProject extends ArcProjectParent {
     }
 
     this.definitions.requests.push(finalRequest);
-    const item = ArcProjectItem.projectRequest(this, finalRequest.key);
+    const item = HttpClientProjectItem.projectRequest(this, finalRequest.key);
 
     if (typeof opts.index === 'number') {
       root.items.splice(opts.index, 0, item);
@@ -1367,9 +1475,9 @@ export class ArcProject extends ArcProjectParent {
    * @param legacy The legacy request definition.
    * @returns The created project request.
    */
-  async addLegacyRequest(legacy: ARCSavedRequest | ARCHistoryRequest): Promise<ArcProjectRequest> {
+  async addLegacyRequest(legacy: ARCSavedRequest | ARCHistoryRequest): Promise<HttpClientProjectRequest> {
     const request = await Request.fromLegacy(legacy);
-    const projectRequest = ArcProjectRequest.fromRequest(request.toJSON(), this);
+    const projectRequest = HttpClientProjectRequest.fromRequest(request.toJSON(), this);
     return this.addRequest(projectRequest);
   }
 
@@ -1380,7 +1488,7 @@ export class ArcProject extends ArcProjectParent {
    * @param opts Optional search options.
    * @returns Found project request or undefined.
    */
-  findRequest(nameOrKey: string, opts: IArcRequestSearchOptions = {}): ArcProjectRequest | undefined {
+  findRequest(nameOrKey: string, opts: IHttpClientRequestSearchOptions = {}): HttpClientProjectRequest | undefined {
     const { definitions } = this;
     const item = definitions.requests.find((request) => {
       if (request.key === nameOrKey) {
@@ -1392,7 +1500,7 @@ export class ArcProject extends ArcProjectParent {
       return !!request.info && request.info.name === nameOrKey;
     });
     if (item) {
-      return item as ArcProjectRequest;
+      return item as HttpClientProjectRequest;
     }
     return undefined;
   }
@@ -1404,7 +1512,7 @@ export class ArcProject extends ArcProjectParent {
    * @param opts Request remove options.
    * @returns The removed request definition or undefined when not removed.
    */
-  removeRequest(key: string, opts: IArcRequestDeleteOptions = {}): ArcProjectRequest | undefined {
+  removeRequest(key: string, opts: IHttpClientRequestDeleteOptions = {}): HttpClientProjectRequest | undefined {
     const { definitions } = this;
     const request = this.findRequest(key, { keyOnly: true });
     if (!request) {
@@ -1437,7 +1545,7 @@ export class ArcProject extends ArcProjectParent {
    * @param key The key of the request to move.
    * @param opts The moving options.
    */
-  moveRequest(key: string, opts: IArcProjectMoveOptions = {}): void {
+  moveRequest(key: string, opts: IHttpClientProjectMoveOptions = {}): void {
     const { index, parent } = opts;
     const request = this.findRequest(key);
     if (!request) {
@@ -1473,24 +1581,24 @@ export class ArcProject extends ArcProjectParent {
   /**
    * Lists items (not the actual definitions!) that are folders.
    */
-  listFolderItems(): ArcProjectItem[] {
+  listFolderItems(): HttpClientProjectItem[] {
     const { items = [] } = this;
-    return items.filter(i => i.kind === ArcProjectFolderKind);
+    return items.filter(i => i.kind === HttpClientFolderKind);
   }
 
   /**
    * Lists items (not the actual definitions!) that are requests.
    */
-  listRequestItems(): ArcProjectItem[] {
+  listRequestItems(): HttpClientProjectItem[] {
     const { items = [] } = this;
-    return items.filter(i => i.kind === ArcProjectRequestKind);
+    return items.filter(i => i.kind === HttpClientRequestKind);
   }
 
   /**
    * Lists folders from the project or a sub-folder.
    * @param opts Folder listing options.
    */
-  listFolders(opts: IArcFolderListOptions = {}): ArcProjectFolder[] {
+  listFolders(opts: IHttpClientFolderListOptions = {}): HttpClientProjectFolder[] {
     let root;
     if (opts.folder) {
       const parent = this.findFolder(opts.folder);
@@ -1502,7 +1610,7 @@ export class ArcProject extends ArcProjectParent {
       root = this;
     }
     const items = root.listFolderItems();
-    const result: ArcProjectFolder[] = [];
+    const result: HttpClientProjectFolder[] = [];
     const { definitions } = this;
     items.forEach((i) => {
       const definition = definitions.folders.find(d => i.key === d.key);
@@ -1517,7 +1625,7 @@ export class ArcProject extends ArcProjectParent {
    * Lists requests in this project or a sub-folder.
    * @param folder The optional folder name or the key to list requests for.
    */
-  listRequests(folder?: string): ArcProjectRequest[] {
+  listRequests(folder?: string): HttpClientProjectRequest[] {
     let root;
     if (folder) {
       const parent = this.findFolder(folder);
@@ -1529,7 +1637,7 @@ export class ArcProject extends ArcProjectParent {
       root = this;
     }
     const items = root.listRequestItems();
-    const result: ArcProjectRequest[] = [];
+    const result: HttpClientProjectRequest[] = [];
     const { definitions } = this;
     items.forEach((i) => {
       const definition = definitions.requests.find(d => i.key === d.key);
@@ -1544,7 +1652,7 @@ export class ArcProject extends ArcProjectParent {
    * Lists definitions for the `items` of the project or a folder.
    * @param folder Optionally the folder name to list the definitions for.
    */
-  listDefinitions(folder?: string): (ArcProjectFolder | ArcProjectRequest)[] {
+  listDefinitions(folder?: string): (HttpClientProjectFolder | HttpClientProjectRequest | Environment)[] {
     let root;
     if (folder) {
       const parent = this.findFolder(folder);
@@ -1555,15 +1663,17 @@ export class ArcProject extends ArcProjectParent {
     } else {
       root = this;
     }
-    const result: (ArcProjectFolder | ArcProjectRequest)[] = [];
+    const result: (HttpClientProjectFolder | HttpClientProjectRequest | Environment)[] = [];
     const { items = [] } = root;
     const { definitions } = this;
     items.forEach((item) => {
-      let definition: ArcProjectFolder | ArcProjectRequest | undefined;
-      if (item.kind === ArcProjectFolderKind) {
+      let definition: HttpClientProjectFolder | HttpClientProjectRequest | Environment | undefined;
+      if (item.kind === HttpClientFolderKind) {
         definition = definitions.folders.find(d => item.key === d.key);
-      } else if (item.kind === ArcProjectRequestKind) {
+      } else if (item.kind === HttpClientRequestKind) {
         definition = definitions.requests.find(d => item.key === d.key);
+      } else if (item.kind === EnvironmentKind) {
+        definition = definitions.environments.find(d => item.key === d.key);
       }
       if (definition) {
         result.push(definition);
@@ -1575,28 +1685,28 @@ export class ArcProject extends ArcProjectParent {
   /**
    * @returns On the project level this always returns undefined.
    */
-  getParent(): ArcProjectFolder | ArcProject | undefined {
+  getParent(): HttpClientProjectFolder | HttpClientProject | undefined {
     return undefined;
   }
 
-  getProject(): ArcProject {
+  getProject(): HttpClientProject {
     return this;
   }
 
   /**
    * Makes a copy of this project.
    */
-  clone(opts: IArcProjectCloneOptions = {}): ArcProject {
-    const copy = new ArcProject(this.toJSON());
+  clone(opts: IHttpClientProjectCloneOptions = {}): HttpClientProject {
+    const copy = new HttpClientProject(this.toJSON());
     if (!opts.withoutRevalidate) {
       copy.key = v4();
-      ArcProject.regenerateKeys(copy);
+      HttpClientProject.regenerateKeys(copy);
     }
     return copy;
   }
 
-  static clone(project: IArcProject, opts: IArcProjectCloneOptions = {}): ArcProject {
-    const obj = new ArcProject(project);
+  static clone(project: IHttpClientProject, opts: IHttpClientProjectCloneOptions = {}): HttpClientProject {
+    const obj = new HttpClientProject(project);
     return obj.clone(opts);
   }
 
@@ -1607,7 +1717,7 @@ export class ArcProject extends ArcProjectParent {
    * 
    * @param src The project instance to re-generate keys for.
    */
-  static regenerateKeys(src: ArcProject): void {
+  static regenerateKeys(src: HttpClientProject): void {
     const { items = [], definitions } = src;
     // create a flat list of all "items" in the project and all folders.
     let flatItems = [...items];
@@ -1639,5 +1749,199 @@ export class ArcProject extends ArcProjectParent {
       indexObject.key = newKey;
       request.key = newKey;
     });
+    (definitions.environments || []).forEach((environment) => {
+      const oldKey = environment.key;
+      const indexObject = flatItems.find(i => i.key === oldKey);
+      if (!indexObject) {
+        return;
+      }
+      const newKey = v4();
+      indexObject.key = newKey;
+      environment.key = newKey;
+    });
+  }
+
+  /**
+   * Adds an environment to the project.
+   * 
+   * @param env The definition of the environment to use to create the environment
+   * @returns The same or created environment.
+   */
+  addEnvironment(env: IEnvironment, opts?: IHttpClientEnvironmentCreateOptions): Environment;
+
+  /**
+   * Adds an environment to the project.
+   * 
+   * @param env The instance of the environment to add
+   * @returns The same or created environment.
+   */
+  addEnvironment(env: Environment, opts?: IHttpClientEnvironmentCreateOptions): Environment;
+
+  /**
+   * Adds an environment to the project.
+   * 
+   * @param env The name of the environment to create
+   * @returns The same or created environment.
+   */
+  addEnvironment(env: string, opts?: IHttpClientEnvironmentCreateOptions): Environment;
+
+  /**
+   * Adds an environment to the project.
+   * @returns The same or created environment.
+   */
+  addEnvironment(env: IEnvironment | Environment | string, opts: IHttpClientEnvironmentCreateOptions = {}): Environment {
+    const environment = this._createEnv(env);
+    const root = this._getRoot(opts);
+    const project = this.getProject();
+    if (!project.definitions.environments) {
+      project.definitions.environments = [];
+    }
+    project.definitions.environments.push(environment);
+    const item = HttpClientProjectItem.projectEnvironment(project, environment.key);
+    this._insertItem(item, root, opts);
+    return environment;
+  }
+
+  protected _createEnv(env: IEnvironment | Environment | string): Environment {
+    let finalEnv: Environment;
+    if (env instanceof Environment) {
+      finalEnv = env;
+    } else if (typeof env === 'string') {
+      finalEnv = Environment.fromName(env);
+    } else {
+      finalEnv = new Environment(env);
+    }
+    if (!finalEnv.key) {
+      finalEnv.key = v4();
+    }
+    return finalEnv;
+  }
+
+  /**
+   * @param key The environment key to read.
+   */
+  getEnvironment(key: string, opts: IHttpClientItemOptions = {}): Environment | undefined {
+    const root = this._getRoot(opts);
+    const item = root.items.find(i => i.key === key);
+    if (!item) {
+      return undefined;
+    }
+    const project = this.getProject();
+    if (!Array.isArray(project.definitions.environments)) {
+      project.definitions.environments = [];
+    }
+    return project.definitions.environments.find(e => e.key === key);
+  }
+
+  /**
+   * Removes an environment from the folder or a sub-folder.
+   * 
+   * @param key the key of the environment to remove
+   * @returns The removed environment, if any.
+   */
+  removeEnvironment(key: string, opts: IHttpClientItemOptions = {}): Environment | undefined {
+    const root = this._getRoot(opts);
+    const itemIndex = root.items.findIndex(i => i.key === key);
+    if (itemIndex < 0) {
+      return undefined;
+    }
+    root.items.splice(itemIndex, 1);
+    const project = this.getProject();
+    if (!Array.isArray(project.definitions.environments)) {
+      project.definitions.environments = [];
+    }
+    const defIndex = project.definitions.environments.findIndex(i => i.key === key);
+    if (defIndex < 0) {
+      return undefined;
+    }
+    const env = project.definitions.environments[defIndex];
+    project.definitions.environments.splice(defIndex, 1);
+    return env;
+  }
+
+  /**
+   * This is a link to the `getEnvironments()`. The difference is that on the 
+   * project level it won't return environments defined with the class initialization.
+   */
+  listEnvironments(opts: IHttpClientItemOptions = {}): Environment[] {
+    const root = this._getRoot(opts);
+    const items = root.items.filter(i => i.kind === EnvironmentKind).map(i => i.key);
+    const project = this.getProject();
+    if (!Array.isArray(project.definitions.environments)) {
+      project.definitions.environments = [];
+    }
+    return project.definitions.environments.filter(e => items.includes(e.key));
+  }
+
+  /**
+   * Reads the list of environments from then selected folder up to the project root.
+   * It stops going up in the project structure when selected environment has the `encapsulated`
+   * property set to true.
+   * The environments are ordered from the top-most level to the selected folder.
+   * 
+   * @param opts The environment read options
+   */
+  readEnvironments(opts: IHttpClientReadEnvironmentOptions = {}): Environment[] {
+    const result: Environment[] = [];
+    const { parent, nameOrKey } = opts;
+
+    const root = parent ? this.findFolder(parent, { keyOnly: true }) : this;
+    if (!root) {
+      return result;
+    }
+
+    let current: HttpClientProject | HttpClientProjectFolder | undefined = root;
+    while (current) {
+      const environments = current.listEnvironments();
+      if (environments.length) {
+        const selected = nameOrKey ? environments.find(i => i.key === nameOrKey || i.info.name === nameOrKey) : environments[0];
+        if (selected) {
+          result.push(selected);
+          if (selected.encapsulated) {
+            break;
+          }
+        }
+      }
+      current = current.getParent();
+    }
+
+    return result.reverse();
+  }
+
+  /**
+   * Finds a definition for an environment regardless of its parent.
+   * 
+   * @param key The Key of the environment to find.
+   * @returns The environment definition or undefined if not found.
+   */
+  findEnvironment(key: string): Environment | undefined {
+    return this.definitions.environments.find(i => i.key === key);
+  }
+
+  /**
+   * Depending on the options returns a project or a folder.
+   * It throws when parent folder cannot ber found.
+   */
+  protected _getRoot(opts: { parent?: string }): HttpClientProjectFolder | HttpClientProject {
+    const project = this.getProject();
+    if (opts.parent) {
+      const parent = project.findFolder(opts.parent);
+      if (!parent) {
+        throw new Error(`Unable to find the parent folder ${opts.parent}.`);
+      }
+      return parent;
+    }
+    return project;
+  }
+
+  protected _insertItem(item: HttpClientProjectItem, root: HttpClientProjectFolder | HttpClientProject, opts: IHttpClientItemCreateOptions): void {
+    if (!Array.isArray(root.items)) {
+      root.items = [];
+    }
+    if (typeof opts.index === 'number') {
+      root.items.splice(opts.index, 0, item);
+    } else {
+      root.items.push(item);
+    }
   }
 }

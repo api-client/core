@@ -341,7 +341,7 @@ export class Request {
       }
       this.info = new Thing(info);
     } else {
-      this.info = new Thing({ kind: ThingKind, name: '' });
+      this.info = Thing.fromName('')
     }
     if (log) {
       this.log = new RequestLog(log);

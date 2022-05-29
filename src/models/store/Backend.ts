@@ -20,6 +20,24 @@ export interface IBackendInfo {
    * @default single-user
    */
   mode: BackendMode;
+
+  /**
+   * The list of capabilities this store has.
+   * This is defined by the store and clients should use values defined there to detect supported capabilities.
+   * 
+   * Example capabilities include:
+   * - authorization
+   * - authentication
+   * - files
+   * - history
+   * - certificates
+   * - etc.
+   * 
+   * This could be potentially replaced by the version number of the store library but this
+   * is more future-proof in case we go into a distributed architecture with the store.
+   * Clients should look for a capability rather the version of the store.
+   */
+  capabilities: string[];
   
   /**
    * Client authentication configuration

@@ -2,14 +2,14 @@ import { IRequest, Request } from "../Request.js";
 import { HttpRequest, IHttpRequest } from "../HttpRequest.js";
 import { Thing } from "../Thing.js";
 
-export const Kind = 'Arc#ArcRequest';
+export const Kind = 'HttpClient#Request';
 
-export interface IArcHttpRequest extends IRequest {
+export interface IHttpClientRequest extends IRequest {
   kind: typeof Kind;
   key: string;
 }
 
-export class ArcHttpRequest extends Request {
+export class HttpClientRequest extends Request {
   kind = Kind;
 
   /**
@@ -23,10 +23,10 @@ export class ArcHttpRequest extends Request {
    * 
    * @param url The Request URL. This is required.
    */
-  static fromUrl(url: string): ArcHttpRequest {
+  static fromUrl(url: string): HttpClientRequest {
     const d = new Date();
     const now: number = d.getTime();
-    const request = new ArcHttpRequest({
+    const request = new HttpClientRequest({
       key: d.toJSON(),
       kind: Kind,
       created: now,
@@ -42,10 +42,10 @@ export class ArcHttpRequest extends Request {
    * 
    * @param name The Request name.
    */
-  static fromName(name: string): ArcHttpRequest {
+  static fromName(name: string): HttpClientRequest {
     const d = new Date();
     const now: number = d.getTime();
-    const request = new ArcHttpRequest({
+    const request = new HttpClientRequest({
       key: d.toJSON(),
       kind: Kind,
       created: now,
@@ -61,10 +61,10 @@ export class ArcHttpRequest extends Request {
    * 
    * @param info The request data.
    */
-  static fromHttpRequest(info: IHttpRequest): ArcHttpRequest {
+  static fromHttpRequest(info: IHttpRequest): HttpClientRequest {
     const d = new Date();
     const now: number = d.getTime();
-    const request = new ArcHttpRequest({
+    const request = new HttpClientRequest({
       key: d.toJSON(),
       kind: Kind,
       created: now,
@@ -78,23 +78,23 @@ export class ArcHttpRequest extends Request {
   /**
    * Creates a request for a schema of a Request.
    */
-  static fromRequest(request: IArcHttpRequest): ArcHttpRequest {
+  static fromRequest(request: IHttpClientRequest): HttpClientRequest {
     const d = new Date(request.created || Date.now());
     const now: number = d.getTime();
-    const init: IArcHttpRequest = { 
+    const init: IHttpClientRequest = { 
       ...request, 
       key: d.toJSON(), 
       kind: Kind,
       created: now,
     };
-    const result = new ArcHttpRequest(init);
+    const result = new HttpClientRequest(init);
     return result;
   }
 
-  constructor(input?: string | IArcHttpRequest) {
+  constructor(input?: string | IHttpClientRequest) {
     super(input);
 
-    let init: IArcHttpRequest | undefined;
+    let init: IHttpClientRequest | undefined;
     if (typeof input === 'string') {
       init = JSON.parse(input);
     } else if (typeof input === 'object') {
@@ -109,7 +109,7 @@ export class ArcHttpRequest extends Request {
     this.kind = Kind;
   }
 
-  new(init: IArcHttpRequest): void {
+  new(init: IHttpClientRequest): void {
     super.new(init);
     
     const { key } = init;
@@ -117,9 +117,9 @@ export class ArcHttpRequest extends Request {
     this.kind = Kind;
   }
 
-  toJSON(): IArcHttpRequest {
+  toJSON(): IHttpClientRequest {
     const request = super.toJSON();
-    const result: IArcHttpRequest = { 
+    const result: IHttpClientRequest = { 
       ...request, 
       key: this.key, 
       kind: Kind 

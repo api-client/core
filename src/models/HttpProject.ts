@@ -16,6 +16,7 @@ import v4 from '../lib/uuid.js';
 import { ARCSavedRequest, ARCHistoryRequest } from './legacy/request/ArcRequest.js';
 import { ArcLegacyProject, ARCProject } from './legacy/models/ArcLegacyProject.js';
 import { PostmanDataTransformer } from './transformers/PostmanDataTransformer.js';
+import { IHttpClientProject } from './http-client/HttpClientProject.js';
 
 export const Kind = 'Core#HttpProject';
 
@@ -27,7 +28,6 @@ export interface IItemOptions {
 }
 
 export interface IItemCreateOptions extends IItemOptions{
-  
   /**
    * The position at which to add the item.
    */
@@ -346,6 +346,34 @@ export class HttpProject extends ProjectParent {
   static fromInitOptions(init: IProjectInitOptions): HttpProject {
     const { name = 'Unnamed project' } = init;
     return HttpProject.fromName(name);
+  }
+
+  static fromHttpClientProject(init: IHttpClientProject): HttpProject {
+    const result = new HttpProject();
+    const { definitions = {}, items, info, key = v4() } = init;
+    result.key = key;
+    result.info = new Thing(info);
+    if (Array.isArray(items)) {
+      result.items = items.map(i => ProjectItem.fromHttpClientProject(result, i));
+    }
+    if (Array.isArray(definitions.environments)) {
+      result.definitions.environments = definitions.environments.map(i => new Environment(i));
+    }
+    if (Array.isArray(definitions.requests)) {
+      result.definitions.requests = definitions.requests.map(i => {
+        const instance = new ProjectRequest(result, i);
+        instance.attachedCallback();
+        return instance;
+      });
+    }
+    if (Array.isArray(definitions.folders)) {
+      result.definitions.folders = definitions.folders.map(i => {
+        const instance = ProjectFolder.fromHttpClientProject(result, i);
+        instance.attachedCallback();
+        return instance;
+      });
+    }
+    return result;
   }
 
   /**
@@ -1103,14 +1131,7 @@ export class HttpProject extends ProjectParent {
         flatItems = flatItems.concat(folder.items);
       }
     });
-    // const withEnvironments: (HttpProject | ProjectFolder)[] = [];
-    // if (Array.isArray(src.environments) && src.environments.length) {
-    //   withEnvironments.push(src);
-    // }
     (definitions.folders || []).forEach((folder) => {
-      // if (Array.isArray(folder.environments) && folder.environments.length) {
-      //   withEnvironments.push(folder);
-      // }
       const oldKey = folder.key;
       const indexObject = flatItems.find(i => i.key === oldKey);
       if (!indexObject) {

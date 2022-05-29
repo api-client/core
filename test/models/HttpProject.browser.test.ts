@@ -2,7 +2,7 @@
 import { assert } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { Kind as HttpProjectKind, HttpProject, IHttpProject, IProjectFolderIteratorResult } from '../../src/models/HttpProject.js';
-import { Kind as ProjectFolderKind } from '../../src/models/ProjectFolder.js';
+import { Kind as ProjectFolderKind, ProjectFolder } from '../../src/models/ProjectFolder.js';
 import { ProjectRequest } from '../../src/models/ProjectRequest.js';
 import { Kind as ThingKind } from '../../src/models/Thing.js';
 import { Kind as ProviderKind } from '../../src/models/Provider.js';
@@ -13,6 +13,7 @@ import { ArcLegacyProject } from '../../src/models/legacy/models/ArcLegacyProjec
 import { ARCSavedRequest } from '../../src/models/legacy/request/ArcRequest.js';
 import { LegacyMock } from '../../src/mocking/LegacyMock.js';
 import { Kind as ServerKind } from '../../src/models/Server.js';
+import { HttpClientProject } from '../../src/models/http-client/HttpClientProject.js';
 
 describe('Models', () => {
   const generator = new LegacyMock();
@@ -2102,6 +2103,86 @@ describe('Models', () => {
         }
         assert.lengthOf(result, 1, 'has only one element');
         assert.deepEqual(result[0].folder, f1);
+      });
+    });
+
+    describe('#fromHttpClientProject()', () => {
+      it('translates an empty project', () => {
+        const source = new HttpClientProject();
+        const result = HttpProject.fromHttpClientProject(source.toJSON());
+        assert.equal(result.kind, HttpProjectKind);
+        assert.equal(result.key, source.key);
+        assert.equal(result.key, source.key);
+        assert.deepEqual(result.items, []);
+        assert.deepEqual(result.definitions.environments, []);
+        assert.deepEqual(result.definitions.folders, []);
+        assert.deepEqual(result.definitions.schemas, []);
+        assert.deepEqual(result.definitions.requests, []);
+      });
+
+      it('adds info meta', () => {
+        const source = new HttpClientProject();
+        source.info.name = 'a';
+        source.info.description = 'b';
+        source.info.displayName = 'c';
+        source.info.version = 'd';
+        const result = HttpProject.fromHttpClientProject(source.toJSON());
+        assert.equal(result.info.name, 'a');
+        assert.equal(result.info.description, 'b');
+        assert.equal(result.info.displayName, 'c');
+        assert.equal(result.info.version, 'd');
+      });
+
+      it('adds folders', () => {
+        const source = new HttpClientProject();
+        const f1 = source.addFolder('f1');
+        const f2 = f1.addFolder('f2');
+        const result = HttpProject.fromHttpClientProject(source.toJSON());
+        assert.lengthOf(result.items, 1, 'has single root item');
+        assert.equal(result.items[0].key, f1.key, 'has the root folder item');
+        assert.lengthOf(result.definitions.folders, 2, 'has both folder definitions');
+        assert.equal(result.definitions.folders[0].key, f1.key, 'has folder #1 definition');
+        assert.equal(result.definitions.folders[1].key, f2.key, 'has folder #2 definition');
+        const f1result = result.findFolder(f1.key) as ProjectFolder;
+        assert.ok(f1result, 'reads folder #1');
+        const f2result = f1result.listFolders()[0] as ProjectFolder;
+        assert.ok(f2result, 'folder #1 has folder #2');
+      });
+
+      it('adds requests', () => {
+        const source = new HttpClientProject();
+        const f1 = source.addFolder('f1');
+        const r1 = source.addRequest('r1');
+        const r2 = f1.addRequest('r2');
+        const result = HttpProject.fromHttpClientProject(source.toJSON());
+        assert.lengthOf(result.items, 2, 'has both root item');
+        assert.equal(result.items[0].key, f1.key, 'has the root folder item');
+        assert.equal(result.items[1].key, r1.key, 'has the root request item');
+        assert.equal(result.definitions.requests[0].key, r1.key, 'has request #1 definition');
+        assert.equal(result.definitions.requests[1].key, r2.key, 'has request #2 definition');
+        const r1result = result.findRequest(r1.key) as ProjectRequest;
+        assert.ok(r1result, 'reads request #1');
+        const f1result = result.findFolder(f1.key) as ProjectFolder;
+        const r2result = f1result.listRequests()[0];
+        assert.ok(r2result, 'folder #1 has request #2');
+      });
+
+      it('adds environments', () => {
+        const source = new HttpClientProject();
+        const f1 = source.addFolder('f1');
+        const e1 = source.addEnvironment('e1');
+        const e2 = f1.addEnvironment('e2');
+        const result = HttpProject.fromHttpClientProject(source.toJSON());
+        assert.lengthOf(result.items, 2, 'has both root item');
+        assert.equal(result.items[0].key, f1.key, 'has the root folder item');
+        assert.equal(result.items[1].key, e1.key, 'has the root environment item');
+        assert.equal(result.definitions.environments[0].key, e1.key, 'has environment #1 definition');
+        assert.equal(result.definitions.environments[1].key, e2.key, 'has environment #2 definition');
+        const r1result = result.findEnvironment(e1.key) as Environment;
+        assert.ok(r1result, 'reads environment #1');
+        const f1result = result.findFolder(f1.key) as ProjectFolder;
+        const r2result = f1result.listEnvironments()[0];
+        assert.ok(r2result, 'folder #1 has environment #2');
       });
     });
   });

@@ -6,29 +6,31 @@ import { Kind as HttpRequestKind, IHttpRequest } from '../../../src/models/HttpR
 import { Kind as RequestLogKind, RequestLog } from '../../../src/models/RequestLog.js';
 import { SentRequest } from '../../../src/models/SentRequest.js';
 import { RequestConfig } from '../../../src/models/RequestConfig.js';
+import { Environment, Kind as EnvironmentKind } from '../../../src/models/Environment.js';
 import { RequestAuthorization } from '../../../src/models/RequestAuthorization.js';
 import { Kind as RequestKind, Request, IRequest } from '../../../src/models/Request.js';
 import { LegacyMock } from '../../../src/mocking/LegacyMock.js';
 import { 
-  ArcProjectKind, ArcProject, IArcProject, ArcProjectFolderKind, ArcProjectFolder, ArcProjectRequest, 
-  IArcProjectRequest, IProjectParent, ArcProjectItem, ArcProjectRequestKind,
-} from '../../../src/models/arc/ArcProject.js';
+  HttpClientProjectKind, HttpClientProject, IHttpClientProject, HttpClientFolderKind, HttpClientProjectFolder, HttpClientProjectRequest, 
+  IHttpClientProjectRequest, IProjectParent, HttpClientProjectItem, HttpClientRequestKind,
+} from '../../../src/models/http-client/HttpClientProject.js';
 import { ArcLegacyProject } from '../../../src/models/legacy/models/ArcLegacyProject.js';
 import { ARCSavedRequest } from '../../../src/models/legacy/request/ArcRequest.js';
 
 describe('Models', () => {
-  describe('arc', () => {
+  describe('http-client', () => {
     const generator = new LegacyMock();
 
-    describe('ArcProject', () => {
+    describe('HttpClientProject', () => {
       describe('initialization', () => {
         describe('Default project initialization', () => {
           it('initializes a default project', () => {
-            const result = new ArcProject();
-            assert.equal(result.kind, ArcProjectKind, 'sets the kind property');
+            const result = new HttpClientProject();
+            assert.equal(result.kind, HttpClientProjectKind, 'sets the kind property');
             assert.typeOf(result.definitions, 'object', 'sets the definitions property');
             assert.deepEqual(result.definitions.folders, [], 'sets the definitions.folders property');
             assert.deepEqual(result.definitions.requests, [], 'sets the definitions.requests property');
+            assert.deepEqual(result.definitions.environments, [], 'sets the definitions.environments property');
             assert.deepEqual(result.items, [], 'sets the items property');
             const { info } = result;
             assert.typeOf(info, 'object', 'sets the default info property');
@@ -38,10 +40,10 @@ describe('Models', () => {
         });
   
         describe('From schema initialization', () => {
-          let base: IArcProject;
+          let base: IHttpClientProject;
           beforeEach(() => {
             base = {
-              kind: ArcProjectKind,
+              kind: HttpClientProjectKind,
               key: 'abc',
               definitions: {
                 folders: [],
@@ -56,13 +58,13 @@ describe('Models', () => {
           });
   
           it('sets the info', () => {
-            const init: IArcProject = { ...base, ...{ info: {
+            const init: IHttpClientProject = { ...base, ...{ info: {
               kind: ThingKind,
               name: 'Test project',
               description: 'Project description',
               version: '1.2.3',
             }}};
-            const project = new ArcProject(init);
+            const project = new HttpClientProject(init);
             const { info } = project;
             assert.equal(info.kind, ThingKind, 'sets the info.kind property');
             assert.equal(info.name, 'Test project', 'sets the info.name property');
@@ -71,29 +73,29 @@ describe('Models', () => {
           });
   
           it('sets the items', () => {
-            const init: IArcProject = { 
+            const init: IHttpClientProject = { 
               ...base, 
               ...{ 
                 items: [{
-                  kind: ArcProjectFolderKind,
+                  kind: HttpClientFolderKind,
                   key: '123456',
                 }]
               },
             };
-            const project = new ArcProject(init);
+            const project = new HttpClientProject(init);
             const { items } = project;
             assert.typeOf(items, 'array', 'has the items')
             assert.lengthOf(items, 1, 'has a single item')
             const [item] = items;
-            assert.equal(item.kind, ArcProjectFolderKind, 'sets the item.kind property');
+            assert.equal(item.kind, HttpClientFolderKind, 'sets the item.kind property');
             assert.equal(item.key, '123456', 'sets the item.key property');
           });
   
           it('sets the definitions.folders', () => {
-            const init: IArcProject = { ...base, ...{ definitions: {
+            const init: IHttpClientProject = { ...base, ...{ definitions: {
               folders: [{
                 key: '123456',
-                kind: ArcProjectFolderKind,
+                kind: HttpClientFolderKind,
                 created: 1234567,
                 updated: 98765,
                 info: {
@@ -103,21 +105,21 @@ describe('Models', () => {
                 items: [],
               }]
             }}};
-            const project = new ArcProject(init);
+            const project = new HttpClientProject(init);
             const { definitions } = project;
             assert.typeOf(definitions.folders, 'array', 'has the items')
             assert.lengthOf(definitions.folders, 1, 'has a single item')
             const [item] = definitions.folders;
-            assert.equal(item.kind, ArcProjectFolderKind, 'sets the item.kind property');
+            assert.equal(item.kind, HttpClientFolderKind, 'sets the item.kind property');
             assert.equal(item.key, '123456', 'sets the item.key property');
           });
   
           it('sets the definitions.requests', () => {
-            const request = ArcProjectRequest.fromUrl('https://api.com', new ArcProject());
-            const init: IArcProject = { ...base, ...{ definitions: {
+            const request = HttpClientProjectRequest.fromUrl('https://api.com', new HttpClientProject());
+            const init: IHttpClientProject = { ...base, ...{ definitions: {
               requests: [request.toJSON()]
             }}};
-            const project = new ArcProject(init);
+            const project = new HttpClientProject(init);
             const { definitions } = project;
             assert.typeOf(definitions.requests, 'array', 'has the items')
             assert.lengthOf(definitions.requests, 1, 'has a single item')
@@ -128,12 +130,12 @@ describe('Models', () => {
   
         describe('From JSON string initialization', () => {
           it('restores project data from JSON string', () => {
-            const orig = new ArcProject();
+            const orig = new HttpClientProject();
             orig.info.name = 'a project';
             orig.addFolder('folder');
             orig.addRequest('https://api.com');
             const str = JSON.stringify(orig);
-            const result = new ArcProject(str);
+            const result = new HttpClientProject(str);
   
             assert.equal(result.key, orig.key, 'restores the key');
             assert.equal(result.info.name, orig.info.name, 'restores the info object');
@@ -143,12 +145,13 @@ describe('Models', () => {
         });
       });
       
-      describe('ArcProject.fromName()', () => {
+      describe('HttpClientProject.fromName()', () => {
         it('creates an empty project with a name', () => {
-          const project = ArcProject.fromName('Test project');
-          assert.equal(project.kind, ArcProjectKind, 'sets the kind property');
+          const project = HttpClientProject.fromName('Test project');
+          assert.equal(project.kind, HttpClientProjectKind, 'sets the kind property');
           assert.deepEqual(project.definitions.folders, [], 'sets the definitions.folders property');
           assert.deepEqual(project.definitions.requests, [], 'sets the definitions.requests property');
+          assert.deepEqual(project.definitions.environments, [], 'sets the definitions.environments property');
           assert.deepEqual(project.items, [], 'sets the items property');
           const { info } = project;
           assert.typeOf(info, 'object', 'sets the default info property');
@@ -162,7 +165,7 @@ describe('Models', () => {
           const init: ArcLegacyProject = {
             name: 'abc',
           };
-          const result = await ArcProject.fromLegacyProject(init, []);
+          const result = await HttpClientProject.fromLegacyProject(init, []);
           assert.equal(result.info.name, 'abc');
         });
 
@@ -171,7 +174,7 @@ describe('Models', () => {
             name: 'abc',
             description: 'test'
           };
-          const result = await ArcProject.fromLegacyProject(init, []);
+          const result = await HttpClientProject.fromLegacyProject(init, []);
           assert.equal(result.info.description, 'test');
         });
 
@@ -189,7 +192,7 @@ describe('Models', () => {
               _id: '1',
             }
           ];
-          const result = await ArcProject.fromLegacyProject(init, requests);
+          const result = await HttpClientProject.fromLegacyProject(init, requests);
           const projectRequests = result.listRequests();
           assert.lengthOf(projectRequests, 1, 'has a single request');
           assert.equal(projectRequests[0].info.name, 'r1');
@@ -215,7 +218,7 @@ describe('Models', () => {
               _id: '3',
             }
           ];
-          const result = await ArcProject.fromLegacyProject(init, requests);
+          const result = await HttpClientProject.fromLegacyProject(init, requests);
           const projectRequests = result.listRequests();
           assert.lengthOf(projectRequests, 1, 'has a single request');
           assert.equal(projectRequests[0].info.name, 'r1');
@@ -224,30 +227,30 @@ describe('Models', () => {
 
       describe('addFolder()', () => {
         it('returns a key of the inserted folder', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const created = project.addFolder('A folder');
           assert.typeOf(created, 'object', 'returns an object');
         });
   
         it('adds the folder to the items array', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const created = project.addFolder('A folder');
           const { items } = project;
           assert.lengthOf(items, 1, 'items has a single object');
           const [item] = items;
   
           assert.equal(item.key, created.key, 'has the key');
-          assert.equal(item.kind, ArcProjectFolderKind, 'has the kind');
+          assert.equal(item.kind, HttpClientFolderKind, 'has the kind');
         });
   
         it('adds the definition', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const created = project.addFolder('A folder');
           const { definitions } = project;
           assert.lengthOf(definitions.folders, 1, 'has the definition');
           const folder = definitions.folders[0];
           
-          assert.equal(folder.kind, ArcProjectFolderKind, 'has the kind');
+          assert.equal(folder.kind, HttpClientFolderKind, 'has the kind');
           assert.equal(folder.key, created.key, 'has the key');
           
           const { info } = folder;
@@ -263,7 +266,7 @@ describe('Models', () => {
         });
   
         it('adds multiple folders', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const created1 = project.addFolder('f1');
           const created2 = project.addFolder('f2');
           const created3 = project.addFolder('f3');
@@ -274,7 +277,7 @@ describe('Models', () => {
         });
   
         it('adds a folder of a folder', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const created1 = project.addFolder('f1');
           const folder = project.findFolder(created1.key);
           const created2 = folder.addFolder('inception');
@@ -287,14 +290,14 @@ describe('Models', () => {
         });
   
         it('ignores adding when the folder already exists', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const created1 = project.addFolder('f1');
           const created2 = project.addFolder('f1', { skipExisting: true });
           assert.deepEqual(created1, created2);
         });
   
         it('adds a folder on a specific position', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           project.addFolder('f1');
           project.addFolder('f2');
           project.addFolder('f3');
@@ -305,35 +308,35 @@ describe('Models', () => {
   
       describe('findFolder()', () => {
         it('returns undefine when no definitions', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const result = project.findFolder('abc');
           assert.isUndefined(result);
         });
   
         it('finds the folder by the name', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const created = project.addFolder('abc');
           const result = project.findFolder('abc');
           assert.deepEqual(result, created);
         });
   
         it('finds the folder by the key', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const created = project.addFolder('abc');
           const result = project.findFolder(created.key);
           assert.deepEqual(result, created);
         });
   
         it('returns undefined for the keyOnly option', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           project.addFolder('abc');
           const result = project.findFolder('abc', { keyOnly: true });
           assert.isUndefined(result);
         });
   
         it('returns a folder only', () => {
-          const project = new ArcProject();
-          const request = ArcProjectRequest.fromName('abc', project);
+          const project = new HttpClientProject();
+          const request = HttpClientProjectRequest.fromName('abc', project);
           project.addRequest(request);
           const created = project.addFolder('abc');
           const result = project.findFolder('abc');
@@ -344,7 +347,7 @@ describe('Models', () => {
       describe('removeFolder()', () => {
         it('removes the folder from the project', () => {
           const name = 'abc';
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const created = project.addFolder(name);
           project.removeFolder(created.key);
           const result = project.findFolder(name);
@@ -353,7 +356,7 @@ describe('Models', () => {
   
         it('removes the folder from the project items', () => {
           const name = 'abc';
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const created = project.addFolder(name);
           assert.lengthOf(project.items, 1, 'has an item');
           project.removeFolder(created.key);
@@ -363,7 +366,7 @@ describe('Models', () => {
   
         it('removes the folder from the definitions', () => {
           const name = 'abc';
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const created = project.addFolder(name);
           assert.lengthOf(project.definitions.folders, 1, 'has a definition');
           project.removeFolder(created.key);
@@ -373,7 +376,7 @@ describe('Models', () => {
   
         it('removes the folder from a parent folder', () => {
           const name = 'abc';
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const parent = project.addFolder('parent');
           const created = project.addFolder(name, { parent: parent.key });
           project.removeFolder(created.key);
@@ -383,7 +386,7 @@ describe('Models', () => {
   
         it('removes the folder from the parent folder items', () => {
           const name = 'abc';
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const parent = project.addFolder('parent');
           const created = project.addFolder(name, { parent: parent.key });
           assert.lengthOf(parent.items, 1, 'has an item');
@@ -394,7 +397,7 @@ describe('Models', () => {
   
         it('removes the folder from the definitions', () => {
           const name = 'abc';
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const parent = project.addFolder('parent');
           const created = project.addFolder(name, { parent: parent.key });
           assert.lengthOf(project.definitions.folders, 2, 'has 2 definitions');
@@ -404,21 +407,21 @@ describe('Models', () => {
         });
   
         it('throws an error when folder is not found', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           assert.throws(() => {
             project.removeFolder('hello');
           });
         });
   
         it('does not throw with the safe option', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           assert.doesNotThrow(() => {
             project.removeFolder('hello', { safe: true });
           });
         });
   
         it('removes requests from the folder', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const parent = project.addFolder('f1');
           parent.addRequest('r1');
           parent.addRequest('r2');
@@ -429,7 +432,7 @@ describe('Models', () => {
         });
   
         it('removes folders from the folder', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const parent = project.addFolder('f1');
           parent.addFolder('f2');
           parent.addFolder('f3');
@@ -440,7 +443,7 @@ describe('Models', () => {
         });
   
         it('deeply removes folders and request from the folder', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const parent = project.addFolder('f1');
           parent.addFolder('f2');
           const f3 = parent.addFolder('f3');
@@ -458,22 +461,22 @@ describe('Models', () => {
   
       describe('findParent()', () => {
         it('finds a parent for a root level folder', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const created = project.addFolder('test');
           const parent = project.findParent(created.key);
           assert.deepEqual(parent, project);
         });
   
         it('finds a parent for a root level request', () => {
-          const project = new ArcProject();
-          const request = ArcProjectRequest.fromName('request', project);
+          const project = new HttpClientProject();
+          const request = HttpClientProjectRequest.fromName('request', project);
           const created = project.addRequest(request);
           const parent = project.findParent(created.key);
           assert.deepEqual(parent, project);
         });
   
         it('finds a parent for a sub-folder', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const folder = project.addFolder('parent');
           const created = project.addFolder('test', { parent: folder.key });
           const parent = project.findParent(created.key);
@@ -481,16 +484,16 @@ describe('Models', () => {
         });
   
         it('finds a parent for a root level request', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const folder = project.addFolder('parent');
-          const request = ArcProjectRequest.fromName('request', project);
+          const request = HttpClientProjectRequest.fromName('request', project);
           const created = project.addRequest(request, { parent: folder.key });
           const parent = project.findParent(created.key);
           assert.deepEqual(parent, folder);
         });
   
         it('returns undefined when not found', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const folder = project.addFolder('parent');
           project.addFolder('test', { parent: folder.key });
           const parent = project.findParent('other');
@@ -499,16 +502,16 @@ describe('Models', () => {
       });
   
       describe('moveFolder()', () => {
-        let project: ArcProject;
+        let project: HttpClientProject;
         beforeEach(() => {
-          project = new ArcProject();
+          project = new HttpClientProject();
           const folder1 = project.addFolder('folder1');
           const folder2 = project.addFolder('folder2');
           project.addFolder('folder3', { parent: folder2.key });
-          const request1 = ArcProjectRequest.fromName('request1', project);
-          const request2 = ArcProjectRequest.fromName('request2', project);
-          const request3 = ArcProjectRequest.fromName('request3', project);
-          const request4 = ArcProjectRequest.fromName('request4', project);
+          const request1 = HttpClientProjectRequest.fromName('request1', project);
+          const request2 = HttpClientProjectRequest.fromName('request2', project);
+          const request3 = HttpClientProjectRequest.fromName('request3', project);
+          const request4 = HttpClientProjectRequest.fromName('request4', project);
           project.addRequest(request1);
           folder1.addRequest(request2);
           folder1.addRequest(request3);
@@ -593,17 +596,17 @@ describe('Models', () => {
       });
   
       describe('hasChild()', () => {
-        let project: ArcProject;
+        let project: HttpClientProject;
         beforeEach(() => {
-          project = new ArcProject();
+          project = new HttpClientProject();
           const folder1 = project.addFolder('folder1');
           const folder2 = project.addFolder('folder2', { parent: folder1.key });
           const folder3 = project.addFolder('folder3', { parent: folder2.key });
           project.addFolder('folder4');
-          const request1 = ArcProjectRequest.fromName('request1', project);
-          const request2 = ArcProjectRequest.fromName('request2', project);
-          const request3 = ArcProjectRequest.fromName('request3', project);
-          const request4 = ArcProjectRequest.fromName('request4', project);
+          const request1 = HttpClientProjectRequest.fromName('request1', project);
+          const request2 = HttpClientProjectRequest.fromName('request2', project);
+          const request3 = HttpClientProjectRequest.fromName('request3', project);
+          const request4 = HttpClientProjectRequest.fromName('request4', project);
           project.addRequest(request1);
           folder1.addRequest(request2);
           folder1.addRequest(request3);
@@ -684,8 +687,8 @@ describe('Models', () => {
   
       describe('addRequest()', () => {
         it('adds an instance of the request', () => {
-          const project = new ArcProject();
-          const request = ArcProjectRequest.fromName('test', project);
+          const project = new HttpClientProject();
+          const request = HttpClientProjectRequest.fromName('test', project);
           const created = project.addRequest(request);
           assert.deepEqual(created, request);
   
@@ -693,12 +696,12 @@ describe('Models', () => {
           assert.deepEqual(project.definitions.requests[0], created, 'inserts the definition into project\'s definitions');
           assert.equal(project.items[0].key, created.key, 'the project has the item');
   
-          assert.equal(created.getParent().kind, ArcProjectKind, 'the request has the parent as the project');
+          assert.equal(created.getParent().kind, HttpClientProjectKind, 'the request has the parent as the project');
         });
   
         it('adds the request from the schema', () => {
-          const project = new ArcProject();
-          const request = ArcProjectRequest.fromName('test', project);
+          const project = new HttpClientProject();
+          const request = HttpClientProjectRequest.fromName('test', project);
           const schema = request.toJSON();
           const created = project.addRequest(schema);
           
@@ -708,14 +711,14 @@ describe('Models', () => {
           assert.deepEqual(project.definitions.requests[0], created, 'inserts the definition into project\'s definitions');
           assert.equal(project.items[0].key, created.key, 'the project has the item');
           
-          assert.equal(created.getParent().kind, ArcProjectKind, 'the request has the parent as the project');
+          assert.equal(created.getParent().kind, HttpClientProjectKind, 'the request has the parent as the project');
         });
   
         it('adds the request to a folder', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const folder = project.addFolder('a folder');
           
-          const request = ArcProjectRequest.fromName('test', project);
+          const request = HttpClientProjectRequest.fromName('test', project);
           const created = project.addRequest(request, { parent: folder.key });
           
           assert.lengthOf(project.definitions.requests, 1, 'has the request definition');
@@ -727,8 +730,8 @@ describe('Models', () => {
         });
   
         it('adds the key if missing', () => {
-          const project = new ArcProject();
-          const request = ArcProjectRequest.fromName('test', project);
+          const project = new HttpClientProject();
+          const request = HttpClientProjectRequest.fromName('test', project);
           const schema = request.toJSON();
           delete schema.key;
           const created = project.addRequest(schema);
@@ -737,8 +740,8 @@ describe('Models', () => {
         });
   
         it('throws when parent folder not found', () => {
-          const project = new ArcProject();
-          const request = ArcProjectRequest.fromName('test', project);
+          const project = new HttpClientProject();
+          const request = HttpClientProjectRequest.fromName('test', project);
           
           assert.throws(() => {
             project.addRequest(request, { parent: 'unknown' });
@@ -746,8 +749,8 @@ describe('Models', () => {
         });
   
         it('throws when index out of bounds', () => {
-          const project = new ArcProject();
-          const request = ArcProjectRequest.fromName('test', project);
+          const project = new HttpClientProject();
+          const request = HttpClientProjectRequest.fromName('test', project);
           
           assert.throws(() => {
             project.addRequest(request, { index: 1 });
@@ -757,38 +760,38 @@ describe('Models', () => {
   
       describe('findRequest()', () => {
         it('returns undefined when no definitions', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const result = project.findRequest('abc');
           assert.isUndefined(result);
         });
   
         it('finds the request by the name', () => {
-          const project = new ArcProject();
-          const created = ArcProjectRequest.fromName('abc', project);
+          const project = new HttpClientProject();
+          const created = HttpClientProjectRequest.fromName('abc', project);
           project.addRequest(created);
           const result = project.findRequest('abc');
           assert.deepEqual(result, created);
         });
   
         it('finds the request by the key', () => {
-          const project = new ArcProject();
-          const created = ArcProjectRequest.fromName('abc', project);
+          const project = new HttpClientProject();
+          const created = HttpClientProjectRequest.fromName('abc', project);
           project.addRequest(created);
           const result = project.findRequest(created.key);
           assert.deepEqual(result, created);
         });
   
         it('returns undefined for the keyOnly option', () => {
-          const project = new ArcProject();
-          project.addRequest(ArcProjectRequest.fromName('abc', project));
+          const project = new HttpClientProject();
+          project.addRequest(HttpClientProjectRequest.fromName('abc', project));
           const result = project.findRequest('abc', { keyOnly: true });
           assert.isUndefined(result);
         });
   
         it('returns a request only', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           project.addFolder('abc');
-          const request = ArcProjectRequest.fromName('abc', project);
+          const request = HttpClientProjectRequest.fromName('abc', project);
           project.addRequest(request);
           const result = project.findRequest('abc');
           assert.deepEqual(result, request);
@@ -798,8 +801,8 @@ describe('Models', () => {
       describe('removeRequest()', () => {
         it('removes the request from the project', () => {
           const name = 'abc';
-          const project = new ArcProject();
-          const created = ArcProjectRequest.fromName(name, project);
+          const project = new HttpClientProject();
+          const created = HttpClientProjectRequest.fromName(name, project);
           project.addRequest(created);
           project.removeRequest(created.key);
           const result = project.findRequest(name);
@@ -807,8 +810,8 @@ describe('Models', () => {
         });
   
         it('removes the request from the project items', () => {
-          const project = new ArcProject();
-          const created = ArcProjectRequest.fromName('test', project);
+          const project = new HttpClientProject();
+          const created = HttpClientProjectRequest.fromName('test', project);
           project.addRequest(created);
           assert.lengthOf(project.items, 1, 'has an item');
           project.removeRequest(created.key);
@@ -816,8 +819,8 @@ describe('Models', () => {
         });
   
         it('removes the request from the definitions', () => {
-          const project = new ArcProject();
-          const created = ArcProjectRequest.fromName('test', project);
+          const project = new HttpClientProject();
+          const created = HttpClientProjectRequest.fromName('test', project);
           project.addRequest(created);
           assert.lengthOf(project.definitions.requests, 1, 'has a definition');
           project.removeRequest(created.key);
@@ -826,9 +829,9 @@ describe('Models', () => {
   
         it('removes the request from a parent folder', () => {
           const name = 'abc';
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const parent = project.addFolder('parent');
-          const created = ArcProjectRequest.fromName(name, project);
+          const created = HttpClientProjectRequest.fromName(name, project);
           project.addRequest(created, { parent: parent.key });
           project.removeRequest(created.key);
           const result = project.findRequest(name);
@@ -837,9 +840,9 @@ describe('Models', () => {
   
         it('removes the request from the parent folder items', () => {
           const name = 'abc';
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const parent = project.addFolder('parent');
-          const created = ArcProjectRequest.fromName(name, project);
+          const created = HttpClientProjectRequest.fromName(name, project);
           project.addRequest(created, { parent: parent.key });
           assert.lengthOf(parent.items, 1, 'has an item');
           project.removeRequest(created.key);
@@ -848,9 +851,9 @@ describe('Models', () => {
   
         it('removes the request from the definitions', () => {
           const name = 'abc';
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const parent = project.addFolder('parent');
-          const created = ArcProjectRequest.fromName(name, project);
+          const created = HttpClientProjectRequest.fromName(name, project);
           project.addRequest(created, { parent: parent.key });
           assert.lengthOf(project.definitions.requests, 1, 'has 1 definition');
           project.removeRequest(created.key);
@@ -858,14 +861,14 @@ describe('Models', () => {
         });
   
         it('throws an error when the request is not found', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           assert.throws(() => {
             project.removeRequest('hello');
           });
         });
   
         it('does not throw with the safe option', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           assert.doesNotThrow(() => {
             project.removeRequest('hello', { safe: true });
           });
@@ -873,16 +876,16 @@ describe('Models', () => {
       });
   
       describe('moveRequest()', () => {
-        let project: ArcProject;
+        let project: HttpClientProject;
         beforeEach(() => {
-          project = new ArcProject();
+          project = new HttpClientProject();
           const folder1 = project.addFolder('folder1');
           const folder2 = project.addFolder('folder2');
           project.addFolder('folder3', { parent: folder2.key });
-          const request1 = ArcProjectRequest.fromName('request1', project);
-          const request2 = ArcProjectRequest.fromName('request2', project);
-          const request3 = ArcProjectRequest.fromName('request3', project);
-          const request4 = ArcProjectRequest.fromName('request4', project);
+          const request1 = HttpClientProjectRequest.fromName('request1', project);
+          const request2 = HttpClientProjectRequest.fromName('request2', project);
+          const request3 = HttpClientProjectRequest.fromName('request3', project);
+          const request4 = HttpClientProjectRequest.fromName('request4', project);
           project.addRequest(request1);
           folder1.addRequest(request2);
           folder1.addRequest(request3);
@@ -960,7 +963,7 @@ describe('Models', () => {
   
       describe('addLegacyRequest()', () => {
         it('adds a legacy history request', async () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const request = generator.http.history();
           const created = await project.addLegacyRequest(request);
           assert.ok(created, 'returns the created request');
@@ -969,14 +972,14 @@ describe('Models', () => {
           assert.deepEqual(project.definitions.requests[0], created, 'inserts the definition into project\'s definitions');
           assert.equal(project.items[0].key, created.key, 'the project has the item');
   
-          assert.equal(created.getParent().kind, ArcProjectKind, 'the request has the parent as the project');
+          assert.equal(created.getParent().kind, HttpClientProjectKind, 'the request has the parent as the project');
   
           assert.equal(created.expects.url, request.url, 'has the URL');
           assert.equal(created.info.name, 'Unnamed request', 'has the default name');
         });
   
         it('adds a legacy saved request', async () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const request = generator.http.saved();
           const created = await project.addLegacyRequest(request);
           assert.ok(created, 'returns the created request');
@@ -985,7 +988,7 @@ describe('Models', () => {
           assert.deepEqual(project.definitions.requests[0], created, 'inserts the definition into project\'s definitions');
           assert.equal(project.items[0].key, created.key, 'the project has the item');
   
-          assert.equal(created.getParent().kind, ArcProjectKind, 'the request has the parent as the project');
+          assert.equal(created.getParent().kind, HttpClientProjectKind, 'the request has the parent as the project');
   
           assert.equal(created.expects.url, request.url, 'has the URL');
           assert.equal(created.info.name, request.name, 'has the name');
@@ -994,22 +997,22 @@ describe('Models', () => {
   
       describe('listFolderItems()', () => {
         it('returns empty array when no items', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const result = project.listFolderItems();
           assert.deepEqual(result, []);
         });
   
         it('ignores request items', () => {
-          const project = new ArcProject();
-          const request = ArcProjectRequest.fromName('name', project);
+          const project = new HttpClientProject();
+          const request = HttpClientProjectRequest.fromName('name', project);
           project.addRequest(request);
           const result = project.listFolderItems();
           assert.deepEqual(result, []);
         });
   
         it('returns folders', () => {
-          const project = new ArcProject();
-          const request = ArcProjectRequest.fromName('name', project);
+          const project = new HttpClientProject();
+          const request = HttpClientProjectRequest.fromName('name', project);
           project.addRequest(request);
           const folder = project.addFolder('a folder');
           const result = project.listFolderItems();
@@ -1020,21 +1023,21 @@ describe('Models', () => {
   
       describe('listRequestItems()', () => {
         it('returns empty array when no items', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const result = project.listRequestItems();
           assert.deepEqual(result, []);
         });
   
         it('ignores folder items', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           project.addFolder('a folder');
           const result = project.listRequestItems();
           assert.deepEqual(result, []);
         });
   
         it('returns requests', () => {
-          const project = new ArcProject();
-          const request = ArcProjectRequest.fromName('name', project);
+          const project = new HttpClientProject();
+          const request = HttpClientProjectRequest.fromName('name', project);
           project.addRequest(request);
           project.addFolder('a folder');
           const result = project.listRequestItems();
@@ -1045,11 +1048,11 @@ describe('Models', () => {
   
       describe('listFolders()', () => {
         it('lists folders from the project', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const f1 = project.addFolder('f1');
           const f2 = project.addFolder('f2');
           f2.addFolder('f3');
-          project.addRequest(ArcProjectRequest.fromName('r1', project));
+          project.addRequest(HttpClientProjectRequest.fromName('r1', project));
           const result = project.listFolders();
           assert.lengthOf(result, 2, 'has both folders');
           assert.equal(result[0].key, f1.key);
@@ -1057,25 +1060,25 @@ describe('Models', () => {
         });
   
         it('lists folders from a folder', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           project.addFolder('f1');
           const f2 = project.addFolder('f2');
           const f3 = f2.addFolder('f3');
-          f2.addRequest(ArcProjectRequest.fromName('r1', project));
+          f2.addRequest(HttpClientProjectRequest.fromName('r1', project));
           const result = project.listFolders({ folder: f2.key });
           assert.lengthOf(result, 1, 'has a single folder');
           assert.equal(result[0].key, f3.key);
         });
   
         it('returns empty list when no items', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const f1 = project.addFolder('f1');
           const result = project.listFolders({ folder:  f1.key });
           assert.deepEqual(result, []);
         });
   
         it('throws when parent folder not found', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           assert.throws(() => {
             project.listFolders({ folder: 'unknown' });
           }, Error, 'Unable to find the folder unknown.');
@@ -1084,21 +1087,21 @@ describe('Models', () => {
   
       describe('listRequests()', () => {
         it('lists requests from the project', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const folder = project.addFolder('f1');
-          const request = ArcProjectRequest.fromName('r1', project);
+          const request = HttpClientProjectRequest.fromName('r1', project);
           project.addRequest(request);
-          project.addRequest(ArcProjectRequest.fromName('r2', project), { parent: folder.key });
+          project.addRequest(HttpClientProjectRequest.fromName('r2', project), { parent: folder.key });
           const result = project.listRequests();
           assert.lengthOf(result, 1, 'has a single request');
           assert.equal(result[0].key, request.key);
         });
   
         it('lists requests from a folder', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const folder = project.addFolder('f1');
-          const request = ArcProjectRequest.fromName('r1', project);
-          project.addRequest(ArcProjectRequest.fromName('r2', project));
+          const request = HttpClientProjectRequest.fromName('r1', project);
+          project.addRequest(HttpClientProjectRequest.fromName('r2', project));
           project.addRequest(request, { parent: folder.key });
           const result = project.listRequests(folder.key);
           assert.lengthOf(result, 1, 'has a single folder');
@@ -1106,14 +1109,14 @@ describe('Models', () => {
         });
   
         it('returns empty list when no items', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const f1 = project.addFolder('f1');
           const result = project.listRequests(f1.key);
           assert.deepEqual(result, []);
         });
   
         it('throws when parent folder not found', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           assert.throws(() => {
             project.listRequests('unknown');
           }, Error, 'Unable to find the folder unknown.');
@@ -1122,9 +1125,9 @@ describe('Models', () => {
   
       describe('listDefinitions()', () => {
         it('returns all definitions for a project root', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const folder = project.addFolder('f1');
-          const request = ArcProjectRequest.fromName('name', project);
+          const request = HttpClientProjectRequest.fromName('name', project);
           project.addRequest(request);
           const result = project.listDefinitions();
           assert.lengthOf(result, 2, 'has both definitions');
@@ -1133,13 +1136,13 @@ describe('Models', () => {
         });
   
         it('returns only the project definitions', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const folder = project.addFolder('f1');
-          const request = ArcProjectRequest.fromName('name', project);
+          const request = HttpClientProjectRequest.fromName('name', project);
           project.addRequest(request);
   
           project.addFolder('other', { parent: folder.key });
-          project.addRequest(ArcProjectRequest.fromName('other', project), { parent: folder.key });
+          project.addRequest(HttpClientProjectRequest.fromName('other', project), { parent: folder.key });
           
           const result = project.listDefinitions();
           assert.lengthOf(result, 2, 'has both definitions');
@@ -1148,9 +1151,9 @@ describe('Models', () => {
         });
   
         it('returns all definitions for a folder', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const folder = project.addFolder('f1');
-          const request = ArcProjectRequest.fromName('name', project);
+          const request = HttpClientProjectRequest.fromName('name', project);
           project.addRequest(request, { parent: folder.key });
           const sub = folder.addFolder('sub');
           sub.addFolder('sub-sub');
@@ -1164,7 +1167,7 @@ describe('Models', () => {
   
       describe('getParent()', () => {
         it('always returns undefined', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const result = project.getParent();
           assert.isUndefined(result);
         });
@@ -1172,16 +1175,16 @@ describe('Models', () => {
   
       describe('getProject()', () => {
         it('always returns the project', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const result = project.getProject();
           assert.isTrue(result === project);
         });
       });
   
       describe('clone()', () => {
-        let project: ArcProject;
+        let project: HttpClientProject;
         beforeEach(() => {
-          project = ArcProject.fromName('a project');
+          project = HttpClientProject.fromName('a project');
         });
   
         it('clones the project', () => {
@@ -1189,7 +1192,7 @@ describe('Models', () => {
           project.addFolder('test');
           const copy = project.clone();
   
-          assert.equal(copy.kind, ArcProjectKind);
+          assert.equal(copy.kind, HttpClientProjectKind);
           assert.equal(copy.info.name, 'a project');
   
           assert.lengthOf(copy.listFolders(), 1, 'has the folder');
@@ -1238,10 +1241,19 @@ describe('Models', () => {
           assert.lengthOf(folder.items, 1, 'folder has the item');
           assert.equal(folder.items[0].key, request.key, 'the item has the reference key');
         });
+
+        it('updates keys for environments', () => {
+          const env = project.addEnvironment('test');
+          const copy = project.clone();
+  
+          assert.typeOf(copy.definitions.environments[0].key, 'string');
+          assert.notEqual(copy.definitions.environments[0].key, env.key);
+        });
   
         it('does not update keys when configured', () => {
           const f = project.addFolder('test');
           const r = project.addRequest('https://domain.com');
+          const env = project.addEnvironment('test');
           const copy = project.clone({ withoutRevalidate: true });
   
           assert.equal(copy.key, project.key);
@@ -1249,28 +1261,240 @@ describe('Models', () => {
           assert.equal(folder.key, f.key);
           const [request] = copy.listRequests();
           assert.equal(request.key, r.key);
+          assert.equal(copy.definitions.environments[0].key, env.key);
         });
       });
   
-      describe('ArcProject.clone()', () => {
+      describe('HttpClientProject.clone()', () => {
         it('clones a project', () => {
-          const project = ArcProject.fromName('a project');
-          const copy = ArcProject.clone(project.toJSON());
+          const project = HttpClientProject.fromName('a project');
+          const copy = HttpClientProject.clone(project.toJSON());
           assert.equal(copy.info.name, 'a project');
+        });
+      });
+
+      describe('addEnvironment()', () => {
+        let project: HttpClientProject;
+        beforeEach(() => {
+          project = HttpClientProject.fromName('test');
+        });
+  
+        it('adds environment by name', () => {
+          const created = project.addEnvironment('test');
+          assert.deepEqual(project.definitions.environments, [created]);
+        });
+  
+        it('adds environment from an instance', () => {
+          const env = Environment.fromName('test');
+          project.addEnvironment(env);
+          assert.deepEqual(project.definitions.environments, [env]);
+        });
+  
+        it('adds environment from a schema', () => {
+          const env = Environment.fromName('test');
+          project.addEnvironment(env.toJSON());
+          assert.deepEqual(project.definitions.environments, [env]);
+        });
+  
+        it('creates environment array when missing', () => {
+          delete project.definitions.environments;
+          const created = project.addEnvironment('test');
+          assert.deepEqual(project.definitions.environments, [created]);
+        });
+  
+        it('adds missing keys', () => {
+          const env = Environment.fromName('test');
+          delete env.key;
+          project.addEnvironment(env);
+          const envs = project.listEnvironments();
+          assert.typeOf(envs[0].key, 'string');
+        });
+  
+        it('adds the environment to the list of project items', () => {
+          const e1 = project.addEnvironment('e1');
+          assert.lengthOf(project.items, 1);
+          assert.equal(project.items[0].key, e1.key);
+        });
+  
+        it('adds the environment to a folder', () => {
+          const f1 = project.addFolder('f1');
+          const e1 = project.addEnvironment('e1', { parent: f1.key });
+          assert.deepEqual(project.definitions.environments, [e1], 'has the env definition on the project');
+          assert.lengthOf(project.items, 1, 'project has only folder item');
+          assert.deepEqual(f1.items[0].key, e1.key);
+        });
+      });
+  
+      describe('readEnvironments()', () => {
+        let project: HttpClientProject;
+        beforeEach(() => {
+          project = new HttpClientProject();
+        });
+  
+        it('reads environments from the project without subfolders without the name', () => {
+          project.addEnvironment('a');
+          project.addEnvironment('b');
+  
+          const envs = project.readEnvironments();
+          assert.lengthOf(envs, 1, 'has the project environment');
+          assert.equal(envs[0].info.name, 'a', 'has the first environment');
+        });
+  
+        it('reads environments from the project without subfolders with the name', () => {
+          project.addEnvironment('a');
+          project.addEnvironment('b');
+  
+          const envs = project.readEnvironments({ nameOrKey: 'b' });
+          assert.lengthOf(envs, 1, 'has the project environment');
+          assert.equal(envs[0].info.name, 'b', 'has the first environment');
+        });
+  
+        it('reads environments from a folder', () => {
+          project.addEnvironment('a');
+          const f = project.addFolder('folder');
+          f.addEnvironment('b');
+          const envs = project.readEnvironments({ parent: f.key });
+          assert.lengthOf(envs, 2, 'has all environments');
+          assert.equal(envs[0].info.name, 'a', 'has the first environment');
+          assert.equal(envs[1].info.name, 'b', 'has the second environment');
+        });
+  
+        it('skips folders without environments', () => {
+          project.addEnvironment('a');
+          const f1 = project.addFolder('folder 1');
+          const f2 = f1.addFolder('folder 2');
+          f2.addEnvironment('b');
+  
+          const envs = project.readEnvironments({ parent: f2.key });
+          assert.lengthOf(envs, 2, 'has all environments');
+          assert.equal(envs[0].info.name, 'a', 'has the first environment');
+          assert.equal(envs[1].info.name, 'b', 'has the second environment');
+        });
+  
+        it('stops reading when "encapsulated is set"', () => {
+          project.addEnvironment('a');
+          const f1 = project.addFolder('folder 1');
+          const f2 = f1.addFolder('folder 2');
+          f1.addEnvironment('b');
+          const env = f2.addEnvironment('c');
+          env.encapsulated = true;
+  
+          const envs = project.readEnvironments({ parent: f2.key });
+          assert.lengthOf(envs, 1, 'has a single environment');
+          assert.equal(envs[0].info.name, 'c', 'has the folder environment');
+        });
+  
+        it('returns empty list when unknown parent', async () => {
+          project.addEnvironment('a');
+          const f = project.addFolder('folder 1');
+          f.addEnvironment('b');
+          const envs = project.readEnvironments({ parent: 'some' });
+          assert.lengthOf(envs, 0);
+        });
+      });
+  
+      describe('listEnvironments()', () => {
+        let project: HttpClientProject;
+        beforeEach(() => {
+          project = new HttpClientProject();
+        });
+  
+        it('returns environments defined in the project only', () => {
+          const f1 = project.addFolder('f1');
+          f1.addEnvironment('e1');
+          const e2 = project.addEnvironment('e2');
+  
+          const result = project.listEnvironments();
+          assert.deepEqual(result, [e2]);
+        });
+  
+        it('returns environments defined in a folder', () => {
+          const f1 = project.addFolder('f1');
+          const e1 = f1.addEnvironment('e1');
+          project.addEnvironment('e2');
+  
+          const result = project.listEnvironments({ parent: f1.key });
+          assert.deepEqual(result, [e1]);
+        });
+      });
+  
+      describe('findEnvironment()', () => {
+        it('returns the environment from the project root', () => {
+          const project = new HttpClientProject();
+          project.addEnvironment('e1');
+          const env = project.addEnvironment('e2');
+          const result = project.findEnvironment(env.key);
+          assert.deepEqual(result, env);
+        });
+  
+        it('returns the environment from a folder', () => {
+          const project = new HttpClientProject();
+          project.addEnvironment('e1');
+          const f1 = project.addFolder('f1');
+          const env = f1.addEnvironment('e2');
+          const result = project.findEnvironment(env.key);
+          assert.deepEqual(result, env);
+        });
+      })
+  
+      describe('removeEnvironment()', () => {
+        let project: HttpClientProject;
+        beforeEach(() => {
+          project = new HttpClientProject();
+        });
+  
+        it('removes the environment from the definitions when in project root', () => {
+          const e1 = project.addEnvironment('e1');
+          project.removeEnvironment(e1.key);
+          assert.deepEqual(project.definitions.environments, []);
+        });
+  
+        it('removes the environment from the definitions when in a folder', () => {
+          const f1 = project.addFolder('f1');
+          const e1 = f1.addEnvironment('e1');
+          project.removeEnvironment(e1.key, { parent: f1.key });
+          assert.deepEqual(project.definitions.environments, []);
+        });
+  
+        it('does nothing when the environment does not belong to the folder', () => {
+          const f1 = project.addFolder('f1');
+          const f2 = f1.addFolder('f2');
+          const e1 = f2.addEnvironment('e1');
+          project.removeEnvironment(e1.key, { parent: f1.key });
+          assert.isNotEmpty(project.definitions.environments);
+        });
+  
+        it('returns the removed environment', () => {
+          const e1 = project.addEnvironment('e1');
+          const result = project.removeEnvironment(e1.key);
+          assert.deepEqual(result, e1);
+        });
+  
+        it('removes the environment from the project items', () => {
+          const e1 = project.addEnvironment('e1');
+          project.removeEnvironment(e1.key);
+          assert.deepEqual(project.items, []);
+        });
+  
+        it('removes the environment from the folder items', () => {
+          const f1 = project.addFolder('f1');
+          const e1 = f1.addEnvironment('e1');
+          project.removeEnvironment(e1.key, { parent: f1.key });
+          assert.deepEqual(f1.items, []);
         });
       });
     });
 
-    describe('ArcProjectFolder', () => {
+    describe('HttpClientProjectFolder', () => {
       describe('Initialization', () => {
-        let project: ArcProject;
+        let project: HttpClientProject;
         beforeEach(() => {
-          project = new ArcProject();
+          project = new HttpClientProject();
         });
   
         it('initializes a default folder', () => {
-          const result = new ArcProjectFolder(project);
-          assert.equal(result.kind, ArcProjectFolderKind, 'sets the kind property');
+          const result = new HttpClientProjectFolder(project);
+          assert.equal(result.kind, HttpClientFolderKind, 'sets the kind property');
           assert.deepEqual(result.items, [], 'sets the items property');
           assert.typeOf(result.updated, 'number', 'sets the updated property');
           assert.typeOf(result.created, 'number', 'sets the created property');
@@ -1283,12 +1507,12 @@ describe('Models', () => {
       });
   
       describe('From schema initialization', () => {
-        let project: ArcProject;
+        let project: HttpClientProject;
         let base: IProjectParent;
         beforeEach(() => {
-          project = new ArcProject();
+          project = new HttpClientProject();
           base = {
-            kind: ArcProjectFolderKind,
+            kind: HttpClientFolderKind,
             items: [],
             updated: 123,
             created: 456,
@@ -1307,7 +1531,7 @@ describe('Models', () => {
             description: 'Project description',
             version: '1.2.3',
           }}};
-          const result = new ArcProjectFolder(project, init);
+          const result = new HttpClientProjectFolder(project, init);
           const { info } = result;
           assert.equal(info.kind, ThingKind, 'sets the info.kind property');
           assert.equal(info.name, 'Test project', 'sets the info.name property');
@@ -1316,32 +1540,32 @@ describe('Models', () => {
         });
   
         it('sets the created/updated', () => {
-          const result = new ArcProjectFolder(project, base);
+          const result = new HttpClientProjectFolder(project, base);
           assert.equal(result.created, 456);
           assert.equal(result.updated, 123);
         });
   
         it('sets the passed key', () => {
-          const result = new ArcProjectFolder(project, base);
+          const result = new HttpClientProjectFolder(project, base);
           assert.equal(result.key, 'test1234');
         });
   
         it('sets a new key when the passed key is missing', () => {
           delete base.key;
-          const result = new ArcProjectFolder(project, base);
+          const result = new HttpClientProjectFolder(project, base);
           assert.typeOf(result.key, 'string');
         });
   
         it('creates the default items', () => {
           delete base.items;
-          const result = new ArcProjectFolder(project, base);
+          const result = new HttpClientProjectFolder(project, base);
           assert.deepEqual(result.items, []);
         });
   
         it('sets the stored items', () => {
-          base.items = [ArcProjectItem.projectFolder(project, 'a-key')];
+          base.items = [HttpClientProjectItem.projectFolder(project, 'a-key')];
           const serialized = JSON.stringify(base);
-          const result = new ArcProjectFolder(project, serialized);
+          const result = new HttpClientProjectFolder(project, serialized);
           assert.lengthOf(result.items, 1, 'has a single item');
           assert.equal(result.items[0].key, 'a-key', 'has the serialized item');
         });
@@ -1349,11 +1573,11 @@ describe('Models', () => {
   
       describe('From JSON string initialization', () => {
         it('restores project data from JSON string', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const folder = project.addFolder('a folder');
           const str = JSON.stringify(folder);
           
-          const result = new ArcProjectFolder(project, str);
+          const result = new HttpClientProjectFolder(project, str);
   
           assert.equal(result.key, folder.key, 'restores the key');
           assert.equal(result.info.name, 'a folder', 'restores the info object');
@@ -1361,12 +1585,12 @@ describe('Models', () => {
       });
   
       describe('toJSON()', () => {
-        let project: ArcProject;
+        let project: HttpClientProject;
         let base: IProjectParent;
         beforeEach(() => {
-          project = new ArcProject();
+          project = new HttpClientProject();
           base = {
-            kind: ArcProjectFolderKind,
+            kind: HttpClientFolderKind,
             items: [],
             updated: 123,
             created: 456,
@@ -1385,7 +1609,7 @@ describe('Models', () => {
             description: 'Project description',
             version: '1.2.3',
           }}};
-          const folder = new ArcProjectFolder(project, init);
+          const folder = new HttpClientProjectFolder(project, init);
           const result = folder.toJSON();
           assert.equal(result.info.kind, ThingKind, 'has the kind');
           assert.equal(result.info.name, 'Test project', 'has the name');
@@ -1395,68 +1619,68 @@ describe('Models', () => {
   
         it('serializes the key', () => {
           const init: IProjectParent = { ...base };
-          const folder = new ArcProjectFolder(project, init);
+          const folder = new HttpClientProjectFolder(project, init);
           const result = folder.toJSON();
           assert.equal(result.key, init.key);
         });
   
         it('serializes the created/updated', () => {
           const init: IProjectParent = { ...base };
-          const folder = new ArcProjectFolder(project, init);
+          const folder = new HttpClientProjectFolder(project, init);
           const result = folder.toJSON();
           assert.equal(result.created, init.created);
           assert.equal(result.updated, init.updated);
         });
   
         it('serializes the items', () => {
-          const init: IProjectParent = { ...base, ...{ items: [ArcProjectItem.projectFolder(project, 'a-key')] } };
-          const folder = new ArcProjectFolder(project, init);
+          const init: IProjectParent = { ...base, ...{ items: [HttpClientProjectItem.projectFolder(project, 'a-key')] } };
+          const folder = new HttpClientProjectFolder(project, init);
           const result = folder.toJSON();
           assert.lengthOf(result.items, 1);
         });
       });
   
-      describe('ArcProjectFolder.fromName()', () => {
-        let project: ArcProject;
+      describe('HttpClientProjectFolder.fromName()', () => {
+        let project: HttpClientProject;
         beforeEach(() => {
-          project = new ArcProject();
+          project = new HttpClientProject();
         });
   
         it('sets the name', () => {
-          const result = ArcProjectFolder.fromName(project, 'a name');
+          const result = HttpClientProjectFolder.fromName(project, 'a name');
           assert.equal(result.info.name, 'a name');
         });
   
         it('uses the default name', () => {
-          const result = ArcProjectFolder.fromName(project);
+          const result = HttpClientProjectFolder.fromName(project);
           assert.equal(result.info.name, 'New folder');
         });
   
         it('generates the key', () => {
-          const result = ArcProjectFolder.fromName(project, 'a name');
+          const result = HttpClientProjectFolder.fromName(project, 'a name');
           assert.typeOf(result.key, 'string');
         });
   
         it('generates the created/updated', () => {
-          const result = ArcProjectFolder.fromName(project, 'a name');
+          const result = HttpClientProjectFolder.fromName(project, 'a name');
           assert.approximately(result.updated, Date.now(), 100);
           assert.approximately(result.created, Date.now(), 100);
         });
   
         it('adds empty items', () => {
-          const result = ArcProjectFolder.fromName(project, 'a name');
+          const result = HttpClientProjectFolder.fromName(project, 'a name');
           assert.deepEqual(result.items, []);
         });
   
         it('sets the kind', () => {
-          const result = ArcProjectFolder.fromName(project, 'a name');
-          assert.equal(result.kind, ArcProjectFolderKind);
+          const result = HttpClientProjectFolder.fromName(project, 'a name');
+          assert.equal(result.kind, HttpClientFolderKind);
         });
       });
   
       describe('new()', () => {
         it('restores a folder definition', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const folder = project.addFolder('a folder');
           const time = 12345;
           folder.new({
@@ -1468,7 +1692,7 @@ describe('Models', () => {
             },
             items: [],
             key: 'abc',
-            kind: ArcProjectFolderKind,
+            kind: HttpClientFolderKind,
           });
           assert.equal(folder.created, time, 'updates the created');
           assert.equal(folder.updated, time, 'updates the created');
@@ -1477,7 +1701,7 @@ describe('Models', () => {
         });
   
         it('restores items', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const folder = project.addFolder('a folder');
           const time = 12345;
           const def: IProjectParent = {
@@ -1489,7 +1713,7 @@ describe('Models', () => {
             },
             items: [],
             key: 'abc',
-            kind: ArcProjectFolderKind,
+            kind: HttpClientFolderKind,
           };
           folder.new(def);
           assert.equal(folder.created, time, 'updates the created');
@@ -1499,7 +1723,7 @@ describe('Models', () => {
         });
   
         it('adds the default info object', () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const folder = project.addFolder('a folder');
           const time = 12345;
           const def: IProjectParent = {
@@ -1511,7 +1735,7 @@ describe('Models', () => {
             },
             items: [],
             key: 'abc',
-            kind: ArcProjectFolderKind,
+            kind: HttpClientFolderKind,
           };
           delete def.info;
           folder.new(def);
@@ -1520,9 +1744,9 @@ describe('Models', () => {
       });
   
       describe('addFolder()', () => {
-        let project: ArcProject;
+        let project: HttpClientProject;
         beforeEach(() => {
-          project = new ArcProject();
+          project = new HttpClientProject();
         });
   
         it('calls the project\'s add folder function', () => {
@@ -1549,7 +1773,7 @@ describe('Models', () => {
   
         it('adds a folder by schema', () => {
           const parent = project.addFolder('parent');
-          const f = new ArcProjectFolder(project);
+          const f = new HttpClientProjectFolder(project);
           f.info.name = 'sub';
           parent.addFolder(f.toJSON());
           const def = project.findFolder('sub');
@@ -1558,7 +1782,7 @@ describe('Models', () => {
   
         it('adds a folder by an instance', () => {
           const parent = project.addFolder('parent');
-          const f = new ArcProjectFolder(project);
+          const f = new HttpClientProjectFolder(project);
           f.info.name = 'sub';
           parent.addFolder(f);
           const def = project.findFolder('sub');
@@ -1567,15 +1791,15 @@ describe('Models', () => {
       });
   
       describe('addRequest()', () => {
-        let project: ArcProject;
+        let project: HttpClientProject;
         beforeEach(() => {
-          project = new ArcProject();
+          project = new HttpClientProject();
         });
   
         it('calls the project\'s add request function', () => {
           const parent = project.addFolder('parent');
           const spy = sinon.spy(project, 'addRequest');
-          const request = ArcProjectRequest.fromName('test', project);
+          const request = HttpClientProjectRequest.fromName('test', project);
           parent.addRequest(request);
           assert.isTrue(spy.calledOnce);
           assert.deepEqual(spy.args[0][0], request, 'has the request');
@@ -1584,7 +1808,7 @@ describe('Models', () => {
   
         it('adds the request to the items', () => {
           const parent = project.addFolder('parent');
-          const request = ArcProjectRequest.fromName('test', project);
+          const request = HttpClientProjectRequest.fromName('test', project);
           parent.addRequest(request);
           assert.lengthOf(parent.items, 1);
         });
@@ -1598,15 +1822,15 @@ describe('Models', () => {
       });
   
       describe('listFolderItems()', () => {
-        let project: ArcProject;
+        let project: HttpClientProject;
         beforeEach(() => {
-          project = new ArcProject();
+          project = new HttpClientProject();
         });
   
         it('returns empty array when no folders', () => {
           const folder = project.addFolder('parent');
           
-          const request = ArcProjectRequest.fromName('test', project);
+          const request = HttpClientProjectRequest.fromName('test', project);
           folder.addRequest(request);
   
           const result = folder.listFolderItems();
@@ -1618,7 +1842,7 @@ describe('Models', () => {
           const f1 = folder.addFolder('f1');
           const f2 = folder.addFolder('f2');
           
-          const request = ArcProjectRequest.fromName('test', project);
+          const request = HttpClientProjectRequest.fromName('test', project);
           folder.addRequest(request);
   
           const result = folder.listFolderItems();
@@ -1629,9 +1853,9 @@ describe('Models', () => {
       });
   
       describe('listRequestItems()', () => {
-        let project: ArcProject;
+        let project: HttpClientProject;
         beforeEach(() => {
-          project = new ArcProject();
+          project = new HttpClientProject();
         });
   
         it('returns empty array when no requests', () => {
@@ -1644,7 +1868,7 @@ describe('Models', () => {
   
         it('returns folder requests', () => {
           const folder = project.addFolder('parent');
-          const request = ArcProjectRequest.fromName('test', project);
+          const request = HttpClientProjectRequest.fromName('test', project);
           folder.addRequest(request);
   
           const result = folder.listRequestItems();
@@ -1654,9 +1878,9 @@ describe('Models', () => {
       });
   
       describe('listFolders()', () => {
-        let project: ArcProject;
+        let project: HttpClientProject;
         beforeEach(() => {
-          project = new ArcProject();
+          project = new HttpClientProject();
         });
   
         it('calls the project\'s listFolders function', () => {
@@ -1676,9 +1900,9 @@ describe('Models', () => {
       });
   
       describe('listRequests()', () => {
-        let project: ArcProject;
+        let project: HttpClientProject;
         beforeEach(() => {
-          project = new ArcProject();
+          project = new HttpClientProject();
         });
   
         it('calls the project\'s listRequests function', () => {
@@ -1692,7 +1916,7 @@ describe('Models', () => {
         it('returns the list', () => {
           const folder = project.addFolder('parent');
   
-          const request = ArcProjectRequest.fromName('test', project);
+          const request = HttpClientProjectRequest.fromName('test', project);
           folder.addRequest(request);
           
           const result = folder.listRequests();
@@ -1701,11 +1925,11 @@ describe('Models', () => {
       });
   
       describe('remove()', () => {
-        let project: ArcProject;
-        let folder: ArcProjectFolder;
+        let project: HttpClientProject;
+        let folder: HttpClientProjectFolder;
   
         beforeEach(() => {
-          project = new ArcProject();
+          project = new HttpClientProject();
           folder = project.addFolder('test');
         });
   
@@ -1734,9 +1958,9 @@ describe('Models', () => {
       });
   
       describe('getParent()', () => {
-        let project: ArcProject;
+        let project: HttpClientProject;
         beforeEach(() => {
-          project = new ArcProject();
+          project = new HttpClientProject();
         });
   
         it('returns the project object', () => {
@@ -1754,9 +1978,9 @@ describe('Models', () => {
       });
   
       describe('getProject()', () => {
-        let project: ArcProject;
+        let project: HttpClientProject;
         beforeEach(() => {
-          project = new ArcProject();
+          project = new HttpClientProject();
         });
   
         it('returns the project when added to the project', () => {
@@ -1774,11 +1998,11 @@ describe('Models', () => {
       });
   
       describe('clone()', () => {
-        let project: ArcProject;
-        let folder: ArcProjectFolder;
+        let project: HttpClientProject;
+        let folder: HttpClientProjectFolder;
   
         beforeEach(() => {
-          project = new ArcProject();
+          project = new HttpClientProject();
           folder = project.addFolder('test');
         });
   
@@ -1931,7 +2155,7 @@ describe('Models', () => {
   
           const origSnapshot = project.toJSON();
   
-          const targetProject = new ArcProject();
+          const targetProject = new HttpClientProject();
           folder.clone({ targetProject });
   
           assert.deepEqual(project.toJSON(), origSnapshot, 'the original project is not changed');
@@ -1955,7 +2179,7 @@ describe('Models', () => {
   
           const origSnapshot = project.toJSON();
   
-          const targetProject = new ArcProject();
+          const targetProject = new HttpClientProject();
           const targetFolder = targetProject.addFolder('parent');
           folder.clone({ targetProject, targetFolder: targetFolder.key });
   
@@ -1990,7 +2214,7 @@ describe('Models', () => {
           const sub = folder.addFolder('sub');
           sub.addRequest('http://api.com');
   
-          const targetProject = new ArcProject();
+          const targetProject = new HttpClientProject();
           assert.throws(() => {
             folder.clone({ targetProject, targetFolder: 'test' });
           });
@@ -1999,7 +2223,7 @@ describe('Models', () => {
 
       describe('addLegacyRequest()', () => {
         it('adds a legacy history request', async () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const request = generator.http.history();
           const folder = project.addFolder('f1');
           const created = await folder.addLegacyRequest(request);
@@ -2009,14 +2233,14 @@ describe('Models', () => {
           assert.deepEqual(project.definitions.requests[0], created, 'inserts the definition into project\'s definitions');
           assert.equal(folder.items[0].key, created.key, 'the project has the item');
   
-          assert.equal(created.getParent().kind, ArcProjectFolderKind, 'the request has the parent as the folder');
+          assert.equal(created.getParent().kind, HttpClientFolderKind, 'the request has the parent as the folder');
   
           assert.equal(created.expects.url, request.url, 'has the URL');
           assert.equal(created.info.name, 'Unnamed request', 'has the default name');
         });
   
         it('adds a legacy saved request', async () => {
-          const project = new ArcProject();
+          const project = new HttpClientProject();
           const request = generator.http.saved();
           const folder = project.addFolder('f1');
           const created = await folder.addLegacyRequest(request);
@@ -2026,111 +2250,194 @@ describe('Models', () => {
           assert.deepEqual(project.definitions.requests[0], created, 'inserts the definition into project\'s definitions');
           assert.equal(folder.items[0].key, created.key, 'the project has the item');
   
-          assert.equal(created.getParent().kind, ArcProjectFolderKind, 'the request has the parent as the project');
+          assert.equal(created.getParent().kind, HttpClientFolderKind, 'the request has the parent as the project');
   
           assert.equal(created.expects.url, request.url, 'has the URL');
           assert.equal(created.info.name, request.name, 'has the name');
         });
       });
+
+      describe('addEnvironment()', () => {
+        let project: HttpClientProject;
+        let f1: HttpClientProjectFolder;
+        beforeEach(() => {
+          project = HttpClientProject.fromName('test');
+          f1 = project.addFolder('f1');
+        });
+  
+        it('adds environment by name', () => {
+          const created = f1.addEnvironment('test');
+          assert.lengthOf(f1.items, 1, 'has an item');
+          assert.equal(f1.items[0].key, created.key, 'has the item');
+          assert.equal(f1.items[0].kind, EnvironmentKind, 'has the item');
+        });
+  
+        it('adds environment from an instance', () => {
+          const created = Environment.fromName('test');
+          f1.addEnvironment(created);
+          assert.lengthOf(f1.items, 1, 'has an item');
+          assert.equal(f1.items[0].key, created.key, 'has the item');
+        });
+  
+        it('adds environment from a schema', () => {
+          const created = Environment.fromName('test');
+          f1.addEnvironment(created.toJSON());
+          assert.lengthOf(f1.items, 1, 'has an item');
+          assert.equal(f1.items[0].key, created.key, 'has the item');
+        });
+      });
+  
+      describe('listEnvironments()', () => {
+        let project: HttpClientProject;
+        let f1: HttpClientProjectFolder;
+        let e2: Environment;
+        beforeEach(() => {
+          project = new HttpClientProject();
+          project.addEnvironment('e1');
+          f1 = project.addFolder('f1');
+          e2 = f1.addEnvironment('e2');
+        });
+  
+        it('returns environments defined in the folder', () => {
+          const result = project.listEnvironments({ parent: f1.key });
+          assert.deepEqual(result, [e2]);
+        });
+  
+        it('ignores sub-folders', () => {
+          const f2 = f1.addFolder('f2');
+          f2.addEnvironment('e3');
+          const result = project.listEnvironments({ parent: f1.key });
+          assert.deepEqual(result, [e2]);
+        });
+      });
+  
+      describe('removeEnvironment()', () => {
+        let project: HttpClientProject;
+        let f1: HttpClientProjectFolder;
+        let e2: Environment;
+        beforeEach(() => {
+          project = new HttpClientProject();
+          project.addEnvironment('e1');
+          f1 = project.addFolder('f1');
+          e2 = f1.addEnvironment('e2');
+        });
+  
+        it('removes the environment from folder items', () => {
+          f1.removeEnvironment(e2.key);
+          assert.deepEqual(f1.items, []);
+        });
+  
+        it('does nothing when the environment is not in the folder', () => {
+          const f2 = f1.addFolder('f2');
+          const e3 = f2.addEnvironment('e1');
+          const result = f1.removeEnvironment(e3.key);
+          assert.isUndefined(result);
+        });
+  
+        it('returns the removed environment', () => {
+          const result = f1.removeEnvironment(e2.key);
+          assert.deepEqual(result, e2);
+        });
+      });
     });
 
-    describe('ArcProjectItem', () => {
-      describe('ArcProjectItem.projectRequest()', () => {
+    describe('HttpClientProjectItem', () => {
+      describe('HttpClientProjectItem.projectRequest()', () => {
         it('creates the item', () => {
-          const project = ArcProject.fromName('test');
-          const item = ArcProjectItem.projectRequest(project, 'r1');
-          assert.equal(item.kind, ArcProjectRequestKind);
+          const project = HttpClientProject.fromName('test');
+          const item = HttpClientProjectItem.projectRequest(project, 'r1');
+          assert.equal(item.kind, HttpClientRequestKind);
           assert.equal(item.key, 'r1');
         });
       });
   
-      describe('ArcProjectItem.projectFolder()', () => {
+      describe('HttpClientProjectItem.projectFolder()', () => {
         it('creates the item', () => {
-          const project = ArcProject.fromName('test');
-          const item = ArcProjectItem.projectFolder(project, 'f1');
-          assert.equal(item.kind, ArcProjectFolderKind);
+          const project = HttpClientProject.fromName('test');
+          const item = HttpClientProjectItem.projectFolder(project, 'f1');
+          assert.equal(item.kind, HttpClientFolderKind);
           assert.equal(item.key, 'f1');
         });
       });
   
-      describe('ArcProjectItem.isProjectItem()', () => {
+      describe('HttpClientProjectItem.isProjectItem()', () => {
         it('returns true for a folder item', () => {
-          const project = ArcProject.fromName('test');
-          const item = ArcProjectItem.projectFolder(project, 'f1');
-          assert.isTrue(ArcProjectItem.isProjectItem(item));
+          const project = HttpClientProject.fromName('test');
+          const item = HttpClientProjectItem.projectFolder(project, 'f1');
+          assert.isTrue(HttpClientProjectItem.isProjectItem(item));
         });
   
         it('returns true for a folder item', () => {
-          const project = ArcProject.fromName('test');
-          const item = ArcProjectItem.projectRequest(project, 'r1');
-          assert.isTrue(ArcProjectItem.isProjectItem(item));
+          const project = HttpClientProject.fromName('test');
+          const item = HttpClientProjectItem.projectRequest(project, 'r1');
+          assert.isTrue(HttpClientProjectItem.isProjectItem(item));
         });
   
         it('returns false when not an item', () => {
-          assert.isFalse(ArcProjectItem.isProjectItem({}));
+          assert.isFalse(HttpClientProjectItem.isProjectItem({}));
         });
       });
   
       describe('constructor()', () => {
-        let project: ArcProject;
+        let project: HttpClientProject;
         beforeEach(() => {
-          project = ArcProject.fromName('test');
+          project = HttpClientProject.fromName('test');
         });
   
         it('creates a default item for "http-request" type', () => {
-          const item = new ArcProjectItem(project, 'http-request');
-          assert.equal(item.kind, ArcProjectRequestKind);
+          const item = new HttpClientProjectItem(project, 'http-request');
+          assert.equal(item.kind, HttpClientRequestKind);
           assert.equal(item.key, '');
         });
   
         it('creates a default item for "folder" type', () => {
-          const item = new ArcProjectItem(project, 'folder');
-          assert.equal(item.kind, ArcProjectFolderKind);
+          const item = new HttpClientProjectItem(project, 'folder');
+          assert.equal(item.kind, HttpClientFolderKind);
           assert.equal(item.key, '');
         });
   
         it('creates an instance from a schema', () => {
-          const schema = ArcProjectItem.projectRequest(project, 'r1').toJSON();
-          const item = new ArcProjectItem(project, schema);
-          assert.equal(item.kind, ArcProjectRequestKind);
+          const schema = HttpClientProjectItem.projectRequest(project, 'r1').toJSON();
+          const item = new HttpClientProjectItem(project, schema);
+          assert.equal(item.kind, HttpClientRequestKind);
           assert.equal(item.key, 'r1');
         });
   
         it('creates an instance from a serialized schema', () => {
-          const schema = JSON.stringify(ArcProjectItem.projectRequest(project, 'r1'));
-          const item = new ArcProjectItem(project, schema);
-          assert.equal(item.kind, ArcProjectRequestKind);
+          const schema = JSON.stringify(HttpClientProjectItem.projectRequest(project, 'r1'));
+          const item = new HttpClientProjectItem(project, schema);
+          assert.equal(item.kind, HttpClientRequestKind);
           assert.equal(item.key, 'r1');
         });
   
         it('throws when input is not defined', () => {
           assert.throws(() => {
-            new ArcProjectItem(project, undefined);
+            new HttpClientProjectItem(project, undefined);
           });
         });
       });
   
       describe('toJSON()', () => {
-        let project: ArcProject;
+        let project: HttpClientProject;
         beforeEach(() => {
-          project = ArcProject.fromName('test');
+          project = HttpClientProject.fromName('test');
         });
   
         it('sets the kind', () => {
-          const item = ArcProjectItem.projectRequest(project, 'r1').toJSON();
-          assert.equal(item.kind, ArcProjectRequestKind);
+          const item = HttpClientProjectItem.projectRequest(project, 'r1').toJSON();
+          assert.equal(item.kind, HttpClientRequestKind);
         });
   
         it('sets the key', () => {
-          const item = ArcProjectItem.projectRequest(project, 'r1').toJSON();
+          const item = HttpClientProjectItem.projectRequest(project, 'r1').toJSON();
           assert.equal(item.key, 'r1');
         });
       });
   
       describe('getItem()', () => {
-        let project: ArcProject;
+        let project: HttpClientProject;
         beforeEach(() => {
-          project = ArcProject.fromName('test');
+          project = HttpClientProject.fromName('test');
         });
   
         it('returns a definition of a request', () => {
@@ -2147,9 +2454,9 @@ describe('Models', () => {
       });
   
       describe('getParent()', () => {
-        let project: ArcProject;
+        let project: HttpClientProject;
         beforeEach(() => {
-          project = ArcProject.fromName('test');
+          project = HttpClientProject.fromName('test');
         });
   
         it('returns the project for a root level items', () => {
@@ -2167,17 +2474,17 @@ describe('Models', () => {
       });
     });
 
-    describe('ArcProjectRequest', () => {
+    describe('HttpClientProjectRequest', () => {
       describe('Initialization', () => {
         describe('Default project initialization', () => {
-          let project: ArcProject;
+          let project: HttpClientProject;
           beforeEach(() => {
-            project = new ArcProject();
+            project = new HttpClientProject();
           });
   
           it('initializes a default project request', () => {
-            const result = new ArcProjectRequest(project);
-            assert.equal(result.kind, ArcProjectRequestKind, 'sets the kind property');
+            const result = new HttpClientProjectRequest(project);
+            assert.equal(result.kind, HttpClientRequestKind, 'sets the kind property');
             assert.typeOf(result.created, 'number', 'sets the created property');
             assert.equal(result.updated, result.created, 'sets the updated property');
             assert.typeOf(result.midnight, 'number', 'sets the updated property');
@@ -2193,12 +2500,12 @@ describe('Models', () => {
         });
   
         describe('From schema initialization', () => {
-          let project: ArcProject;
-          let base: IArcProjectRequest;
+          let project: HttpClientProject;
+          let base: IHttpClientProjectRequest;
           beforeEach(() => {
-            project = new ArcProject();
+            project = new HttpClientProject();
             base = {
-              kind: ArcProjectRequestKind,
+              kind: HttpClientRequestKind,
               info: {
                 kind: ThingKind,
                 name: '',
@@ -2213,53 +2520,53 @@ describe('Models', () => {
           });
   
           it('sets the kind property', () => {
-            const init: IArcProjectRequest = { ...base };
-            const request = new ArcProjectRequest(project, init);
-            assert.equal(request.kind, ArcProjectRequestKind);
+            const init: IHttpClientProjectRequest = { ...base };
+            const request = new HttpClientProjectRequest(project, init);
+            assert.equal(request.kind, HttpClientRequestKind);
           });
   
           it('sets the key property when missing', () => {
-            const init: IArcProjectRequest = { ...base };
+            const init: IHttpClientProjectRequest = { ...base };
             delete init.key;
-            const request = new ArcProjectRequest(project, init);
+            const request = new HttpClientProjectRequest(project, init);
             assert.typeOf(request.key, 'string');
             assert.isNotEmpty(request.key);
           });
   
           it('sets the key property', () => {
-            const init: IArcProjectRequest = { ...base, ... { key: 'test' } };
-            const request = new ArcProjectRequest(project, init);
+            const init: IHttpClientProjectRequest = { ...base, ... { key: 'test' } };
+            const request = new HttpClientProjectRequest(project, init);
             assert.equal(request.key, 'test');
           });
   
           it('sets the expects property when missing', () => {
-            const init: IArcProjectRequest = { ...base };
+            const init: IHttpClientProjectRequest = { ...base };
             delete init.expects;
-            const request = new ArcProjectRequest(project, init);
+            const request = new HttpClientProjectRequest(project, init);
             assert.typeOf(request.expects, 'object');
             assert.equal(request.expects.method, 'GET');
             assert.equal(request.expects.url, '');
           });
   
           it('sets the expects property', () => {
-            const init: IArcProjectRequest = { ...base, ... { expects: { kind: HttpRequestKind, url: 'test.com', method: 'GET' } } };
-            const request = new ArcProjectRequest(project, init);
+            const init: IHttpClientProjectRequest = { ...base, ... { expects: { kind: HttpRequestKind, url: 'test.com', method: 'GET' } } };
+            const request = new HttpClientProjectRequest(project, init);
             assert.typeOf(request.expects, 'object');
             assert.equal(request.expects.method, 'GET');
             assert.equal(request.expects.url, 'test.com');
           });
   
           it('sets the info property when missing', () => {
-            const init: IArcProjectRequest = { ...base };
+            const init: IHttpClientProjectRequest = { ...base };
             delete init.info;
-            const request = new ArcProjectRequest(project, init);
+            const request = new HttpClientProjectRequest(project, init);
             assert.typeOf(request.info, 'object');
             assert.equal(request.info.name, '');
           });
   
           it('sets the info property', () => {
-            const init: IArcProjectRequest = { ...base, ... { info: { kind: ThingKind, name: 'A request' } } };
-            const request = new ArcProjectRequest(project, init);
+            const init: IHttpClientProjectRequest = { ...base, ... { info: { kind: ThingKind, name: 'A request' } } };
+            const request = new HttpClientProjectRequest(project, init);
             assert.typeOf(request.info, 'object');
             assert.equal(request.info.name, 'A request');
           });
@@ -2270,8 +2577,8 @@ describe('Models', () => {
               startTime: Date.now(),
             });
             const log = RequestLog.fromRequest(sentRequest.toJSON());
-            const init: IArcProjectRequest = { ...base, ... { log: log.toJSON() } };
-            const request = new ArcProjectRequest(project, init);
+            const init: IHttpClientProjectRequest = { ...base, ... { log: log.toJSON() } };
+            const request = new HttpClientProjectRequest(project, init);
             assert.typeOf(request.log, 'object');
             assert.equal(request.log.kind, RequestLogKind);
             assert.typeOf(request.log.request, 'object');
@@ -2280,8 +2587,8 @@ describe('Models', () => {
   
           it('sets the config property', () => {
             const config = RequestConfig.withDefaults();
-            const init: IArcProjectRequest = { ...base, ... { config: config.toJSON() } };
-            const request = new ArcProjectRequest(project, init);
+            const init: IHttpClientProjectRequest = { ...base, ... { config: config.toJSON() } };
+            const request = new HttpClientProjectRequest(project, init);
             assert.typeOf(request.config, 'object');
             assert.isTrue(request.config.enabled);
             assert.equal(request.config.timeout, 90);
@@ -2289,46 +2596,46 @@ describe('Models', () => {
   
           it('sets the authorization property', () => {
             const authorization = new RequestAuthorization();
-            const init: IArcProjectRequest = { ...base, ... { authorization: [authorization.toJSON()] } };
-            const request = new ArcProjectRequest(project, init);
+            const init: IHttpClientProjectRequest = { ...base, ... { authorization: [authorization.toJSON()] } };
+            const request = new HttpClientProjectRequest(project, init);
             assert.typeOf(request.authorization, 'array');
             assert.lengthOf(request.authorization, 1);
           });
   
           it('sets the created property', () => {
-            const init: IArcProjectRequest = { ...base, ...{ created: 123 } };
-            const request = new ArcProjectRequest(project, init);
+            const init: IHttpClientProjectRequest = { ...base, ...{ created: 123 } };
+            const request = new HttpClientProjectRequest(project, init);
             assert.equal(request.created, 123);
           });
   
           it('sets the default created property', () => {
-            const init: IArcProjectRequest = { ...base };
-            const request = new ArcProjectRequest(project, init);
+            const init: IHttpClientProjectRequest = { ...base };
+            const request = new HttpClientProjectRequest(project, init);
             assert.typeOf(request.created, 'number');
           });
   
           it('sets the updated property', () => {
-            const init: IArcProjectRequest = { ...base, ...{ updated: 123 } };
-            const request = new ArcProjectRequest(project, init);
+            const init: IHttpClientProjectRequest = { ...base, ...{ updated: 123 } };
+            const request = new HttpClientProjectRequest(project, init);
             assert.equal(request.updated, 123);
           });
   
           it('sets the default updated property', () => {
-            const init: IArcProjectRequest = { ...base };
-            const request = new ArcProjectRequest(project, init);
+            const init: IHttpClientProjectRequest = { ...base };
+            const request = new HttpClientProjectRequest(project, init);
             assert.equal(request.updated, request.created);
           });
   
           it('sets the midnight property', () => {
-            const init: IArcProjectRequest = { ...base, ...{ midnight: 123 } };
-            const request = new ArcProjectRequest(project, init);
+            const init: IHttpClientProjectRequest = { ...base, ...{ midnight: 123 } };
+            const request = new HttpClientProjectRequest(project, init);
             assert.equal(request.midnight, 123);
           });
   
           it('sets the default midnight property', () => {
             const now = new Date();
-            const init: IArcProjectRequest = { ...base, updated: now.getTime() };
-            const request = new ArcProjectRequest(project, init);
+            const init: IHttpClientProjectRequest = { ...base, updated: now.getTime() };
+            const request = new HttpClientProjectRequest(project, init);
             now.setHours(0, 0, 0, 0);
             assert.equal(request.midnight, now.getTime());
           });
@@ -2336,11 +2643,11 @@ describe('Models', () => {
   
         describe('From JSON string initialization', () => {
           it('restores project data from JSON string', () => {
-            const project = new ArcProject();
+            const project = new HttpClientProject();
             const request = project.addRequest('https://api.com');
             const str = JSON.stringify(request);
             
-            const result = new ArcProjectRequest(project, str);
+            const result = new HttpClientProjectRequest(project, str);
   
             assert.equal(result.key, request.key, 'restores the key');
             assert.equal(result.info.name, 'https://api.com', 'restores the info object');
@@ -2348,16 +2655,16 @@ describe('Models', () => {
           });
         });
   
-        describe('ArcProjectRequest.fromUrl()', () => {
+        describe('HttpClientProjectRequest.fromUrl()', () => {
           const url = 'https://api.com';
   
-          let project: ArcProject;
+          let project: HttpClientProject;
           beforeEach(() => {
-            project = new ArcProject();
+            project = new HttpClientProject();
           });
   
           it('sets the request values', () => {
-            const request = ArcProjectRequest.fromUrl(url, project);
+            const request = HttpClientProjectRequest.fromUrl(url, project);
             const { expects } = request;
             assert.equal(expects.url, url, 'sets the url');
             assert.equal(expects.kind, HttpRequestKind, 'sets the kind');
@@ -2365,37 +2672,37 @@ describe('Models', () => {
           });
   
           it('sets the info values', () => {
-            const request = ArcProjectRequest.fromUrl(url, project);
+            const request = HttpClientProjectRequest.fromUrl(url, project);
             const { info } = request;
             assert.equal(info.name, url, 'sets the name');
             assert.equal(info.kind, ThingKind, 'sets the kind');
           });
   
           it('sets request meta', () => {
-            const request = ArcProjectRequest.fromUrl(url, project);
+            const request = HttpClientProjectRequest.fromUrl(url, project);
             assert.typeOf(request.key, 'string', 'has the key');
-            assert.equal(request.kind, ArcProjectRequestKind, 'sets the kind');
+            assert.equal(request.kind, HttpClientRequestKind, 'sets the kind');
             assert.typeOf(request.created, 'number', 'sets the created');
             assert.equal(request.updated, request.created, 'sets the updated');
           });
   
           it('throws when the project ius missing', () => {
             assert.throws(() => {
-              ArcProjectRequest.fromUrl(url);
+              HttpClientProjectRequest.fromUrl(url);
             }, 'The project is required.');
           });
         });
   
-        describe('ArcProjectRequest.fromName()', () => {
+        describe('HttpClientProjectRequest.fromName()', () => {
           const name = 'a request';
   
-          let project: ArcProject;
+          let project: HttpClientProject;
           beforeEach(() => {
-            project = new ArcProject();
+            project = new HttpClientProject();
           });
   
           it('sets the request values', () => {
-            const request = ArcProjectRequest.fromName(name, project);
+            const request = HttpClientProjectRequest.fromName(name, project);
             const { expects } = request;
             assert.equal(expects.url, '', 'sets the empty url');
             assert.equal(expects.kind, HttpRequestKind, 'sets the kind');
@@ -2403,33 +2710,33 @@ describe('Models', () => {
           });
   
           it('sets the info values', () => {
-            const request = ArcProjectRequest.fromName(name, project);
+            const request = HttpClientProjectRequest.fromName(name, project);
             const { info } = request;
             assert.equal(info.name, name, 'sets the name');
             assert.equal(info.kind, ThingKind, 'sets the kind');
           });
   
           it('sets request meta', () => {
-            const request = ArcProjectRequest.fromName(name, project);
+            const request = HttpClientProjectRequest.fromName(name, project);
             assert.typeOf(request.key, 'string', 'has the key');
-            assert.equal(request.kind, ArcProjectRequestKind, 'sets the kind');
+            assert.equal(request.kind, HttpClientRequestKind, 'sets the kind');
             assert.typeOf(request.created, 'number', 'sets the created');
             assert.equal(request.updated, request.created, 'sets the updated');
           });
   
           it('throws when the project ius missing', () => {
             assert.throws(() => {
-              ArcProjectRequest.fromName(name);
+              HttpClientProjectRequest.fromName(name);
             }, 'The project is required.');
           });
         });
   
-        describe('ArcProjectRequest.fromHttpRequest()', () => {
+        describe('HttpClientProjectRequest.fromHttpRequest()', () => {
           let iRequest: IHttpRequest;
   
-          let project: ArcProject;
+          let project: HttpClientProject;
           beforeEach(() => {
-            project = new ArcProject();
+            project = new HttpClientProject();
             iRequest = {
               kind: HttpRequestKind,
               method: 'PUT',
@@ -2440,7 +2747,7 @@ describe('Models', () => {
           });
   
           it('sets the request values', () => {
-            const request = ArcProjectRequest.fromHttpRequest(iRequest, project);
+            const request = HttpClientProjectRequest.fromHttpRequest(iRequest, project);
             const { expects } = request;
             assert.equal(expects.url, iRequest.url, 'sets the empty url');
             assert.equal(expects.kind, HttpRequestKind, 'sets the kind');
@@ -2450,33 +2757,33 @@ describe('Models', () => {
           });
   
           it('sets the info values', () => {
-            const request = ArcProjectRequest.fromHttpRequest(iRequest, project);
+            const request = HttpClientProjectRequest.fromHttpRequest(iRequest, project);
             const { info } = request;
             assert.equal(info.name, iRequest.url, 'sets the name');
             assert.equal(info.kind, ThingKind, 'sets the kind');
           });
   
           it('sets request meta', () => {
-            const request = ArcProjectRequest.fromHttpRequest(iRequest, project);
+            const request = HttpClientProjectRequest.fromHttpRequest(iRequest, project);
             assert.typeOf(request.key, 'string', 'has the key');
-            assert.equal(request.kind, ArcProjectRequestKind, 'sets the kind');
+            assert.equal(request.kind, HttpClientRequestKind, 'sets the kind');
             assert.typeOf(request.created, 'number', 'sets the created');
             assert.equal(request.updated, request.created, 'sets the updated');
           });
   
           it('throws when the project ius missing', () => {
             assert.throws(() => {
-              ArcProjectRequest.fromHttpRequest(iRequest);
+              HttpClientProjectRequest.fromHttpRequest(iRequest);
             }, 'The project is required.');
           });
         });
   
-        describe('ArcProjectRequest.fromRequest()', () => {
+        describe('HttpClientProjectRequest.fromRequest()', () => {
           let iRequest: IRequest;
   
-          let project: ArcProject;
+          let project: HttpClientProject;
           beforeEach(() => {
-            project = new ArcProject();
+            project = new HttpClientProject();
             const httpRequest: IHttpRequest = {
               kind: RequestKind,
               method: 'PUT',
@@ -2490,7 +2797,7 @@ describe('Models', () => {
           });
   
           it('sets the request values', () => {
-            const request = ArcProjectRequest.fromRequest(iRequest, project);
+            const request = HttpClientProjectRequest.fromRequest(iRequest, project);
             const { expects } = request;
             assert.equal(expects.url, iRequest.expects.url, 'sets the empty url');
             assert.equal(expects.kind, HttpRequestKind, 'sets the kind');
@@ -2500,16 +2807,16 @@ describe('Models', () => {
           });
   
           it('sets the info values', () => {
-            const request = ArcProjectRequest.fromRequest(iRequest, project);
+            const request = HttpClientProjectRequest.fromRequest(iRequest, project);
             const { info } = request;
             assert.equal(info.name, 'a name', 'sets the name');
             assert.equal(info.kind, ThingKind, 'sets the kind');
           });
   
           it('sets request meta', () => {
-            const request = ArcProjectRequest.fromRequest(iRequest, project);
+            const request = HttpClientProjectRequest.fromRequest(iRequest, project);
             assert.typeOf(request.key, 'string', 'has the key');
-            assert.equal(request.kind, ArcProjectRequestKind, 'sets the kind');
+            assert.equal(request.kind, HttpClientRequestKind, 'sets the kind');
             assert.typeOf(request.created, 'number', 'sets the created');
             assert.equal(request.updated, request.created, 'sets the updated');
           });
@@ -2517,9 +2824,9 @@ describe('Models', () => {
       });
   
       describe('getParent()', () => {
-        let project: ArcProject;
+        let project: HttpClientProject;
         beforeEach(() => {
-          project = new ArcProject();
+          project = new HttpClientProject();
         });
   
         it('returns the project object', () => {
@@ -2537,9 +2844,9 @@ describe('Models', () => {
       });
   
       describe('getProject()', () => {
-        let project: ArcProject;
+        let project: HttpClientProject;
         beforeEach(() => {
-          project = new ArcProject();
+          project = new HttpClientProject();
         });
   
         it('returns the project when added to the project', () => {
@@ -2557,9 +2864,9 @@ describe('Models', () => {
       });
   
       describe('remove()', () => {
-        let project: ArcProject;
+        let project: HttpClientProject;
         beforeEach(() => {
-          project = new ArcProject();
+          project = new HttpClientProject();
         });
   
         it('removes from a project root', () => {
@@ -2575,15 +2882,15 @@ describe('Models', () => {
           r.remove();
           assert.deepEqual(folder.items, [], 'folder has no items');
           assert.lengthOf(project.items, 1, 'projects has a single item');
-          assert.lengthOf(project.items.filter(i => i.kind === ArcProjectFolderKind), 1, 'projects has only folder items');
+          assert.lengthOf(project.items.filter(i => i.kind === HttpClientFolderKind), 1, 'projects has only folder items');
           assert.lengthOf(project.definitions.requests, 0, 'projects has no request definitions');
         });
       });
   
       describe('clone()', () => {
-        let project: ArcProject;
+        let project: HttpClientProject;
         beforeEach(() => {
-          project = new ArcProject();
+          project = new HttpClientProject();
         });
   
         describe('project root', () => {
@@ -2617,7 +2924,7 @@ describe('Models', () => {
           it('copies a request from one project to another', () => {
             const r = project.addRequest('https://api.com');
             const result = r.clone({ withoutAttach: true });
-            const target = new ArcProject();
+            const target = new HttpClientProject();
             target.addRequest(result);
             assert.isTrue(result.getProject() === target, 'the request has a new project');
             assert.lengthOf(target.items, 1);
@@ -2626,8 +2933,8 @@ describe('Models', () => {
         });
   
         describe('folder root', () => {
-          let request: ArcProjectRequest;
-          let folder: ArcProjectFolder;
+          let request: HttpClientProjectRequest;
+          let folder: HttpClientProjectFolder;
           beforeEach(() => {
             folder = project.addFolder('a folder');
             request = folder.addRequest('https://api.com');
@@ -2646,7 +2953,7 @@ describe('Models', () => {
   
           it('copies a request from one project to another', () => {
             const result = request.clone({ withoutAttach: true });
-            const target = new ArcProject();
+            const target = new HttpClientProject();
             target.addRequest(result);
             assert.isTrue(result.getProject() === target, 'the request has a new project');
             assert.lengthOf(target.items, 1);
@@ -2655,15 +2962,15 @@ describe('Models', () => {
         });
       });
   
-      describe('ArcProjectRequest.clone()', () => {
-        let project: ArcProject;
+      describe('HttpClientProjectRequest.clone()', () => {
+        let project: HttpClientProject;
         beforeEach(() => {
-          project = new ArcProject();
+          project = new HttpClientProject();
         });
   
         it('clones the request', () => {
           const request = project.addRequest('https://api.com');
-          const result = ArcProjectRequest.clone(request.toJSON(), project);
+          const result = HttpClientProjectRequest.clone(request.toJSON(), project);
   
           assert.typeOf(result.key, 'string', 'has the key');
           assert.notEqual(result.key, request.key, 'has a different key');

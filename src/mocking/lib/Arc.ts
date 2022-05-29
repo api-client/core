@@ -1,5 +1,5 @@
 import { IDataMockInit, IHttpRequestInit } from '@pawel-up/data-mock';
-import { IArcHttpRequest, Kind as ArcHttpRequestKind } from '../../models/arc/ArcHttpRequest.js';
+import { IHttpClientRequest, Kind as HttpClientRequestKind } from '../../models/http-client/HttpClientRequest.js';
 import { Request } from './Request.js';
 
 export class Arc {
@@ -9,17 +9,17 @@ export class Arc {
     this.request = new Request(init);
   }
 
-  arcRequest(init?: IHttpRequestInit): IArcHttpRequest {
+  arcRequest(init?: IHttpRequestInit): IHttpClientRequest {
     const request = this.request.request(init);
     return {
       key: new Date(request.created || Date.now()).toJSON(),
       ...request,
-      kind: ArcHttpRequestKind,
+      kind: HttpClientRequestKind,
     };
   }
 
-  arcRequests(size = 25, init?: IHttpRequestInit): IArcHttpRequest[] {
-    const result: IArcHttpRequest[] = [];
+  arcRequests(size = 25, init?: IHttpRequestInit): IHttpClientRequest[] {
+    const result: IHttpClientRequest[] = [];
     for (let i = 0; i < size; i++) {
       result.push(this.arcRequest(init));
     }
