@@ -5,6 +5,8 @@ import { IUser, Kind as UserKind } from './User.js';
 import { IThing, Thing } from '../Thing.js';
 import v4 from '../../lib/uuid.js';
 import { ICapabilities } from './Capabilities.js';
+// this causes error
+// import { Kind as WorkspaceKind } from '../Workspace.js';
 
 export const DefaultOwner = 'default';
 

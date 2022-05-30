@@ -81,9 +81,9 @@ export class HttpClientRequest extends Request {
   static fromRequest(request: IHttpClientRequest): HttpClientRequest {
     const d = new Date(request.created || Date.now());
     const now: number = d.getTime();
-    const init: IHttpClientRequest = { 
-      ...request, 
-      key: d.toJSON(), 
+    const init: IHttpClientRequest = {
+      ...request,
+      key: d.toJSON(),
       kind: Kind,
       created: now,
     };
@@ -111,7 +111,7 @@ export class HttpClientRequest extends Request {
 
   new(init: IHttpClientRequest): void {
     super.new(init);
-    
+
     const { key } = init;
     this.key = key || new Date(init.created || Date.now()).toJSON();
     this.kind = Kind;
@@ -119,10 +119,10 @@ export class HttpClientRequest extends Request {
 
   toJSON(): IHttpClientRequest {
     const request = super.toJSON();
-    const result: IHttpClientRequest = { 
-      ...request, 
-      key: this.key, 
-      kind: Kind 
+    const result: IHttpClientRequest = {
+      ...request,
+      key: this.key,
+      kind: Kind
     };
     return result;
   }

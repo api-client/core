@@ -14,6 +14,7 @@ import { ARCSavedRequest } from '../../src/models/legacy/request/ArcRequest.js';
 import { LegacyMock } from '../../src/mocking/LegacyMock.js';
 import { Kind as ServerKind } from '../../src/models/Server.js';
 import { HttpClientProject } from '../../src/models/http-client/HttpClientProject.js';
+import { Certificate } from '../../src/models/ClientCertificate.js';
 
 describe('Models', () => {
   const generator = new LegacyMock();
@@ -30,6 +31,7 @@ describe('Models', () => {
           assert.deepEqual(result.definitions.folders, [], 'sets the definitions.folders property');
           assert.deepEqual(result.definitions.requests, [], 'sets the definitions.requests property');
           assert.deepEqual(result.definitions.schemas, [], 'sets the definitions.schemas property');
+          assert.deepEqual(result.definitions.certificates, [], 'sets the definitions.certificates property');
           assert.deepEqual(result.items, [], 'sets the items property');
           const { info } = result;
           assert.typeOf(info, 'object', 'sets the default info property');
@@ -221,6 +223,19 @@ describe('Models', () => {
           const [item] = definitions.requests;
           assert.equal(item.key, request.key, 'sets the request instance');
         });
+
+        it('sets the definitions.certificates', () => {
+          const cert = Certificate.fromP12('value')
+          const init: IHttpProject = { ...base, ...{ definitions: {
+            certificates: [cert.toJSON()]
+          }}};
+          const project = new HttpProject(init);
+          const { definitions } = project;
+          assert.typeOf(definitions.certificates, 'array', 'has the definitions')
+          assert.lengthOf(definitions.certificates, 1, 'has a single definition')
+          const [item] = definitions.certificates;
+          assert.equal(item.key, cert.key, 'sets the request instance');
+        });
       });
 
       describe('From JSON string initialization', () => {
@@ -247,6 +262,7 @@ describe('Models', () => {
           assert.deepEqual(project.definitions.folders, [], 'sets the definitions.folders property');
           assert.deepEqual(project.definitions.requests, [], 'sets the definitions.requests property');
           assert.deepEqual(project.definitions.schemas, [], 'sets the definitions.schemas property');
+          assert.deepEqual(project.definitions.certificates, [], 'sets the definitions.certificates property');
           assert.deepEqual(project.items, [], 'sets the items property');
           const { info } = project;
           assert.typeOf(info, 'object', 'sets the default info property');
@@ -329,6 +345,85 @@ describe('Models', () => {
           });
           assert.equal(result.info.name, 'abc');
         });
+      });
+    });
+
+    describe('toJSON()', () => {
+      let project: HttpProject;
+      beforeEach(() => {
+        project = new HttpProject();
+      });
+
+      it('sets the kind', () => {
+        const result = project.toJSON();
+        assert.equal(result.kind, HttpProjectKind);
+      });
+
+      it('sets the key', () => {
+        const result = project.toJSON();
+        assert.equal(result.key, project.key);
+      });
+
+      it('sets the info object', () => {
+        project.info.name = 'a';
+        const result = project.toJSON();
+        assert.equal(result.info.name, 'a');
+      });
+
+      it('sets the empty definitions', () => {
+        const result = project.toJSON();
+        assert.deepEqual(result.definitions, {});
+      });
+
+      it('sets the empty items', () => {
+        const result = project.toJSON();
+        assert.deepEqual(result.items, []);
+      });
+
+      it('does not set empty provider', () => {
+        const result = project.toJSON();
+        assert.isUndefined(result.provider);
+      });
+
+      it('does not set empty license', () => {
+        const result = project.toJSON();
+        assert.isUndefined(result.license);
+      });
+
+      it('serializes the items', () => {
+        const f1 = project.addFolder('f1')
+        const result = project.toJSON();
+        assert.lengthOf(result.items, 1);
+        assert.equal(result.items[0].key, f1.key);
+      });
+
+      it('serializes the definitions.environments', () => {
+        const e1 = project.addEnvironment('e1')
+        const result = project.toJSON();
+        assert.lengthOf(result.definitions.environments, 1);
+        assert.equal(result.definitions.environments[0].key, e1.key);
+      });
+
+      it('serializes the definitions.requests', () => {
+        const r1 = project.addRequest('r1')
+        const result = project.toJSON();
+        assert.lengthOf(result.definitions.requests, 1);
+        assert.equal(result.definitions.requests[0].key, r1.key);
+      });
+
+      it('serializes the definitions.folders', () => {
+        const f1 = project.addFolder('f1')
+        const result = project.toJSON();
+        assert.lengthOf(result.definitions.folders, 1);
+        assert.equal(result.definitions.folders[0].key, f1.key);
+      });
+
+      it('serializes the definitions.certificates', () => {
+        const c1 = Certificate.fromP12('value');
+        project.addCertificate(c1)
+        const result = project.toJSON();
+        assert.lengthOf(result.definitions.certificates, 1);
+        assert.equal(result.definitions.certificates[0].key, c1.key);
       });
     });
 
@@ -1667,16 +1762,28 @@ describe('Models', () => {
         assert.notEqual(copy.definitions.schemas[0].key, schema.key);
       });
 
+      it('updates keys for certificates', () => {
+        const cert = Certificate.fromP12('value');
+        project.definitions.certificates.push(cert);
+        const copy = project.clone();
+
+        assert.typeOf(copy.definitions.certificates[0].key, 'string');
+        assert.notEqual(copy.definitions.certificates[0].key, cert.key);
+      });
+
       it('does not update keys when configured', () => {
         const f = project.addFolder('test');
         const r = project.addRequest('https://domain.com');
         const env = project.addEnvironment('test');
         const schema = ProjectSchema.fromName('s1');
         project.definitions.schemas.push(schema);
+        const cert = Certificate.fromP12('value');
+        project.definitions.certificates.push(cert);
         const copy = project.clone({ withoutRevalidate: true });
 
         assert.equal(copy.key, project.key);
         assert.equal(copy.definitions.schemas[0].key, schema.key);
+        assert.equal(copy.definitions.certificates[0].key, cert.key);
         const [folder] = copy.listFolders();
         assert.equal(folder.key, f.key);
         const [request] = copy.listRequests();
@@ -2183,6 +2290,80 @@ describe('Models', () => {
         const f1result = result.findFolder(f1.key) as ProjectFolder;
         const r2result = f1result.listEnvironments()[0];
         assert.ok(r2result, 'folder #1 has environment #2');
+      });
+    });
+
+    describe('addCertificate()', () => {
+      it('adds a certificate instance', () => {
+        const cert = Certificate.fromP12('value');
+        const project = new HttpProject();
+        const created = project.addCertificate(cert);
+        assert.deepEqual(created, cert);
+
+        assert.lengthOf(project.definitions.certificates, 1, 'has one certificate');
+        assert.equal(project.definitions.certificates[0].key, created.key, 'the project has the certificate');
+      });
+
+      it('adds by the schema', () => {
+        const project = new HttpProject();
+        const cert = Certificate.fromP12('value');
+        const created = project.addCertificate(cert.toJSON());
+        assert.deepEqual(created, cert);
+
+        assert.lengthOf(project.definitions.certificates, 1, 'has one certificate');
+        assert.equal(project.definitions.certificates[0].key, created.key, 'the project has the certificate');
+      });
+    });
+
+    describe('removeCertificate()', () => {
+      let project: HttpProject;
+      let cert: Certificate;
+      beforeEach(() => {
+        cert = Certificate.fromP12('value');
+        project = new HttpProject();
+        project.addCertificate(cert);
+      });
+
+      it('removes the certificate from the project', () => {
+        project.removeCertificate(cert.key);
+        assert.lengthOf(project.definitions.certificates, 0, 'has no certificates');
+      });
+
+      it('returns the removed certificate', () => {
+        const result = project.removeCertificate(cert.key);
+        assert.deepEqual(result, cert);
+      });
+
+      it('returns undefined when no certificate', () => {
+        const result = project.removeCertificate('other');
+        assert.isUndefined(result);
+      });
+
+      it('removes only the requested certificate', () => {
+        const c2 = Certificate.fromP12('value');
+        project.addCertificate(c2);
+        project.removeCertificate(cert.key);
+        assert.deepEqual(project.definitions.certificates, [c2]);
+      });
+    });
+
+    describe('findCertificate()', () => {
+      let project: HttpProject;
+      let cert: Certificate;
+      beforeEach(() => {
+        cert = Certificate.fromP12('value');
+        project = new HttpProject();
+        project.addCertificate(cert);
+      });
+
+      it('returns the certificate', () => {
+        const result = project.findCertificate(cert.key);
+        assert.deepEqual(result, cert);
+      });
+
+      it('returns undefined when no certificate', () => {
+        const result = project.findCertificate('other');
+        assert.isUndefined(result);
       });
     });
   });

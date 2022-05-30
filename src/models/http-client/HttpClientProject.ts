@@ -11,6 +11,8 @@ import { Environment, IEnvironment, Kind as EnvironmentKind } from '../Environme
 import { IThing, Thing } from "../Thing.js";
 import { ARCHistoryRequest, ARCSavedRequest } from "../legacy/request/ArcRequest.js";
 import { ARCProject } from "../legacy/models/ArcLegacyProject.js";
+import { Certificate, HttpCertificate } from "../ClientCertificate.js";
+import { ICCAuthorization } from "../Authorization.js";
 
 export const HttpClientProjectKind = 'HttpClient#Project';
 export const HttpClientFolderKind = 'HttpClient#ProjectFolder';
@@ -23,7 +25,7 @@ export interface IHttpClientItemOptions {
   parent?: string;
 }
 
-export interface IHttpClientItemCreateOptions extends IHttpClientItemOptions{
+export interface IHttpClientItemCreateOptions extends IHttpClientItemOptions {
   /**
    * The position at which to add the item.
    */
@@ -188,6 +190,7 @@ export interface IHttpClientProjectDefinitions {
    */
   requests?: IHttpClientProjectRequest[];
   environments?: IEnvironment[];
+  certificates?: HttpCertificate[];
 }
 
 export interface HttpClientProjectDefinitions {
@@ -200,6 +203,7 @@ export interface HttpClientProjectDefinitions {
    */
   requests: HttpClientProjectRequest[];
   environments: Environment[];
+  certificates: Certificate[];
 }
 
 export interface IHttpClientProject extends IProjectParent {
@@ -1042,6 +1046,7 @@ export class HttpClientProject extends HttpClientProjectParent {
       folders: [],
       requests: [],
       environments: [],
+      certificates: [],
     };
     let init: IHttpClientProject;
     if (typeof input === 'string') {
@@ -1084,6 +1089,7 @@ export class HttpClientProject extends HttpClientProjectParent {
       folders: [],
       requests: [],
       environments: [],
+      certificates: [],
     };
     if (Array.isArray(definitions.requests)) {
       this.definitions.requests = definitions.requests.map(i => {
@@ -1099,6 +1105,9 @@ export class HttpClientProject extends HttpClientProjectParent {
     }
     if (Array.isArray(definitions.environments)) {
       this.definitions.environments = definitions.environments.map(i => new Environment(i));
+    }
+    if (Array.isArray(definitions.certificates)) {
+      this.definitions.certificates = definitions.certificates.map(i => new Certificate(i));
     }
   }
 
@@ -1120,6 +1129,9 @@ export class HttpClientProject extends HttpClientProjectParent {
     }
     if (Array.isArray(this.definitions.environments) && this.definitions.environments.length) {
       result.definitions.environments = this.definitions.environments.map(i => i.toJSON());
+    }
+    if (Array.isArray(this.definitions.certificates) && this.definitions.certificates.length) {
+      result.definitions.certificates = this.definitions.certificates.map(i => i.toJSON());
     }
     if (Array.isArray(this.items) && this.items.length) {
       result.items = this.items.map(i => i.toJSON());
@@ -1759,6 +1771,9 @@ export class HttpClientProject extends HttpClientProjectParent {
       indexObject.key = newKey;
       environment.key = newKey;
     });
+    (definitions.certificates || []).forEach((cert) => {
+      cert.key = v4();
+    });
   }
 
   /**
@@ -1943,5 +1958,74 @@ export class HttpClientProject extends HttpClientProjectParent {
     } else {
       root.items.push(item);
     }
+  }
+
+  /**
+   * Finds a definition for a certificate.
+   * 
+   * @param key The key of the certificate to find.
+   * @returns The certificate definition or undefined if not found.
+   */
+  findCertificate(key: string): Certificate | undefined {
+    return this.definitions.certificates.find(i => i.key === key);
+  }
+
+  /**
+   * Adds a certificate to the project.
+   * 
+   * @param init Either an instance of a certificate or its definition.
+   * @returns The inserted certificate.
+   */
+  addCertificate(init: Certificate | HttpCertificate): Certificate {
+    let finalCert: Certificate;
+    if (init instanceof Certificate) {
+      finalCert = init;
+    } else {
+      finalCert = new Certificate(init);
+    }
+    if (!this.definitions.certificates) {
+      this.definitions.certificates = [];
+    }
+    this.definitions.certificates.push(finalCert);
+    return finalCert;
+  }
+
+  /**
+   * Removes a certificate from the project.
+   * 
+   * @param key the key of the certificate to remove
+   * @returns The removed certificate, if any.
+   */
+  removeCertificate(key: string): Certificate | undefined {
+    if (!Array.isArray(this.definitions.certificates)) {
+      return undefined
+    }
+    const defIndex = this.definitions.certificates.findIndex(i => i.key === key);
+    if (defIndex < 0) {
+      return undefined;
+    }
+    const cert = this.definitions.certificates[defIndex];
+    this.definitions.certificates.splice(defIndex, 1);
+    return cert;
+  }
+
+  /**
+   * Finds the requests that are using the certificate identified by the key.
+   * 
+   * @param key The key of the certificate to find the usage for.
+   * @returns The list of requests that use this certificate.
+   */
+  findCertificateRequests(key: string): HttpClientProjectRequest[] {
+    return this.definitions.requests.filter((request) => {
+      if (!Array.isArray(request.authorization)) {
+        return false;
+      }
+      const ccAuth = request.authorization.find(auth => auth.type === 'client certificate');
+      if (!ccAuth) {
+        return false;
+      }
+      const cnf = ccAuth.config as ICCAuthorization;
+      return !!cnf && !!cnf.certificate && cnf.certificate.key === key;
+    });
   }
 }
