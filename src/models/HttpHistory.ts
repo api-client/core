@@ -11,6 +11,8 @@ export interface IHttpHistory {
    * In majority of cases this value is set. It is not set when generating the history object before sending it to the store.
    * 
    * Note for data store implementations. This must be a URL-safe value so the id should be encoded if needed.
+   * 
+   * @readonly
    */
   key?: string;
   /**
@@ -27,9 +29,12 @@ export interface IHttpHistory {
   app?: string;
   /**
    * The user id that made that request.
-   * Note, the default API Client's store automatically adds the user information to the record overriding any pre-set user id.
+   * Note, the default API Client's store automatically adds the user information to the record overriding any pre-set user id, making it a read-only
+   * value.
+   * 
+   * @readonly
    */
-  user: string;
+  user?: string;
   /**
    * The optional request id in the project that generated this log.
    */
@@ -80,7 +85,7 @@ export interface IHttpHistoryBulkAdd {
 
 /**
  * An HTTP history is an object containing an information of a request and response
- * made with the application.
+ * made by an application.
  * 
  * Note, history object are not mutable. Can only be created or deleted.
  */

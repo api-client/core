@@ -15,8 +15,7 @@ export interface IServer {
    */
   uri: string;
   /**
-   * Usually included in the `uri`. When the `uri` is missing a protocol 
-   * this is then used.
+   * Usually included in the `uri`. When the `uri` is missing a protocol this is then used.
    */
   protocol?: string;
   /**

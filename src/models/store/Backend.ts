@@ -38,7 +38,7 @@ export interface IBackendInfo {
    * Clients should look for a capability rather the version of the store.
    */
   capabilities: string[];
-  
+
   /**
    * Client authentication configuration
    */
@@ -142,7 +142,7 @@ export interface IListResponse<T = unknown> {
   /**
    * The list of objects returned from the store.
    */
-  data: T[];
+  items: T[];
 }
 
 export interface IListOptions {
@@ -317,4 +317,132 @@ export interface IPatchRevision extends IPatchInfo {
    * The patch to apply to the object to revert the changes.
    */
   revert: JsonPatch;
+}
+
+/**
+ * Describes a batch read operation body.
+ */
+export interface IBatchRead {
+  /**
+   * The keys of the items to read. The response has the ordered list of results.
+   */
+  items: string[];
+}
+
+/**
+ * Describes a result of the batch read operation body.
+ */
+export interface IBatchReadResult<T = unknown> {
+  /**
+   * The ordered list of read entities.
+   * Each element can be null/undefined when the item cannot be read.
+   * 
+   * The batch operation does not return specific errors. Use the direct read operation
+   * for the detailed error.
+   */
+  items: (T | null | undefined)[];
+}
+
+/**
+ * Describes a batch update/create operation body.
+ */
+export interface IBatchUpdate<T = unknown> {
+  /**
+   * The items to add or update in a batch operation.
+   */
+  items: T[];
+  /**
+   * The optional key of the parent object of the created/updated items.
+   */
+  parent?: string;
+}
+
+/**
+ * Describes a result of the batch update/create operation body.
+ */
+export interface IBatchUpdateResult<T = unknown> {
+  /**
+   * The ordered list of create/update result for each item.
+   */
+  items: T[];
+  /**
+   * The optional key of the parent object of the created/updated items.
+   */
+  parent?: string;
+}
+
+/**
+ * Describes a batch delete operation body.
+ */
+export interface IBatchDelete {
+  /**
+   * The list of keys of items to delete.
+   */
+  items: string[];
+  /**
+   * The optional key of the parent object of the deleted items.
+   * Not used by the store but reported back through the events.
+   */
+  parent?: string;
+}
+
+/**
+ * Describes a result of the batch delete operation.
+ */
+export interface IBatchDeleteResult {
+  /**
+   * The ordered list of delete result for each item.
+   * 
+   * The batch operation does not return specific errors. Use the direct delete operation
+   * for the detailed error.
+   */
+  items: (IDeleteRecord | undefined | null)[];
+}
+
+export interface IDeleteRecord {
+  /**
+   * The key of the removed object.
+   */
+  key: string;
+  /**
+   * The key of the parent object, if applicable.
+   */
+  parent?: string;
+}
+
+/**
+ * Describes a batch undelete operation body.
+ */
+export interface IBatchUndelete {
+  /**
+   * The list of keys of the items to undelete.
+   */
+  items: string[];
+  /**
+   * The optional key of the parent object of the deleted items.
+   */
+  parent?: string;
+}
+
+export interface IRevertResult<T = unknown> {
+  /**
+   * The data kind of the changed item.
+   */
+  kind?: string;
+  /**
+   * The key of the changed object.
+   */
+  key: string;
+  /**
+   * The updated object.
+   */
+  item?: T;
+  /**
+   * Optionally, when relevant, the key of the parent of the changed object.
+   */
+  parent?: string;
+}
+
+export interface IRevertResponse<T = unknown> {
+  items: (IRevertResult<T> | undefined)[];
 }

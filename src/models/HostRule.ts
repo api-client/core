@@ -17,11 +17,11 @@ export interface IHostRule {
    */
   from: string;
   /**
-   * replacement value
+   * The replacement value
    */
   to: string;
   /**
-   * if false the rule is ignored
+   * When false the rule is ignored
    */
   enabled?: boolean;
   /**

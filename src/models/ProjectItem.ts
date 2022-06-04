@@ -2,7 +2,7 @@ import { Kind as ProjectFolderKind, ProjectFolder } from './ProjectFolder.js';
 import { Kind as ProjectRequestKind, ProjectRequest } from './ProjectRequest.js';
 import { Kind as EnvironmentKind, Environment } from './Environment.js';
 import { HttpProject } from './HttpProject.js';
-import { HttpClientFolderKind, HttpClientRequestKind, IHttpClientProjectItem } from './http-client/HttpClientProject.js';
+import { AppProjectFolderKind, AppProjectRequestKind, IAppProjectItem } from './AppProject.js';
 
 type Kind = typeof ProjectFolderKind | typeof ProjectRequestKind | typeof EnvironmentKind;
 
@@ -75,11 +75,11 @@ export class ProjectItem {
     return item;
   }
 
-  static fromHttpClientProject(project: HttpProject, item: IHttpClientProjectItem): ProjectItem {
+  static fromAppProject(project: HttpProject, item: IAppProjectItem): ProjectItem {
     let kind: Kind;
-    if (item.kind === HttpClientFolderKind) {
+    if (item.kind === AppProjectFolderKind) {
       kind = ProjectFolderKind
-    } else if (item.kind === HttpClientRequestKind) {
+    } else if (item.kind === AppProjectRequestKind) {
       kind = ProjectRequestKind
     } else if (item.kind === EnvironmentKind) {
       kind = EnvironmentKind

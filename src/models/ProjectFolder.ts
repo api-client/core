@@ -6,7 +6,7 @@ import { HttpProject, IEnvironmentCreateOptions } from './HttpProject.js';
 import { IThing, Thing, Kind as ThingKind } from './Thing.js';
 import { Environment, IEnvironment } from './Environment.js';
 import v4 from '../lib/uuid.js';
-import { IProjectParent } from './http-client/HttpClientProject.js';
+import { IAppProjectParent } from './AppProject.js';
 
 export const Kind = 'Core#ProjectFolder';
 export const DefaultFolderName = 'New folder';
@@ -95,7 +95,7 @@ export class ProjectFolder extends ProjectParent {
    */
   created = 0;
 
-  static fromHttpClientProject(project: HttpProject, init: IProjectParent): ProjectFolder {
+  static fromAppProject(project: HttpProject, init: IAppProjectParent): ProjectFolder {
     const result = new ProjectFolder(project);
     const { key = v4(), created = Date.now(), updated = Date.now(), items, info } = init;
     result.key = key;
@@ -105,7 +105,7 @@ export class ProjectFolder extends ProjectParent {
       result.info = new Thing(info);
     }
     if (Array.isArray(items)) {
-      result.items = items.map(i => ProjectItem.fromHttpClientProject(project, i));
+      result.items = items.map(i => ProjectItem.fromAppProject(project, i));
     }
     return result;
   }

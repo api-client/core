@@ -4,35 +4,35 @@
 /* eslint-disable max-classes-per-file */
 // import { ARCHistoryRequest, ARCSavedRequest } from "@api-client/core/build/legacy.js";
 
-import v4 from "../../lib/uuid.js";
-import { HttpRequest, IHttpRequest } from "../HttpRequest.js";
-import { IRequest, Request } from "../Request.js";
-import { Environment, IEnvironment, Kind as EnvironmentKind } from '../Environment.js';
-import { IThing, Thing } from "../Thing.js";
-import { ARCHistoryRequest, ARCSavedRequest } from "../legacy/request/ArcRequest.js";
-import { ARCProject } from "../legacy/models/ArcLegacyProject.js";
-import { Certificate, HttpCertificate } from "../ClientCertificate.js";
-import { ICCAuthorization } from "../Authorization.js";
+import v4 from "../lib/uuid.js";
+import { HttpRequest, IHttpRequest } from "./HttpRequest.js";
+import { IRequest, Request } from "./Request.js";
+import { Environment, IEnvironment, Kind as EnvironmentKind } from './Environment.js';
+import { IThing, Thing } from "./Thing.js";
+import { ARCHistoryRequest, ARCSavedRequest } from "./legacy/request/ArcRequest.js";
+import { ARCProject } from "./legacy/models/ArcLegacyProject.js";
+import { Certificate, HttpCertificate } from "./ClientCertificate.js";
+import { ICCAuthorization } from "./Authorization.js";
 
-export const HttpClientProjectKind = 'HttpClient#Project';
-export const HttpClientFolderKind = 'HttpClient#ProjectFolder';
-export const HttpClientRequestKind = 'HttpClient#ProjectRequest';
+export const AppProjectKind = 'Core#AppProject';
+export const AppProjectFolderKind = 'Core#AppProjectFolder';
+export const AppProjectRequestKind = 'Core#AppProjectRequest';
 
-export interface IHttpClientItemOptions {
+export interface IAppProjectItemOptions {
   /**
    * The parent folder to add the item to.
    */
   parent?: string;
 }
 
-export interface IHttpClientItemCreateOptions extends IHttpClientItemOptions {
+export interface IAppProjectItemCreateOptions extends IAppProjectItemOptions {
   /**
    * The position at which to add the item.
    */
   index?: number;
 }
 
-export interface IHttpClientRequestCloneOptions {
+export interface IAppProjectRequestCloneOptions {
   /**
    * By default it revalidates (re-creates) keys in the request.
    * Set this to true to not make any changes to the keys.
@@ -46,14 +46,14 @@ export interface IHttpClientRequestCloneOptions {
   withoutAttach?: boolean;
 }
 
-export interface IHttpClientFolderAddOptions {
+export interface IAppProjectFolderAddOptions {
   /**
    * Optionally the position at which to add the request into the list of items.
    */
   index?: number;
 }
 
-export interface IHttpClientFolderCloneOptions {
+export interface IAppProjectFolderCloneOptions {
   /**
    * By default it clones the folder with all requests in it.
    * Set this to `true` to skip copying the requests along with the folder.
@@ -70,7 +70,7 @@ export interface IHttpClientFolderCloneOptions {
    * is put into the project root rather than the parent folder (as it would when cloning
    * a folder inside the same project).
    */
-  targetProject?: HttpClientProject;
+  targetProject?: AppProject;
   /**
    * The **key** of the target folder.
    * 
@@ -80,7 +80,7 @@ export interface IHttpClientFolderCloneOptions {
   targetFolder?: string;
 }
 
-export interface IHttpClientFolderCreateOptions extends IHttpClientItemOptions {
+export interface IAppProjectFolderCreateOptions extends IAppProjectItemOptions {
   /**
    * Ignores the operation when the folder with the same name already exists. 
    * This command can be used used to ensure that the folder exists.
@@ -92,7 +92,7 @@ export interface IHttpClientFolderCreateOptions extends IHttpClientItemOptions {
   index?: number;
 }
 
-export interface IHttpClientFolderSearchOptions {
+export interface IAppProjectFolderSearchOptions {
   /**
    * When set it searches for a folder using keys only. 
    * By default it searches for a key and the name.
@@ -100,21 +100,21 @@ export interface IHttpClientFolderSearchOptions {
   keyOnly?: boolean;
 }
 
-export interface IHttpClientFolderDeleteOptions {
+export interface IAppProjectFolderDeleteOptions {
   /**
    * When set it won't throw an error when the folder is not found in the project.
    */
   safe?: boolean;
 }
 
-export interface IHttpClientRequestAddOptions extends IHttpClientItemOptions {
+export interface IAppProjectRequestAddOptions extends IAppProjectItemOptions {
   /**
    * Optionally the position at which to add the request into the list of items.
    */
   index?: number;
 }
 
-export interface IHttpClientRequestSearchOptions {
+export interface IAppProjectRequestSearchOptions {
   /**
    * When set it searches for a request using keys only. 
    * By default it searches for a key and the name.
@@ -122,28 +122,28 @@ export interface IHttpClientRequestSearchOptions {
   keyOnly?: boolean;
 }
 
-export interface IHttpClientRequestDeleteOptions {
+export interface IAppProjectRequestDeleteOptions {
   /**
    * When set it won't throw an error when the request is not found in the project.
    */
   safe?: boolean;
 }
 
-export interface IHttpClientProjectMoveOptions extends IHttpClientItemOptions {
+export interface IAppProjectProjectMoveOptions extends IAppProjectItemOptions {
   /**
    * The position at which to insert the object in the destination. BY default it adds the object at the end.
    */
   index?: number;
 }
 
-export interface IHttpClientFolderListOptions {
+export interface IAppProjectFolderListOptions {
   /**
    * Folder name or key to list folders for.
    */
   folder?: string;
 }
 
-export interface IHttpClientProjectCloneOptions {
+export interface IAppProjectProjectCloneOptions {
   /**
    * By default it revalidates (re-creates) keys in the request.
    * Set this to true to not make any changes to the keys.
@@ -151,14 +151,14 @@ export interface IHttpClientProjectCloneOptions {
   withoutRevalidate?: boolean;
 }
 
-export interface IHttpClientEnvironmentCreateOptions extends IHttpClientItemOptions {
+export interface IAppProjectEnvironmentCreateOptions extends IAppProjectItemOptions {
   /**
    * The position at which to add the item.
    */
   index?: number;
 }
 
-export interface IHttpClientReadEnvironmentOptions extends IHttpClientItemOptions {
+export interface IAppProjectReadEnvironmentOptions extends IAppProjectItemOptions {
   /**
    * The name or the key of the environment to select.
    * 
@@ -170,53 +170,53 @@ export interface IHttpClientReadEnvironmentOptions extends IHttpClientItemOption
   nameOrKey?: string;
 }
 
-export interface IHttpClientProjectRequest extends IRequest {
-  kind: typeof HttpClientRequestKind;
+export interface IAppProjectRequest extends IRequest {
+  kind: typeof AppProjectRequestKind;
   key: string;
 }
 
-export interface IHttpClientProjectItem {
-  kind: typeof HttpClientFolderKind | typeof HttpClientRequestKind | typeof EnvironmentKind;
+export interface IAppProjectItem {
+  kind: typeof AppProjectFolderKind | typeof AppProjectRequestKind | typeof EnvironmentKind;
   key: string;
 }
 
-export interface IHttpClientProjectDefinitions {
+export interface IAppProjectDefinitions {
   /**
    * The list of all folders defined in the project.
    */
-  folders?: IProjectParent[];
+  folders?: IAppProjectParent[];
   /**
    * The list of all requests defined in the project.
    */
-  requests?: IHttpClientProjectRequest[];
+  requests?: IAppProjectRequest[];
   environments?: IEnvironment[];
   certificates?: HttpCertificate[];
 }
 
-export interface HttpClientProjectDefinitions {
+export interface AppProjectDefinitions {
   /**
    * The list of all folders defined in the project.
    */
-  folders: HttpClientProjectFolder[];
+  folders: AppProjectFolder[];
   /**
    * The list of all requests defined in the project.
    */
-  requests: HttpClientProjectRequest[];
+  requests: AppProjectRequest[];
   environments: Environment[];
   certificates: Certificate[];
 }
 
-export interface IHttpClientProject extends IProjectParent {
-  definitions: IHttpClientProjectDefinitions;
+/**
+ * An app project is similar to the HttpProject but stored for a single application
+ * and has no sharing options. The AppProject can be upgraded to an HttpProject.
+ */
+export interface IAppProject extends IAppProjectParent {
+  definitions: IAppProjectDefinitions;
 }
 
-export interface IProjectParent {
+export interface IAppProjectParent {
   key: string;
-  /**
-   * The auto-generated key for the folder object.
-   * For the project root this is the same as the `_id`.
-   */
-  kind: typeof HttpClientProjectKind | typeof HttpClientFolderKind;
+  kind: typeof AppProjectKind | typeof AppProjectFolderKind;
   /**
    * Folder meta
    */
@@ -226,7 +226,7 @@ export interface IProjectParent {
    * It is an ordered list of requests and folders.
    * The actual definition is kept in the root's `definitions`.
    */
-  items: IHttpClientProjectItem[];
+  items: IAppProjectItem[];
   /**
    * Timestamp when the project was last updated.
    */
@@ -237,8 +237,8 @@ export interface IProjectParent {
   created?: number;
 }
 
-export class HttpClientProjectRequest extends Request {
-  kind = HttpClientRequestKind;
+export class AppProjectRequest extends Request {
+  kind = AppProjectRequestKind;
 
   /**
    * The identifier of the request.
@@ -248,7 +248,7 @@ export class HttpClientProjectRequest extends Request {
   /**
    * A reference to the top level project object.
    */
-  project: HttpClientProject;
+  project: AppProject;
 
   /**
    * Creates a project request from an URL.
@@ -257,14 +257,14 @@ export class HttpClientProjectRequest extends Request {
    * @param url The Request URL. This is required.
    * @param project The parent project.
    */
-  static fromUrl(url: string, project?: HttpClientProject): HttpClientProjectRequest {
+  static fromUrl(url: string, project?: AppProject): AppProjectRequest {
     if (!project) {
       throw new Error(`The project is required.`);
     }
     const now: number = Date.now();
-    const request = new HttpClientProjectRequest(project, {
+    const request = new AppProjectRequest(project, {
       key: v4(),
-      kind: HttpClientRequestKind,
+      kind: AppProjectRequestKind,
       created: now,
       updated: now,
       expects: HttpRequest.fromBaseValues({ url, method: 'GET' }).toJSON(),
@@ -280,14 +280,14 @@ export class HttpClientProjectRequest extends Request {
    * @param name The Request name.
    * @param project The parent project.This is required.
    */
-  static fromName(name: string, project?: HttpClientProject): HttpClientProjectRequest {
+  static fromName(name: string, project?: AppProject): AppProjectRequest {
     if (!project) {
       throw new Error(`The project is required.`);
     }
     const now: number = Date.now();
-    const request = new HttpClientProjectRequest(project, {
+    const request = new AppProjectRequest(project, {
       key: v4(),
-      kind: HttpClientRequestKind,
+      kind: AppProjectRequestKind,
       created: now,
       updated: now,
       expects: new HttpRequest().toJSON(),
@@ -303,14 +303,14 @@ export class HttpClientProjectRequest extends Request {
    * @param project The parent project This is required.
    * @param info The request data.
    */
-  static fromHttpRequest(info: IHttpRequest, project?: HttpClientProject): HttpClientProjectRequest {
+  static fromHttpRequest(info: IHttpRequest, project?: AppProject): AppProjectRequest {
     if (!project) {
       throw new Error(`The project is required.`);
     }
     const now: number = Date.now();
-    const request = new HttpClientProjectRequest(project, {
+    const request = new AppProjectRequest(project, {
       key: v4(),
-      kind: HttpClientRequestKind,
+      kind: AppProjectRequestKind,
       created: now,
       updated: now,
       expects: HttpRequest.fromBaseValues({ method: info.method, url: info.url, headers: info.headers, payload: info.payload }).toJSON(),
@@ -322,18 +322,18 @@ export class HttpClientProjectRequest extends Request {
   /**
    * Creates a project request for a schema of a Request.
    */
-  static fromRequest(request: IRequest, project: HttpClientProject): HttpClientProjectRequest {
+  static fromRequest(request: IRequest, project: AppProject): AppProjectRequest {
     const key = v4();
-    const init: IHttpClientProjectRequest = { ...request, key, kind: HttpClientRequestKind };
-    const result = new HttpClientProjectRequest(project, init);
+    const init: IAppProjectRequest = { ...request, key, kind: AppProjectRequestKind };
+    const result = new AppProjectRequest(project, init);
     return result;
   }
 
-  constructor(project: HttpClientProject, input?: string | IHttpClientProjectRequest) {
+  constructor(project: AppProject, input?: string | IAppProjectRequest) {
     super(input);
     this.project = project;
 
-    let init: IHttpClientProjectRequest | undefined;
+    let init: IAppProjectRequest | undefined;
     if (typeof input === 'string') {
       init = JSON.parse(input);
     } else if (typeof input === 'object') {
@@ -342,27 +342,27 @@ export class HttpClientProjectRequest extends Request {
     if (init) {
       this.key = init.key || v4();
     }
-    this.kind = HttpClientRequestKind;
+    this.kind = AppProjectRequestKind;
   }
 
-  new(init: IHttpClientProjectRequest): void {
+  new(init: IAppProjectRequest): void {
     super.new(init);
 
     const { key = v4() } = init;
     this.key = key;
-    this.kind = HttpClientRequestKind;
+    this.kind = AppProjectRequestKind;
   }
 
-  toJSON(): IHttpClientProjectRequest {
+  toJSON(): IAppProjectRequest {
     const request = super.toJSON();
-    const result: IHttpClientProjectRequest = { ...request, key: this.key, kind: HttpClientRequestKind };
+    const result: IAppProjectRequest = { ...request, key: this.key, kind: AppProjectRequestKind };
     return result;
   }
 
   /**
    * @returns The instance of the ArcProject or a ArcProjectFolder that is a closes parent of this instance.
    */
-  getParent(): HttpClientProjectFolder | HttpClientProject | undefined {
+  getParent(): AppProjectFolder | AppProject | undefined {
     const { project, key } = this;
     return project.findParent(key);
   }
@@ -370,7 +370,7 @@ export class HttpClientProjectRequest extends Request {
   /**
    * @returns A reference to the parent folder or the top-level HTTP project.
    */
-  getProject(): HttpClientProject {
+  getProject(): AppProject {
     return this.project;
   }
 
@@ -386,8 +386,8 @@ export class HttpClientProjectRequest extends Request {
    * By default it attaches the copied request to the same parent.
    * Use the options dictionary to control this behavior.
    */
-  clone(opts: IHttpClientRequestCloneOptions = {}): HttpClientProjectRequest {
-    const copy = new HttpClientProjectRequest(this.project, this.toJSON());
+  clone(opts: IAppProjectRequestCloneOptions = {}): AppProjectRequest {
+    const copy = new AppProjectRequest(this.project, this.toJSON());
     if (!opts.withoutRevalidate) {
       copy.key = v4();
     }
@@ -409,17 +409,17 @@ export class HttpClientProjectRequest extends Request {
    * @param opts Optional options.
    * @returns The copied request.
    */
-  static clone(request: IHttpClientProjectRequest, project: HttpClientProject, opts: IHttpClientRequestCloneOptions = {}): HttpClientProjectRequest {
-    const obj = new HttpClientProjectRequest(project, request);
+  static clone(request: IAppProjectRequest, project: AppProject, opts: IAppProjectRequestCloneOptions = {}): AppProjectRequest {
+    const obj = new AppProjectRequest(project, request);
     return obj.clone(opts);
   }
 }
 
-export class HttpClientProjectItem {
+export class AppProjectItem {
   /**
    * The kind of the item.
    */
-  kind: typeof HttpClientFolderKind | typeof HttpClientRequestKind | typeof EnvironmentKind = HttpClientRequestKind;
+  kind: typeof AppProjectFolderKind | typeof AppProjectRequestKind | typeof EnvironmentKind = AppProjectRequestKind;
 
   /**
    * The identifier of the object in the `definitions` array of the project.
@@ -429,14 +429,14 @@ export class HttpClientProjectItem {
   /**
    * A reference to the top level project object.
    */
-  project: HttpClientProject;
+  project: AppProject;
 
   /**
    * Checks whether the input is a definition of a project item.
    */
   static isProjectItem(input: unknown): boolean {
-    const typed = input as IHttpClientProjectItem;
-    if (!input || ![HttpClientFolderKind, HttpClientRequestKind, EnvironmentKind].includes(typed.kind)) {
+    const typed = input as IAppProjectItem;
+    if (!input || ![AppProjectFolderKind, AppProjectRequestKind, EnvironmentKind].includes(typed.kind)) {
       return false;
     }
     return true;
@@ -445,9 +445,9 @@ export class HttpClientProjectItem {
   /**
    * @return An instance that represents a request item
    */
-  static projectRequest(project: HttpClientProject, key: string): HttpClientProjectItem {
-    const item = new HttpClientProjectItem(project, {
-      kind: HttpClientRequestKind,
+  static projectRequest(project: AppProject, key: string): AppProjectItem {
+    const item = new AppProjectItem(project, {
+      kind: AppProjectRequestKind,
       key,
     });
     return item;
@@ -456,9 +456,9 @@ export class HttpClientProjectItem {
   /**
    * @return An instance that represents a folder item
    */
-  static projectFolder(project: HttpClientProject, key: string): HttpClientProjectItem {
-    const item = new HttpClientProjectItem(project, {
-      kind: HttpClientFolderKind,
+  static projectFolder(project: AppProject, key: string): AppProjectItem {
+    const item = new AppProjectItem(project, {
+      kind: AppProjectFolderKind,
       key,
     });
     return item;
@@ -467,8 +467,8 @@ export class HttpClientProjectItem {
   /**
    * @return An instance that represents an environment item
    */
-  static projectEnvironment(project: HttpClientProject, key: string): HttpClientProjectItem {
-    const item = new HttpClientProjectItem(project, {
+  static projectEnvironment(project: AppProject, key: string): AppProjectItem {
+    const item = new AppProjectItem(project, {
       kind: EnvironmentKind,
       key,
     });
@@ -479,18 +479,18 @@ export class HttpClientProjectItem {
    * @param project The top-most project.
    * @param input The project item definition used to restore the state.
    */
-  constructor(project: HttpClientProject, input: string | IHttpClientProjectItem) {
+  constructor(project: AppProject, input: string | IAppProjectItem) {
     this.project = project;
-    let init: IHttpClientProjectItem;
+    let init: IAppProjectItem;
     if (typeof input === 'string') {
       if (input === 'http-request') {
         init = {
-          kind: HttpClientRequestKind,
+          kind: AppProjectRequestKind,
           key: '',
         };
       } else if (input === 'folder') {
         init = {
-          kind: HttpClientFolderKind,
+          kind: AppProjectFolderKind,
           key: '',
         };
       } else if (input === 'environment') {
@@ -514,8 +514,8 @@ export class HttpClientProjectItem {
    * 
    * Note, this throws an error when the project item is not a project item. 
    */
-  new(init: IHttpClientProjectItem): void {
-    if (!HttpClientProjectItem.isProjectItem(init)) {
+  new(init: IAppProjectItem): void {
+    if (!AppProjectItem.isProjectItem(init)) {
       throw new Error(`Not a project item.`);
     }
     const { kind, key } = init;
@@ -523,8 +523,8 @@ export class HttpClientProjectItem {
     this.key = key;
   }
 
-  toJSON(): IHttpClientProjectItem {
-    const result: IHttpClientProjectItem = {
+  toJSON(): IAppProjectItem {
+    const result: IAppProjectItem = {
       kind: this.kind,
       key: this.key,
     };
@@ -534,13 +534,13 @@ export class HttpClientProjectItem {
   /**
    * @returns The instance of the definition associated with this item.
    */
-  getItem(): HttpClientProjectFolder | HttpClientProjectRequest | Environment | undefined {
+  getItem(): AppProjectFolder | AppProjectRequest | Environment | undefined {
     const { project, key, kind } = this;
     const { definitions } = project;
-    if (kind === HttpClientRequestKind) {
+    if (kind === AppProjectRequestKind) {
       return definitions.requests.find(i => i.key === key);
     }
-    if (kind === HttpClientFolderKind) {
+    if (kind === AppProjectFolderKind) {
       return definitions.folders.find(i => i.key === key);
     }
     if (kind === EnvironmentKind) {
@@ -552,18 +552,18 @@ export class HttpClientProjectItem {
   /**
    * @returns The instance of the ArcProject or a ArcProjectFolder that is a closest parent of this item.
    */
-  getParent(): HttpClientProjectFolder | HttpClientProject | undefined {
+  getParent(): AppProjectFolder | AppProject | undefined {
     const { project, key } = this;
     return project.findParent(key);
   }
 }
 
-export abstract class HttpClientProjectParent {
+export abstract class AppProjectParent {
   /**
    * The auto-generated key for the folder object.
    * For the project root this is the same as the `_id`.
    */
-  kind: typeof HttpClientProjectKind | typeof HttpClientFolderKind;
+  kind: typeof AppProjectKind | typeof AppProjectFolderKind;
 
   /**
    * The key of the project / folder.
@@ -580,7 +580,7 @@ export abstract class HttpClientProjectParent {
    * It is an ordered list of requests and folders.
    * The actual definition is kept in the root's `definitions`.
    */
-  items: HttpClientProjectItem[] = [];
+  items: AppProjectItem[] = [];
 
   /**
    * Timestamp when the project was last updated.
@@ -592,10 +592,10 @@ export abstract class HttpClientProjectParent {
    */
   created: number = Date.now();
 
-  constructor(kind: typeof HttpClientProjectKind | typeof HttpClientFolderKind, input?: string | IProjectParent) {
+  constructor(kind: typeof AppProjectKind | typeof AppProjectFolderKind, input?: string | IAppProjectParent) {
     this.kind = kind;
 
-    let init: IProjectParent;
+    let init: IAppProjectParent;
     if (typeof input === 'string') {
       init = JSON.parse(input);
     } else if (typeof input === 'object') {
@@ -619,7 +619,7 @@ export abstract class HttpClientProjectParent {
    * 
    * Note, this throws an error when the project folder is not a project folder.
    */
-  new(init: IProjectParent): void {
+  new(init: IAppProjectParent): void {
     const { key = v4(), created = Date.now(), updated = Date.now(), items, info, kind } = init;
     this.kind = kind;
     this.key = key;
@@ -633,54 +633,54 @@ export abstract class HttpClientProjectParent {
     }
   }
 
-  abstract setItems(items?: IHttpClientProjectItem[]): void;
+  abstract setItems(items?: IAppProjectItem[]): void;
 
   /**
    * Lists items (not the actual definitions!) that are folders.
    */
-  listFolderItems(): HttpClientProjectItem[] {
+  listFolderItems(): AppProjectItem[] {
     const { items = [] } = this;
-    return items.filter(i => i.kind === HttpClientFolderKind);
+    return items.filter(i => i.kind === AppProjectFolderKind);
   }
 
   /**
    * Lists items (not the actual definitions!) that are requests.
    */
-  listRequestItems(): HttpClientProjectItem[] {
+  listRequestItems(): AppProjectItem[] {
     const { items = [] } = this;
-    return items.filter(i => i.kind === HttpClientRequestKind);
+    return items.filter(i => i.kind === AppProjectRequestKind);
   }
 }
 
-export class HttpClientProjectFolder extends HttpClientProjectParent {
+export class AppProjectFolder extends AppProjectParent {
 
-  project: HttpClientProject;
+  project: AppProject;
 
   /**
    * Creates a new ArcProjectFolder object from a name.
    * @param project The top-most project.
    * @param name The name to set.
    */
-  static fromName(project: HttpClientProject, name = 'New folder'): HttpClientProjectFolder {
+  static fromName(project: AppProject, name = 'New folder'): AppProjectFolder {
     const now = Date.now();
     const key = v4();
     const info = Thing.fromName(name);
-    const definition = new HttpClientProjectFolder(project, {
+    const definition = new AppProjectFolder(project, {
       key,
       created: now,
       updated: now,
       items: [],
-      kind: HttpClientFolderKind,
+      kind: AppProjectFolderKind,
       info: info.toJSON(),
     });
     return definition;
   }
 
-  constructor(project: HttpClientProject, input?: string | IProjectParent) {
-    super(HttpClientFolderKind, input);
+  constructor(project: AppProject, input?: string | IAppProjectParent) {
+    super(AppProjectFolderKind, input);
     this.project = project;
 
-    let init: IProjectParent | undefined;
+    let init: IAppProjectParent | undefined;
     if (typeof input === 'string') {
       init = JSON.parse(input);
     } else if (typeof input === 'object') {
@@ -689,12 +689,12 @@ export class HttpClientProjectFolder extends HttpClientProjectParent {
     if (init) {
       this.key = init.key || v4();
     }
-    this.kind = HttpClientFolderKind;
+    this.kind = AppProjectFolderKind;
   }
 
-  toJSON(): IProjectParent {
-    const result: IProjectParent = {
-      kind: HttpClientFolderKind,
+  toJSON(): IAppProjectParent {
+    const result: IAppProjectParent = {
+      kind: AppProjectFolderKind,
       info: this.info.toJSON(),
       key: this.key,
       created: this.created,
@@ -707,9 +707,9 @@ export class HttpClientProjectFolder extends HttpClientProjectParent {
     return result;
   }
 
-  setItems(items?: IHttpClientProjectItem[]): void {
+  setItems(items?: IAppProjectItem[]): void {
     if (Array.isArray(items)) {
-      this.items = items.map(i => new HttpClientProjectItem(this.project, i));
+      this.items = items.map(i => new AppProjectItem(this.project, i));
     } else {
       this.items = [];
     }
@@ -721,7 +721,7 @@ export class HttpClientProjectFolder extends HttpClientProjectParent {
    * @param folder The folder to add to this project.
    * @returns The added folder.
    */
-  addFolder(folder: HttpClientProjectFolder): HttpClientProjectFolder;
+  addFolder(folder: AppProjectFolder): AppProjectFolder;
 
   /**
    * Appends new folder to a project from a full folder schema.
@@ -731,7 +731,7 @@ export class HttpClientProjectFolder extends HttpClientProjectParent {
    * @param folder The folder schema to add to this project.
    * @returns The added folder.
    */
-  addFolder(folder: IProjectParent): HttpClientProjectFolder;
+  addFolder(folder: IAppProjectParent): AppProjectFolder;
 
   /**
    * Appends a new folder to the project or a sub-folder.
@@ -739,15 +739,15 @@ export class HttpClientProjectFolder extends HttpClientProjectParent {
    * @param name The name to set. Optional.
    * @returns The newly inserted folder. If the folder already existed it returns its instance.
    */
-  addFolder(name?: string): HttpClientProjectFolder;
+  addFolder(name?: string): AppProjectFolder;
 
   /**
    * Appends a new folder to the folder. It updates the project to add the request definition.
    * @param name The name to set. Optional.
    * @returns The key of newly inserted folder.
    */
-  addFolder(name: string | IProjectParent | HttpClientProjectFolder | undefined): HttpClientProjectFolder {
-    return this.project.addFolder(name as HttpClientProjectFolder, { parent: this.key });
+  addFolder(name: string | IAppProjectParent | AppProjectFolder | undefined): AppProjectFolder {
+    return this.project.addFolder(name as AppProjectFolder, { parent: this.key });
   }
 
   /**
@@ -757,7 +757,7 @@ export class HttpClientProjectFolder extends HttpClientProjectParent {
    * @param opts The request add options.
    * @returns The inserted into the definitions request.
    */
-  addRequest(url: string, opts?: IHttpClientFolderAddOptions): HttpClientProjectRequest;
+  addRequest(url: string, opts?: IAppProjectFolderAddOptions): AppProjectRequest;
 
   /**
    * Adds a request to the project or a sub-folder.
@@ -766,14 +766,14 @@ export class HttpClientProjectFolder extends HttpClientProjectParent {
    * @param opts The request add options.
    * @returns The inserted into the definitions request.
    */
-  addRequest(request: IHttpClientProjectRequest | HttpClientProjectRequest, opts?: IHttpClientFolderAddOptions): HttpClientProjectRequest;
+  addRequest(request: IAppProjectRequest | AppProjectRequest, opts?: IAppProjectFolderAddOptions): AppProjectRequest;
 
   /**
    * Appends a new request to the folder. It updates the project to add the request definition.
    * @param request The request to append to the folder.
    * @returns The key of newly inserted request.
    */
-  addRequest(request: IHttpClientProjectRequest | HttpClientProjectRequest | string, opts: IHttpClientFolderAddOptions = {}): HttpClientProjectRequest {
+  addRequest(request: IAppProjectRequest | AppProjectRequest | string, opts: IAppProjectFolderAddOptions = {}): AppProjectRequest {
     const addOptions = { parent: this.key, ...opts };
     if (typeof request === 'string') {
       return this.project.addRequest(request, addOptions);
@@ -784,7 +784,7 @@ export class HttpClientProjectFolder extends HttpClientProjectParent {
   /**
    * @returns The instance of the ArcProject or a ArcProjectFolder that is a closes parent of this instance.
    */
-  getParent(): HttpClientProjectFolder | HttpClientProject | undefined {
+  getParent(): AppProjectFolder | AppProject | undefined {
     const { project, key } = this;
     return project.findParent(key);
   }
@@ -792,7 +792,7 @@ export class HttpClientProjectFolder extends HttpClientProjectParent {
   /**
    * @returns A reference to the parent folder or the top-level HTTP project.
    */
-  getProject(): HttpClientProject {
+  getProject(): AppProject {
     return this.project;
   }
 
@@ -812,9 +812,9 @@ export class HttpClientProjectFolder extends HttpClientProjectParent {
    * 
    * @param opts Cloning options
    */
-  clone(opts: IHttpClientFolderCloneOptions = {}): HttpClientProjectFolder {
+  clone(opts: IAppProjectFolderCloneOptions = {}): AppProjectFolder {
     const { targetProject = this.project, targetFolder } = opts;
-    const copy = new HttpClientProjectFolder(targetProject, this.toJSON());
+    const copy = new AppProjectFolder(targetProject, this.toJSON());
     copy.key = v4();
 
     const extProject = targetProject !== this.project;
@@ -854,8 +854,8 @@ export class HttpClientProjectFolder extends HttpClientProjectParent {
    * @param folder The target folder into which to put the requests. The folder has to have the target project attached to it.
    * @param project The originating project where the definitions are stored
    */
-  protected cloneRequests(folder: HttpClientProjectFolder, project: HttpClientProject): void {
-    const requests = this.items.filter(i => i.kind === HttpClientRequestKind);
+  protected cloneRequests(folder: AppProjectFolder, project: AppProject): void {
+    const requests = this.items.filter(i => i.kind === AppProjectRequestKind);
     requests.forEach(r => {
       const request = project.findRequest(r.key, { keyOnly: true });
       if (!request) {
@@ -881,14 +881,14 @@ export class HttpClientProjectFolder extends HttpClientProjectParent {
    * @param project The originating project where the definitions are stored
    * @param withRequests Whether to clone requests with the folder.
    */
-  protected cloneSubFolders(folder: HttpClientProjectFolder, project: HttpClientProject, withRequests = true): void {
-    const folders = this.items.filter(i => i.kind === HttpClientFolderKind);
+  protected cloneSubFolders(folder: AppProjectFolder, project: AppProject, withRequests = true): void {
+    const folders = this.items.filter(i => i.kind === AppProjectFolderKind);
     folders.forEach(f => {
       const definition = project.findFolder(f.key, { keyOnly: true });
       if (!definition) {
         return;
       }
-      const copy = new HttpClientProjectFolder(folder.getProject(), definition.toJSON());
+      const copy = new AppProjectFolder(folder.getProject(), definition.toJSON());
       copy.key = v4();
       copy.items = [];
       folder.addFolder(copy);
@@ -902,14 +902,14 @@ export class HttpClientProjectFolder extends HttpClientProjectParent {
   /**
    * Lists folders in this folder.
    */
-  listFolders(): HttpClientProjectFolder[] {
+  listFolders(): AppProjectFolder[] {
     return this.project.listFolders({ folder: this.key });
   }
 
   /**
    * Lists requests in this folder.
    */
-  listRequests(): HttpClientProjectRequest[] {
+  listRequests(): AppProjectRequest[] {
     return this.project.listRequests(this.key);
   }
 
@@ -919,9 +919,9 @@ export class HttpClientProjectFolder extends HttpClientProjectParent {
    * @param legacy The legacy request definition.
    * @returns The created project request.
    */
-  async addLegacyRequest(legacy: ARCSavedRequest | ARCHistoryRequest): Promise<HttpClientProjectRequest> {
+  async addLegacyRequest(legacy: ARCSavedRequest | ARCHistoryRequest): Promise<AppProjectRequest> {
     const request = await Request.fromLegacy(legacy);
-    const projectRequest = HttpClientProjectRequest.fromRequest(request.toJSON(), this.project);
+    const projectRequest = AppProjectRequest.fromRequest(request.toJSON(), this.project);
     return this.addRequest(projectRequest);
   }
 
@@ -931,7 +931,7 @@ export class HttpClientProjectFolder extends HttpClientProjectParent {
    * @param env The definition of the environment to use to create the environment
    * @returns The same or created environment.
    */
-  addEnvironment(env: IEnvironment, opts?: IHttpClientEnvironmentCreateOptions): Environment;
+  addEnvironment(env: IEnvironment, opts?: IAppProjectEnvironmentCreateOptions): Environment;
 
   /**
    * Adds an environment to the project.
@@ -939,7 +939,7 @@ export class HttpClientProjectFolder extends HttpClientProjectParent {
    * @param env The instance of the environment to add
    * @returns The same or created environment.
    */
-  addEnvironment(env: Environment, opts?: IHttpClientEnvironmentCreateOptions): Environment;
+  addEnvironment(env: Environment, opts?: IAppProjectEnvironmentCreateOptions): Environment;
 
   /**
    * Adds an environment to the project.
@@ -947,14 +947,14 @@ export class HttpClientProjectFolder extends HttpClientProjectParent {
    * @param env The name of the environment to create
    * @returns The same or created environment.
    */
-  addEnvironment(env: string, opts?: IHttpClientEnvironmentCreateOptions): Environment;
+  addEnvironment(env: string, opts?: IAppProjectEnvironmentCreateOptions): Environment;
 
   /**
    * Adds an environment to the project.
    * @returns The same or created environment.
    */
-  addEnvironment(env: IEnvironment | Environment | string, opts: IHttpClientEnvironmentCreateOptions = {}): Environment {
-    const newOptions: IHttpClientEnvironmentCreateOptions = { ...opts, parent: this.key };
+  addEnvironment(env: IEnvironment | Environment | string, opts: IAppProjectEnvironmentCreateOptions = {}): Environment {
+    const newOptions: IAppProjectEnvironmentCreateOptions = { ...opts, parent: this.key };
     return this.project.addEnvironment(env as Environment, newOptions);
   }
 
@@ -984,7 +984,11 @@ export class HttpClientProjectFolder extends HttpClientProjectParent {
   }
 }
 
-export class HttpClientProject extends HttpClientProjectParent {
+/**
+ * An app project is similar to the HttpProject but stored for a single application
+ * and has no sharing options. The AppProject can be upgraded to an HttpProject.
+ */
+export class AppProject extends AppProjectParent {
   /**
    * Timestamp when the project was last updated.
    */
@@ -995,14 +999,14 @@ export class HttpClientProject extends HttpClientProjectParent {
    */
   created: number = Date.now();
 
-  definitions: HttpClientProjectDefinitions;
+  definitions: AppProjectDefinitions;
 
   /**
    * Creates a new ARC project from a name.
    * @param name The name to set.
    */
-  static fromName(name: string): HttpClientProject {
-    const project = new HttpClientProject();
+  static fromName(name: string): AppProject {
+    const project = new AppProject();
     const info = Thing.fromName(name);
     project.info = info;
     return project;
@@ -1013,9 +1017,9 @@ export class HttpClientProject extends HttpClientProjectParent {
    * 
    * Note, the `requests` should be processed and the payload restored to it's original value.
    */
-  static async fromLegacyProject(project: ARCProject, requests: ARCSavedRequest[]): Promise<HttpClientProject> {
+  static async fromLegacyProject(project: ARCProject, requests: ARCSavedRequest[]): Promise<AppProject> {
     const { name = 'Unnamed project', description, requests: ids } = project;
-    const result = HttpClientProject.fromName(name);
+    const result = AppProject.fromName(name);
     if (project._id) {
       result.key = project._id;
     }
@@ -1029,7 +1033,7 @@ export class HttpClientProject extends HttpClientProjectParent {
           return;
         }
         const request = await Request.fromLegacy(old);
-        const projectRequest = HttpClientProjectRequest.fromRequest(request.toJSON(), result);
+        const projectRequest = AppProjectRequest.fromRequest(request.toJSON(), result);
         if (old._id) {
           projectRequest.key = old._id;
         }
@@ -1040,26 +1044,26 @@ export class HttpClientProject extends HttpClientProjectParent {
     return result;
   }
 
-  constructor(input?: string | IHttpClientProject) {
-    super(HttpClientProjectKind);
+  constructor(input?: string | IAppProject) {
+    super(AppProjectKind);
     this.definitions = {
       folders: [],
       requests: [],
       environments: [],
       certificates: [],
     };
-    let init: IHttpClientProject;
+    let init: IAppProject;
     if (typeof input === 'string') {
       init = JSON.parse(input);
     } else if (typeof input === 'object') {
       init = input;
       if (!init.kind) {
-        init.kind = HttpClientProjectKind;
+        init.kind = AppProjectKind;
       }
     } else {
       const now = Date.now();
       init = {
-        kind: HttpClientProjectKind,
+        kind: AppProjectKind,
         key: v4(),
         definitions: {},
         items: [],
@@ -1071,7 +1075,7 @@ export class HttpClientProject extends HttpClientProjectParent {
     this.new(init);
   }
 
-  new(init: IHttpClientProject): void {
+  new(init: IAppProject): void {
     if (!init || !init.items) {
       throw new Error(`Not a project.`);
     }
@@ -1093,13 +1097,13 @@ export class HttpClientProject extends HttpClientProjectParent {
     };
     if (Array.isArray(definitions.requests)) {
       this.definitions.requests = definitions.requests.map(i => {
-        const instance = new HttpClientProjectRequest(this, i);
+        const instance = new AppProjectRequest(this, i);
         return instance;
       });
     }
     if (Array.isArray(definitions.folders)) {
       this.definitions.folders = definitions.folders.map(i => {
-        const instance = new HttpClientProjectFolder(this, i);
+        const instance = new AppProjectFolder(this, i);
         return instance;
       });
     }
@@ -1111,9 +1115,9 @@ export class HttpClientProject extends HttpClientProjectParent {
     }
   }
 
-  toJSON(): IHttpClientProject {
-    const result: IHttpClientProject = {
-      kind: HttpClientProjectKind,
+  toJSON(): IAppProject {
+    const result: IAppProject = {
+      kind: AppProjectKind,
       key: this.key,
       definitions: {},
       items: [],
@@ -1139,9 +1143,9 @@ export class HttpClientProject extends HttpClientProjectParent {
     return result;
   }
 
-  setItems(items?: IHttpClientProjectItem[]): void {
+  setItems(items?: IAppProjectItem[]): void {
     if (Array.isArray(items)) {
-      this.items = items.map(i => new HttpClientProjectItem(this, i));
+      this.items = items.map(i => new AppProjectItem(this, i));
     } else {
       this.items = [];
     }
@@ -1153,7 +1157,7 @@ export class HttpClientProject extends HttpClientProjectParent {
    * @param  key The key of the definition.
    * @returns The parent or undefine when not found.
    */
-  findParent(key: string): HttpClientProjectFolder | HttpClientProject | undefined {
+  findParent(key: string): AppProjectFolder | AppProject | undefined {
     const { definitions, items = [] } = this;
     const projectItemsIndex = items.findIndex(i => i.key === key);
     if (projectItemsIndex > -1) {
@@ -1173,7 +1177,7 @@ export class HttpClientProject extends HttpClientProjectParent {
    * @param opts Optional folder add options.
    * @returns The added folder.
    */
-  addFolder(folder: HttpClientProjectFolder, opts?: IHttpClientFolderCreateOptions): HttpClientProjectFolder;
+  addFolder(folder: AppProjectFolder, opts?: IAppProjectFolderCreateOptions): AppProjectFolder;
 
   /**
    * Appends new folder to a project from a full folder schema.
@@ -1184,7 +1188,7 @@ export class HttpClientProject extends HttpClientProjectParent {
    * @param opts Optional folder add options.
    * @returns The added folder.
    */
-  addFolder(folder: IProjectParent, opts?: IHttpClientFolderCreateOptions): HttpClientProjectFolder;
+  addFolder(folder: IAppProjectParent, opts?: IAppProjectFolderCreateOptions): AppProjectFolder;
 
   /**
    * Appends a new folder to the project or a sub-folder.
@@ -1193,7 +1197,7 @@ export class HttpClientProject extends HttpClientProjectParent {
    * @param opts Folder create options.
    * @returns The newly inserted folder. If the folder already existed it returns its instance.
    */
-  addFolder(name?: string, opts?: IHttpClientFolderCreateOptions): HttpClientProjectFolder;
+  addFolder(name?: string, opts?: IAppProjectFolderCreateOptions): AppProjectFolder;
 
   /**
    * Appends a new folder to the project or a sub-folder.
@@ -1205,7 +1209,7 @@ export class HttpClientProject extends HttpClientProjectParent {
    * @param opts Folder create options.
    * @returns The newly inserted folder. If the folder already existed it returns its instance.
    */
-  addFolder(init: string | IProjectParent | HttpClientProjectFolder = 'New Folder', opts: IHttpClientFolderCreateOptions = {}): HttpClientProjectFolder {
+  addFolder(init: string | IAppProjectParent | AppProjectFolder = 'New Folder', opts: IAppProjectFolderCreateOptions = {}): AppProjectFolder {
     if (!Array.isArray(this.items)) {
       this.items = [];
     }
@@ -1213,7 +1217,7 @@ export class HttpClientProject extends HttpClientProjectParent {
       this.definitions.folders = [];
     }
     const { skipExisting, parent } = opts;
-    let root: HttpClientProjectFolder | HttpClientProject;
+    let root: AppProjectFolder | AppProject;
     if (parent) {
       const rootCandidate = this.findFolder(parent);
       if (!rootCandidate) {
@@ -1223,13 +1227,13 @@ export class HttpClientProject extends HttpClientProjectParent {
     } else {
       root = this;
     }
-    let definition: HttpClientProjectFolder;
+    let definition: AppProjectFolder;
     if (typeof init === 'string') {
-      definition = HttpClientProjectFolder.fromName(this, init);
-    } else if (init instanceof HttpClientProjectFolder) {
+      definition = AppProjectFolder.fromName(this, init);
+    } else if (init instanceof AppProjectFolder) {
       definition = init;
     } else {
-      definition = new HttpClientProjectFolder(this, init);
+      definition = new AppProjectFolder(this, init);
     }
     if (skipExisting) {
       const folders = root.listFolderItems();
@@ -1242,7 +1246,7 @@ export class HttpClientProject extends HttpClientProjectParent {
     }
 
     this.definitions.folders.push(definition);
-    const item = HttpClientProjectItem.projectFolder(this, definition.key);
+    const item = AppProjectItem.projectFolder(this, definition.key);
     if (!Array.isArray(root.items)) {
       root.items = [];
     }
@@ -1261,13 +1265,13 @@ export class HttpClientProject extends HttpClientProjectParent {
    * @param opts Optional search options.
    * @returns Found project folder or undefined.
    */
-  findFolder(nameOrKey: string, opts: IHttpClientFolderSearchOptions = {}): HttpClientProjectFolder | undefined {
+  findFolder(nameOrKey: string, opts: IAppProjectFolderSearchOptions = {}): AppProjectFolder | undefined {
     const { definitions } = this;
     const item = definitions.folders.find((i) => {
-      if (i.kind !== HttpClientFolderKind) {
+      if (i.kind !== AppProjectFolderKind) {
         return false;
       }
-      const folder = (i as HttpClientProjectFolder);
+      const folder = (i as AppProjectFolder);
       if (folder.key === nameOrKey) {
         return true;
       }
@@ -1277,7 +1281,7 @@ export class HttpClientProject extends HttpClientProjectParent {
       return !!folder.info && folder.info.name === nameOrKey;
     });
     if (item) {
-      return item as HttpClientProjectFolder;
+      return item as AppProjectFolder;
     }
     return undefined;
   }
@@ -1288,7 +1292,7 @@ export class HttpClientProject extends HttpClientProjectParent {
    * @param opts Folder remove options.
    * @returns The removed folder definition or undefined when not removed.
    */
-  removeFolder(key: string, opts: IHttpClientFolderDeleteOptions = {}): HttpClientProjectFolder | undefined {
+  removeFolder(key: string, opts: IAppProjectFolderDeleteOptions = {}): AppProjectFolder | undefined {
     const { definitions } = this;
     const folder = this.findFolder(key, { keyOnly: true });
     if (!folder) {
@@ -1327,7 +1331,7 @@ export class HttpClientProject extends HttpClientProjectParent {
    * @param key The key of the request to move.
    * @param opts The moving options.
    */
-  moveFolder(key: string, opts: IHttpClientProjectMoveOptions = {}): void {
+  moveFolder(key: string, opts: IAppProjectProjectMoveOptions = {}): void {
     const { index, parent } = opts;
     const movedFolder = this.findFolder(key);
     if (!movedFolder) {
@@ -1383,7 +1387,7 @@ export class HttpClientProject extends HttpClientProjectParent {
       if (item.key === child) {
         return true;
       }
-      if (item.kind === HttpClientFolderKind) {
+      if (item.kind === AppProjectFolderKind) {
         const hasChild = this.hasChild(child, item.key);
         if (hasChild) {
           return true;
@@ -1400,7 +1404,7 @@ export class HttpClientProject extends HttpClientProjectParent {
    * @param opts The request add options.
    * @returns The inserted into the definitions request.
    */
-  addRequest(url: string, opts?: IHttpClientRequestAddOptions): HttpClientProjectRequest;
+  addRequest(url: string, opts?: IAppProjectRequestAddOptions): AppProjectRequest;
 
   /**
    * Adds a request to the project or a sub-folder.
@@ -1409,7 +1413,7 @@ export class HttpClientProject extends HttpClientProjectParent {
    * @param opts The request add options.
    * @returns The inserted into the definitions request.
    */
-  addRequest(request: IHttpClientProjectRequest | HttpClientProjectRequest, opts?: IHttpClientRequestAddOptions): HttpClientProjectRequest;
+  addRequest(request: IAppProjectRequest | AppProjectRequest, opts?: IAppProjectRequestAddOptions): AppProjectRequest;
 
   /**
    * Adds a request to the project or a sub-folder.
@@ -1417,7 +1421,7 @@ export class HttpClientProject extends HttpClientProjectParent {
    * @param opts Thew request add options.
    * @returns The inserted into the definitions request.
    */
-  addRequest(request: IHttpClientProjectRequest | HttpClientProjectRequest | string, opts: IHttpClientRequestAddOptions = {}): HttpClientProjectRequest {
+  addRequest(request: IAppProjectRequest | AppProjectRequest | string, opts: IAppProjectRequestAddOptions = {}): AppProjectRequest {
     if (!Array.isArray(this.definitions.requests)) {
       this.definitions.requests = [];
     }
@@ -1428,7 +1432,7 @@ export class HttpClientProject extends HttpClientProjectParent {
     if (typeof request === 'object' && request.key) {
       const existing = this.definitions.requests.find(i => i.key === request.key);
       if (existing) {
-        existing.new(request as IHttpClientProjectRequest);
+        existing.new(request as IAppProjectRequest);
         return existing;
       }
     }
@@ -1437,18 +1441,18 @@ export class HttpClientProject extends HttpClientProjectParent {
 
     let finalRequest;
     if (typeof request === 'string') {
-      finalRequest = HttpClientProjectRequest.fromUrl(request, this);
-    } else if (request instanceof HttpClientProjectRequest) {
+      finalRequest = AppProjectRequest.fromUrl(request, this);
+    } else if (request instanceof AppProjectRequest) {
       finalRequest = request;
       finalRequest.project = this;
     } else {
-      finalRequest = new HttpClientProjectRequest(this, request);
+      finalRequest = new AppProjectRequest(this, request);
     }
     if (!finalRequest.key) {
       finalRequest.key = v4();
     }
 
-    let root: HttpClientProjectFolder | HttpClientProject;
+    let root: AppProjectFolder | AppProject;
     if (opts.parent) {
       const rootCandidate = this.findFolder(opts.parent);
       if (!rootCandidate) {
@@ -1471,7 +1475,7 @@ export class HttpClientProject extends HttpClientProjectParent {
     }
 
     this.definitions.requests.push(finalRequest);
-    const item = HttpClientProjectItem.projectRequest(this, finalRequest.key);
+    const item = AppProjectItem.projectRequest(this, finalRequest.key);
 
     if (typeof opts.index === 'number') {
       root.items.splice(opts.index, 0, item);
@@ -1487,9 +1491,9 @@ export class HttpClientProject extends HttpClientProjectParent {
    * @param legacy The legacy request definition.
    * @returns The created project request.
    */
-  async addLegacyRequest(legacy: ARCSavedRequest | ARCHistoryRequest): Promise<HttpClientProjectRequest> {
+  async addLegacyRequest(legacy: ARCSavedRequest | ARCHistoryRequest): Promise<AppProjectRequest> {
     const request = await Request.fromLegacy(legacy);
-    const projectRequest = HttpClientProjectRequest.fromRequest(request.toJSON(), this);
+    const projectRequest = AppProjectRequest.fromRequest(request.toJSON(), this);
     return this.addRequest(projectRequest);
   }
 
@@ -1500,7 +1504,7 @@ export class HttpClientProject extends HttpClientProjectParent {
    * @param opts Optional search options.
    * @returns Found project request or undefined.
    */
-  findRequest(nameOrKey: string, opts: IHttpClientRequestSearchOptions = {}): HttpClientProjectRequest | undefined {
+  findRequest(nameOrKey: string, opts: IAppProjectRequestSearchOptions = {}): AppProjectRequest | undefined {
     const { definitions } = this;
     const item = definitions.requests.find((request) => {
       if (request.key === nameOrKey) {
@@ -1512,7 +1516,7 @@ export class HttpClientProject extends HttpClientProjectParent {
       return !!request.info && request.info.name === nameOrKey;
     });
     if (item) {
-      return item as HttpClientProjectRequest;
+      return item as AppProjectRequest;
     }
     return undefined;
   }
@@ -1524,7 +1528,7 @@ export class HttpClientProject extends HttpClientProjectParent {
    * @param opts Request remove options.
    * @returns The removed request definition or undefined when not removed.
    */
-  removeRequest(key: string, opts: IHttpClientRequestDeleteOptions = {}): HttpClientProjectRequest | undefined {
+  removeRequest(key: string, opts: IAppProjectRequestDeleteOptions = {}): AppProjectRequest | undefined {
     const { definitions } = this;
     const request = this.findRequest(key, { keyOnly: true });
     if (!request) {
@@ -1557,7 +1561,7 @@ export class HttpClientProject extends HttpClientProjectParent {
    * @param key The key of the request to move.
    * @param opts The moving options.
    */
-  moveRequest(key: string, opts: IHttpClientProjectMoveOptions = {}): void {
+  moveRequest(key: string, opts: IAppProjectProjectMoveOptions = {}): void {
     const { index, parent } = opts;
     const request = this.findRequest(key);
     if (!request) {
@@ -1593,24 +1597,24 @@ export class HttpClientProject extends HttpClientProjectParent {
   /**
    * Lists items (not the actual definitions!) that are folders.
    */
-  listFolderItems(): HttpClientProjectItem[] {
+  listFolderItems(): AppProjectItem[] {
     const { items = [] } = this;
-    return items.filter(i => i.kind === HttpClientFolderKind);
+    return items.filter(i => i.kind === AppProjectFolderKind);
   }
 
   /**
    * Lists items (not the actual definitions!) that are requests.
    */
-  listRequestItems(): HttpClientProjectItem[] {
+  listRequestItems(): AppProjectItem[] {
     const { items = [] } = this;
-    return items.filter(i => i.kind === HttpClientRequestKind);
+    return items.filter(i => i.kind === AppProjectRequestKind);
   }
 
   /**
    * Lists folders from the project or a sub-folder.
    * @param opts Folder listing options.
    */
-  listFolders(opts: IHttpClientFolderListOptions = {}): HttpClientProjectFolder[] {
+  listFolders(opts: IAppProjectFolderListOptions = {}): AppProjectFolder[] {
     let root;
     if (opts.folder) {
       const parent = this.findFolder(opts.folder);
@@ -1622,7 +1626,7 @@ export class HttpClientProject extends HttpClientProjectParent {
       root = this;
     }
     const items = root.listFolderItems();
-    const result: HttpClientProjectFolder[] = [];
+    const result: AppProjectFolder[] = [];
     const { definitions } = this;
     items.forEach((i) => {
       const definition = definitions.folders.find(d => i.key === d.key);
@@ -1637,7 +1641,7 @@ export class HttpClientProject extends HttpClientProjectParent {
    * Lists requests in this project or a sub-folder.
    * @param folder The optional folder name or the key to list requests for.
    */
-  listRequests(folder?: string): HttpClientProjectRequest[] {
+  listRequests(folder?: string): AppProjectRequest[] {
     let root;
     if (folder) {
       const parent = this.findFolder(folder);
@@ -1649,7 +1653,7 @@ export class HttpClientProject extends HttpClientProjectParent {
       root = this;
     }
     const items = root.listRequestItems();
-    const result: HttpClientProjectRequest[] = [];
+    const result: AppProjectRequest[] = [];
     const { definitions } = this;
     items.forEach((i) => {
       const definition = definitions.requests.find(d => i.key === d.key);
@@ -1664,7 +1668,7 @@ export class HttpClientProject extends HttpClientProjectParent {
    * Lists definitions for the `items` of the project or a folder.
    * @param folder Optionally the folder name to list the definitions for.
    */
-  listDefinitions(folder?: string): (HttpClientProjectFolder | HttpClientProjectRequest | Environment)[] {
+  listDefinitions(folder?: string): (AppProjectFolder | AppProjectRequest | Environment)[] {
     let root;
     if (folder) {
       const parent = this.findFolder(folder);
@@ -1675,14 +1679,14 @@ export class HttpClientProject extends HttpClientProjectParent {
     } else {
       root = this;
     }
-    const result: (HttpClientProjectFolder | HttpClientProjectRequest | Environment)[] = [];
+    const result: (AppProjectFolder | AppProjectRequest | Environment)[] = [];
     const { items = [] } = root;
     const { definitions } = this;
     items.forEach((item) => {
-      let definition: HttpClientProjectFolder | HttpClientProjectRequest | Environment | undefined;
-      if (item.kind === HttpClientFolderKind) {
+      let definition: AppProjectFolder | AppProjectRequest | Environment | undefined;
+      if (item.kind === AppProjectFolderKind) {
         definition = definitions.folders.find(d => item.key === d.key);
-      } else if (item.kind === HttpClientRequestKind) {
+      } else if (item.kind === AppProjectRequestKind) {
         definition = definitions.requests.find(d => item.key === d.key);
       } else if (item.kind === EnvironmentKind) {
         definition = definitions.environments.find(d => item.key === d.key);
@@ -1697,28 +1701,28 @@ export class HttpClientProject extends HttpClientProjectParent {
   /**
    * @returns On the project level this always returns undefined.
    */
-  getParent(): HttpClientProjectFolder | HttpClientProject | undefined {
+  getParent(): AppProjectFolder | AppProject | undefined {
     return undefined;
   }
 
-  getProject(): HttpClientProject {
+  getProject(): AppProject {
     return this;
   }
 
   /**
    * Makes a copy of this project.
    */
-  clone(opts: IHttpClientProjectCloneOptions = {}): HttpClientProject {
-    const copy = new HttpClientProject(this.toJSON());
+  clone(opts: IAppProjectProjectCloneOptions = {}): AppProject {
+    const copy = new AppProject(this.toJSON());
     if (!opts.withoutRevalidate) {
       copy.key = v4();
-      HttpClientProject.regenerateKeys(copy);
+      AppProject.regenerateKeys(copy);
     }
     return copy;
   }
 
-  static clone(project: IHttpClientProject, opts: IHttpClientProjectCloneOptions = {}): HttpClientProject {
-    const obj = new HttpClientProject(project);
+  static clone(project: IAppProject, opts: IAppProjectProjectCloneOptions = {}): AppProject {
+    const obj = new AppProject(project);
     return obj.clone(opts);
   }
 
@@ -1729,7 +1733,7 @@ export class HttpClientProject extends HttpClientProjectParent {
    * 
    * @param src The project instance to re-generate keys for.
    */
-  static regenerateKeys(src: HttpClientProject): void {
+  static regenerateKeys(src: AppProject): void {
     const { items = [], definitions } = src;
     // create a flat list of all "items" in the project and all folders.
     let flatItems = [...items];
@@ -1782,7 +1786,7 @@ export class HttpClientProject extends HttpClientProjectParent {
    * @param env The definition of the environment to use to create the environment
    * @returns The same or created environment.
    */
-  addEnvironment(env: IEnvironment, opts?: IHttpClientEnvironmentCreateOptions): Environment;
+  addEnvironment(env: IEnvironment, opts?: IAppProjectEnvironmentCreateOptions): Environment;
 
   /**
    * Adds an environment to the project.
@@ -1790,7 +1794,7 @@ export class HttpClientProject extends HttpClientProjectParent {
    * @param env The instance of the environment to add
    * @returns The same or created environment.
    */
-  addEnvironment(env: Environment, opts?: IHttpClientEnvironmentCreateOptions): Environment;
+  addEnvironment(env: Environment, opts?: IAppProjectEnvironmentCreateOptions): Environment;
 
   /**
    * Adds an environment to the project.
@@ -1798,13 +1802,13 @@ export class HttpClientProject extends HttpClientProjectParent {
    * @param env The name of the environment to create
    * @returns The same or created environment.
    */
-  addEnvironment(env: string, opts?: IHttpClientEnvironmentCreateOptions): Environment;
+  addEnvironment(env: string, opts?: IAppProjectEnvironmentCreateOptions): Environment;
 
   /**
    * Adds an environment to the project.
    * @returns The same or created environment.
    */
-  addEnvironment(env: IEnvironment | Environment | string, opts: IHttpClientEnvironmentCreateOptions = {}): Environment {
+  addEnvironment(env: IEnvironment | Environment | string, opts: IAppProjectEnvironmentCreateOptions = {}): Environment {
     const environment = this._createEnv(env);
     const root = this._getRoot(opts);
     const project = this.getProject();
@@ -1812,7 +1816,7 @@ export class HttpClientProject extends HttpClientProjectParent {
       project.definitions.environments = [];
     }
     project.definitions.environments.push(environment);
-    const item = HttpClientProjectItem.projectEnvironment(project, environment.key);
+    const item = AppProjectItem.projectEnvironment(project, environment.key);
     this._insertItem(item, root, opts);
     return environment;
   }
@@ -1835,7 +1839,7 @@ export class HttpClientProject extends HttpClientProjectParent {
   /**
    * @param key The environment key to read.
    */
-  getEnvironment(key: string, opts: IHttpClientItemOptions = {}): Environment | undefined {
+  getEnvironment(key: string, opts: IAppProjectItemOptions = {}): Environment | undefined {
     const root = this._getRoot(opts);
     const item = root.items.find(i => i.key === key);
     if (!item) {
@@ -1854,7 +1858,7 @@ export class HttpClientProject extends HttpClientProjectParent {
    * @param key the key of the environment to remove
    * @returns The removed environment, if any.
    */
-  removeEnvironment(key: string, opts: IHttpClientItemOptions = {}): Environment | undefined {
+  removeEnvironment(key: string, opts: IAppProjectItemOptions = {}): Environment | undefined {
     const root = this._getRoot(opts);
     const itemIndex = root.items.findIndex(i => i.key === key);
     if (itemIndex < 0) {
@@ -1878,7 +1882,7 @@ export class HttpClientProject extends HttpClientProjectParent {
    * This is a link to the `getEnvironments()`. The difference is that on the 
    * project level it won't return environments defined with the class initialization.
    */
-  listEnvironments(opts: IHttpClientItemOptions = {}): Environment[] {
+  listEnvironments(opts: IAppProjectItemOptions = {}): Environment[] {
     const root = this._getRoot(opts);
     const items = root.items.filter(i => i.kind === EnvironmentKind).map(i => i.key);
     const project = this.getProject();
@@ -1896,7 +1900,7 @@ export class HttpClientProject extends HttpClientProjectParent {
    * 
    * @param opts The environment read options
    */
-  readEnvironments(opts: IHttpClientReadEnvironmentOptions = {}): Environment[] {
+  readEnvironments(opts: IAppProjectReadEnvironmentOptions = {}): Environment[] {
     const result: Environment[] = [];
     const { parent, nameOrKey } = opts;
 
@@ -1905,7 +1909,7 @@ export class HttpClientProject extends HttpClientProjectParent {
       return result;
     }
 
-    let current: HttpClientProject | HttpClientProjectFolder | undefined = root;
+    let current: AppProject | AppProjectFolder | undefined = root;
     while (current) {
       const environments = current.listEnvironments();
       if (environments.length) {
@@ -1937,7 +1941,7 @@ export class HttpClientProject extends HttpClientProjectParent {
    * Depending on the options returns a project or a folder.
    * It throws when parent folder cannot ber found.
    */
-  protected _getRoot(opts: { parent?: string }): HttpClientProjectFolder | HttpClientProject {
+  protected _getRoot(opts: { parent?: string }): AppProjectFolder | AppProject {
     const project = this.getProject();
     if (opts.parent) {
       const parent = project.findFolder(opts.parent);
@@ -1949,7 +1953,7 @@ export class HttpClientProject extends HttpClientProjectParent {
     return project;
   }
 
-  protected _insertItem(item: HttpClientProjectItem, root: HttpClientProjectFolder | HttpClientProject, opts: IHttpClientItemCreateOptions): void {
+  protected _insertItem(item: AppProjectItem, root: AppProjectFolder | AppProject, opts: IAppProjectItemCreateOptions): void {
     if (!Array.isArray(root.items)) {
       root.items = [];
     }
@@ -2015,7 +2019,7 @@ export class HttpClientProject extends HttpClientProjectParent {
    * @param key The key of the certificate to find the usage for.
    * @returns The list of requests that use this certificate.
    */
-  findCertificateRequests(key: string): HttpClientProjectRequest[] {
+  findCertificateRequests(key: string): AppProjectRequest[] {
     return this.definitions.requests.filter((request) => {
       if (!Array.isArray(request.authorization)) {
         return false;

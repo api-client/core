@@ -26,7 +26,7 @@ export const midnightSymbol = Symbol('midnight');
 export interface IRequest {
   kind: string;
   /**
-   * The basic information about the project.
+   * The basic information about the request.
    */
   info: IThing;
   /**

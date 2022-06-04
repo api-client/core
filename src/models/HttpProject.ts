@@ -16,7 +16,7 @@ import v4 from '../lib/uuid.js';
 import { ARCSavedRequest, ARCHistoryRequest } from './legacy/request/ArcRequest.js';
 import { ArcLegacyProject, ARCProject } from './legacy/models/ArcLegacyProject.js';
 import { PostmanDataTransformer } from './transformers/PostmanDataTransformer.js';
-import { IHttpClientProject } from './http-client/HttpClientProject.js';
+import { IAppProject } from './AppProject.js';
 import { Certificate, HttpCertificate } from './ClientCertificate.js';
 import { ICCAuthorization } from './Authorization.js';
 
@@ -352,13 +352,13 @@ export class HttpProject extends ProjectParent {
     return HttpProject.fromName(name);
   }
 
-  static fromHttpClientProject(init: IHttpClientProject): HttpProject {
+  static fromAppProject(init: IAppProject): HttpProject {
     const result = new HttpProject();
     const { definitions = {}, items, info, key = v4() } = init;
     result.key = key;
     result.info = new Thing(info);
     if (Array.isArray(items)) {
-      result.items = items.map(i => ProjectItem.fromHttpClientProject(result, i));
+      result.items = items.map(i => ProjectItem.fromAppProject(result, i));
     }
     if (Array.isArray(definitions.environments)) {
       result.definitions.environments = definitions.environments.map(i => new Environment(i));
@@ -372,7 +372,7 @@ export class HttpProject extends ProjectParent {
     }
     if (Array.isArray(definitions.folders)) {
       result.definitions.folders = definitions.folders.map(i => {
-        const instance = ProjectFolder.fromHttpClientProject(result, i);
+        const instance = ProjectFolder.fromAppProject(result, i);
         instance.attachedCallback();
         return instance;
       });

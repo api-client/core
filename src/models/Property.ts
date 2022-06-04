@@ -27,7 +27,7 @@ export interface IProperty {
   /**
    * Enum values for the property.
    */
-  enum?: unknown;
+  enum?: unknown[];
   /**
    * The description of the property
    */
@@ -76,7 +76,7 @@ export class Property {
   /**
    * Enum values for the property.
    */
-  enum?: unknown;
+  enum?: unknown[];
   /**
    * Whether the value id required to be provided. This is used with validation.
    */
@@ -406,8 +406,8 @@ export class Property {
     if (typeof this.default !== 'undefined') {
       result.default = this.default;
     }
-    if (this.enum) {
-      result.enum = this.enum;
+    if (Array.isArray(this.enum) && this.enum.length) {
+      result.enum = [...this.enum];
     }
     if (typeof this.enabled === 'boolean') {
       result.enabled = this.enabled;

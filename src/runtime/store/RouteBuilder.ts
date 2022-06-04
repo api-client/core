@@ -10,10 +10,10 @@ export class RouteBuilder {
   }
 
   /**
-   * @returns The path to the /files/bulk route.
+   * @returns The path to the /files/batch route.
    */
-  static filesBulk(): string {
-    return '/files/bulk';
+  static filesBatch(): string {
+    return '/files/batch';
   }
 
   /**
@@ -82,5 +82,77 @@ export class RouteBuilder {
 
   static shared(): string {
     return '/shared';
+  }
+
+  static app(appId: string): string {
+    return `/app/${appId}`;
+  }
+
+  // GET, POST
+  static appRequests(appId: string): string {
+    return `${this.app(appId)}/requests`;
+  }
+
+  // GET, DELETE
+  static appRequestItem(appId: string, key: string): string {
+    return `${this.appRequests(appId)}${key}`;
+  }
+
+  static appRequestsBatch(appId: string): string {
+    return `${this.appRequests(appId)}/batch`;
+  }
+
+  // POST
+  static appRequestsBatchCreate(appId: string): string {
+    return `${this.appRequestsBatch(appId)}/create`;
+  }
+
+  // POST
+  static appRequestsBatchRead(appId: string): string {
+    return `${this.appRequestsBatch(appId)}/read`;
+  }
+
+  // POST
+  static appRequestsBatchDelete(appId: string): string {
+    return `${this.appRequestsBatch(appId)}/delete`;
+  }
+
+  // POST
+  static appRequestsBatchUndelete(appId: string): string {
+    return `${this.appRequestsBatch(appId)}/undelete`;
+  }
+
+  // POST, GET
+  static appProjects(appId: string): string {
+    return `${this.app(appId)}/projects`;
+  }
+
+  // GET, DELETE
+  static appProjectItem(appId: string, key: string): string {
+    return `${this.appProjects(appId)}${key}`;
+  }
+
+  static appProjectsBatch(appId: string): string {
+    return `${this.appProjects(appId)}/batch`;
+  }
+
+  // POST
+  static appProjectsBatchCreate(appId: string): string {
+    return `${this.appProjectsBatch(appId)}/create`;
+  }
+
+  // POST
+  static appProjectsBatchRead(appId: string): string {
+    return `${this.appProjectsBatch(appId)}/read`;
+  }
+
+  // POST
+  static appProjectsBatchDelete(appId: string): string {
+    return `${this.appProjectsBatch(appId)}/delete`;
+  }
+
+  // POST
+  static appProjectsBatchUndelete(appId: string): string {
+    return `${this.appProjectsBatch(appId)}/undelete`;
   }
 }

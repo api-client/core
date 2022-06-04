@@ -13,7 +13,7 @@ import { ArcLegacyProject } from '../../src/models/legacy/models/ArcLegacyProjec
 import { ARCSavedRequest } from '../../src/models/legacy/request/ArcRequest.js';
 import { LegacyMock } from '../../src/mocking/LegacyMock.js';
 import { Kind as ServerKind } from '../../src/models/Server.js';
-import { HttpClientProject } from '../../src/models/http-client/HttpClientProject.js';
+import { AppProject } from '../../src/models/AppProject.js';
 import { Certificate } from '../../src/models/ClientCertificate.js';
 
 describe('Models', () => {
@@ -2213,10 +2213,10 @@ describe('Models', () => {
       });
     });
 
-    describe('#fromHttpClientProject()', () => {
+    describe('#fromAppProject()', () => {
       it('translates an empty project', () => {
-        const source = new HttpClientProject();
-        const result = HttpProject.fromHttpClientProject(source.toJSON());
+        const source = new AppProject();
+        const result = HttpProject.fromAppProject(source.toJSON());
         assert.equal(result.kind, HttpProjectKind);
         assert.equal(result.key, source.key);
         assert.equal(result.key, source.key);
@@ -2228,12 +2228,12 @@ describe('Models', () => {
       });
 
       it('adds info meta', () => {
-        const source = new HttpClientProject();
+        const source = new AppProject();
         source.info.name = 'a';
         source.info.description = 'b';
         source.info.displayName = 'c';
         source.info.version = 'd';
-        const result = HttpProject.fromHttpClientProject(source.toJSON());
+        const result = HttpProject.fromAppProject(source.toJSON());
         assert.equal(result.info.name, 'a');
         assert.equal(result.info.description, 'b');
         assert.equal(result.info.displayName, 'c');
@@ -2241,10 +2241,10 @@ describe('Models', () => {
       });
 
       it('adds folders', () => {
-        const source = new HttpClientProject();
+        const source = new AppProject();
         const f1 = source.addFolder('f1');
         const f2 = f1.addFolder('f2');
-        const result = HttpProject.fromHttpClientProject(source.toJSON());
+        const result = HttpProject.fromAppProject(source.toJSON());
         assert.lengthOf(result.items, 1, 'has single root item');
         assert.equal(result.items[0].key, f1.key, 'has the root folder item');
         assert.lengthOf(result.definitions.folders, 2, 'has both folder definitions');
@@ -2257,11 +2257,11 @@ describe('Models', () => {
       });
 
       it('adds requests', () => {
-        const source = new HttpClientProject();
+        const source = new AppProject();
         const f1 = source.addFolder('f1');
         const r1 = source.addRequest('r1');
         const r2 = f1.addRequest('r2');
-        const result = HttpProject.fromHttpClientProject(source.toJSON());
+        const result = HttpProject.fromAppProject(source.toJSON());
         assert.lengthOf(result.items, 2, 'has both root item');
         assert.equal(result.items[0].key, f1.key, 'has the root folder item');
         assert.equal(result.items[1].key, r1.key, 'has the root request item');
@@ -2275,11 +2275,11 @@ describe('Models', () => {
       });
 
       it('adds environments', () => {
-        const source = new HttpClientProject();
+        const source = new AppProject();
         const f1 = source.addFolder('f1');
         const e1 = source.addEnvironment('e1');
         const e2 = f1.addEnvironment('e2');
-        const result = HttpProject.fromHttpClientProject(source.toJSON());
+        const result = HttpProject.fromAppProject(source.toJSON());
         assert.lengthOf(result.items, 2, 'has both root item');
         assert.equal(result.items[0].key, f1.key, 'has the root folder item');
         assert.equal(result.items[1].key, e1.key, 'has the root environment item');

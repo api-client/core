@@ -241,7 +241,7 @@ export class FilesSdk extends SdkBase {
    */
   async readBulk(keys: string[], request: ISdkRequestOptions = {}): Promise<IListResponse<IFile|undefined>> {
     const token = request.token || this.sdk.token;
-    const url = this.sdk.getUrl(RouteBuilder.filesBulk());
+    const url = this.sdk.getUrl(RouteBuilder.filesBatch());
     const body = JSON.stringify(keys);
     const result = await this.sdk.http.post(url.toString(), { token, body });
     this.inspectCommonStatusCodes(result.status, result.body);

@@ -1,33 +1,33 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { assert } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { Kind as ThingKind } from '../../../src/models/Thing.js';
-import { Kind as HttpRequestKind, IHttpRequest } from '../../../src/models/HttpRequest.js';
-import { Kind as RequestLogKind, RequestLog } from '../../../src/models/RequestLog.js';
-import { SentRequest } from '../../../src/models/SentRequest.js';
-import { RequestConfig } from '../../../src/models/RequestConfig.js';
-import { Environment, Kind as EnvironmentKind } from '../../../src/models/Environment.js';
-import { RequestAuthorization } from '../../../src/models/RequestAuthorization.js';
-import { Kind as RequestKind, Request, IRequest } from '../../../src/models/Request.js';
-import { LegacyMock } from '../../../src/mocking/LegacyMock.js';
+import { Kind as ThingKind } from '../../src/models/Thing.js';
+import { Kind as HttpRequestKind, IHttpRequest } from '../../src/models/HttpRequest.js';
+import { Kind as RequestLogKind, RequestLog } from '../../src/models/RequestLog.js';
+import { SentRequest } from '../../src/models/SentRequest.js';
+import { RequestConfig } from '../../src/models/RequestConfig.js';
+import { Environment, Kind as EnvironmentKind } from '../../src/models/Environment.js';
+import { RequestAuthorization } from '../../src/models/RequestAuthorization.js';
+import { Kind as RequestKind, Request, IRequest } from '../../src/models/Request.js';
+import { LegacyMock } from '../../src/mocking/LegacyMock.js';
 import { 
-  HttpClientProjectKind, HttpClientProject, IHttpClientProject, HttpClientFolderKind, HttpClientProjectFolder, HttpClientProjectRequest, 
-  IHttpClientProjectRequest, IProjectParent, HttpClientProjectItem, HttpClientRequestKind,
-} from '../../../src/models/http-client/HttpClientProject.js';
-import { ArcLegacyProject } from '../../../src/models/legacy/models/ArcLegacyProject.js';
-import { ARCSavedRequest } from '../../../src/models/legacy/request/ArcRequest.js';
-import { Certificate } from '../../../src/models/ClientCertificate.js';
+  AppProjectKind, AppProject, IAppProject, AppProjectFolderKind, AppProjectFolder, AppProjectRequest, 
+  IAppProjectRequest, IAppProjectParent, AppProjectItem, AppProjectRequestKind,
+} from '../../src/models/AppProject.js';
+import { ArcLegacyProject } from '../../src/models/legacy/models/ArcLegacyProject.js';
+import { ARCSavedRequest } from '../../src/models/legacy/request/ArcRequest.js';
+import { Certificate } from '../../src/models/ClientCertificate.js';
 
 describe('Models', () => {
   describe('http-client', () => {
     const generator = new LegacyMock();
 
-    describe('HttpClientProject', () => {
+    describe('AppProject', () => {
       describe('initialization', () => {
         describe('Default project initialization', () => {
           it('initializes a default project', () => {
-            const result = new HttpClientProject();
-            assert.equal(result.kind, HttpClientProjectKind, 'sets the kind property');
+            const result = new AppProject();
+            assert.equal(result.kind, AppProjectKind, 'sets the kind property');
             assert.typeOf(result.definitions, 'object', 'sets the definitions property');
             assert.deepEqual(result.definitions.folders, [], 'sets the definitions.folders property');
             assert.deepEqual(result.definitions.requests, [], 'sets the definitions.requests property');
@@ -42,10 +42,10 @@ describe('Models', () => {
         });
   
         describe('From schema initialization', () => {
-          let base: IHttpClientProject;
+          let base: IAppProject;
           beforeEach(() => {
             base = {
-              kind: HttpClientProjectKind,
+              kind: AppProjectKind,
               key: 'abc',
               definitions: {
                 folders: [],
@@ -60,13 +60,13 @@ describe('Models', () => {
           });
   
           it('sets the info', () => {
-            const init: IHttpClientProject = { ...base, ...{ info: {
+            const init: IAppProject = { ...base, ...{ info: {
               kind: ThingKind,
               name: 'Test project',
               description: 'Project description',
               version: '1.2.3',
             }}};
-            const project = new HttpClientProject(init);
+            const project = new AppProject(init);
             const { info } = project;
             assert.equal(info.kind, ThingKind, 'sets the info.kind property');
             assert.equal(info.name, 'Test project', 'sets the info.name property');
@@ -75,29 +75,29 @@ describe('Models', () => {
           });
   
           it('sets the items', () => {
-            const init: IHttpClientProject = { 
+            const init: IAppProject = { 
               ...base, 
               ...{ 
                 items: [{
-                  kind: HttpClientFolderKind,
+                  kind: AppProjectFolderKind,
                   key: '123456',
                 }]
               },
             };
-            const project = new HttpClientProject(init);
+            const project = new AppProject(init);
             const { items } = project;
             assert.typeOf(items, 'array', 'has the items')
             assert.lengthOf(items, 1, 'has a single item')
             const [item] = items;
-            assert.equal(item.kind, HttpClientFolderKind, 'sets the item.kind property');
+            assert.equal(item.kind, AppProjectFolderKind, 'sets the item.kind property');
             assert.equal(item.key, '123456', 'sets the item.key property');
           });
   
           it('sets the definitions.folders', () => {
-            const init: IHttpClientProject = { ...base, ...{ definitions: {
+            const init: IAppProject = { ...base, ...{ definitions: {
               folders: [{
                 key: '123456',
-                kind: HttpClientFolderKind,
+                kind: AppProjectFolderKind,
                 created: 1234567,
                 updated: 98765,
                 info: {
@@ -107,21 +107,21 @@ describe('Models', () => {
                 items: [],
               }]
             }}};
-            const project = new HttpClientProject(init);
+            const project = new AppProject(init);
             const { definitions } = project;
             assert.typeOf(definitions.folders, 'array', 'has the items')
             assert.lengthOf(definitions.folders, 1, 'has a single item')
             const [item] = definitions.folders;
-            assert.equal(item.kind, HttpClientFolderKind, 'sets the item.kind property');
+            assert.equal(item.kind, AppProjectFolderKind, 'sets the item.kind property');
             assert.equal(item.key, '123456', 'sets the item.key property');
           });
   
           it('sets the definitions.requests', () => {
-            const request = HttpClientProjectRequest.fromUrl('https://api.com', new HttpClientProject());
-            const init: IHttpClientProject = { ...base, ...{ definitions: {
+            const request = AppProjectRequest.fromUrl('https://api.com', new AppProject());
+            const init: IAppProject = { ...base, ...{ definitions: {
               requests: [request.toJSON()]
             }}};
-            const project = new HttpClientProject(init);
+            const project = new AppProject(init);
             const { definitions } = project;
             assert.typeOf(definitions.requests, 'array', 'has the items')
             assert.lengthOf(definitions.requests, 1, 'has a single item')
@@ -131,10 +131,10 @@ describe('Models', () => {
 
           it('sets the definitions.certificates', () => {
             const cert = Certificate.fromP12('value')
-            const init: IHttpClientProject = { ...base, ...{ definitions: {
+            const init: IAppProject = { ...base, ...{ definitions: {
               certificates: [cert.toJSON()]
             }}};
-            const project = new HttpClientProject(init);
+            const project = new AppProject(init);
             const { definitions } = project;
             assert.typeOf(definitions.certificates, 'array', 'has the definitions')
             assert.lengthOf(definitions.certificates, 1, 'has a single definition')
@@ -145,12 +145,12 @@ describe('Models', () => {
   
         describe('From JSON string initialization', () => {
           it('restores project data from JSON string', () => {
-            const orig = new HttpClientProject();
+            const orig = new AppProject();
             orig.info.name = 'a project';
             orig.addFolder('folder');
             orig.addRequest('https://api.com');
             const str = JSON.stringify(orig);
-            const result = new HttpClientProject(str);
+            const result = new AppProject(str);
   
             assert.equal(result.key, orig.key, 'restores the key');
             assert.equal(result.info.name, orig.info.name, 'restores the info object');
@@ -160,10 +160,10 @@ describe('Models', () => {
         });
       });
       
-      describe('HttpClientProject.fromName()', () => {
+      describe('AppProject.fromName()', () => {
         it('creates an empty project with a name', () => {
-          const project = HttpClientProject.fromName('Test project');
-          assert.equal(project.kind, HttpClientProjectKind, 'sets the kind property');
+          const project = AppProject.fromName('Test project');
+          assert.equal(project.kind, AppProjectKind, 'sets the kind property');
           assert.deepEqual(project.definitions.folders, [], 'sets the definitions.folders property');
           assert.deepEqual(project.definitions.requests, [], 'sets the definitions.requests property');
           assert.deepEqual(project.definitions.environments, [], 'sets the definitions.environments property');
@@ -181,7 +181,7 @@ describe('Models', () => {
           const init: ArcLegacyProject = {
             name: 'abc',
           };
-          const result = await HttpClientProject.fromLegacyProject(init, []);
+          const result = await AppProject.fromLegacyProject(init, []);
           assert.equal(result.info.name, 'abc');
         });
 
@@ -190,7 +190,7 @@ describe('Models', () => {
             name: 'abc',
             description: 'test'
           };
-          const result = await HttpClientProject.fromLegacyProject(init, []);
+          const result = await AppProject.fromLegacyProject(init, []);
           assert.equal(result.info.description, 'test');
         });
 
@@ -208,7 +208,7 @@ describe('Models', () => {
               _id: '1',
             }
           ];
-          const result = await HttpClientProject.fromLegacyProject(init, requests);
+          const result = await AppProject.fromLegacyProject(init, requests);
           const projectRequests = result.listRequests();
           assert.lengthOf(projectRequests, 1, 'has a single request');
           assert.equal(projectRequests[0].info.name, 'r1');
@@ -234,7 +234,7 @@ describe('Models', () => {
               _id: '3',
             }
           ];
-          const result = await HttpClientProject.fromLegacyProject(init, requests);
+          const result = await AppProject.fromLegacyProject(init, requests);
           const projectRequests = result.listRequests();
           assert.lengthOf(projectRequests, 1, 'has a single request');
           assert.equal(projectRequests[0].info.name, 'r1');
@@ -242,14 +242,14 @@ describe('Models', () => {
       });
 
       describe('toJSON()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
         });
   
         it('sets the kind', () => {
           const result = project.toJSON();
-          assert.equal(result.kind, HttpClientProjectKind);
+          assert.equal(result.kind, AppProjectKind);
         });
   
         it('sets the key', () => {
@@ -312,30 +312,30 @@ describe('Models', () => {
 
       describe('addFolder()', () => {
         it('returns a key of the inserted folder', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const created = project.addFolder('A folder');
           assert.typeOf(created, 'object', 'returns an object');
         });
   
         it('adds the folder to the items array', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const created = project.addFolder('A folder');
           const { items } = project;
           assert.lengthOf(items, 1, 'items has a single object');
           const [item] = items;
   
           assert.equal(item.key, created.key, 'has the key');
-          assert.equal(item.kind, HttpClientFolderKind, 'has the kind');
+          assert.equal(item.kind, AppProjectFolderKind, 'has the kind');
         });
   
         it('adds the definition', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const created = project.addFolder('A folder');
           const { definitions } = project;
           assert.lengthOf(definitions.folders, 1, 'has the definition');
           const folder = definitions.folders[0];
           
-          assert.equal(folder.kind, HttpClientFolderKind, 'has the kind');
+          assert.equal(folder.kind, AppProjectFolderKind, 'has the kind');
           assert.equal(folder.key, created.key, 'has the key');
           
           const { info } = folder;
@@ -351,7 +351,7 @@ describe('Models', () => {
         });
   
         it('adds multiple folders', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const created1 = project.addFolder('f1');
           const created2 = project.addFolder('f2');
           const created3 = project.addFolder('f3');
@@ -362,7 +362,7 @@ describe('Models', () => {
         });
   
         it('adds a folder of a folder', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const created1 = project.addFolder('f1');
           const folder = project.findFolder(created1.key);
           const created2 = folder.addFolder('inception');
@@ -375,14 +375,14 @@ describe('Models', () => {
         });
   
         it('ignores adding when the folder already exists', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const created1 = project.addFolder('f1');
           const created2 = project.addFolder('f1', { skipExisting: true });
           assert.deepEqual(created1, created2);
         });
   
         it('adds a folder on a specific position', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           project.addFolder('f1');
           project.addFolder('f2');
           project.addFolder('f3');
@@ -393,35 +393,35 @@ describe('Models', () => {
   
       describe('findFolder()', () => {
         it('returns undefine when no definitions', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const result = project.findFolder('abc');
           assert.isUndefined(result);
         });
   
         it('finds the folder by the name', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const created = project.addFolder('abc');
           const result = project.findFolder('abc');
           assert.deepEqual(result, created);
         });
   
         it('finds the folder by the key', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const created = project.addFolder('abc');
           const result = project.findFolder(created.key);
           assert.deepEqual(result, created);
         });
   
         it('returns undefined for the keyOnly option', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           project.addFolder('abc');
           const result = project.findFolder('abc', { keyOnly: true });
           assert.isUndefined(result);
         });
   
         it('returns a folder only', () => {
-          const project = new HttpClientProject();
-          const request = HttpClientProjectRequest.fromName('abc', project);
+          const project = new AppProject();
+          const request = AppProjectRequest.fromName('abc', project);
           project.addRequest(request);
           const created = project.addFolder('abc');
           const result = project.findFolder('abc');
@@ -432,7 +432,7 @@ describe('Models', () => {
       describe('removeFolder()', () => {
         it('removes the folder from the project', () => {
           const name = 'abc';
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const created = project.addFolder(name);
           project.removeFolder(created.key);
           const result = project.findFolder(name);
@@ -441,7 +441,7 @@ describe('Models', () => {
   
         it('removes the folder from the project items', () => {
           const name = 'abc';
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const created = project.addFolder(name);
           assert.lengthOf(project.items, 1, 'has an item');
           project.removeFolder(created.key);
@@ -451,7 +451,7 @@ describe('Models', () => {
   
         it('removes the folder from the definitions', () => {
           const name = 'abc';
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const created = project.addFolder(name);
           assert.lengthOf(project.definitions.folders, 1, 'has a definition');
           project.removeFolder(created.key);
@@ -461,7 +461,7 @@ describe('Models', () => {
   
         it('removes the folder from a parent folder', () => {
           const name = 'abc';
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const parent = project.addFolder('parent');
           const created = project.addFolder(name, { parent: parent.key });
           project.removeFolder(created.key);
@@ -471,7 +471,7 @@ describe('Models', () => {
   
         it('removes the folder from the parent folder items', () => {
           const name = 'abc';
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const parent = project.addFolder('parent');
           const created = project.addFolder(name, { parent: parent.key });
           assert.lengthOf(parent.items, 1, 'has an item');
@@ -482,7 +482,7 @@ describe('Models', () => {
   
         it('removes the folder from the definitions', () => {
           const name = 'abc';
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const parent = project.addFolder('parent');
           const created = project.addFolder(name, { parent: parent.key });
           assert.lengthOf(project.definitions.folders, 2, 'has 2 definitions');
@@ -492,21 +492,21 @@ describe('Models', () => {
         });
   
         it('throws an error when folder is not found', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           assert.throws(() => {
             project.removeFolder('hello');
           });
         });
   
         it('does not throw with the safe option', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           assert.doesNotThrow(() => {
             project.removeFolder('hello', { safe: true });
           });
         });
   
         it('removes requests from the folder', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const parent = project.addFolder('f1');
           parent.addRequest('r1');
           parent.addRequest('r2');
@@ -517,7 +517,7 @@ describe('Models', () => {
         });
   
         it('removes folders from the folder', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const parent = project.addFolder('f1');
           parent.addFolder('f2');
           parent.addFolder('f3');
@@ -528,7 +528,7 @@ describe('Models', () => {
         });
   
         it('deeply removes folders and request from the folder', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const parent = project.addFolder('f1');
           parent.addFolder('f2');
           const f3 = parent.addFolder('f3');
@@ -546,22 +546,22 @@ describe('Models', () => {
   
       describe('findParent()', () => {
         it('finds a parent for a root level folder', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const created = project.addFolder('test');
           const parent = project.findParent(created.key);
           assert.deepEqual(parent, project);
         });
   
         it('finds a parent for a root level request', () => {
-          const project = new HttpClientProject();
-          const request = HttpClientProjectRequest.fromName('request', project);
+          const project = new AppProject();
+          const request = AppProjectRequest.fromName('request', project);
           const created = project.addRequest(request);
           const parent = project.findParent(created.key);
           assert.deepEqual(parent, project);
         });
   
         it('finds a parent for a sub-folder', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const folder = project.addFolder('parent');
           const created = project.addFolder('test', { parent: folder.key });
           const parent = project.findParent(created.key);
@@ -569,16 +569,16 @@ describe('Models', () => {
         });
   
         it('finds a parent for a root level request', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const folder = project.addFolder('parent');
-          const request = HttpClientProjectRequest.fromName('request', project);
+          const request = AppProjectRequest.fromName('request', project);
           const created = project.addRequest(request, { parent: folder.key });
           const parent = project.findParent(created.key);
           assert.deepEqual(parent, folder);
         });
   
         it('returns undefined when not found', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const folder = project.addFolder('parent');
           project.addFolder('test', { parent: folder.key });
           const parent = project.findParent('other');
@@ -587,16 +587,16 @@ describe('Models', () => {
       });
   
       describe('moveFolder()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
           const folder1 = project.addFolder('folder1');
           const folder2 = project.addFolder('folder2');
           project.addFolder('folder3', { parent: folder2.key });
-          const request1 = HttpClientProjectRequest.fromName('request1', project);
-          const request2 = HttpClientProjectRequest.fromName('request2', project);
-          const request3 = HttpClientProjectRequest.fromName('request3', project);
-          const request4 = HttpClientProjectRequest.fromName('request4', project);
+          const request1 = AppProjectRequest.fromName('request1', project);
+          const request2 = AppProjectRequest.fromName('request2', project);
+          const request3 = AppProjectRequest.fromName('request3', project);
+          const request4 = AppProjectRequest.fromName('request4', project);
           project.addRequest(request1);
           folder1.addRequest(request2);
           folder1.addRequest(request3);
@@ -681,17 +681,17 @@ describe('Models', () => {
       });
   
       describe('hasChild()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
           const folder1 = project.addFolder('folder1');
           const folder2 = project.addFolder('folder2', { parent: folder1.key });
           const folder3 = project.addFolder('folder3', { parent: folder2.key });
           project.addFolder('folder4');
-          const request1 = HttpClientProjectRequest.fromName('request1', project);
-          const request2 = HttpClientProjectRequest.fromName('request2', project);
-          const request3 = HttpClientProjectRequest.fromName('request3', project);
-          const request4 = HttpClientProjectRequest.fromName('request4', project);
+          const request1 = AppProjectRequest.fromName('request1', project);
+          const request2 = AppProjectRequest.fromName('request2', project);
+          const request3 = AppProjectRequest.fromName('request3', project);
+          const request4 = AppProjectRequest.fromName('request4', project);
           project.addRequest(request1);
           folder1.addRequest(request2);
           folder1.addRequest(request3);
@@ -772,8 +772,8 @@ describe('Models', () => {
   
       describe('addRequest()', () => {
         it('adds an instance of the request', () => {
-          const project = new HttpClientProject();
-          const request = HttpClientProjectRequest.fromName('test', project);
+          const project = new AppProject();
+          const request = AppProjectRequest.fromName('test', project);
           const created = project.addRequest(request);
           assert.deepEqual(created, request);
   
@@ -781,12 +781,12 @@ describe('Models', () => {
           assert.deepEqual(project.definitions.requests[0], created, 'inserts the definition into project\'s definitions');
           assert.equal(project.items[0].key, created.key, 'the project has the item');
   
-          assert.equal(created.getParent().kind, HttpClientProjectKind, 'the request has the parent as the project');
+          assert.equal(created.getParent().kind, AppProjectKind, 'the request has the parent as the project');
         });
   
         it('adds the request from the schema', () => {
-          const project = new HttpClientProject();
-          const request = HttpClientProjectRequest.fromName('test', project);
+          const project = new AppProject();
+          const request = AppProjectRequest.fromName('test', project);
           const schema = request.toJSON();
           const created = project.addRequest(schema);
           
@@ -796,14 +796,14 @@ describe('Models', () => {
           assert.deepEqual(project.definitions.requests[0], created, 'inserts the definition into project\'s definitions');
           assert.equal(project.items[0].key, created.key, 'the project has the item');
           
-          assert.equal(created.getParent().kind, HttpClientProjectKind, 'the request has the parent as the project');
+          assert.equal(created.getParent().kind, AppProjectKind, 'the request has the parent as the project');
         });
   
         it('adds the request to a folder', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const folder = project.addFolder('a folder');
           
-          const request = HttpClientProjectRequest.fromName('test', project);
+          const request = AppProjectRequest.fromName('test', project);
           const created = project.addRequest(request, { parent: folder.key });
           
           assert.lengthOf(project.definitions.requests, 1, 'has the request definition');
@@ -815,8 +815,8 @@ describe('Models', () => {
         });
   
         it('adds the key if missing', () => {
-          const project = new HttpClientProject();
-          const request = HttpClientProjectRequest.fromName('test', project);
+          const project = new AppProject();
+          const request = AppProjectRequest.fromName('test', project);
           const schema = request.toJSON();
           delete schema.key;
           const created = project.addRequest(schema);
@@ -825,8 +825,8 @@ describe('Models', () => {
         });
   
         it('throws when parent folder not found', () => {
-          const project = new HttpClientProject();
-          const request = HttpClientProjectRequest.fromName('test', project);
+          const project = new AppProject();
+          const request = AppProjectRequest.fromName('test', project);
           
           assert.throws(() => {
             project.addRequest(request, { parent: 'unknown' });
@@ -834,8 +834,8 @@ describe('Models', () => {
         });
   
         it('throws when index out of bounds', () => {
-          const project = new HttpClientProject();
-          const request = HttpClientProjectRequest.fromName('test', project);
+          const project = new AppProject();
+          const request = AppProjectRequest.fromName('test', project);
           
           assert.throws(() => {
             project.addRequest(request, { index: 1 });
@@ -845,38 +845,38 @@ describe('Models', () => {
   
       describe('findRequest()', () => {
         it('returns undefined when no definitions', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const result = project.findRequest('abc');
           assert.isUndefined(result);
         });
   
         it('finds the request by the name', () => {
-          const project = new HttpClientProject();
-          const created = HttpClientProjectRequest.fromName('abc', project);
+          const project = new AppProject();
+          const created = AppProjectRequest.fromName('abc', project);
           project.addRequest(created);
           const result = project.findRequest('abc');
           assert.deepEqual(result, created);
         });
   
         it('finds the request by the key', () => {
-          const project = new HttpClientProject();
-          const created = HttpClientProjectRequest.fromName('abc', project);
+          const project = new AppProject();
+          const created = AppProjectRequest.fromName('abc', project);
           project.addRequest(created);
           const result = project.findRequest(created.key);
           assert.deepEqual(result, created);
         });
   
         it('returns undefined for the keyOnly option', () => {
-          const project = new HttpClientProject();
-          project.addRequest(HttpClientProjectRequest.fromName('abc', project));
+          const project = new AppProject();
+          project.addRequest(AppProjectRequest.fromName('abc', project));
           const result = project.findRequest('abc', { keyOnly: true });
           assert.isUndefined(result);
         });
   
         it('returns a request only', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           project.addFolder('abc');
-          const request = HttpClientProjectRequest.fromName('abc', project);
+          const request = AppProjectRequest.fromName('abc', project);
           project.addRequest(request);
           const result = project.findRequest('abc');
           assert.deepEqual(result, request);
@@ -886,8 +886,8 @@ describe('Models', () => {
       describe('removeRequest()', () => {
         it('removes the request from the project', () => {
           const name = 'abc';
-          const project = new HttpClientProject();
-          const created = HttpClientProjectRequest.fromName(name, project);
+          const project = new AppProject();
+          const created = AppProjectRequest.fromName(name, project);
           project.addRequest(created);
           project.removeRequest(created.key);
           const result = project.findRequest(name);
@@ -895,8 +895,8 @@ describe('Models', () => {
         });
   
         it('removes the request from the project items', () => {
-          const project = new HttpClientProject();
-          const created = HttpClientProjectRequest.fromName('test', project);
+          const project = new AppProject();
+          const created = AppProjectRequest.fromName('test', project);
           project.addRequest(created);
           assert.lengthOf(project.items, 1, 'has an item');
           project.removeRequest(created.key);
@@ -904,8 +904,8 @@ describe('Models', () => {
         });
   
         it('removes the request from the definitions', () => {
-          const project = new HttpClientProject();
-          const created = HttpClientProjectRequest.fromName('test', project);
+          const project = new AppProject();
+          const created = AppProjectRequest.fromName('test', project);
           project.addRequest(created);
           assert.lengthOf(project.definitions.requests, 1, 'has a definition');
           project.removeRequest(created.key);
@@ -914,9 +914,9 @@ describe('Models', () => {
   
         it('removes the request from a parent folder', () => {
           const name = 'abc';
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const parent = project.addFolder('parent');
-          const created = HttpClientProjectRequest.fromName(name, project);
+          const created = AppProjectRequest.fromName(name, project);
           project.addRequest(created, { parent: parent.key });
           project.removeRequest(created.key);
           const result = project.findRequest(name);
@@ -925,9 +925,9 @@ describe('Models', () => {
   
         it('removes the request from the parent folder items', () => {
           const name = 'abc';
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const parent = project.addFolder('parent');
-          const created = HttpClientProjectRequest.fromName(name, project);
+          const created = AppProjectRequest.fromName(name, project);
           project.addRequest(created, { parent: parent.key });
           assert.lengthOf(parent.items, 1, 'has an item');
           project.removeRequest(created.key);
@@ -936,9 +936,9 @@ describe('Models', () => {
   
         it('removes the request from the definitions', () => {
           const name = 'abc';
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const parent = project.addFolder('parent');
-          const created = HttpClientProjectRequest.fromName(name, project);
+          const created = AppProjectRequest.fromName(name, project);
           project.addRequest(created, { parent: parent.key });
           assert.lengthOf(project.definitions.requests, 1, 'has 1 definition');
           project.removeRequest(created.key);
@@ -946,14 +946,14 @@ describe('Models', () => {
         });
   
         it('throws an error when the request is not found', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           assert.throws(() => {
             project.removeRequest('hello');
           });
         });
   
         it('does not throw with the safe option', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           assert.doesNotThrow(() => {
             project.removeRequest('hello', { safe: true });
           });
@@ -961,16 +961,16 @@ describe('Models', () => {
       });
   
       describe('moveRequest()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
           const folder1 = project.addFolder('folder1');
           const folder2 = project.addFolder('folder2');
           project.addFolder('folder3', { parent: folder2.key });
-          const request1 = HttpClientProjectRequest.fromName('request1', project);
-          const request2 = HttpClientProjectRequest.fromName('request2', project);
-          const request3 = HttpClientProjectRequest.fromName('request3', project);
-          const request4 = HttpClientProjectRequest.fromName('request4', project);
+          const request1 = AppProjectRequest.fromName('request1', project);
+          const request2 = AppProjectRequest.fromName('request2', project);
+          const request3 = AppProjectRequest.fromName('request3', project);
+          const request4 = AppProjectRequest.fromName('request4', project);
           project.addRequest(request1);
           folder1.addRequest(request2);
           folder1.addRequest(request3);
@@ -1048,7 +1048,7 @@ describe('Models', () => {
   
       describe('addLegacyRequest()', () => {
         it('adds a legacy history request', async () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const request = generator.http.history();
           const created = await project.addLegacyRequest(request);
           assert.ok(created, 'returns the created request');
@@ -1057,14 +1057,14 @@ describe('Models', () => {
           assert.deepEqual(project.definitions.requests[0], created, 'inserts the definition into project\'s definitions');
           assert.equal(project.items[0].key, created.key, 'the project has the item');
   
-          assert.equal(created.getParent().kind, HttpClientProjectKind, 'the request has the parent as the project');
+          assert.equal(created.getParent().kind, AppProjectKind, 'the request has the parent as the project');
   
           assert.equal(created.expects.url, request.url, 'has the URL');
           assert.equal(created.info.name, 'Unnamed request', 'has the default name');
         });
   
         it('adds a legacy saved request', async () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const request = generator.http.saved();
           const created = await project.addLegacyRequest(request);
           assert.ok(created, 'returns the created request');
@@ -1073,7 +1073,7 @@ describe('Models', () => {
           assert.deepEqual(project.definitions.requests[0], created, 'inserts the definition into project\'s definitions');
           assert.equal(project.items[0].key, created.key, 'the project has the item');
   
-          assert.equal(created.getParent().kind, HttpClientProjectKind, 'the request has the parent as the project');
+          assert.equal(created.getParent().kind, AppProjectKind, 'the request has the parent as the project');
   
           assert.equal(created.expects.url, request.url, 'has the URL');
           assert.equal(created.info.name, request.name, 'has the name');
@@ -1082,22 +1082,22 @@ describe('Models', () => {
   
       describe('listFolderItems()', () => {
         it('returns empty array when no items', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const result = project.listFolderItems();
           assert.deepEqual(result, []);
         });
   
         it('ignores request items', () => {
-          const project = new HttpClientProject();
-          const request = HttpClientProjectRequest.fromName('name', project);
+          const project = new AppProject();
+          const request = AppProjectRequest.fromName('name', project);
           project.addRequest(request);
           const result = project.listFolderItems();
           assert.deepEqual(result, []);
         });
   
         it('returns folders', () => {
-          const project = new HttpClientProject();
-          const request = HttpClientProjectRequest.fromName('name', project);
+          const project = new AppProject();
+          const request = AppProjectRequest.fromName('name', project);
           project.addRequest(request);
           const folder = project.addFolder('a folder');
           const result = project.listFolderItems();
@@ -1108,21 +1108,21 @@ describe('Models', () => {
   
       describe('listRequestItems()', () => {
         it('returns empty array when no items', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const result = project.listRequestItems();
           assert.deepEqual(result, []);
         });
   
         it('ignores folder items', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           project.addFolder('a folder');
           const result = project.listRequestItems();
           assert.deepEqual(result, []);
         });
   
         it('returns requests', () => {
-          const project = new HttpClientProject();
-          const request = HttpClientProjectRequest.fromName('name', project);
+          const project = new AppProject();
+          const request = AppProjectRequest.fromName('name', project);
           project.addRequest(request);
           project.addFolder('a folder');
           const result = project.listRequestItems();
@@ -1133,11 +1133,11 @@ describe('Models', () => {
   
       describe('listFolders()', () => {
         it('lists folders from the project', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const f1 = project.addFolder('f1');
           const f2 = project.addFolder('f2');
           f2.addFolder('f3');
-          project.addRequest(HttpClientProjectRequest.fromName('r1', project));
+          project.addRequest(AppProjectRequest.fromName('r1', project));
           const result = project.listFolders();
           assert.lengthOf(result, 2, 'has both folders');
           assert.equal(result[0].key, f1.key);
@@ -1145,25 +1145,25 @@ describe('Models', () => {
         });
   
         it('lists folders from a folder', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           project.addFolder('f1');
           const f2 = project.addFolder('f2');
           const f3 = f2.addFolder('f3');
-          f2.addRequest(HttpClientProjectRequest.fromName('r1', project));
+          f2.addRequest(AppProjectRequest.fromName('r1', project));
           const result = project.listFolders({ folder: f2.key });
           assert.lengthOf(result, 1, 'has a single folder');
           assert.equal(result[0].key, f3.key);
         });
   
         it('returns empty list when no items', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const f1 = project.addFolder('f1');
           const result = project.listFolders({ folder:  f1.key });
           assert.deepEqual(result, []);
         });
   
         it('throws when parent folder not found', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           assert.throws(() => {
             project.listFolders({ folder: 'unknown' });
           }, Error, 'Unable to find the folder unknown.');
@@ -1172,21 +1172,21 @@ describe('Models', () => {
   
       describe('listRequests()', () => {
         it('lists requests from the project', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const folder = project.addFolder('f1');
-          const request = HttpClientProjectRequest.fromName('r1', project);
+          const request = AppProjectRequest.fromName('r1', project);
           project.addRequest(request);
-          project.addRequest(HttpClientProjectRequest.fromName('r2', project), { parent: folder.key });
+          project.addRequest(AppProjectRequest.fromName('r2', project), { parent: folder.key });
           const result = project.listRequests();
           assert.lengthOf(result, 1, 'has a single request');
           assert.equal(result[0].key, request.key);
         });
   
         it('lists requests from a folder', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const folder = project.addFolder('f1');
-          const request = HttpClientProjectRequest.fromName('r1', project);
-          project.addRequest(HttpClientProjectRequest.fromName('r2', project));
+          const request = AppProjectRequest.fromName('r1', project);
+          project.addRequest(AppProjectRequest.fromName('r2', project));
           project.addRequest(request, { parent: folder.key });
           const result = project.listRequests(folder.key);
           assert.lengthOf(result, 1, 'has a single folder');
@@ -1194,14 +1194,14 @@ describe('Models', () => {
         });
   
         it('returns empty list when no items', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const f1 = project.addFolder('f1');
           const result = project.listRequests(f1.key);
           assert.deepEqual(result, []);
         });
   
         it('throws when parent folder not found', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           assert.throws(() => {
             project.listRequests('unknown');
           }, Error, 'Unable to find the folder unknown.');
@@ -1210,9 +1210,9 @@ describe('Models', () => {
   
       describe('listDefinitions()', () => {
         it('returns all definitions for a project root', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const folder = project.addFolder('f1');
-          const request = HttpClientProjectRequest.fromName('name', project);
+          const request = AppProjectRequest.fromName('name', project);
           project.addRequest(request);
           const result = project.listDefinitions();
           assert.lengthOf(result, 2, 'has both definitions');
@@ -1221,13 +1221,13 @@ describe('Models', () => {
         });
   
         it('returns only the project definitions', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const folder = project.addFolder('f1');
-          const request = HttpClientProjectRequest.fromName('name', project);
+          const request = AppProjectRequest.fromName('name', project);
           project.addRequest(request);
   
           project.addFolder('other', { parent: folder.key });
-          project.addRequest(HttpClientProjectRequest.fromName('other', project), { parent: folder.key });
+          project.addRequest(AppProjectRequest.fromName('other', project), { parent: folder.key });
           
           const result = project.listDefinitions();
           assert.lengthOf(result, 2, 'has both definitions');
@@ -1236,9 +1236,9 @@ describe('Models', () => {
         });
   
         it('returns all definitions for a folder', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const folder = project.addFolder('f1');
-          const request = HttpClientProjectRequest.fromName('name', project);
+          const request = AppProjectRequest.fromName('name', project);
           project.addRequest(request, { parent: folder.key });
           const sub = folder.addFolder('sub');
           sub.addFolder('sub-sub');
@@ -1252,7 +1252,7 @@ describe('Models', () => {
   
       describe('getParent()', () => {
         it('always returns undefined', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const result = project.getParent();
           assert.isUndefined(result);
         });
@@ -1260,16 +1260,16 @@ describe('Models', () => {
   
       describe('getProject()', () => {
         it('always returns the project', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const result = project.getProject();
           assert.isTrue(result === project);
         });
       });
   
       describe('clone()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = HttpClientProject.fromName('a project');
+          project = AppProject.fromName('a project');
         });
   
         it('clones the project', () => {
@@ -1277,7 +1277,7 @@ describe('Models', () => {
           project.addFolder('test');
           const copy = project.clone();
   
-          assert.equal(copy.kind, HttpClientProjectKind);
+          assert.equal(copy.kind, AppProjectKind);
           assert.equal(copy.info.name, 'a project');
   
           assert.lengthOf(copy.listFolders(), 1, 'has the folder');
@@ -1362,18 +1362,18 @@ describe('Models', () => {
         });
       });
   
-      describe('HttpClientProject.clone()', () => {
+      describe('AppProject.clone()', () => {
         it('clones a project', () => {
-          const project = HttpClientProject.fromName('a project');
-          const copy = HttpClientProject.clone(project.toJSON());
+          const project = AppProject.fromName('a project');
+          const copy = AppProject.clone(project.toJSON());
           assert.equal(copy.info.name, 'a project');
         });
       });
 
       describe('addEnvironment()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = HttpClientProject.fromName('test');
+          project = AppProject.fromName('test');
         });
   
         it('adds environment by name', () => {
@@ -1423,9 +1423,9 @@ describe('Models', () => {
       });
   
       describe('readEnvironments()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
         });
   
         it('reads environments from the project without subfolders without the name', () => {
@@ -1491,9 +1491,9 @@ describe('Models', () => {
       });
   
       describe('listEnvironments()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
         });
   
         it('returns environments defined in the project only', () => {
@@ -1517,7 +1517,7 @@ describe('Models', () => {
   
       describe('findEnvironment()', () => {
         it('returns the environment from the project root', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           project.addEnvironment('e1');
           const env = project.addEnvironment('e2');
           const result = project.findEnvironment(env.key);
@@ -1525,7 +1525,7 @@ describe('Models', () => {
         });
   
         it('returns the environment from a folder', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           project.addEnvironment('e1');
           const f1 = project.addFolder('f1');
           const env = f1.addEnvironment('e2');
@@ -1535,9 +1535,9 @@ describe('Models', () => {
       })
   
       describe('removeEnvironment()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
         });
   
         it('removes the environment from the definitions when in project root', () => {
@@ -1582,16 +1582,16 @@ describe('Models', () => {
       });
     });
 
-    describe('HttpClientProjectFolder', () => {
+    describe('AppProjectFolder', () => {
       describe('Initialization', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
         });
   
         it('initializes a default folder', () => {
-          const result = new HttpClientProjectFolder(project);
-          assert.equal(result.kind, HttpClientFolderKind, 'sets the kind property');
+          const result = new AppProjectFolder(project);
+          assert.equal(result.kind, AppProjectFolderKind, 'sets the kind property');
           assert.deepEqual(result.items, [], 'sets the items property');
           assert.typeOf(result.updated, 'number', 'sets the updated property');
           assert.typeOf(result.created, 'number', 'sets the created property');
@@ -1604,12 +1604,12 @@ describe('Models', () => {
       });
   
       describe('From schema initialization', () => {
-        let project: HttpClientProject;
-        let base: IProjectParent;
+        let project: AppProject;
+        let base: IAppProjectParent;
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
           base = {
-            kind: HttpClientFolderKind,
+            kind: AppProjectFolderKind,
             items: [],
             updated: 123,
             created: 456,
@@ -1622,13 +1622,13 @@ describe('Models', () => {
         });
   
         it('sets the info', () => {
-          const init: IProjectParent = { ...base, ...{ info: {
+          const init: IAppProjectParent = { ...base, ...{ info: {
             kind: ThingKind,
             name: 'Test project',
             description: 'Project description',
             version: '1.2.3',
           }}};
-          const result = new HttpClientProjectFolder(project, init);
+          const result = new AppProjectFolder(project, init);
           const { info } = result;
           assert.equal(info.kind, ThingKind, 'sets the info.kind property');
           assert.equal(info.name, 'Test project', 'sets the info.name property');
@@ -1637,32 +1637,32 @@ describe('Models', () => {
         });
   
         it('sets the created/updated', () => {
-          const result = new HttpClientProjectFolder(project, base);
+          const result = new AppProjectFolder(project, base);
           assert.equal(result.created, 456);
           assert.equal(result.updated, 123);
         });
   
         it('sets the passed key', () => {
-          const result = new HttpClientProjectFolder(project, base);
+          const result = new AppProjectFolder(project, base);
           assert.equal(result.key, 'test1234');
         });
   
         it('sets a new key when the passed key is missing', () => {
           delete base.key;
-          const result = new HttpClientProjectFolder(project, base);
+          const result = new AppProjectFolder(project, base);
           assert.typeOf(result.key, 'string');
         });
   
         it('creates the default items', () => {
           delete base.items;
-          const result = new HttpClientProjectFolder(project, base);
+          const result = new AppProjectFolder(project, base);
           assert.deepEqual(result.items, []);
         });
   
         it('sets the stored items', () => {
-          base.items = [HttpClientProjectItem.projectFolder(project, 'a-key')];
+          base.items = [AppProjectItem.projectFolder(project, 'a-key')];
           const serialized = JSON.stringify(base);
-          const result = new HttpClientProjectFolder(project, serialized);
+          const result = new AppProjectFolder(project, serialized);
           assert.lengthOf(result.items, 1, 'has a single item');
           assert.equal(result.items[0].key, 'a-key', 'has the serialized item');
         });
@@ -1670,11 +1670,11 @@ describe('Models', () => {
   
       describe('From JSON string initialization', () => {
         it('restores project data from JSON string', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const folder = project.addFolder('a folder');
           const str = JSON.stringify(folder);
           
-          const result = new HttpClientProjectFolder(project, str);
+          const result = new AppProjectFolder(project, str);
   
           assert.equal(result.key, folder.key, 'restores the key');
           assert.equal(result.info.name, 'a folder', 'restores the info object');
@@ -1682,12 +1682,12 @@ describe('Models', () => {
       });
   
       describe('toJSON()', () => {
-        let project: HttpClientProject;
-        let base: IProjectParent;
+        let project: AppProject;
+        let base: IAppProjectParent;
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
           base = {
-            kind: HttpClientFolderKind,
+            kind: AppProjectFolderKind,
             items: [],
             updated: 123,
             created: 456,
@@ -1700,13 +1700,13 @@ describe('Models', () => {
         });
     
         it('serializes the info object', () => {
-          const init: IProjectParent = { ...base, ...{ info: {
+          const init: IAppProjectParent = { ...base, ...{ info: {
             kind: ThingKind,
             name: 'Test project',
             description: 'Project description',
             version: '1.2.3',
           }}};
-          const folder = new HttpClientProjectFolder(project, init);
+          const folder = new AppProjectFolder(project, init);
           const result = folder.toJSON();
           assert.equal(result.info.kind, ThingKind, 'has the kind');
           assert.equal(result.info.name, 'Test project', 'has the name');
@@ -1715,69 +1715,69 @@ describe('Models', () => {
         });
   
         it('serializes the key', () => {
-          const init: IProjectParent = { ...base };
-          const folder = new HttpClientProjectFolder(project, init);
+          const init: IAppProjectParent = { ...base };
+          const folder = new AppProjectFolder(project, init);
           const result = folder.toJSON();
           assert.equal(result.key, init.key);
         });
   
         it('serializes the created/updated', () => {
-          const init: IProjectParent = { ...base };
-          const folder = new HttpClientProjectFolder(project, init);
+          const init: IAppProjectParent = { ...base };
+          const folder = new AppProjectFolder(project, init);
           const result = folder.toJSON();
           assert.equal(result.created, init.created);
           assert.equal(result.updated, init.updated);
         });
   
         it('serializes the items', () => {
-          const init: IProjectParent = { ...base, ...{ items: [HttpClientProjectItem.projectFolder(project, 'a-key')] } };
-          const folder = new HttpClientProjectFolder(project, init);
+          const init: IAppProjectParent = { ...base, ...{ items: [AppProjectItem.projectFolder(project, 'a-key')] } };
+          const folder = new AppProjectFolder(project, init);
           const result = folder.toJSON();
           assert.lengthOf(result.items, 1);
         });
       });
   
-      describe('HttpClientProjectFolder.fromName()', () => {
-        let project: HttpClientProject;
+      describe('AppProjectFolder.fromName()', () => {
+        let project: AppProject;
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
         });
   
         it('sets the name', () => {
-          const result = HttpClientProjectFolder.fromName(project, 'a name');
+          const result = AppProjectFolder.fromName(project, 'a name');
           assert.equal(result.info.name, 'a name');
         });
   
         it('uses the default name', () => {
-          const result = HttpClientProjectFolder.fromName(project);
+          const result = AppProjectFolder.fromName(project);
           assert.equal(result.info.name, 'New folder');
         });
   
         it('generates the key', () => {
-          const result = HttpClientProjectFolder.fromName(project, 'a name');
+          const result = AppProjectFolder.fromName(project, 'a name');
           assert.typeOf(result.key, 'string');
         });
   
         it('generates the created/updated', () => {
-          const result = HttpClientProjectFolder.fromName(project, 'a name');
+          const result = AppProjectFolder.fromName(project, 'a name');
           assert.approximately(result.updated, Date.now(), 100);
           assert.approximately(result.created, Date.now(), 100);
         });
   
         it('adds empty items', () => {
-          const result = HttpClientProjectFolder.fromName(project, 'a name');
+          const result = AppProjectFolder.fromName(project, 'a name');
           assert.deepEqual(result.items, []);
         });
   
         it('sets the kind', () => {
-          const result = HttpClientProjectFolder.fromName(project, 'a name');
-          assert.equal(result.kind, HttpClientFolderKind);
+          const result = AppProjectFolder.fromName(project, 'a name');
+          assert.equal(result.kind, AppProjectFolderKind);
         });
       });
   
       describe('new()', () => {
         it('restores a folder definition', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const folder = project.addFolder('a folder');
           const time = 12345;
           folder.new({
@@ -1789,7 +1789,7 @@ describe('Models', () => {
             },
             items: [],
             key: 'abc',
-            kind: HttpClientFolderKind,
+            kind: AppProjectFolderKind,
           });
           assert.equal(folder.created, time, 'updates the created');
           assert.equal(folder.updated, time, 'updates the created');
@@ -1798,10 +1798,10 @@ describe('Models', () => {
         });
   
         it('restores items', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const folder = project.addFolder('a folder');
           const time = 12345;
-          const def: IProjectParent = {
+          const def: IAppProjectParent = {
             created: time,
             updated: time,
             info: {
@@ -1810,7 +1810,7 @@ describe('Models', () => {
             },
             items: [],
             key: 'abc',
-            kind: HttpClientFolderKind,
+            kind: AppProjectFolderKind,
           };
           folder.new(def);
           assert.equal(folder.created, time, 'updates the created');
@@ -1820,10 +1820,10 @@ describe('Models', () => {
         });
   
         it('adds the default info object', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const folder = project.addFolder('a folder');
           const time = 12345;
-          const def: IProjectParent = {
+          const def: IAppProjectParent = {
             created: time,
             updated: time,
             info: {
@@ -1832,7 +1832,7 @@ describe('Models', () => {
             },
             items: [],
             key: 'abc',
-            kind: HttpClientFolderKind,
+            kind: AppProjectFolderKind,
           };
           delete def.info;
           folder.new(def);
@@ -1841,9 +1841,9 @@ describe('Models', () => {
       });
   
       describe('addFolder()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
         });
   
         it('calls the project\'s add folder function', () => {
@@ -1870,7 +1870,7 @@ describe('Models', () => {
   
         it('adds a folder by schema', () => {
           const parent = project.addFolder('parent');
-          const f = new HttpClientProjectFolder(project);
+          const f = new AppProjectFolder(project);
           f.info.name = 'sub';
           parent.addFolder(f.toJSON());
           const def = project.findFolder('sub');
@@ -1879,7 +1879,7 @@ describe('Models', () => {
   
         it('adds a folder by an instance', () => {
           const parent = project.addFolder('parent');
-          const f = new HttpClientProjectFolder(project);
+          const f = new AppProjectFolder(project);
           f.info.name = 'sub';
           parent.addFolder(f);
           const def = project.findFolder('sub');
@@ -1888,15 +1888,15 @@ describe('Models', () => {
       });
   
       describe('addRequest()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
         });
   
         it('calls the project\'s add request function', () => {
           const parent = project.addFolder('parent');
           const spy = sinon.spy(project, 'addRequest');
-          const request = HttpClientProjectRequest.fromName('test', project);
+          const request = AppProjectRequest.fromName('test', project);
           parent.addRequest(request);
           assert.isTrue(spy.calledOnce);
           assert.deepEqual(spy.args[0][0], request, 'has the request');
@@ -1905,7 +1905,7 @@ describe('Models', () => {
   
         it('adds the request to the items', () => {
           const parent = project.addFolder('parent');
-          const request = HttpClientProjectRequest.fromName('test', project);
+          const request = AppProjectRequest.fromName('test', project);
           parent.addRequest(request);
           assert.lengthOf(parent.items, 1);
         });
@@ -1919,15 +1919,15 @@ describe('Models', () => {
       });
   
       describe('listFolderItems()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
         });
   
         it('returns empty array when no folders', () => {
           const folder = project.addFolder('parent');
           
-          const request = HttpClientProjectRequest.fromName('test', project);
+          const request = AppProjectRequest.fromName('test', project);
           folder.addRequest(request);
   
           const result = folder.listFolderItems();
@@ -1939,7 +1939,7 @@ describe('Models', () => {
           const f1 = folder.addFolder('f1');
           const f2 = folder.addFolder('f2');
           
-          const request = HttpClientProjectRequest.fromName('test', project);
+          const request = AppProjectRequest.fromName('test', project);
           folder.addRequest(request);
   
           const result = folder.listFolderItems();
@@ -1950,9 +1950,9 @@ describe('Models', () => {
       });
   
       describe('listRequestItems()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
         });
   
         it('returns empty array when no requests', () => {
@@ -1965,7 +1965,7 @@ describe('Models', () => {
   
         it('returns folder requests', () => {
           const folder = project.addFolder('parent');
-          const request = HttpClientProjectRequest.fromName('test', project);
+          const request = AppProjectRequest.fromName('test', project);
           folder.addRequest(request);
   
           const result = folder.listRequestItems();
@@ -1975,9 +1975,9 @@ describe('Models', () => {
       });
   
       describe('listFolders()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
         });
   
         it('calls the project\'s listFolders function', () => {
@@ -1997,9 +1997,9 @@ describe('Models', () => {
       });
   
       describe('listRequests()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
         });
   
         it('calls the project\'s listRequests function', () => {
@@ -2013,7 +2013,7 @@ describe('Models', () => {
         it('returns the list', () => {
           const folder = project.addFolder('parent');
   
-          const request = HttpClientProjectRequest.fromName('test', project);
+          const request = AppProjectRequest.fromName('test', project);
           folder.addRequest(request);
           
           const result = folder.listRequests();
@@ -2022,11 +2022,11 @@ describe('Models', () => {
       });
   
       describe('remove()', () => {
-        let project: HttpClientProject;
-        let folder: HttpClientProjectFolder;
+        let project: AppProject;
+        let folder: AppProjectFolder;
   
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
           folder = project.addFolder('test');
         });
   
@@ -2055,9 +2055,9 @@ describe('Models', () => {
       });
   
       describe('getParent()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
         });
   
         it('returns the project object', () => {
@@ -2075,9 +2075,9 @@ describe('Models', () => {
       });
   
       describe('getProject()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
         });
   
         it('returns the project when added to the project', () => {
@@ -2095,11 +2095,11 @@ describe('Models', () => {
       });
   
       describe('clone()', () => {
-        let project: HttpClientProject;
-        let folder: HttpClientProjectFolder;
+        let project: AppProject;
+        let folder: AppProjectFolder;
   
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
           folder = project.addFolder('test');
         });
   
@@ -2252,7 +2252,7 @@ describe('Models', () => {
   
           const origSnapshot = project.toJSON();
   
-          const targetProject = new HttpClientProject();
+          const targetProject = new AppProject();
           folder.clone({ targetProject });
   
           assert.deepEqual(project.toJSON(), origSnapshot, 'the original project is not changed');
@@ -2276,7 +2276,7 @@ describe('Models', () => {
   
           const origSnapshot = project.toJSON();
   
-          const targetProject = new HttpClientProject();
+          const targetProject = new AppProject();
           const targetFolder = targetProject.addFolder('parent');
           folder.clone({ targetProject, targetFolder: targetFolder.key });
   
@@ -2311,7 +2311,7 @@ describe('Models', () => {
           const sub = folder.addFolder('sub');
           sub.addRequest('http://api.com');
   
-          const targetProject = new HttpClientProject();
+          const targetProject = new AppProject();
           assert.throws(() => {
             folder.clone({ targetProject, targetFolder: 'test' });
           });
@@ -2320,7 +2320,7 @@ describe('Models', () => {
 
       describe('addLegacyRequest()', () => {
         it('adds a legacy history request', async () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const request = generator.http.history();
           const folder = project.addFolder('f1');
           const created = await folder.addLegacyRequest(request);
@@ -2330,14 +2330,14 @@ describe('Models', () => {
           assert.deepEqual(project.definitions.requests[0], created, 'inserts the definition into project\'s definitions');
           assert.equal(folder.items[0].key, created.key, 'the project has the item');
   
-          assert.equal(created.getParent().kind, HttpClientFolderKind, 'the request has the parent as the folder');
+          assert.equal(created.getParent().kind, AppProjectFolderKind, 'the request has the parent as the folder');
   
           assert.equal(created.expects.url, request.url, 'has the URL');
           assert.equal(created.info.name, 'Unnamed request', 'has the default name');
         });
   
         it('adds a legacy saved request', async () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const request = generator.http.saved();
           const folder = project.addFolder('f1');
           const created = await folder.addLegacyRequest(request);
@@ -2347,7 +2347,7 @@ describe('Models', () => {
           assert.deepEqual(project.definitions.requests[0], created, 'inserts the definition into project\'s definitions');
           assert.equal(folder.items[0].key, created.key, 'the project has the item');
   
-          assert.equal(created.getParent().kind, HttpClientFolderKind, 'the request has the parent as the project');
+          assert.equal(created.getParent().kind, AppProjectFolderKind, 'the request has the parent as the project');
   
           assert.equal(created.expects.url, request.url, 'has the URL');
           assert.equal(created.info.name, request.name, 'has the name');
@@ -2355,10 +2355,10 @@ describe('Models', () => {
       });
 
       describe('addEnvironment()', () => {
-        let project: HttpClientProject;
-        let f1: HttpClientProjectFolder;
+        let project: AppProject;
+        let f1: AppProjectFolder;
         beforeEach(() => {
-          project = HttpClientProject.fromName('test');
+          project = AppProject.fromName('test');
           f1 = project.addFolder('f1');
         });
   
@@ -2385,11 +2385,11 @@ describe('Models', () => {
       });
   
       describe('listEnvironments()', () => {
-        let project: HttpClientProject;
-        let f1: HttpClientProjectFolder;
+        let project: AppProject;
+        let f1: AppProjectFolder;
         let e2: Environment;
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
           project.addEnvironment('e1');
           f1 = project.addFolder('f1');
           e2 = f1.addEnvironment('e2');
@@ -2409,11 +2409,11 @@ describe('Models', () => {
       });
   
       describe('removeEnvironment()', () => {
-        let project: HttpClientProject;
-        let f1: HttpClientProjectFolder;
+        let project: AppProject;
+        let f1: AppProjectFolder;
         let e2: Environment;
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
           project.addEnvironment('e1');
           f1 = project.addFolder('f1');
           e2 = f1.addEnvironment('e2');
@@ -2438,103 +2438,103 @@ describe('Models', () => {
       });
     });
 
-    describe('HttpClientProjectItem', () => {
-      describe('HttpClientProjectItem.projectRequest()', () => {
+    describe('AppProjectItem', () => {
+      describe('AppProjectItem.projectRequest()', () => {
         it('creates the item', () => {
-          const project = HttpClientProject.fromName('test');
-          const item = HttpClientProjectItem.projectRequest(project, 'r1');
-          assert.equal(item.kind, HttpClientRequestKind);
+          const project = AppProject.fromName('test');
+          const item = AppProjectItem.projectRequest(project, 'r1');
+          assert.equal(item.kind, AppProjectRequestKind);
           assert.equal(item.key, 'r1');
         });
       });
   
-      describe('HttpClientProjectItem.projectFolder()', () => {
+      describe('AppProjectItem.projectFolder()', () => {
         it('creates the item', () => {
-          const project = HttpClientProject.fromName('test');
-          const item = HttpClientProjectItem.projectFolder(project, 'f1');
-          assert.equal(item.kind, HttpClientFolderKind);
+          const project = AppProject.fromName('test');
+          const item = AppProjectItem.projectFolder(project, 'f1');
+          assert.equal(item.kind, AppProjectFolderKind);
           assert.equal(item.key, 'f1');
         });
       });
   
-      describe('HttpClientProjectItem.isProjectItem()', () => {
+      describe('AppProjectItem.isProjectItem()', () => {
         it('returns true for a folder item', () => {
-          const project = HttpClientProject.fromName('test');
-          const item = HttpClientProjectItem.projectFolder(project, 'f1');
-          assert.isTrue(HttpClientProjectItem.isProjectItem(item));
+          const project = AppProject.fromName('test');
+          const item = AppProjectItem.projectFolder(project, 'f1');
+          assert.isTrue(AppProjectItem.isProjectItem(item));
         });
   
         it('returns true for a folder item', () => {
-          const project = HttpClientProject.fromName('test');
-          const item = HttpClientProjectItem.projectRequest(project, 'r1');
-          assert.isTrue(HttpClientProjectItem.isProjectItem(item));
+          const project = AppProject.fromName('test');
+          const item = AppProjectItem.projectRequest(project, 'r1');
+          assert.isTrue(AppProjectItem.isProjectItem(item));
         });
   
         it('returns false when not an item', () => {
-          assert.isFalse(HttpClientProjectItem.isProjectItem({}));
+          assert.isFalse(AppProjectItem.isProjectItem({}));
         });
       });
   
       describe('constructor()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = HttpClientProject.fromName('test');
+          project = AppProject.fromName('test');
         });
   
         it('creates a default item for "http-request" type', () => {
-          const item = new HttpClientProjectItem(project, 'http-request');
-          assert.equal(item.kind, HttpClientRequestKind);
+          const item = new AppProjectItem(project, 'http-request');
+          assert.equal(item.kind, AppProjectRequestKind);
           assert.equal(item.key, '');
         });
   
         it('creates a default item for "folder" type', () => {
-          const item = new HttpClientProjectItem(project, 'folder');
-          assert.equal(item.kind, HttpClientFolderKind);
+          const item = new AppProjectItem(project, 'folder');
+          assert.equal(item.kind, AppProjectFolderKind);
           assert.equal(item.key, '');
         });
   
         it('creates an instance from a schema', () => {
-          const schema = HttpClientProjectItem.projectRequest(project, 'r1').toJSON();
-          const item = new HttpClientProjectItem(project, schema);
-          assert.equal(item.kind, HttpClientRequestKind);
+          const schema = AppProjectItem.projectRequest(project, 'r1').toJSON();
+          const item = new AppProjectItem(project, schema);
+          assert.equal(item.kind, AppProjectRequestKind);
           assert.equal(item.key, 'r1');
         });
   
         it('creates an instance from a serialized schema', () => {
-          const schema = JSON.stringify(HttpClientProjectItem.projectRequest(project, 'r1'));
-          const item = new HttpClientProjectItem(project, schema);
-          assert.equal(item.kind, HttpClientRequestKind);
+          const schema = JSON.stringify(AppProjectItem.projectRequest(project, 'r1'));
+          const item = new AppProjectItem(project, schema);
+          assert.equal(item.kind, AppProjectRequestKind);
           assert.equal(item.key, 'r1');
         });
   
         it('throws when input is not defined', () => {
           assert.throws(() => {
-            new HttpClientProjectItem(project, undefined);
+            new AppProjectItem(project, undefined);
           });
         });
       });
   
       describe('toJSON()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = HttpClientProject.fromName('test');
+          project = AppProject.fromName('test');
         });
   
         it('sets the kind', () => {
-          const item = HttpClientProjectItem.projectRequest(project, 'r1').toJSON();
-          assert.equal(item.kind, HttpClientRequestKind);
+          const item = AppProjectItem.projectRequest(project, 'r1').toJSON();
+          assert.equal(item.kind, AppProjectRequestKind);
         });
   
         it('sets the key', () => {
-          const item = HttpClientProjectItem.projectRequest(project, 'r1').toJSON();
+          const item = AppProjectItem.projectRequest(project, 'r1').toJSON();
           assert.equal(item.key, 'r1');
         });
       });
   
       describe('getItem()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = HttpClientProject.fromName('test');
+          project = AppProject.fromName('test');
         });
   
         it('returns a definition of a request', () => {
@@ -2551,9 +2551,9 @@ describe('Models', () => {
       });
   
       describe('getParent()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = HttpClientProject.fromName('test');
+          project = AppProject.fromName('test');
         });
   
         it('returns the project for a root level items', () => {
@@ -2571,17 +2571,17 @@ describe('Models', () => {
       });
     });
 
-    describe('HttpClientProjectRequest', () => {
+    describe('AppProjectRequest', () => {
       describe('Initialization', () => {
         describe('Default project initialization', () => {
-          let project: HttpClientProject;
+          let project: AppProject;
           beforeEach(() => {
-            project = new HttpClientProject();
+            project = new AppProject();
           });
   
           it('initializes a default project request', () => {
-            const result = new HttpClientProjectRequest(project);
-            assert.equal(result.kind, HttpClientRequestKind, 'sets the kind property');
+            const result = new AppProjectRequest(project);
+            assert.equal(result.kind, AppProjectRequestKind, 'sets the kind property');
             assert.typeOf(result.created, 'number', 'sets the created property');
             assert.equal(result.updated, result.created, 'sets the updated property');
             assert.typeOf(result.midnight, 'number', 'sets the updated property');
@@ -2597,12 +2597,12 @@ describe('Models', () => {
         });
   
         describe('From schema initialization', () => {
-          let project: HttpClientProject;
-          let base: IHttpClientProjectRequest;
+          let project: AppProject;
+          let base: IAppProjectRequest;
           beforeEach(() => {
-            project = new HttpClientProject();
+            project = new AppProject();
             base = {
-              kind: HttpClientRequestKind,
+              kind: AppProjectRequestKind,
               info: {
                 kind: ThingKind,
                 name: '',
@@ -2617,53 +2617,53 @@ describe('Models', () => {
           });
   
           it('sets the kind property', () => {
-            const init: IHttpClientProjectRequest = { ...base };
-            const request = new HttpClientProjectRequest(project, init);
-            assert.equal(request.kind, HttpClientRequestKind);
+            const init: IAppProjectRequest = { ...base };
+            const request = new AppProjectRequest(project, init);
+            assert.equal(request.kind, AppProjectRequestKind);
           });
   
           it('sets the key property when missing', () => {
-            const init: IHttpClientProjectRequest = { ...base };
+            const init: IAppProjectRequest = { ...base };
             delete init.key;
-            const request = new HttpClientProjectRequest(project, init);
+            const request = new AppProjectRequest(project, init);
             assert.typeOf(request.key, 'string');
             assert.isNotEmpty(request.key);
           });
   
           it('sets the key property', () => {
-            const init: IHttpClientProjectRequest = { ...base, ... { key: 'test' } };
-            const request = new HttpClientProjectRequest(project, init);
+            const init: IAppProjectRequest = { ...base, ... { key: 'test' } };
+            const request = new AppProjectRequest(project, init);
             assert.equal(request.key, 'test');
           });
   
           it('sets the expects property when missing', () => {
-            const init: IHttpClientProjectRequest = { ...base };
+            const init: IAppProjectRequest = { ...base };
             delete init.expects;
-            const request = new HttpClientProjectRequest(project, init);
+            const request = new AppProjectRequest(project, init);
             assert.typeOf(request.expects, 'object');
             assert.equal(request.expects.method, 'GET');
             assert.equal(request.expects.url, '');
           });
   
           it('sets the expects property', () => {
-            const init: IHttpClientProjectRequest = { ...base, ... { expects: { kind: HttpRequestKind, url: 'test.com', method: 'GET' } } };
-            const request = new HttpClientProjectRequest(project, init);
+            const init: IAppProjectRequest = { ...base, ... { expects: { kind: HttpRequestKind, url: 'test.com', method: 'GET' } } };
+            const request = new AppProjectRequest(project, init);
             assert.typeOf(request.expects, 'object');
             assert.equal(request.expects.method, 'GET');
             assert.equal(request.expects.url, 'test.com');
           });
   
           it('sets the info property when missing', () => {
-            const init: IHttpClientProjectRequest = { ...base };
+            const init: IAppProjectRequest = { ...base };
             delete init.info;
-            const request = new HttpClientProjectRequest(project, init);
+            const request = new AppProjectRequest(project, init);
             assert.typeOf(request.info, 'object');
             assert.equal(request.info.name, '');
           });
   
           it('sets the info property', () => {
-            const init: IHttpClientProjectRequest = { ...base, ... { info: { kind: ThingKind, name: 'A request' } } };
-            const request = new HttpClientProjectRequest(project, init);
+            const init: IAppProjectRequest = { ...base, ... { info: { kind: ThingKind, name: 'A request' } } };
+            const request = new AppProjectRequest(project, init);
             assert.typeOf(request.info, 'object');
             assert.equal(request.info.name, 'A request');
           });
@@ -2674,8 +2674,8 @@ describe('Models', () => {
               startTime: Date.now(),
             });
             const log = RequestLog.fromRequest(sentRequest.toJSON());
-            const init: IHttpClientProjectRequest = { ...base, ... { log: log.toJSON() } };
-            const request = new HttpClientProjectRequest(project, init);
+            const init: IAppProjectRequest = { ...base, ... { log: log.toJSON() } };
+            const request = new AppProjectRequest(project, init);
             assert.typeOf(request.log, 'object');
             assert.equal(request.log.kind, RequestLogKind);
             assert.typeOf(request.log.request, 'object');
@@ -2684,8 +2684,8 @@ describe('Models', () => {
   
           it('sets the config property', () => {
             const config = RequestConfig.withDefaults();
-            const init: IHttpClientProjectRequest = { ...base, ... { config: config.toJSON() } };
-            const request = new HttpClientProjectRequest(project, init);
+            const init: IAppProjectRequest = { ...base, ... { config: config.toJSON() } };
+            const request = new AppProjectRequest(project, init);
             assert.typeOf(request.config, 'object');
             assert.isTrue(request.config.enabled);
             assert.equal(request.config.timeout, 90);
@@ -2693,46 +2693,46 @@ describe('Models', () => {
   
           it('sets the authorization property', () => {
             const authorization = new RequestAuthorization();
-            const init: IHttpClientProjectRequest = { ...base, ... { authorization: [authorization.toJSON()] } };
-            const request = new HttpClientProjectRequest(project, init);
+            const init: IAppProjectRequest = { ...base, ... { authorization: [authorization.toJSON()] } };
+            const request = new AppProjectRequest(project, init);
             assert.typeOf(request.authorization, 'array');
             assert.lengthOf(request.authorization, 1);
           });
   
           it('sets the created property', () => {
-            const init: IHttpClientProjectRequest = { ...base, ...{ created: 123 } };
-            const request = new HttpClientProjectRequest(project, init);
+            const init: IAppProjectRequest = { ...base, ...{ created: 123 } };
+            const request = new AppProjectRequest(project, init);
             assert.equal(request.created, 123);
           });
   
           it('sets the default created property', () => {
-            const init: IHttpClientProjectRequest = { ...base };
-            const request = new HttpClientProjectRequest(project, init);
+            const init: IAppProjectRequest = { ...base };
+            const request = new AppProjectRequest(project, init);
             assert.typeOf(request.created, 'number');
           });
   
           it('sets the updated property', () => {
-            const init: IHttpClientProjectRequest = { ...base, ...{ updated: 123 } };
-            const request = new HttpClientProjectRequest(project, init);
+            const init: IAppProjectRequest = { ...base, ...{ updated: 123 } };
+            const request = new AppProjectRequest(project, init);
             assert.equal(request.updated, 123);
           });
   
           it('sets the default updated property', () => {
-            const init: IHttpClientProjectRequest = { ...base };
-            const request = new HttpClientProjectRequest(project, init);
+            const init: IAppProjectRequest = { ...base };
+            const request = new AppProjectRequest(project, init);
             assert.equal(request.updated, request.created);
           });
   
           it('sets the midnight property', () => {
-            const init: IHttpClientProjectRequest = { ...base, ...{ midnight: 123 } };
-            const request = new HttpClientProjectRequest(project, init);
+            const init: IAppProjectRequest = { ...base, ...{ midnight: 123 } };
+            const request = new AppProjectRequest(project, init);
             assert.equal(request.midnight, 123);
           });
   
           it('sets the default midnight property', () => {
             const now = new Date();
-            const init: IHttpClientProjectRequest = { ...base, updated: now.getTime() };
-            const request = new HttpClientProjectRequest(project, init);
+            const init: IAppProjectRequest = { ...base, updated: now.getTime() };
+            const request = new AppProjectRequest(project, init);
             now.setHours(0, 0, 0, 0);
             assert.equal(request.midnight, now.getTime());
           });
@@ -2740,11 +2740,11 @@ describe('Models', () => {
   
         describe('From JSON string initialization', () => {
           it('restores project data from JSON string', () => {
-            const project = new HttpClientProject();
+            const project = new AppProject();
             const request = project.addRequest('https://api.com');
             const str = JSON.stringify(request);
             
-            const result = new HttpClientProjectRequest(project, str);
+            const result = new AppProjectRequest(project, str);
   
             assert.equal(result.key, request.key, 'restores the key');
             assert.equal(result.info.name, 'https://api.com', 'restores the info object');
@@ -2752,16 +2752,16 @@ describe('Models', () => {
           });
         });
   
-        describe('HttpClientProjectRequest.fromUrl()', () => {
+        describe('AppProjectRequest.fromUrl()', () => {
           const url = 'https://api.com';
   
-          let project: HttpClientProject;
+          let project: AppProject;
           beforeEach(() => {
-            project = new HttpClientProject();
+            project = new AppProject();
           });
   
           it('sets the request values', () => {
-            const request = HttpClientProjectRequest.fromUrl(url, project);
+            const request = AppProjectRequest.fromUrl(url, project);
             const { expects } = request;
             assert.equal(expects.url, url, 'sets the url');
             assert.equal(expects.kind, HttpRequestKind, 'sets the kind');
@@ -2769,37 +2769,37 @@ describe('Models', () => {
           });
   
           it('sets the info values', () => {
-            const request = HttpClientProjectRequest.fromUrl(url, project);
+            const request = AppProjectRequest.fromUrl(url, project);
             const { info } = request;
             assert.equal(info.name, url, 'sets the name');
             assert.equal(info.kind, ThingKind, 'sets the kind');
           });
   
           it('sets request meta', () => {
-            const request = HttpClientProjectRequest.fromUrl(url, project);
+            const request = AppProjectRequest.fromUrl(url, project);
             assert.typeOf(request.key, 'string', 'has the key');
-            assert.equal(request.kind, HttpClientRequestKind, 'sets the kind');
+            assert.equal(request.kind, AppProjectRequestKind, 'sets the kind');
             assert.typeOf(request.created, 'number', 'sets the created');
             assert.equal(request.updated, request.created, 'sets the updated');
           });
   
           it('throws when the project ius missing', () => {
             assert.throws(() => {
-              HttpClientProjectRequest.fromUrl(url);
+              AppProjectRequest.fromUrl(url);
             }, 'The project is required.');
           });
         });
   
-        describe('HttpClientProjectRequest.fromName()', () => {
+        describe('AppProjectRequest.fromName()', () => {
           const name = 'a request';
   
-          let project: HttpClientProject;
+          let project: AppProject;
           beforeEach(() => {
-            project = new HttpClientProject();
+            project = new AppProject();
           });
   
           it('sets the request values', () => {
-            const request = HttpClientProjectRequest.fromName(name, project);
+            const request = AppProjectRequest.fromName(name, project);
             const { expects } = request;
             assert.equal(expects.url, '', 'sets the empty url');
             assert.equal(expects.kind, HttpRequestKind, 'sets the kind');
@@ -2807,33 +2807,33 @@ describe('Models', () => {
           });
   
           it('sets the info values', () => {
-            const request = HttpClientProjectRequest.fromName(name, project);
+            const request = AppProjectRequest.fromName(name, project);
             const { info } = request;
             assert.equal(info.name, name, 'sets the name');
             assert.equal(info.kind, ThingKind, 'sets the kind');
           });
   
           it('sets request meta', () => {
-            const request = HttpClientProjectRequest.fromName(name, project);
+            const request = AppProjectRequest.fromName(name, project);
             assert.typeOf(request.key, 'string', 'has the key');
-            assert.equal(request.kind, HttpClientRequestKind, 'sets the kind');
+            assert.equal(request.kind, AppProjectRequestKind, 'sets the kind');
             assert.typeOf(request.created, 'number', 'sets the created');
             assert.equal(request.updated, request.created, 'sets the updated');
           });
   
           it('throws when the project ius missing', () => {
             assert.throws(() => {
-              HttpClientProjectRequest.fromName(name);
+              AppProjectRequest.fromName(name);
             }, 'The project is required.');
           });
         });
   
-        describe('HttpClientProjectRequest.fromHttpRequest()', () => {
+        describe('AppProjectRequest.fromHttpRequest()', () => {
           let iRequest: IHttpRequest;
   
-          let project: HttpClientProject;
+          let project: AppProject;
           beforeEach(() => {
-            project = new HttpClientProject();
+            project = new AppProject();
             iRequest = {
               kind: HttpRequestKind,
               method: 'PUT',
@@ -2844,7 +2844,7 @@ describe('Models', () => {
           });
   
           it('sets the request values', () => {
-            const request = HttpClientProjectRequest.fromHttpRequest(iRequest, project);
+            const request = AppProjectRequest.fromHttpRequest(iRequest, project);
             const { expects } = request;
             assert.equal(expects.url, iRequest.url, 'sets the empty url');
             assert.equal(expects.kind, HttpRequestKind, 'sets the kind');
@@ -2854,33 +2854,33 @@ describe('Models', () => {
           });
   
           it('sets the info values', () => {
-            const request = HttpClientProjectRequest.fromHttpRequest(iRequest, project);
+            const request = AppProjectRequest.fromHttpRequest(iRequest, project);
             const { info } = request;
             assert.equal(info.name, iRequest.url, 'sets the name');
             assert.equal(info.kind, ThingKind, 'sets the kind');
           });
   
           it('sets request meta', () => {
-            const request = HttpClientProjectRequest.fromHttpRequest(iRequest, project);
+            const request = AppProjectRequest.fromHttpRequest(iRequest, project);
             assert.typeOf(request.key, 'string', 'has the key');
-            assert.equal(request.kind, HttpClientRequestKind, 'sets the kind');
+            assert.equal(request.kind, AppProjectRequestKind, 'sets the kind');
             assert.typeOf(request.created, 'number', 'sets the created');
             assert.equal(request.updated, request.created, 'sets the updated');
           });
   
           it('throws when the project ius missing', () => {
             assert.throws(() => {
-              HttpClientProjectRequest.fromHttpRequest(iRequest);
+              AppProjectRequest.fromHttpRequest(iRequest);
             }, 'The project is required.');
           });
         });
   
-        describe('HttpClientProjectRequest.fromRequest()', () => {
+        describe('AppProjectRequest.fromRequest()', () => {
           let iRequest: IRequest;
   
-          let project: HttpClientProject;
+          let project: AppProject;
           beforeEach(() => {
-            project = new HttpClientProject();
+            project = new AppProject();
             const httpRequest: IHttpRequest = {
               kind: RequestKind,
               method: 'PUT',
@@ -2894,7 +2894,7 @@ describe('Models', () => {
           });
   
           it('sets the request values', () => {
-            const request = HttpClientProjectRequest.fromRequest(iRequest, project);
+            const request = AppProjectRequest.fromRequest(iRequest, project);
             const { expects } = request;
             assert.equal(expects.url, iRequest.expects.url, 'sets the empty url');
             assert.equal(expects.kind, HttpRequestKind, 'sets the kind');
@@ -2904,16 +2904,16 @@ describe('Models', () => {
           });
   
           it('sets the info values', () => {
-            const request = HttpClientProjectRequest.fromRequest(iRequest, project);
+            const request = AppProjectRequest.fromRequest(iRequest, project);
             const { info } = request;
             assert.equal(info.name, 'a name', 'sets the name');
             assert.equal(info.kind, ThingKind, 'sets the kind');
           });
   
           it('sets request meta', () => {
-            const request = HttpClientProjectRequest.fromRequest(iRequest, project);
+            const request = AppProjectRequest.fromRequest(iRequest, project);
             assert.typeOf(request.key, 'string', 'has the key');
-            assert.equal(request.kind, HttpClientRequestKind, 'sets the kind');
+            assert.equal(request.kind, AppProjectRequestKind, 'sets the kind');
             assert.typeOf(request.created, 'number', 'sets the created');
             assert.equal(request.updated, request.created, 'sets the updated');
           });
@@ -2921,9 +2921,9 @@ describe('Models', () => {
       });
   
       describe('getParent()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
         });
   
         it('returns the project object', () => {
@@ -2941,9 +2941,9 @@ describe('Models', () => {
       });
   
       describe('getProject()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
         });
   
         it('returns the project when added to the project', () => {
@@ -2961,9 +2961,9 @@ describe('Models', () => {
       });
   
       describe('remove()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
         });
   
         it('removes from a project root', () => {
@@ -2979,15 +2979,15 @@ describe('Models', () => {
           r.remove();
           assert.deepEqual(folder.items, [], 'folder has no items');
           assert.lengthOf(project.items, 1, 'projects has a single item');
-          assert.lengthOf(project.items.filter(i => i.kind === HttpClientFolderKind), 1, 'projects has only folder items');
+          assert.lengthOf(project.items.filter(i => i.kind === AppProjectFolderKind), 1, 'projects has only folder items');
           assert.lengthOf(project.definitions.requests, 0, 'projects has no request definitions');
         });
       });
   
       describe('clone()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
         });
   
         describe('project root', () => {
@@ -3021,7 +3021,7 @@ describe('Models', () => {
           it('copies a request from one project to another', () => {
             const r = project.addRequest('https://api.com');
             const result = r.clone({ withoutAttach: true });
-            const target = new HttpClientProject();
+            const target = new AppProject();
             target.addRequest(result);
             assert.isTrue(result.getProject() === target, 'the request has a new project');
             assert.lengthOf(target.items, 1);
@@ -3030,8 +3030,8 @@ describe('Models', () => {
         });
   
         describe('folder root', () => {
-          let request: HttpClientProjectRequest;
-          let folder: HttpClientProjectFolder;
+          let request: AppProjectRequest;
+          let folder: AppProjectFolder;
           beforeEach(() => {
             folder = project.addFolder('a folder');
             request = folder.addRequest('https://api.com');
@@ -3050,7 +3050,7 @@ describe('Models', () => {
   
           it('copies a request from one project to another', () => {
             const result = request.clone({ withoutAttach: true });
-            const target = new HttpClientProject();
+            const target = new AppProject();
             target.addRequest(result);
             assert.isTrue(result.getProject() === target, 'the request has a new project');
             assert.lengthOf(target.items, 1);
@@ -3060,14 +3060,14 @@ describe('Models', () => {
       });
   
       describe('#clone()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         beforeEach(() => {
-          project = new HttpClientProject();
+          project = new AppProject();
         });
   
         it('clones the request', () => {
           const request = project.addRequest('https://api.com');
-          const result = HttpClientProjectRequest.clone(request.toJSON(), project);
+          const result = AppProjectRequest.clone(request.toJSON(), project);
   
           assert.typeOf(result.key, 'string', 'has the key');
           assert.notEqual(result.key, request.key, 'has a different key');
@@ -3081,7 +3081,7 @@ describe('Models', () => {
       describe('addCertificate()', () => {
         it('adds a certificate instance', () => {
           const cert = Certificate.fromP12('value');
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const created = project.addCertificate(cert);
           assert.deepEqual(created, cert);
   
@@ -3090,7 +3090,7 @@ describe('Models', () => {
         });
   
         it('adds by the schema', () => {
-          const project = new HttpClientProject();
+          const project = new AppProject();
           const cert = Certificate.fromP12('value');
           const created = project.addCertificate(cert.toJSON());
           assert.deepEqual(created, cert);
@@ -3101,11 +3101,11 @@ describe('Models', () => {
       });
   
       describe('removeCertificate()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         let cert: Certificate;
         beforeEach(() => {
           cert = Certificate.fromP12('value');
-          project = new HttpClientProject();
+          project = new AppProject();
           project.addCertificate(cert);
         });
   
@@ -3133,11 +3133,11 @@ describe('Models', () => {
       });
   
       describe('findCertificate()', () => {
-        let project: HttpClientProject;
+        let project: AppProject;
         let cert: Certificate;
         beforeEach(() => {
           cert = Certificate.fromP12('value');
-          project = new HttpClientProject();
+          project = new AppProject();
           project.addCertificate(cert);
         });
   

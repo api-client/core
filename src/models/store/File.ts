@@ -20,7 +20,7 @@ export interface IStoredFile {
    */
   key: string;
   /**
-   * The projects's meta info.
+   * The file's meta info.
    */
   info: IThing;
   /**

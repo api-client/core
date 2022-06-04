@@ -60,8 +60,8 @@ export { DataModel, IDataModel, Kind as DataModelKind } from './src/models/data/
 export { DataNamespace, IDataNamespace, Kind as DataNamespaceKind, DataItem, IDataItem } from './src/models/data/DataNamespace.js';
 export { DataProperty, IDataProperty, Kind as DataPropertyKind, DataPropertyType, DataPropertyTypes, DataPropertyList, DateFormat, DateFormats, DateFormatList } from './src/models/data/DataProperty.js';
 
-export { HttpClientRequest, IHttpClientRequest, Kind as HttpClientRequestKind } from './src/models/http-client/HttpClientRequest.js';
-export * from './src/models/http-client/HttpClientProject.js';
+export { AppRequest, IAppRequest, Kind as AppRequestKind, } from './src/models/AppRequest.js';
+export * from './src/models/AppProject.js';
 
 // 
 // AMF

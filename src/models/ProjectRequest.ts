@@ -5,7 +5,7 @@ import { IHttpRequest, Kind as HttpRequestKind } from './HttpRequest.js';
 import { HttpProject } from './HttpProject.js';
 import v4 from '../lib/uuid.js';
 import { IRequest, Request } from './Request.js';
-import { IHttpClientProjectRequest } from './http-client/HttpClientProject.js';
+import { IAppProjectRequest } from './AppProject.js';
 
 export const Kind = 'Core#ProjectRequest';
 
@@ -161,10 +161,10 @@ export class ProjectRequest extends Request implements ProjectDefinitionProperty
     return result;
   }
   
-  constructor(project: HttpProject, input?: string|IProjectRequest | IHttpClientProjectRequest) {
+  constructor(project: HttpProject, input?: string|IProjectRequest | IAppProjectRequest) {
     super(input);
     this.project = project;
-    let init: IProjectRequest | IHttpClientProjectRequest;
+    let init: IProjectRequest | IAppProjectRequest;
     if (typeof input === 'string') {
       init = JSON.parse(input);
     } else if (typeof input === 'object') {
@@ -190,7 +190,7 @@ export class ProjectRequest extends Request implements ProjectDefinitionProperty
     this.new(init);
   }
 
-  new(init: IProjectRequest | IHttpClientProjectRequest): void {
+  new(init: IProjectRequest | IAppProjectRequest): void {
     super.new(init);
     
     const { key } = init;
