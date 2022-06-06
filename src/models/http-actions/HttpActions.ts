@@ -1,3 +1,5 @@
+import { SameSiteValue } from '../../cookies/CookieParser.js';
+
 export const ReadDataStepKind = 'HttpAction#ReadData';
 export const SetDataStepKind = 'HttpAction#SetData';
 export const SetVariableStepKind = 'HttpAction#SetVariable';
@@ -30,14 +32,14 @@ export enum ActionOperatorEnum {
   regex = "regex",
 }
 
-export enum ActionRequestSourceEnum {
+export enum ActionRequestDataEnum {
   url = "url",
   method = "method",
   headers = "headers",
   body = "body"
 }
 
-export enum ActionResponseSourceEnum {
+export enum ActionResponseDataEnum {
   url = "url",
   status = "status",
   headers = "headers",
@@ -101,10 +103,10 @@ export interface IHttpCondition {
   source?: ActionSourceEnum;
   /**
    * Source of the data.
-   * In the legacy actions this was `data`.
+   * In the legacy actions this was `source`.
    * This is not required when the source is not `request` or `response`.
    */
-  data?: ActionRequestSourceEnum | ActionResponseSourceEnum;
+  data?: ActionRequestDataEnum | ActionResponseDataEnum;
   /**
    * The path to the data.
    * For JSON value use https://jmespath.org/ syntax.
@@ -116,6 +118,15 @@ export interface IHttpCondition {
    * The comparison operator.
    */
   operator?: ActionOperatorEnum;
+  /**
+   * The value to compare the read result.
+   * In runtime, the type is casted to the same type as read value.
+   * 
+   * When this is not set it compares to an empty string value or `0`.
+   * 
+   * In ARC actions this was the `predictedValue`.
+   */
+  value?: string;
 }
 
 export interface IActionStep {
@@ -141,10 +152,10 @@ export interface IReadDataStep extends IActionStep {
   source?: ActionSourceEnum;
   /**
    * Source of the data.
-   * In the legacy actions this was `data`.
+   * In the legacy actions this was `source`.
    * This is not required when the source is not `request` or `response`.
    */
-  data?: ActionRequestSourceEnum | ActionResponseSourceEnum;
+  data?: ActionRequestDataEnum | ActionResponseDataEnum;
   /**
    * The path to the data.
    * For JSON value use https://jmespath.org/ syntax.
@@ -238,7 +249,7 @@ export interface ISetCookieStep extends IActionStep {
    * The SameSite parameter of the cookie.
    * https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#creating_cookies
    */
-  sameSite?: 'Lax' | 'Strict' | 'None';
+  sameSite?: SameSiteValue;
 }
 
 /**

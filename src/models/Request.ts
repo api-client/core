@@ -1,6 +1,6 @@
+import { Core as JsonCore } from '@api-client/json'
 import { IRequestConfig, RequestConfig } from './RequestConfig.js';
 import { Thing, IThing, Kind as ThingKind } from './Thing.js';
-import { IRequestActions, RequestActions } from './RequestActions.js';
 import { HttpCertificate, Certificate } from './ClientCertificate.js';
 import { IRequestAuthorization, RequestAuthorization } from './RequestAuthorization.js';
 import { IRequestLog, RequestLog, Kind as LogKind } from './RequestLog.js';
@@ -13,6 +13,8 @@ import { ARCSavedRequest, ARCHistoryRequest } from './legacy/request/ArcRequest.
 import { ErrorResponse as LegacyErrorResponse, Response as LegacyResponse } from './legacy/request/ArcResponse.js';
 import { PayloadSerializer } from '../lib/transformers/PayloadSerializer.js';
 import { Normalizer } from './legacy/Normalizer.js';
+import { IHttpActionFlow } from './http-actions/HttpActions.js';
+import { LegacyTranslator } from './http-actions/LegacyTranslator.js';
 
 export const Kind = 'Core#Request';
 export const createdSymbol = Symbol('created');
@@ -58,11 +60,15 @@ export interface IRequest {
    */
   authorization?: IRequestAuthorization[];
   /**
-   * Actions to be performed when the request is executed.
+   * Http action flows.
+   * In ARC this was "actions",
    */
-  actions?: IRequestActions;
+  flows?: IHttpActionFlow[];
   /**
-   * The list of certificates to use with the request.
+   * The certificate to use with the request.
+   * Note, the certificate defined on the certificate authorization 
+   * should not be included here by default. The HTTP transport should recognize 
+   * this certificate and update the configuration.
    */
   clientCertificate?: HttpCertificate;
 }
@@ -93,11 +99,15 @@ export class Request {
    */
   authorization?: RequestAuthorization[];
   /**
-   * Actions to be performed when the request is executed.
+   * Http action flows.
+   * In ARC this was "actions",
    */
-  actions?: RequestActions;
+  flows?: IHttpActionFlow[];
   /**
-   * The list of certificates to use with the request.
+   * The certificate to use with the request.
+   * Note, the certificate defined on the certificate authorization 
+   * should not be included here by default. The HTTP transport should recognize 
+   * this certificate and update the configuration.
    */
   clientCertificate?: Certificate;
 
@@ -196,7 +206,7 @@ export class Request {
     init.created = normalized.created;
     init.updated = normalized.updated;
     if (normalized.actions) {
-      init.actions = RequestActions.fromLegacy(normalized.actions).toJSON();
+      init.flows = LegacyTranslator.translate(normalized.actions);
     }
     if (Array.isArray(normalized.authorization) && normalized.authorization.length) {
       init.authorization = normalized.authorization.map((i) => RequestAuthorization.fromLegacy(i).toJSON());
@@ -329,7 +339,7 @@ export class Request {
   }
 
   new(init: IRequest): void {
-    const { expects, log, updated, created = Date.now(), midnight, config, authorization, actions, clientCertificate, info } = init;
+    const { expects, log, updated, created = Date.now(), midnight, config, authorization, flows, clientCertificate, info } = init;
     if (expects) {
       this.expects = new HttpRequest(expects);
     } else {
@@ -367,10 +377,10 @@ export class Request {
     if (midnight) {
       this.midnight = midnight;
     }
-    if (actions) {
-      this.actions = new RequestActions(actions);
+    if (Array.isArray(flows)) {
+      this.flows = flows.map(i => JsonCore.clone(i));
     } else {
-      this.actions = undefined;
+      this.flows = undefined;
     }
     if (clientCertificate) {
       this.clientCertificate = new Certificate(clientCertificate);
@@ -397,8 +407,8 @@ export class Request {
     if (Array.isArray(this.authorization)) {
       result.authorization = this.authorization.map(i => i.toJSON());
     }
-    if (this.actions) {
-      result.actions = this.actions.toJSON();
+    if (Array.isArray(this.flows)) {
+      result.flows = this.flows.map(i => JsonCore.clone(i))
     }
     if (this.clientCertificate) {
       result.clientCertificate = this.clientCertificate.toJSON();

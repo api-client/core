@@ -1,4 +1,4 @@
-import { CookieJar } from "src/cookies/CookieJar";
+import { CookieJar } from "../../cookies/CookieJar";
 
 /**
  * The request(s) execution environment.

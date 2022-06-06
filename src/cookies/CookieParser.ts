@@ -2,7 +2,7 @@
 import { Punycode } from "./Punycode.js";
 import { HttpCookie } from '../models/HttpCookie.js';
 
-type SameSiteValue = 'Lax' | 'Strict' | 'None';
+export type SameSiteValue = 'Lax' | 'Strict' | 'None';
 
 const cookieParts: (keyof HttpCookie)[] = [
   'path',
@@ -271,23 +271,7 @@ export class CookieParser {
       return true;
     }
     const requestPath = this.getPath(url);
-    // p1: The cookie-path and the request-path are identical.
-    if (requestPath === cookiePath) {
-      return true;
-    }
-
-    // p2,p3: The cookie-path is a prefix of the request-path ...
-    if (requestPath.startsWith(cookiePath)) {
-      // p2: and the last character of the cookie-path is U+002F ("/").
-      if (cookiePath.endsWith('/')) {
-        return true;
-      }
-      // p3: and the first character of the request-path that is not included in the cookie-path 
-      // is a U+002F ("/") character.
-      if (requestPath.replace(cookiePath, '')[0] === '/') {
-        return true;
-      }
-    }
+    return this._matchesPath(cookiePath, requestPath);
     
     // const index = requestPath.indexOf(cookiePath);
     // if (index === 0 && cookiePath[cookiePath.length - 1] === '/') {
@@ -305,6 +289,39 @@ export class CookieParser {
     //     }
     //   }
     // }
+  }
+
+  protected static _matchesPath(cookiePath: string, requestPath: string): boolean {
+    // p1: The cookie-path and the request-path are identical.
+    if (requestPath === cookiePath) {
+      return true;
+    }
+
+    // p2,p3: The cookie-path is a prefix of the request-path ...
+    if (requestPath.startsWith(cookiePath)) {
+      // p2: and the last character of the cookie-path is U+002F ("/").
+      if (cookiePath.endsWith('/')) {
+        return true;
+      }
+      // p3: and the first character of the request-path that is not included in the cookie-path 
+      // is a U+002F ("/") character.
+      if (requestPath.replace(cookiePath, '')[0] === '/') {
+        return true;
+      }
+    }
     return false;
+  }
+
+  static matchesCookie(c1: HttpCookie, c2: HttpCookie): boolean {
+    if (c1.name !== c2.name) {
+      return false;
+    }
+    if (!c1.domain || !c2.domain) {
+      return false;
+    }
+    if (!c1.path || !c2.path) {
+      return false;
+    }
+    return this.matchesDomain(c1.domain, c2.domain) && this._matchesPath(c1.path, c2.path);
   }
 }

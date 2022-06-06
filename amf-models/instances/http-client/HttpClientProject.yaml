@@ -1,6 +1,6 @@
 #%HTTP Client Project 1.0
 
-kind: HttpClient#Project
+kind: Core#AppProject
 key: ec8dcc51-a2b1-48a4-a063-1f023e717381
 
 info:
@@ -12,24 +12,24 @@ created: 1653592878403
 updated: 1653592878403
 
 items:
-  - kind: HttpClient#ProjectFolder
+  - kind: Core#AppProjectFolder
     key: f045ff7c-5f7b-4232-ac84-2b5ce5d3f6fd
 
 definitions:
   folders:
-    - kind: HttpClient#ProjectFolder # most likely this will be optional in this place but required when the folder is defined in another file.
+    - kind: Core#AppProjectFolder # most likely this will be optional in this place but required when the folder is defined in another file.
       key: f045ff7c-5f7b-4232-ac84-2b5ce5d3f6fd
       info:
         name: Status codes
       created: 1653593047514
       updated: 1653593047514
       items:
-        - kind: HttpClient#ProjectRequest
+        - kind: Core#AppProjectRequest
           key: e4c08ed6-c566-449b-8c09-3af36fe0af48
-        - kind: HttpClient#ProjectRequest
+        - kind: Core#AppProjectRequest
           key: b2977e38-a7de-47f9-acbe-4492745bcf40
   requests:
-    - kind: HttpClient#ProjectRequest
+    - kind: Core#AppProjectRequest
       key: e4c08ed6-c566-449b-8c09-3af36fe0af48
       created: 1653593207486
       updated: 1653593207486
@@ -38,7 +38,7 @@ definitions:
       expects:
         url: https://httpbin.org/status/{code}
         method: GET
-    - kind: HttpClient#ProjectRequest
+    - kind: Core#AppProjectRequest
       key: b2977e38-a7de-47f9-acbe-4492745bcf40
       created: 1653593404216
       updated: 1653593404216

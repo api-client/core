@@ -3,8 +3,7 @@ import { IHttpRequest, HttpRequest } from '../models/HttpRequest.js';
 import { ISentRequest, SentRequest } from '../models/SentRequest.js';
 import { IHttpResponse, HttpResponse } from '../models/HttpResponse.js';
 import { IErrorResponse, ErrorResponse } from '../models/ErrorResponse.js';
-import { IDataSource } from '../models/actions/Condition.js';
-import { ActionTypeEnum } from '../models/actions/Enums.js';
+import { ActionRequestDataEnum, ActionResponseDataEnum, ActionSourceEnum } from '../models/http-actions/HttpActions.js';
 import { Headers } from '../lib/headers/Headers.js';
 import { JsonReader } from './JsonReader.js';
 import { XmlReader } from './XmlReader.js';
@@ -19,10 +18,12 @@ export class RequestDataExtractor {
    * The request that has been sent to the server.
    */
   request: HttpRequest | SentRequest;
+
   /**
    * The response object
    */
   response?: HttpResponse | ErrorResponse;
+
   constructor(request: IHttpRequest | ISentRequest, response?: IHttpResponse | IErrorResponse) {
     this.request = new HttpRequest(request);
     if (response) {
@@ -37,28 +38,26 @@ export class RequestDataExtractor {
   /**
    * Reads the data from the selected path.
    * 
-   * @param config The configuration of the data source
+   * @param source The source of the data to read. Note, variables are not supported here.
+   * @param data The kind of data to read the value from
+   * @param path The path to the data.
    * @return Data to be processed
    */
-  async extract(config: IDataSource): Promise<string | number | undefined> {
-    const { type, source, path, value } = config;
-    if (source === 'value') {
-      return value;
-    }
+  async extract(source: ActionSourceEnum, data?: ActionRequestDataEnum | ActionResponseDataEnum, path?: string): Promise<string | number | undefined> {
     const args = path ? path.split('.') : [];
-    switch (source) {
+    switch (data) {
       case 'url':
         return DataUtils.getDataUrl(this.getUrl(), args);
       case 'headers':
-        return DataUtils.getDataHeaders(this.getHeaders(type), args);
+        return DataUtils.getDataHeaders(this.getHeaders(source), args);
       case 'status':
         return this.response && this.response.status;
       case 'method':
         return this.request.method;
       case 'body':
-        return this.processBody(path, type);
+        return this.processBody(path, source);
       default:
-        throw new Error(`Unknown source ${source} for ${type} data`);
+        throw new Error(`Unknown data ${data} for ${source} data`);
     }
   }
 
@@ -74,14 +73,14 @@ export class RequestDataExtractor {
    * @param source The source name 
    * @returns The headers from the request / response
    */
-  getHeaders(source?: ActionTypeEnum): string {
+  getHeaders(source?: ActionSourceEnum): string {
     if (source === 'request') {
       return this.request.headers || '';
     }
     return this.response && this.response.headers || '';
   }
 
-  async processBody(path?: string, source?: ActionTypeEnum): Promise<string | undefined> {
+  async processBody(path?: string, source?: ActionSourceEnum): Promise<string | undefined> {
     const value = await this.getBody(source);
     if (!value) {
       return undefined;
@@ -105,7 +104,7 @@ export class RequestDataExtractor {
    * @param source The source name 
    * @returns The headers from the request / response
    */
-  async getBody(source?: ActionTypeEnum): Promise<string | undefined> {
+  async getBody(source?: ActionSourceEnum): Promise<string | undefined> {
     if (source === 'request') {
       return this.request.readPayloadAsString();
     }

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { OperatorEnum } from '../../models/actions/Enums.js';
+import { ActionOperatorEnum } from '../../models/http-actions/HttpActions.js';
 
 /**
  * Checks if values equal.
@@ -8,7 +8,7 @@ import { OperatorEnum } from '../../models/actions/Enums.js';
  * @returns True if objects matches.
  */
 export function isEqual(value: any, condition: any): boolean {
-  if (value === condition) {
+  if (value === condition || String(value) === String(condition)) {
     return true;
   }
   let valueTyped = value;
@@ -170,7 +170,7 @@ export function isRegex(value: any, condition: any): boolean {
  * @param condition Value to compare.
  * @returns True if the condition is satisfied and false otherwise.
  */
-export function checkCondition(value: any, operator: OperatorEnum, condition: string | number): boolean {
+export function checkCondition(value: any, operator: ActionOperatorEnum, condition: string | undefined): boolean {
   switch (operator) {
     case 'equal':
       return isEqual(value, condition);
