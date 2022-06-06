@@ -25,9 +25,18 @@ import { DefaultLogger } from '../../lib/logging/DefaultLogger.js';
 import { ILogger, Logger } from '../../lib/logging/Logger.js';
 import { Headers } from '../../lib/headers/Headers.js';
 import * as RequestUtils from './RequestUtils.js';
-import { Cookies } from '../../lib/cookies/Cookies.js';
+// import { Cookies } from '../../lib/cookies/Cookies.js';
 import { HttpErrorCodes } from './HttpErrorCodes.js';
+import { CookieParser } from '../../cookies/CookieParser.js';
 
+/**
+ * A note on cookies and redirects.
+ * The architecture here assumes running requests is a test environment.
+ * This means cookies are not processed by this class. This includes processing cookies during a redirect.
+ * The class does parse response cookies before a redirect and sets new cookies in the redirected request only
+ * if they match the domain + path. However, this class doesn't know anything about other cookies 
+ * that the application may have for the domain after redirection.
+ */
 export interface HttpEngineOptions extends IRequestBaseConfig {
   /**
    * The authorization configuration to apply to the request.
@@ -473,11 +482,8 @@ export abstract class HttpEngine extends EventEmitter {
       this._publishResponse();
       return;
     }
-    let responseCookies;
-    if (this.currentHeaders.has('set-cookie')) {
-      responseCookies = this.currentHeaders.get('set-cookie');
-    }
     try {
+      const responseCookies = this.currentHeaders.get('set-cookie');
       const response = await this._createRedirectResponse(location);
       this.redirects.push(response);
       this._cleanUpRedirect();
@@ -712,35 +718,47 @@ Check your request parameters.`);
    * @param location Redirect destination
    */
   _processRedirectCookies(responseCookies: string, location: string): void {
-    let newParser = new Cookies(responseCookies, location);
-    newParser.filter();
-    const expired = newParser.clearExpired();
+    const received = CookieParser.parse(this.request.url, responseCookies);
+    const forwardCookies = CookieParser.filterCookies(received, location);
     const headers = new Headers(this.request.headers);
-    const hasCookie = headers.has('cookie');
-    if (hasCookie) {
-      const oldCookies = headers.get('cookie');
-      const oldParser = new Cookies(oldCookies, location);
-      oldParser.filter();
-      oldParser.clearExpired();
-      oldParser.merge(newParser);
-      newParser = oldParser;
-      // remove expired from the new response.
-      newParser.cookies = newParser.cookies.filter((c) => {
-        for (let i = 0, len = expired.length; i < len; i++) {
-          if (expired[i].name === c.name) {
-            return false;
-          }
-        }
-        return true;
+    headers.delete('cookie');
+    if (forwardCookies.length) {
+      const parts: string[] = [];
+      forwardCookies.forEach((cookie) => {
+        parts.push(cookie.toString());
       });
-    }
-    const str = newParser.toString(true);
-    if (str) {
-      headers.set('cookie', str);
-    } else if (hasCookie) {
-      headers.delete('cookie');
+      headers.set('cookie', parts.join('; '));
     }
     this.request.headers = headers.toString();
+
+    // let newParser = new Cookies(responseCookies, location);
+    // newParser.filter();
+    // const expired = newParser.clearExpired();
+    // const hasCookie = headers.has('cookie');
+    // if (hasCookie) {
+    //   const oldCookies = headers.get('cookie');
+    //   const oldParser = new Cookies(oldCookies, location);
+    //   oldParser.filter();
+    //   oldParser.clearExpired();
+    //   oldParser.merge(newParser);
+    //   newParser = oldParser;
+    //   // remove expired from the new response.
+    //   newParser.cookies = newParser.cookies.filter((c) => {
+    //     for (let i = 0, len = expired.length; i < len; i++) {
+    //       if (expired[i].name === c.name) {
+    //         return false;
+    //       }
+    //     }
+    //     return true;
+    //   });
+    // }
+    // const str = newParser.toString(true);
+    // if (str) {
+    //   headers.set('cookie', str);
+    // } else if (hasCookie) {
+    //   headers.delete('cookie');
+    // }
+    // this.request.headers = headers.toString();
   }
 
   /**

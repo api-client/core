@@ -73,7 +73,7 @@ export class FilesSdk extends SdkBase {
     } catch (e) {
       throw new Error(`${E_PREFIX}${E_INVALID_JSON}.`);
     }
-    if (!Array.isArray(data.data)) {
+    if (!Array.isArray(data.items)) {
       throw new Error(`${E_PREFIX}${E_RESPONSE_UNKNOWN}.`);
     }
     return data;
@@ -264,7 +264,7 @@ export class FilesSdk extends SdkBase {
     } catch (e) {
       throw new Error(`${E_PREFIX}${E_INVALID_JSON}.`);
     }
-    if (!Array.isArray(data.data)) {
+    if (!Array.isArray(data.items)) {
       throw new Error(`${E_PREFIX}${E_RESPONSE_UNKNOWN}.`);
     }
     return data;
@@ -408,7 +408,7 @@ export class FilesSdk extends SdkBase {
     } catch (e) {
       throw new Error(`${E_PREFIX}${E_INVALID_JSON}.`);
     }
-    if (!Array.isArray(data.data)) {
+    if (!Array.isArray(data.items)) {
       throw new Error(`${E_PREFIX}${E_RESPONSE_UNKNOWN}.`);
     }
     return data;

@@ -145,29 +145,7 @@ export class ApiSchemaValues {
    */
   static generateDefaultValue(schema: IScalarShape): any {
     const { dataType } = schema;
-    switch (dataType) {
-      case ns.w3.xmlSchema.string: return '';
-      // XML schema, for DataNode
-      case ns.w3.xmlSchema.number:
-      case ns.w3.xmlSchema.integer:
-      case ns.w3.xmlSchema.float:
-      case ns.w3.xmlSchema.long:
-      case ns.w3.xmlSchema.double:
-      case ns.aml.vocabularies.shapes.number:
-      case ns.aml.vocabularies.shapes.integer:
-      case ns.aml.vocabularies.shapes.float:
-      case ns.aml.vocabularies.shapes.long:
-      case ns.aml.vocabularies.shapes.double: return 0;
-      case ns.aml.vocabularies.shapes.boolean:
-      case ns.w3.xmlSchema.boolean: return false;
-      case ns.aml.vocabularies.shapes.nil:
-      case ns.w3.xmlSchema.nil: return null;
-      case ns.w3.xmlSchema.date: return '';
-      case ns.w3.xmlSchema.dateTime: return '';
-      case ns.aml.vocabularies.shapes.dateTimeOnly: return '';
-      case ns.w3.xmlSchema.time:  return '';
-      default: return undefined;
-    }
+    return this.defaultValue(dataType);
   }
 
   /**
@@ -198,6 +176,32 @@ export class ApiSchemaValues {
       case ns.w3.xmlSchema.dateTime: return new Time().dateTime((schema.format === 'date-time' ? 'rfc3339' : schema.format) as "rfc3339" | "rfc2616");
       case ns.aml.vocabularies.shapes.dateTimeOnly: return new Time().dateTimeOnly();
       case ns.w3.xmlSchema.time: return new Time().timeOnly();
+      default: return undefined;
+    }
+  }
+
+  static defaultValue(dataType?: string): any {
+    switch (dataType) {
+      case ns.w3.xmlSchema.string: return '';
+      // XML schema, for DataNode
+      case ns.w3.xmlSchema.number:
+      case ns.w3.xmlSchema.integer:
+      case ns.w3.xmlSchema.float:
+      case ns.w3.xmlSchema.long:
+      case ns.w3.xmlSchema.double:
+      case ns.aml.vocabularies.shapes.number:
+      case ns.aml.vocabularies.shapes.integer:
+      case ns.aml.vocabularies.shapes.float:
+      case ns.aml.vocabularies.shapes.long:
+      case ns.aml.vocabularies.shapes.double: return 0;
+      case ns.aml.vocabularies.shapes.boolean:
+      case ns.w3.xmlSchema.boolean: return false;
+      case ns.aml.vocabularies.shapes.nil:
+      case ns.w3.xmlSchema.nil: return null;
+      case ns.w3.xmlSchema.date: return '';
+      case ns.w3.xmlSchema.dateTime: return '';
+      case ns.aml.vocabularies.shapes.dateTimeOnly: return '';
+      case ns.w3.xmlSchema.time:  return '';
       default: return undefined;
     }
   }
@@ -359,7 +363,7 @@ export class ApiSchemaValues {
    * - rfc3339 (default): 2016-02-28T16:41:41.090Z
    * - rfc2616: Sun, 28 Feb 2016 16:41:41 GMT
    */
-  static parseDateTimeInput(value: any, format: string = 'rfc3339'): string | undefined {
+  static parseDateTimeInput(value: any, format = 'rfc3339'): string | undefined {
     const d = new Date(value);
     if (Number.isNaN(d.getTime())) {
       return undefined;

@@ -43,7 +43,7 @@ export class SharedSdk extends SdkBase {
       err.response = result.body;
       throw err;
     }
-    if (!Array.isArray(data.data)) {
+    if (!Array.isArray(data.items)) {
       const err = new SdkError(`${E_PREFIX}${E_RESPONSE_UNKNOWN}.`, 0);
       err.response = result.body;
       throw err;

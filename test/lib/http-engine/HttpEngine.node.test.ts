@@ -16,6 +16,7 @@ import {
   DummyLogger,
   ISentRequest,
   ResponseRedirect,
+  IResponseRedirect,
   Headers,
   INtlmAuthorization,
   PayloadSerializer,
@@ -29,6 +30,7 @@ import {
   HostRuleKind,
   RequestAuthorizationKind,
   SerializableError,
+  HttpResponse,
 } from '../../../index.js';
 
 const logger = new DummyLogger();
@@ -2169,6 +2171,36 @@ describe('http-engine', () => {
           const location = `http://localhost:${httpPort}/v1/get?test=true`;
           assert.equal(transport.url, location, 'transport request has the final URL');
           assert.equal(response.status, 200, 'has the status code');
+        });
+      });
+
+      describe('Cookies', () => {
+        // cookies
+
+        let baseRequest: IHttpRequest;
+
+        beforeEach(() => {
+          baseRequest = {
+            url: `http://localhost:${httpPort}/v1/redirect/cookies/2`,
+            method: 'GET',
+          };
+        });
+
+        it('supports cookies between redirects', async () => {
+          const request = new CoreEngine(baseRequest, opts);
+          const log = await request.send();
+          const list = log.redirects as IResponseRedirect[];
+          const redirects = list.map(i => new ResponseRedirect(i));
+          const response = new Response(log.response as IResponse);
+          const payload = await response.readPayloadAsString() as string;
+          const body = JSON.parse(payload);
+          
+          assert.equal(body.headers.cookie, 'redirect-1=true', 'the final response has a cookie set with the last redirect');
+          
+          const [, r2] = redirects;
+          const rPayload = await (r2.response as HttpResponse).readPayloadAsString() as string;
+          const rBody = JSON.parse(rPayload);
+          assert.equal(rBody.headers.cookie, 'redirect-1=true', 'the redirect #2 has the cookie');
         });
       });
     });

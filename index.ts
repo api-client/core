@@ -84,8 +84,6 @@ export { ILogger, Logger } from './src/lib/logging/Logger.js';
 export { DummyLogger } from './src/lib/logging/DummyLogger.js';
 export { DefaultLogger } from './src/lib/logging/DefaultLogger.js';
 export { Headers } from './src/lib/headers/Headers.js';
-export { Cookie, CookieOptions } from './src/lib/cookies/Cookie.js';
-export { Cookies } from './src/lib/cookies/Cookies.js';
 export * as EventUtils from './src/lib/events/Utils.js';
 export { default as uuidV4 } from './src/lib/uuid.js';
 export * as fs from './src/lib/fs/Fs.js';
@@ -96,6 +94,12 @@ export { UriTemplate, IUriTemplateOptions } from './src/lib/parsers/UriTemplate.
 export * from './src/lib/parsers/UrlProcessor.js';
 export * as HttpDefinitions from './src/lib/definitions/HttpDefinitions.js';
 export * as Buffer from './src/lib/Buffer.js';
+
+// 
+// Cookies
+// 
+export { CookieParser } from './src/cookies/CookieParser.js'
+export { CookieJar } from './src/cookies/CookieJar.js'
 
 // 
 // Authorization
@@ -218,7 +222,6 @@ export { RunnableCondition } from './src/runtime/actions/RunnableCondition.js';
 // Request modules
 // 
 export { ModulesRegistry, RegistryPermission, RegisteredRequestModule, RegisteredResponseModule, ExecutionContext, ExecutionEvents } from './src/runtime/modules/ModulesRegistry.js';
-export * as RequestCookiesModule  from './src/runtime/modules/RequestCookies.js';
 export * as RequestAuthorizationModule  from './src/runtime/modules/RequestAuthorization.js';
 // 
 // External data importers
