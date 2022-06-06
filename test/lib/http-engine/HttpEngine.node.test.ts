@@ -2175,8 +2175,6 @@ describe('http-engine', () => {
       });
 
       describe('Cookies', () => {
-        // cookies
-
         let baseRequest: IHttpRequest;
 
         beforeEach(() => {

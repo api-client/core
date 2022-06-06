@@ -111,7 +111,7 @@ class RedirectsApiRoute extends BaseApi {
     }
     res.setHeader('location', next);
     // Set-Cookie: UserID=JohnDoe; Max-Age=3600; Version=1
-    res.setHeader('set-cookie', `redirect-${size}=true, unrelated=true; Domain=api.com`);
+    res.setHeader('set-cookie', `redirect-${size}=true; Path=/, unrelated=true; Domain=api.com`);
     res.setHeader('connection', 'close');
     res.status(302);
     res.send({
