@@ -45,17 +45,17 @@ export class CookieParser {
    */
   static canonicalDomainUrl(url: string): string {
     const parser = new URL(url);
-    return this.canonicalDomain(parser.hostname);
+    return this.canonicalDomain(parser.host);
   }
 
   /**
    * Creates a cookie canonical domain from the host name.
    * 
-   * @param hostname The same as `new URL('...').hostname`.
+   * @param host The same as `new URL('...').host`.
    * @returns The canonical domain for the URL.
    */
-  static canonicalDomain(hostname: string): string {
-    let str = hostname;
+  static canonicalDomain(host: string): string {
+    let str = host;
     str = str.trim();
     if (ipV6re.test(str)) {
       str = str.replace("[", "").replace("]", "");
@@ -158,7 +158,7 @@ export class CookieParser {
 
     // first lets set cookie domain and path.
     const url = new URL(requestUrl);
-    const domain = this.canonicalDomain(url.hostname);
+    const domain = this.canonicalDomain(url.host);
     const path = this.getPath(url);
 
     result.forEach((cookie) => {
@@ -187,7 +187,7 @@ export class CookieParser {
    */
   static filterCookies(cookies: HttpCookie[], requestUrl: string): HttpCookie[] {
     const url = new URL(requestUrl);
-    const domain = this.canonicalDomain(url.hostname);
+    const domain = this.canonicalDomain(url.host);
     return cookies.filter((cookie) => {
       if (!cookie.path || !cookie.domain) {
         return false;

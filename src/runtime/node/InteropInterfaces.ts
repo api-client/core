@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-empty-interface */
 import { IProjectRequestIterator, IHttpProject } from '../../models/HttpProject.js';
 import { Environment } from '../../models/Environment.js';
 import { Logger } from '../../lib/logging/Logger.js';
 import { IRequestLog } from '../../models/RequestLog.js';
+import { CookieJar } from '../../cookies/CookieJar.js';
 
 export interface ProjectRunnerOptions {
   /**
@@ -124,4 +126,9 @@ export interface IProjectRunnerOptions {
    * It aborts the execution when the ``abort` event is dispatched.
    */
   signal?: AbortSignal;
+
+  /**
+   * An instance of a cookie jar (store) to put/read cookies.
+   */
+  cookies?: CookieJar;
 }

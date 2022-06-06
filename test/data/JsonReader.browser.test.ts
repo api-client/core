@@ -80,5 +80,18 @@ describe('data', () => {
       const result = await reader.getValue('xml/city[1]//name');
       assert.equal(result, 'Seattle');
     });
+
+    it('it selects non-variable-name property', async () => {
+      const payload = JSON.stringify({
+        headers: {
+          'x-test': true,
+        }
+      });
+      const reader = new JsonReader();
+      await reader.writePayload(payload);
+
+      const result = await reader.getValue('headers/x-test');
+      assert.equal(result, 'true');
+    });
   });
 });

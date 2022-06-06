@@ -15,6 +15,7 @@ import { HttpFlowRunner } from './HttpFlowRunner.js';
 import { ISentRequest } from "../../models/SentRequest.js";
 import { IResponse } from "../../models/Response.js";
 import { IErrorResponse } from "../../models/ErrorResponse.js";
+import { HttpCertificate } from '../../models/ClientCertificate.js';
 
 /**
  * A class that takes a single HttpRequest definition and executes it.
@@ -73,6 +74,11 @@ export class HttpRequestRunner {
    * An instance of a cookie jar (store) to put/read cookies.
    */
   cookies?: CookieJar;
+
+  /**
+   * Certificates to send with the request.
+   */
+  certificates?: HttpCertificate[]
 
   /**
    * Creates an instance from the IRequest object with setting the corresponding variables.
@@ -165,18 +171,15 @@ export class HttpRequestRunner {
     return copy;
   }
 
-  protected async applyAuthorization(request: IHttpRequest): Promise<IHttpRequest> {
+  async applyAuthorization(request: IHttpRequest): Promise<IHttpRequest> {
     const auth = await this.readAuthorization();
     RequestAuthorizationProcessor.setAuthorization(request, auth);
     return request;
   }
 
-  protected async applyCookies(request: IHttpRequest): Promise<IHttpRequest> {
-    const { cookies, config } = this;
-    if (!cookies) {
-      return request;
-    }
-    if (config && config.ignoreSessionCookies) {
+  async applyCookies(request: IHttpRequest): Promise<IHttpRequest> {
+    const { cookies } = this;
+    if (!cookies || !this.sessionCookies) {
       return request;
     }
     const list = await cookies.listCookies(request.url);
@@ -188,22 +191,22 @@ export class HttpRequestRunner {
    * Executes the request actions and modules.
    */
   async runRequestFlows(request: IHttpRequest): Promise<void> {
-    const actions = await this.readActions('request');
+    const flows = await this.readFlows('request');
     const runner = new HttpFlowRunner();
     runner.cookies = this.cookies;
     runner.variables = this.variables;
-    await runner.request(request, actions);
+    await runner.request(request, flows);
   }
 
   /**
    * Executes the request actions and modules.
    */
   async runResponseFlows(request: ISentRequest, response: IResponse | IErrorResponse): Promise<void> {
-    const actions = await this.readActions('response');
+    const flows = await this.readFlows('response');
     const runner = new HttpFlowRunner();
     runner.cookies = this.cookies;
     runner.variables = this.variables;
-    await runner.response(request, response, actions);
+    await runner.response(request, response, flows);
   }
 
   /**
@@ -211,10 +214,10 @@ export class HttpRequestRunner {
    * 
    * @param trigger The trigger name to read the flows for.
    */
-  protected async readActions(trigger: 'request' | 'response'): Promise<IHttpActionFlow[]> {
+  protected async readFlows(trigger: 'request' | 'response'): Promise<IHttpActionFlow[]> {
     const result: IHttpActionFlow[] = [];
-    const { flows, variables, variablesProcessor } = this;
-    if (!variables || !Array.isArray(flows) || !flows.length) {
+    const { flows, variables = {}, variablesProcessor } = this;
+    if (!Array.isArray(flows) || !flows.length) {
       return result;
     }
     for (const flow of flows) {
@@ -264,6 +267,12 @@ export class HttpRequestRunner {
     const opts: HttpEngineOptions = {};
     if (cert) {
       opts.certificates = [cert];
+    }
+    if (this.certificates) {
+      if (!opts.certificates) {
+        opts.certificates = [];
+      }
+      opts.certificates = opts.certificates.concat(this.certificates);
     }
     if (Array.isArray(auth)) {
       opts.authorization = auth;
@@ -318,16 +327,27 @@ export class HttpRequestRunner {
     if (!request || !response) {
       return;
     }
-
-    const cookies = RequestCookiesProcessor.response(log);
-    if (cookies && this.cookies) {
-      const ps = Object.keys(cookies).map((url) => {
-        const items = cookies[url];
-        this.cookies?.setCookies(url, items);
-      });
-      await Promise.allSettled(ps);
+    if (this.cookies && this.sessionCookies) {
+      const cookies = RequestCookiesProcessor.response(log);
+      if (cookies) {
+        const ps = Object.keys(cookies).map((url) => {
+          const items = cookies[url];
+          this.cookies?.setCookies(url, items);
+        });
+        await Promise.allSettled(ps);
+      }
     }
-
     await this.runResponseFlows(request, response);
+  }
+
+  get sessionCookies(): boolean {
+    const { config } = this;
+    if (!config) {
+      return true;
+    }
+    if (config.enabled === false) {
+      return true;
+    }
+    return !config.ignoreSessionCookies;
   }
 }

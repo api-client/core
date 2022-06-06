@@ -181,6 +181,12 @@ describe('Models', () => {
         assert.isUndefined(result.expirationDate);
       });
 
+      it('sets the expirationDate from string number', () => {
+        const cookie = new HttpCookie();
+        cookie.expirationDate = '123456';
+        assert.equal(cookie.expirationDate, 123456);
+      });
+
       it('sets the hostOnly', () => {
         schema.hostOnly = false;
         const result = new HttpCookie(schema);

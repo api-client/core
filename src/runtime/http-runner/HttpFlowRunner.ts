@@ -178,20 +178,19 @@ export class HttpFlowRunner {
     } else {
       url = request.url;
     }
-    const uri = new URL(url);
     const cookie = new HttpCookie({
       name: name,
       value: typedValue,
       sameSite: 'unspecified',
-      domain: uri.host, // parser.hostname,
-      path: uri.pathname,
     });
-
-    const typed = sameSite as SameSiteValue;
-    switch (typed.toLowerCase()) {
-      case 'lax': cookie.sameSite = 'lax'; break;
-      case 'strict': cookie.sameSite = 'strict'; break;
-      case 'none': cookie.sameSite = 'no_restriction'; break;
+    
+    if (sameSite) {
+      const typed = sameSite as SameSiteValue;
+      switch (typed.toLowerCase()) {
+        case 'lax': cookie.sameSite = 'lax'; break;
+        case 'strict': cookie.sameSite = 'strict'; break;
+        case 'none': cookie.sameSite = 'no_restriction'; break;
+      }
     }
     if (expires) {
       cookie.expirationDate = expires;

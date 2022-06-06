@@ -249,6 +249,13 @@ describe('cookies', () => {
         assert.approximately(cookie.expirationDate, future, 100);
         assert.isFalse(cookie.session, 'The session flag is not set to true');
       });
+
+      it('sets the domain and port', () => {
+        const str = 'rememberme=1';
+        const list = CookieParser.parse('http://localhost:1234/', str);
+        const [cookie] = list;
+        assert.equal(cookie.domain, 'localhost:1234');
+      });
     });
 
     describe('#matchesDomain()', () => {

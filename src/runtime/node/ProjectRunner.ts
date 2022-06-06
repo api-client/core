@@ -301,7 +301,7 @@ export abstract class ProjectRunner extends BaseRunner {
       });
     } catch (e) {
       const cause = e as Error;
-      console.error(e);
+      this.options?.logger?.error(e);
       this.currentIteration.error = cause.message || 'Unknown error ocurred';
       // ...
     }

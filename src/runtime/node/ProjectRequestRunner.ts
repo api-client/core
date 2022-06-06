@@ -11,10 +11,9 @@ import { SentRequest } from '../../models/SentRequest.js';
 import { ErrorResponse } from '../../models/ErrorResponse.js';
 import { VariablesStore } from './VariablesStore.js';
 import { VariablesProcessor } from '../variables/VariablesProcessor.js';
-import { RequestFactory } from './RequestFactory.js';
-import { EventTypes } from '../../events/EventTypes.js';
 import { ProjectRunnerOptions, ProjectRunnerRunOptions, RunResult } from './InteropInterfaces.js';
 import { State } from './enums.js';
+import { HttpRequestRunner } from '../http-runner/HttpRequestRunner.js';
 
 export interface ProjectRequestRunner {
   /**
@@ -51,7 +50,6 @@ export interface ProjectRequestRunner {
  * Requests are executed in order defined in the folder.
  */
 export class ProjectRequestRunner extends EventEmitter {
-  eventTarget: EventTarget;
   logger?: Logger;
   project: HttpProject;
 
@@ -73,7 +71,6 @@ export class ProjectRequestRunner extends EventEmitter {
     super();
     this.project = project;
     this.logger = opts.logger;
-    this.eventTarget = opts.eventTarget || new EventTarget();
     this.masterEnvironment = opts.environment;
     this.extraVariables = opts.variables;
   }
@@ -148,14 +145,14 @@ export class ProjectRequestRunner extends EventEmitter {
 
   protected async execute(request: ProjectRequest, variables: Record<string, string>): Promise<RunResult> {
     const config = request.getConfig();
-    const factory = new RequestFactory(this.eventTarget);
+    const factory = new HttpRequestRunner();
 
     factory.variables = variables;
     if (request.authorization) {
       factory.authorization = request.authorization.map(i => i.toJSON());
     }
-    if (request.actions) {
-      factory.actions = request.actions.toJSON();
+    if (request.flows) {
+      factory.flows = request.flows;
     }
     if (request.clientCertificate) {
       factory.certificates = [request.clientCertificate.toJSON()];
@@ -172,24 +169,14 @@ export class ProjectRequestRunner extends EventEmitter {
     const requestData = request.expects.toJSON();
     requestData.url = this.prepareRequestUrl(requestData.url, variables);
 
-    function variableHandler(e: CustomEvent): void {
-      if (e.defaultPrevented) {
-        return;
-      }
-      const { name, value } = e.detail;
-      variables[name] = value;
-      e.preventDefault();
-      e.detail.result = Promise.resolve();
-    }
-
-    this.eventTarget.addEventListener(EventTypes.Environment.set, variableHandler as any);
-
     try {
       // Below replaces the single call to the `run()` function of the factory to 
       // report via the events a request object that has evaluated with the Jexl library.
-      const requestCopy = await factory.processRequestVariables(requestData);
+      const requestCopy = await factory.applyVariables(requestData);
+      await factory.applyAuthorization(requestCopy);
+      await factory.applyCookies(requestCopy);
       this.emit('request', request.key, { ...requestCopy });
-      await factory.processRequestLogic(requestCopy);
+      await factory.runRequestFlows(requestCopy);
       const result = await factory.executeRequest(requestCopy);
       result.requestId = request.key;
       await factory.processResponse(result);
@@ -205,8 +192,6 @@ export class ProjectRequestRunner extends EventEmitter {
       const log = RequestLog.fromRequestResponse(sent.toJSON(), response.toJSON()).toJSON();
       this.emit('error', request.key, log, info.errorMessage);
     }
-
-    this.eventTarget.removeEventListener(EventTypes.Environment.set, variableHandler as any);
     return info;
   }
 

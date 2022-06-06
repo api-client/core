@@ -1,5 +1,6 @@
 import { assert } from '@esm-bundle/chai';
-import { RequestDataExtractor, ActionEnums, HttpRequestKind, IHttpRequest, HttpResponseKind, IHttpResponse, HttpResponse } from '../../index.js';
+import { RequestDataExtractor, HttpRequestKind, IHttpRequest, HttpResponseKind, IHttpResponse, HttpResponse } from '../../index.js';
+import { ActionSourceEnum, ActionRequestDataEnum, ActionResponseDataEnum } from '../../src/models/http-actions/HttpActions.js';
 
 describe('data', () => {
   describe('RequestDataExtractor', () => {
@@ -46,115 +47,80 @@ describe('data', () => {
 
       it('returns the whole URL when no path', async () => {
         const factory = new RequestDataExtractor(request);
-        const result = await factory.extract({
-          source: ActionEnums.RequestDataSourceEnum.url,
-        });
+        const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.url);
         assert.equal(result, 'https://dot.com');
       });
 
       it('returns the "host" path', async () => {
         const factory = new RequestDataExtractor(request);
-        const result = await factory.extract({
-          source: ActionEnums.RequestDataSourceEnum.url,
-          path: 'host',
-        });
+        const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.url, 'host');
         assert.equal(result, 'dot.com');
       });
 
       it('returns the "protocol" path', async () => {
         const factory = new RequestDataExtractor(request);
-        const result = await factory.extract({
-          source: ActionEnums.RequestDataSourceEnum.url,
-          path: 'protocol',
-        });
+        const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.url, 'protocol');
         assert.equal(result, 'https:');
       });
 
       it('returns the "path" path', async () => {
         request.url += '/a/path/index.html'
         const factory = new RequestDataExtractor(request);
-        const result = await factory.extract({
-          source: ActionEnums.RequestDataSourceEnum.url,
-          path: 'path',
-        });
+        const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.url, 'path');
         assert.equal(result, '/a/path/index.html');
       });
 
       it('returns the whole "query" path', async () => {
         request.url += '/a/b?c=d&e=f'
         const factory = new RequestDataExtractor(request);
-        const result = await factory.extract({
-          source: ActionEnums.RequestDataSourceEnum.url,
-          path: 'query',
-        });
+        const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.url, 'query');
         assert.equal(result, 'c=d&e=f');
       });
 
       it('returns a specific query parameter', async () => {
         request.url += '/a/b?c=d&e=f'
         const factory = new RequestDataExtractor(request);
-        const result = await factory.extract({
-          source: ActionEnums.RequestDataSourceEnum.url,
-          path: 'query.c',
-        });
+        const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.url, 'query.c');
         assert.equal(result, 'd');
       });
 
       it('returns undefined when unknown query parameter', async () => {
         request.url += '/a/b?c=d&e=f'
         const factory = new RequestDataExtractor(request);
-        const result = await factory.extract({
-          source: ActionEnums.RequestDataSourceEnum.url,
-          path: 'query.g',
-        });
+        const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.url, 'query.g');
         assert.isUndefined(result);
       });
 
       it('returns undefined when no query parameters', async () => {
         const factory = new RequestDataExtractor(request);
-        const result = await factory.extract({
-          source: ActionEnums.RequestDataSourceEnum.url,
-          path: 'query.g',
-        });
+        const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.url, 'query.g');
         assert.isUndefined(result);
       });
 
       it('returns the whole "hash" path', async () => {
         request.url += '/a/b#c=d&e=f'
         const factory = new RequestDataExtractor(request);
-        const result = await factory.extract({
-          source: ActionEnums.RequestDataSourceEnum.url,
-          path: 'hash',
-        });
+        const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.url, 'hash');
         assert.equal(result, 'c=d&e=f');
       });
 
       it('returns a specific hash as query parameter', async () => {
         request.url += '/a/b#c=d&e=f'
         const factory = new RequestDataExtractor(request);
-        const result = await factory.extract({
-          source: ActionEnums.RequestDataSourceEnum.url,
-          path: 'hash.c',
-        });
+        const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.url, 'hash.c');
         assert.equal(result, 'd');
       });
 
       it('returns undefined when unknown hash as query parameter', async () => {
         request.url += '/a/b#c=d&e=f'
         const factory = new RequestDataExtractor(request);
-        const result = await factory.extract({
-          source: ActionEnums.RequestDataSourceEnum.url,
-          path: 'hash.g',
-        });
+        const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.url, 'hash.g');
         assert.isUndefined(result);
       });
 
       it('returns undefined when no hash part', async () => {
         const factory = new RequestDataExtractor(request);
-        const result = await factory.extract({
-          source: ActionEnums.RequestDataSourceEnum.url,
-          path: 'hash.g',
-        });
+        const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.url, 'hash.g');
         assert.isUndefined(result);
       });
 
@@ -162,10 +128,7 @@ describe('data', () => {
         let thrown = false;
         const factory = new RequestDataExtractor(request);
         try {
-          await factory.extract({
-            source: ActionEnums.RequestDataSourceEnum.url,
-            path: 'something',
-          });
+          await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.url, 'something');
         } catch (e) {
           thrown = true;
         }
@@ -186,41 +149,26 @@ describe('data', () => {
 
         it('returns the whole headers value when no path', async () => {
           const factory = new RequestDataExtractor(request);
-          const result = await factory.extract({
-            source: ActionEnums.RequestDataSourceEnum.headers,
-            type: ActionEnums.ActionTypeEnum.request,
-          });
+          const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.headers);
           assert.equal(result, 'x-t1: true\naccept: text/plain');
         });
 
         it('returns a specific header', async () => {
           const factory = new RequestDataExtractor(request);
-          const result = await factory.extract({
-            source: ActionEnums.RequestDataSourceEnum.headers,
-            type: ActionEnums.ActionTypeEnum.request,
-            path: 'accept',
-          });
+          const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.headers, 'accept');
           assert.equal(result, 'text/plain');
         });
 
         it('returns undefined for unknown header', async () => {
           const factory = new RequestDataExtractor(request);
-          const result = await factory.extract({
-            source: ActionEnums.RequestDataSourceEnum.headers,
-            type: ActionEnums.ActionTypeEnum.request,
-            path: 'some',
-          });
+          const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.headers, 'some');
           assert.isUndefined(result);
         });
 
         it('returns undefined when no headers', async () => {
           delete request.headers;
           const factory = new RequestDataExtractor(request);
-          const result = await factory.extract({
-            source: ActionEnums.RequestDataSourceEnum.headers,
-            type: ActionEnums.ActionTypeEnum.request,
-            path: 'some',
-          });
+          const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.headers, 'some');
           assert.isUndefined(result);
         });
       });
@@ -242,52 +190,33 @@ describe('data', () => {
 
         it('returns the whole headers value when no path', async () => {
           const factory = new RequestDataExtractor(request, response);
-          const result = await factory.extract({
-            source: ActionEnums.ResponseDataSourceEnum.headers,
-            type: ActionEnums.ActionTypeEnum.response,
-          });
+          const result = await factory.extract(ActionSourceEnum.response, ActionResponseDataEnum.headers);
           assert.equal(result, 'x-t1: true\naccept: text/plain');
         });
 
         it('returns a specific header', async () => {
           const factory = new RequestDataExtractor(request, response);
-          const result = await factory.extract({
-            source: ActionEnums.ResponseDataSourceEnum.headers,
-            type: ActionEnums.ActionTypeEnum.response,
-            path: 'accept',
-          });
+          const result = await factory.extract(ActionSourceEnum.response, ActionResponseDataEnum.headers, 'accept');
           assert.equal(result, 'text/plain');
         });
 
         it('returns undefined for unknown header', async () => {
           const factory = new RequestDataExtractor(request, response);
-          const result = await factory.extract({
-            source: ActionEnums.ResponseDataSourceEnum.headers,
-            type: ActionEnums.ActionTypeEnum.response,
-            path: 'some',
-          });
+          const result = await factory.extract(ActionSourceEnum.response, ActionResponseDataEnum.headers, 'some');
           assert.isUndefined(result);
         });
 
         it('returns undefined when no headers', async () => {
           delete request.headers;
           const factory = new RequestDataExtractor(request, response);
-          const result = await factory.extract({
-            source: ActionEnums.ResponseDataSourceEnum.headers,
-            type: ActionEnums.ActionTypeEnum.response,
-            path: 'some',
-          });
+          const result = await factory.extract(ActionSourceEnum.response, ActionResponseDataEnum.headers, 'some');
           assert.isUndefined(result);
         });
 
         it('returns undefined when no response object', async () => {
           delete request.headers;
           const factory = new RequestDataExtractor(request);
-          const result = await factory.extract({
-            source: ActionEnums.ResponseDataSourceEnum.headers,
-            type: ActionEnums.ActionTypeEnum.response,
-            path: 'some',
-          });
+          const result = await factory.extract(ActionSourceEnum.response, ActionResponseDataEnum.headers, 'some');
           assert.isUndefined(result);
         });
       });
@@ -309,19 +238,13 @@ describe('data', () => {
 
       it('returns the response status', async () => {
         const factory = new RequestDataExtractor(request, response);
-        const result = await factory.extract({
-          source: ActionEnums.ResponseDataSourceEnum.status,
-          type: ActionEnums.ActionTypeEnum.response,
-        });
+        const result = await factory.extract(ActionSourceEnum.response, ActionResponseDataEnum.status);
         assert.strictEqual(result, 200);
       });
 
       it('returns undefined when no response', async () => {
         const factory = new RequestDataExtractor(request);
-        const result = await factory.extract({
-          source: ActionEnums.ResponseDataSourceEnum.status,
-          type: ActionEnums.ActionTypeEnum.response,
-        });
+        const result = await factory.extract(ActionSourceEnum.response, ActionResponseDataEnum.status);
         assert.isUndefined(result);
       });
     });
@@ -337,9 +260,7 @@ describe('data', () => {
 
       it('returns the http method', async () => {
         const factory = new RequestDataExtractor(request);
-        const result = await factory.extract({
-          source: ActionEnums.RequestDataSourceEnum.method,
-        });
+        const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.method);
         assert.strictEqual(result, 'GET');
       });
     });
@@ -363,48 +284,33 @@ describe('data', () => {
 
         it('extract body from the request object', async () => {
           const factory = new RequestDataExtractor(request, response);
-          const result = await factory.extract({
-            source: ActionEnums.RequestDataSourceEnum.body,
-            type: ActionEnums.ActionTypeEnum.request,
-          });
+          const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.body);
           assert.equal(result, 'request-payload');
         });
 
         it('extract body from the response object', async () => {
           const factory = new RequestDataExtractor(request, response);
-          const result = await factory.extract({
-            source: ActionEnums.ResponseDataSourceEnum.body,
-            type: ActionEnums.ActionTypeEnum.response,
-          });
+          const result = await factory.extract(ActionSourceEnum.response, ActionRequestDataEnum.body);
           assert.equal(result, 'response-payload');
         });
 
         it('returns undefined when no request payload', async () => {
           delete request.payload;
           const factory = new RequestDataExtractor(request, response);
-          const result = await factory.extract({
-            source: ActionEnums.RequestDataSourceEnum.body,
-            type: ActionEnums.ActionTypeEnum.request,
-          });
+          const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.body);
           assert.isUndefined(result);
         });
 
         it('returns undefined when no response payload', async () => {
           delete response.payload;
           const factory = new RequestDataExtractor(request, response);
-          const result = await factory.extract({
-            source: ActionEnums.ResponseDataSourceEnum.body,
-            type: ActionEnums.ActionTypeEnum.response,
-          });
+          const result = await factory.extract(ActionSourceEnum.response, ActionRequestDataEnum.body);
           assert.isUndefined(result);
         });
 
         it('returns undefined when no response', async () => {
           const factory = new RequestDataExtractor(request);
-          const result = await factory.extract({
-            source: ActionEnums.ResponseDataSourceEnum.body,
-            type: ActionEnums.ActionTypeEnum.response,
-          });
+          const result = await factory.extract(ActionSourceEnum.response, ActionRequestDataEnum.body);
           assert.isUndefined(result);
         });
       });
@@ -424,11 +330,7 @@ describe('data', () => {
         it('returns undefined when invalid payload', async () => {
           request.payload = 'test';
           const factory = new RequestDataExtractor(request);
-          const result = await factory.extract({
-            source: ActionEnums.RequestDataSourceEnum.body,
-            type: ActionEnums.ActionTypeEnum.request,
-            path: '/a/b/c'
-          });
+          const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.body, '/a/b/c');
           assert.isUndefined(result);
         });
 
@@ -436,11 +338,7 @@ describe('data', () => {
           request.payload = simpleBody;
           delete request.headers;
           const factory = new RequestDataExtractor(request);
-          const result = await factory.extract({
-            source: ActionEnums.RequestDataSourceEnum.body,
-            type: ActionEnums.ActionTypeEnum.request,
-            path: '/a/b/c'
-          });
+          const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.body, '/a/b/c');
           assert.isUndefined(result);
         });
 
@@ -448,22 +346,14 @@ describe('data', () => {
           request.payload = simpleBody;
           request.headers = 'content-length: 100';
           const factory = new RequestDataExtractor(request);
-          const result = await factory.extract({
-            source: ActionEnums.RequestDataSourceEnum.body,
-            type: ActionEnums.ActionTypeEnum.request,
-            path: '/a/b/c'
-          });
+          const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.body, '/a/b/c');
           assert.isUndefined(result);
         });
 
         it('returns the value for a simple object', async () => {
           request.payload = simpleBody;
           const factory = new RequestDataExtractor(request);
-          const result = await factory.extract({
-            source: ActionEnums.RequestDataSourceEnum.body,
-            type: ActionEnums.ActionTypeEnum.request,
-            path: '/a/b/c',
-          });
+          const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.body, '/a/b/c');
           assert.equal(result, 'value');
         });
 
@@ -473,23 +363,8 @@ describe('data', () => {
             { "type": "openid", "value": "openid-token" },
           ]});
           const factory = new RequestDataExtractor(request);
-          const result = await factory.extract({
-            source: ActionEnums.RequestDataSourceEnum.body,
-            type: ActionEnums.ActionTypeEnum.request,
-            path: '/tokens[type=\'Bearer\']/value[1]',
-          });
+          const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.body, '/tokens[type=\'Bearer\']/value[1]');
           assert.equal(result, 'bearer-token');
-        });
-
-        it('returns the "value", when configured', async () => {
-          request.payload = simpleBody;
-          const factory = new RequestDataExtractor(request);
-          const result = await factory.extract({
-            source: 'value',
-            type: ActionEnums.ActionTypeEnum.request,
-            value: 'test-value'
-          });
-          assert.equal(result, 'test-value');
         });
       });
 
@@ -506,33 +381,21 @@ describe('data', () => {
         it('returns undefined when invalid payload', async () => {
           request.payload = 'test';
           const factory = new RequestDataExtractor(request);
-          const result = await factory.extract({
-            source: ActionEnums.RequestDataSourceEnum.body,
-            type: ActionEnums.ActionTypeEnum.request,
-            path: 'root/a'
-          });
+          const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.body, 'root/a');
           assert.isUndefined(result);
         });
 
         it('returns the value for a simple payload', async () => {
           request.payload = '<feed><item><name>Test</name></item></feed>';
           const factory = new RequestDataExtractor(request);
-          const result = await factory.extract({
-            source: ActionEnums.RequestDataSourceEnum.body,
-            type: ActionEnums.ActionTypeEnum.request,
-            path: 'feed/item/name',
-          });
+          const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.body, 'feed/item/name');
           assert.equal(result, 'Test');
         });
 
         it('returns the value with an iterator', async () => {
           request.payload = '<feed><item><name>Test</name></item><item><name>Other</name></item></feed>';
           const factory = new RequestDataExtractor(request);
-          const result = await factory.extract({
-            source: ActionEnums.RequestDataSourceEnum.body,
-            type: ActionEnums.ActionTypeEnum.request,
-            path: 'feed/item[name="Other"]/name',
-          });
+          const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.body, 'feed/item[name="Other"]/name');
           assert.equal(result, 'Other');
         });
       });
@@ -550,22 +413,14 @@ describe('data', () => {
         it('returns undefined when invalid payload', async () => {
           request.payload = 'test';
           const factory = new RequestDataExtractor(request);
-          const result = await factory.extract({
-            source: ActionEnums.RequestDataSourceEnum.body,
-            type: ActionEnums.ActionTypeEnum.request,
-            path: 'param'
-          });
+          const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.body, 'param');
           assert.isUndefined(result);
         });
 
         it('returns the value for a simple payload', async () => {
           request.payload = 'a=b&c=d';
           const factory = new RequestDataExtractor(request);
-          const result = await factory.extract({
-            source: ActionEnums.RequestDataSourceEnum.body,
-            type: ActionEnums.ActionTypeEnum.request,
-            path: 'c',
-          });
+          const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.body, 'c');
           assert.equal(result, 'd');
         });
       });
@@ -583,11 +438,7 @@ describe('data', () => {
 
         it('always returns undefined for unsupported mime type', async () => {
           const factory = new RequestDataExtractor(request);
-          const result = await factory.extract({
-            source: ActionEnums.RequestDataSourceEnum.body,
-            type: ActionEnums.ActionTypeEnum.request,
-            path: 'lorem'
-          });
+          const result = await factory.extract(ActionSourceEnum.request, ActionRequestDataEnum.body, 'lorem');
           assert.isUndefined(result);
         });
 
@@ -595,11 +446,9 @@ describe('data', () => {
           const factory = new RequestDataExtractor(request);
           let thrown = false;
           try {
-            await factory.extract({
-              // @ts-ignore
-              source: 'unknown',
-              type: ActionEnums.ActionTypeEnum.request,
-            });
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            await factory.extract(ActionSourceEnum.request, 'unknown');
           } catch (e) {
             thrown = true;
           }

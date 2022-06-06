@@ -97,8 +97,9 @@ export * as Buffer from './src/lib/Buffer.js';
 // 
 // Cookies
 // 
-export { CookieParser } from './src/cookies/CookieParser.js'
-export { CookieJar } from './src/cookies/CookieJar.js'
+export { CookieParser } from './src/cookies/CookieParser.js';
+export { CookieJar } from './src/cookies/CookieJar.js';
+export { InMemoryCookieJar } from './src/cookies/InMemoryCookieJar.js';
 
 // 
 // Authorization

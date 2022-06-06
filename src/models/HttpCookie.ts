@@ -351,7 +351,10 @@ export class HttpCookie {
    */
   setExpirationTime(expires: Date | string | number | undefined): void {
     let value: number | undefined;
-    if (expires instanceof Date) {
+    const typedNumber = Number(expires);
+    if (!Number.isNaN(typedNumber)) {
+      value = typedNumber;
+    } else if (expires instanceof Date) {
       value = expires.getTime();
     } else if (typeof expires === 'string') {
       const tmp = new Date(expires);
@@ -360,8 +363,6 @@ export class HttpCookie {
       } else {
         value = tmp.getTime();
       }
-    } else if (typeof expires === 'number') {
-      value = expires;
     } else {
       value = undefined;
     }

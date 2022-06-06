@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { assert } from 'chai';
 import { HttpResponse, Headers, ResponseRedirect, IHttpRequest } from '../../../index.js';

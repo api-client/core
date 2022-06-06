@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import chai, { assert } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
@@ -464,7 +465,7 @@ describe('Runtime', () => {
           const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
           const items: RunResult[] = [];
-          for await (let runResult of runner) {
+          for await (const runResult of runner) {
             items.push(runResult);
           }
           assert.lengthOf(items, 2, 'has both requests');
