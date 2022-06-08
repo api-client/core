@@ -5,11 +5,24 @@ import getConfig from '../helpers/getSetup.js';
 import { 
   ISentRequest,
   HttpProject,
+  Response,
   IResponse,
   ProjectSerialRunner,
   ProjectRequest,
   ProjectFolder,
   RequestLogKind,
+  InMemoryCookieJar,
+  DeleteCookieStepKind,
+  IDeleteCookieStep,
+  IRequestLog,
+  ActionSourceEnum,
+  ActionResponseDataEnum,
+  ActionOperatorEnum,
+  ReadDataStepKind,
+  ActionRequestDataEnum,
+  IReadDataStep,
+  SetVariableStepKind,
+  ISetVariableStep,
 } from '../../index.js';
 import path from 'path';
 
@@ -280,9 +293,9 @@ describe('Runtime', () => {
 
         it('uses the folder declared environment', async () => {
           const f1 = project.addFolder('f1');
-          const e1 = project.addEnvironment('My default');
+          const e1 = project.addEnvironment('e1');
           e1.addVariable('CUSTOM', 'v1');
-          const e2 = f1.addEnvironment('Other');
+          const e2 = f1.addEnvironment('e2');
           e2.addVariable('CUSTOM', 'v2');
           project.moveRequest(r1.key, {
             parent: f1.key,
@@ -445,6 +458,180 @@ describe('Runtime', () => {
           assert.typeOf(e1.response, 'object', 'has the log.response');
           const request = e1.request as ISentRequest;
           assert.equal(request.url, `http://localhost:${httpPort}/v1/get`, 'the factory evaluated variables');
+        });
+      });
+
+      describe('cookies', () => {
+        let cookies: InMemoryCookieJar;
+
+        before(() => {
+          cookies = new InMemoryCookieJar()
+        });
+
+        afterEach(() => {
+          cookies.clear();
+        });
+
+        let project: HttpProject;
+        beforeEach(() => {
+          project = HttpProject.fromName('Test project');
+        });
+
+        it('stores response cookies in the store', async () => {
+          project.addRequest(`http://localhost:${httpPort}/v1/cookie`);
+          const runner = new ProjectSerialRunner();
+          await runner.configure(project, { cookies });
+          const result = await runner.execute();
+          const { iterations } = result;
+          assert.lengthOf(iterations, 1);
+
+          const stored = await cookies.listCookies(`http://localhost:${httpPort}/v1/cookie`);
+          assert.lengthOf(stored, 3, 'has all cookies');
+        });
+
+        it('uses stored cookies with the request', async () => {
+          project.addRequest(`http://localhost:${httpPort}/v1/cookie`);
+          project.addRequest(`http://localhost:${httpPort}/v1/get`);
+
+          const runner = new ProjectSerialRunner();
+          await runner.configure(project, { cookies });
+          const result = await runner.execute();
+          const { iterations } = result;
+          assert.lengthOf(iterations, 1);
+          const log2 = iterations[0].executed[1] as IRequestLog;
+          const rsp2 = new Response(log2.response as IResponse);
+          const body2 = await rsp2.readPayloadAsString() as string;
+          const p2 = JSON.parse(body2);
+          assert.equal(p2.headers.cookie, 'c1=v1; c2=v2; c3=v3');
+        });
+
+        it('uses the store with http flows', async () => {
+          const r1 = project.addRequest(`http://localhost:${httpPort}/v1/cookie`);
+          r1.flows = [
+            {
+              trigger: 'response',
+              // actions are executed after cookies are stored.
+              actions: [
+                {
+                  steps: [
+                    {
+                      kind: DeleteCookieStepKind,
+                      name: 'c2',
+                    } as IDeleteCookieStep,
+                  ],
+                }
+              ],
+            }
+          ];
+          const runner = new ProjectSerialRunner();
+          await runner.configure(project, { cookies });
+          const result = await runner.execute();
+          const { iterations } = result;
+          assert.lengthOf(iterations, 1);
+
+          const stored = await cookies.listCookies(`http://localhost:${httpPort}/v1/cookie`);
+          assert.lengthOf(stored, 2, 'has the remaining cookies');
+          assert.equal(stored[0].name, 'c1');
+          assert.equal(stored[1].name, 'c3');
+        });
+      });
+
+      describe('variables sharing', () => {
+        let project: HttpProject;
+        beforeEach(() => {
+          project = HttpProject.fromName('p1');
+        });
+
+        it('shares variables between the requests in different folders', async () => {
+          // emulate a situation that the first folder performs an authorization
+          // and sets a variable and other requests uses this variable
+          const f1 = project.addFolder('f1');
+          const r1 = f1.addRequest(`http://localhost:${httpPort}/v1/response/static`);
+          r1.flows = [
+            {
+              trigger: 'response',
+              actions: [
+                {
+                  condition: {
+                    source: ActionSourceEnum.response,
+                    data: ActionResponseDataEnum.status,
+                    operator: ActionOperatorEnum.equal,
+                    value: '200',
+                  },
+                  steps: [
+                    {
+                      kind: ReadDataStepKind,
+                      source: ActionSourceEnum.response,
+                      data: ActionRequestDataEnum.body,
+                      path: '/data/token',
+                    } as IReadDataStep,
+                    {
+                      kind: SetVariableStepKind,
+                      name: 'token',
+                    } as ISetVariableStep,
+                  ],
+                }
+              ],
+            }
+          ];
+          const f2 = project.addFolder('f2');
+          f2.addRequest(`http://localhost:${httpPort}/v1/get?token={token}`);
+          project.addRequest(`http://localhost:${httpPort}/v1/get?token={token}`);
+
+          const runner = new ProjectSerialRunner();
+          await runner.configure(project, { recursive: true });
+          const result = await runner.execute();
+          const { iterations } = result;
+          assert.lengthOf(iterations, 1);
+
+          const log2 = iterations[0].executed[1] as IRequestLog;
+          const log3 = iterations[0].executed[2] as IRequestLog;
+          
+          const sent2 = log2.request as ISentRequest;
+          assert.equal(sent2.url, `http://localhost:${httpPort}/v1/get?token=sJxlgNgHi8`);
+          
+          const sent3 = log3.request as ISentRequest;
+          assert.equal(sent3.url, `http://localhost:${httpPort}/v1/get?token=sJxlgNgHi8`);
+        });
+
+        it('keeps sub-folder variables in the parent tree only.', async () => {
+          const f1 = project.addFolder('f1');
+          const e1 = f1.addEnvironment('e1');
+          e1.addVariable('a1', 'v1');
+          const r1 = f1.addRequest(`http://localhost:${httpPort}/v1/get`);
+          r1.expects.headers = `x-a1: {a1}\nx-a2: {a2}`;
+          const f2 = project.addFolder('f2');
+          const e2 = f2.addEnvironment('e2');
+          e2.addVariable('a2', 'v2');
+          const r2 = f2.addRequest(`http://localhost:${httpPort}/v1/get?token={token}`);
+          r2.expects.headers = `x-a1: {a1}\nx-a2: {a2}`;
+          const r3 = project.addRequest(`http://localhost:${httpPort}/v1/get?token={token}`);
+          r3.expects.headers = `x-a1: {a1}\nx-a2: {a2}`;
+
+          const runner = new ProjectSerialRunner();
+          await runner.configure(project, { recursive: true });
+          const result = await runner.execute();
+          const { iterations } = result;
+          assert.lengthOf(iterations, 1);
+
+          const log1 = iterations[0].executed[0] as IRequestLog;
+          const log2 = iterations[0].executed[1] as IRequestLog;
+          const log3 = iterations[0].executed[2] as IRequestLog;
+          const response1 = new Response(log1.response as IResponse);
+          const response2 = new Response(log2.response as IResponse);
+          const response3 = new Response(log3.response as IResponse);
+          const payload1 = await response1.readPayloadAsString() as string;
+          const payload2 = await response2.readPayloadAsString() as string;
+          const payload3 = await response3.readPayloadAsString() as string;
+          const body1 = JSON.parse(payload1);
+          const body2 = JSON.parse(payload2);
+          const body3 = JSON.parse(payload3);
+          assert.equal(body1.headers['x-a1'], 'v1', 'request #1 has a folder variable');
+          assert.equal(body1.headers['x-a2'], 'undefined', 'request #1 has no variables from f2');
+          assert.equal(body2.headers['x-a1'], 'undefined', 'request #2 has no variables from f1');
+          assert.equal(body2.headers['x-a2'], 'v2', 'request #2 has a folder variable');
+          assert.equal(body3.headers['x-a1'], 'undefined', 'request #3 has no variables from f1');
+          assert.equal(body3.headers['x-a2'], 'undefined', 'request #3 has no variables from f2');
         });
       });
     });

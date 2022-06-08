@@ -12,6 +12,11 @@ export interface IProjectExecutionIteration {
    */
   executed: IRequestLog[];
   /**
+   * The variables evaluated during the run. 
+   * These variables have values set by requests' HTTP flows.
+   */
+  variables: Record<string, string>;
+  /**
    * Optional general error message.
    */
   error?: string;

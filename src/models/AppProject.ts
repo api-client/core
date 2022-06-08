@@ -13,6 +13,7 @@ import { ARCHistoryRequest, ARCSavedRequest } from "./legacy/request/ArcRequest.
 import { ARCProject } from "./legacy/models/ArcLegacyProject.js";
 import { Certificate, HttpCertificate } from "./ClientCertificate.js";
 import { ICCAuthorization } from "./Authorization.js";
+import { IProjectRequestIterator } from "./HttpProject.js";
 
 export const AppProjectKind = 'Core#AppProject';
 export const AppProjectFolderKind = 'Core#AppProjectFolder';
@@ -2031,5 +2032,58 @@ export class AppProject extends AppProjectParent {
       const cnf = ccAuth.config as ICCAuthorization;
       return !!cnf && !!cnf.certificate && cnf.certificate.key === key;
     });
+  }
+
+  /**
+   * Iterates over requests in the project.
+   */
+  * requestIterator(opts: IProjectRequestIterator = {}): Generator<AppProjectRequest> {
+    const { definitions } = this;
+    const { ignore=[], parent, recursive, requests=[] } = opts;
+    const root = parent ? this.findFolder(parent) : this;
+    if (!root) {
+      throw new Error(`The parent folder not found: ${parent}.`);
+    }
+    const items = root.items;
+    if (!items || !items.length) {
+      return;
+    }
+    for (const item of items) {
+      if (ignore.includes(item.key)) {
+        continue;
+      }
+      if (item.kind === AppProjectRequestKind) {
+        const request = definitions.requests.find(i => i.key === item.key);
+        if (!request) {
+          continue;
+        }
+        const name = request.info.name || '';
+        if (ignore.includes(name)) {
+          continue;
+        }
+        if (requests.length && !requests.includes(item.key) && !requests.includes(name)) {
+          continue;
+        }
+        yield request;
+      } else if (recursive && item.kind === AppProjectFolderKind) {
+        const folder = definitions.folders.find(i => i.key === item.key);
+        if (!folder) {
+          continue;
+        }
+        const name = folder.info.name || '';
+        if (ignore.includes(name)) {
+          continue;
+        }
+        const it = this.requestIterator({
+          parent: item.key,
+          recursive,
+          ignore,
+          requests,
+        });
+        for (const request of it) {
+          yield request;
+        }
+      }
+    }
   }
 }

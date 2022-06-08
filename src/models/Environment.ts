@@ -4,6 +4,8 @@ import { IThing, Thing, Kind as ThingKind } from './Thing.js';
 import v4 from '../lib/uuid.js';
 import { ARCVariable } from './legacy/models/Variable.js';
 
+export const Kind = 'Core#Environment';
+
 export interface IEnvironmentCloneOptions {
   /**
    * By default it revalidates (re-creates) keys in the environment.
@@ -46,8 +48,6 @@ export interface IEnvironment {
    */
   security?: unknown;
 }
-
-export const Kind = 'Core#Environment';
 
 /**
  * An environment is applied to a project or a folder.
@@ -276,5 +276,27 @@ export class Environment {
       copy.key = v4();
     }
     return copy;
+  }
+
+  /**
+   * Creates a map of variables from this environment.
+   * 
+   * @param readStrategy The read strategy. When `lastWins` (default) then a variable with the same name overwrites the previously set variable. The `firstWins` stops overwriting values once a variable is set.
+   * @returns An object containing variables defined in this environment
+   */
+  variablesMap(readStrategy: 'lastWins' | 'firstWins' = 'lastWins'): Record<string, string> {
+    const result: Record<string, string> = {};
+    const { variables=[] } = this
+    variables.forEach((item) => {
+      const { enabled, name, value } = item;
+      if (!enabled || !name || value === undefined) {
+        return;
+      }
+      if (readStrategy === 'firstWins' && name in result) {
+        return;
+      }
+      result[name] = value as string;
+    });
+    return result;
   }
 }

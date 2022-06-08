@@ -36,6 +36,7 @@ describe('Runtime', () => {
             await mock.projectRequest.log(opts),
             await mock.projectRequest.log(opts),
           ],
+          variables: {},
         });
         const out = await TestCliHelper.grabOutput(async () => {
           const reporter = new ProjectRunCliReporter(info);
@@ -55,7 +56,8 @@ describe('Runtime', () => {
         const info = wrapIteration({
           index: 0,
           executed: [],
-          error: 'This is anm error'
+          error: 'This is anm error',
+          variables: {},
         });
         const out = await TestCliHelper.grabOutput(async () => {
           const reporter = new ProjectRunCliReporter(info);

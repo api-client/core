@@ -9,6 +9,13 @@ export function clearStore(): void {
 }
 
 export class InMemoryCookieJar extends CookieJar {
+  /**
+   * Clears the memory store from all values.
+   */
+  clear(): void {
+    cache.splice(0);
+  }
+
   async deleteCookies(requestUrl: string, name?: string): Promise<void> {
     const url = new URL(requestUrl);
     const domain = CookieParser.canonicalDomain(url.host);

@@ -30,7 +30,7 @@ export { RequestConfig, IRequestConfig, IRequestBaseConfig, Kind as RequestConfi
 export { RequestLog, IRequestLog, Kind as RequestLogKind } from './src/models/RequestLog.js';
 export { RequestsSize, IRequestsSize, Kind as RequestsSizeKind } from './src/models/RequestsSize.js';
 export { RequestTime, IRequestTime, Kind as RequestTimeKind } from './src/models/RequestTime.js';
-export { RequestUiMeta, IRequestUiMeta, Kind as RequestUiMetaKind, IActionsMeta, IAuthMeta, IBodyMeta, IBodyMetaModel, IHeadersMeta, IRawBody, IResponseUiMeta, IUrlMeta } from './src/models/RequestUiMeta.js';
+export { RequestUiMeta, IRequestUiMeta, Kind as RequestUiMetaKind, IAuthMeta, IBodyMeta, IBodyMetaModel, IHeadersMeta, IRawBody, IResponseUiMeta, IUrlMeta } from './src/models/RequestUiMeta.js';
 export { ResponseAuthorization, IResponseAuthorization, Kind as ResponseAuthorizationKind } from './src/models/ResponseAuthorization.js';
 export { ResponseRedirect, IResponseRedirect, Kind as ResponseRedirectKind } from './src/models/ResponseRedirect.js';
 export { ISentRequest, SentRequest, IBaseSentRequest } from './src/models/SentRequest.js';
@@ -111,13 +111,18 @@ export * as KnownGrants from './src/authorization/lib/KnownGrants.js';
 export * as AuthorizationUtils from './src/authorization/lib/Utils.js';
 export { SecurityProcessor, IAuthApplyOptions } from './src/authorization/lib/SecurityProcessor.js';
 
+// 
+// HTTP Flows
+// 
+
+export * from './src/models/http-actions/HttpActions.js';
+
 //
 // Runtime
 //
 export { VariablesProcessor } from './src/runtime/variables/VariablesProcessor.js';
 export { ProjectRequestRunner } from './src/runtime/node/ProjectRequestRunner.js';
 export { HttpRequestRunner } from './src/runtime/http-runner/HttpRequestRunner.js';
-export { VariablesStore } from './src/runtime/node/VariablesStore.js';
 export { ProjectSerialRunner } from './src/runtime/node/ProjectSerialRunner.js';
 export { ProjectParallelRunner, IWorkerInfo } from './src/runtime/node/ProjectParallelRunner.js';
 export { ProjectRunner } from './src/runtime/node/ProjectRunner.js';

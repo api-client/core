@@ -141,7 +141,7 @@ export class ProjectParallelRunner extends BaseRunner {
       }
     });
     if (this.mainRejecter) {
-      this.mainRejecter!(new Error(`The execution has been aborted.`));
+      this.mainRejecter(new Error(`The execution has been aborted.`));
       this.mainRejecter = undefined;
       this.mainResolver = undefined;
     }
@@ -172,7 +172,9 @@ export class ProjectParallelRunner extends BaseRunner {
       cluster.on('exit', this._exitHandler);
     } catch (e) {
       const cause = e as Error;
-      this.mainRejecter!(cause);
+      if (this.mainRejecter) {
+        this.mainRejecter(cause);
+      }
       this.mainResolver = undefined
       this.mainRejecter = undefined
       this._state = State.Idle as State;

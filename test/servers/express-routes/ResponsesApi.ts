@@ -34,11 +34,6 @@ class ImagesApiRoute extends BaseApi {
     res.send(buff);
   }
 
-  /**
-   * @param {Request} req
-   * @param {Response} res
-   * @return {Promise}
-   */
   async bytes(req: Request, res: Response): Promise<void> {
     const { params } = req;
     let size = Number(params.size);
@@ -49,6 +44,19 @@ class ImagesApiRoute extends BaseApi {
     res.setHeader('content-type', 'application/octet-stream');
     res.send(buf);
   }
+
+  async static(req: Request, res: Response): Promise<void> {
+    res.setHeader('content-type', 'application/json');
+    res.send({
+      data: {
+        token: 'sJxlgNgHi8',
+        code: 'D4o0q9TKpf',
+        redirect: 'http://apparel.example.net/bridge.html'
+      },
+      headers: req.headers,
+      query: req.query,
+    });
+  }
 }
 const api = new ImagesApiRoute();
 api.setCors(router);
@@ -57,3 +65,4 @@ router.get('/html', cors(checkCorsFn), api.html.bind(api));
 router.get('/json', cors(checkCorsFn), api.json.bind(api));
 router.get('/xml', cors(checkCorsFn), api.xml.bind(api));
 router.get('/bytes/:size', cors(checkCorsFn), api.bytes.bind(api));
+router.get('/static', cors(checkCorsFn), api.static.bind(api));

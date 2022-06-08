@@ -9,8 +9,9 @@ import { ProjectRequestRunner } from './ProjectRequestRunner.js';
 import { IProjectExecutionIteration, IProjectExecutionLog } from '../reporters/Reporter.js';
 import { pathExists, readJson } from '../../lib/fs/Fs.js';
 import { BaseRunner } from './BaseRunner.js';
-import { IProjectRunnerOptions } from './InteropInterfaces.js';
+import { IProjectRunnerOptions, IRequestRunnerOptions } from './InteropInterfaces.js';
 import { State } from './enums.js';
+import { AppProject } from '../../models/AppProject.js';
 
 type ProjectParent = HttpProject | ProjectFolder;
 
@@ -89,7 +90,7 @@ export abstract class ProjectRunner extends BaseRunner {
   /**
    * The HTTP project to run requests from.
    */
-  project?: HttpProject;
+  project?: HttpProject | AppProject;
   /**
    * The execution options for the project.
    */
@@ -102,10 +103,6 @@ export abstract class ProjectRunner extends BaseRunner {
    * The selected environment to apply to the requests.
    */
   environment?: Environment;
-  /**
-   * The events target instance for events dispatched by the request factory.
-   */
-  target = new EventTarget();
   /**
    * This is used with `--iterations`. The index of the current iteration.
    */
@@ -262,6 +259,28 @@ export abstract class ProjectRunner extends BaseRunner {
     return env;
   }
 
+  protected async getProjectRunnerOptions(): Promise<IRequestRunnerOptions> {
+    const { environment, options } = this;
+    if (!options) {
+      throw new Error(`Run configure() first.`);
+    }
+    const result: IRequestRunnerOptions = {
+      variables: this.prepareVariables(),
+    };
+    if (environment) {
+      result.environment = environment;
+    }
+    if (options.logger) {
+      result.logger = options.logger;
+    } else {
+      result.logger = new DummyLogger();
+    }
+    if (options.cookies) {
+      result.cookies = options.cookies;
+    }
+    return result;
+  }
+
   /**
    * Runs the requests from the project as configured.
    */
@@ -269,36 +288,32 @@ export abstract class ProjectRunner extends BaseRunner {
     if (this._state === State.Aborted) {
       throw new Error(`The execution has been aborted.`);
     }
-    const { environment, project, options, hasIterations, index, noEmit } = this;
+    const { project, options, hasIterations, index, noEmit } = this;
     if (!options || !project) {
       throw new Error(`Run configure() first.`);
     }
     if (!noEmit) {
       this.emit('before-iteration', index, hasIterations);
     }
-    
-    const runner = new ProjectRequestRunner(project, {
-      environment,
-      logger: options.logger ? options.logger : new DummyLogger(),
-      eventTarget: this.target,
-      variables: this.getSystemVariables(),
-    });
+    const runnerOptions = await this.getProjectRunnerOptions();
+    const runner = new ProjectRequestRunner(project, runnerOptions);
     this._runner = runner;
-    
     runner.on('request', this._requestHandler);
     runner.on('response', this._responseHandler);
     runner.on('error', this._errorHandler);
     this.currentIteration = {
       index: this.index,
       executed: [],
+      variables: {},
     };
     try {
-      await runner.run({ 
-        parent: options.parent, 
-        requests: options.request, 
-        ignore: options.ignore, 
-        recursive: options.recursive 
+      const info = await runner.run({
+        parent: options.parent,
+        requests: options.request,
+        ignore: options.ignore,
+        recursive: options.recursive
       });
+      this.currentIteration.variables = info.variables;
     } catch (e) {
       const cause = e as Error;
       this.options?.logger?.error(e);
@@ -343,7 +358,7 @@ export abstract class ProjectRunner extends BaseRunner {
   /**
    * @returns Reads the system variables based on the library configuration.
    */
-  protected getSystemVariables(): Record<string, string> {
+  protected prepareVariables(): Record<string, string> {
     const result: Record<string, string> = {};
     const { options } = this;
     if (!options) {
