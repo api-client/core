@@ -95,6 +95,30 @@ class RedirectsApiRoute extends BaseApi {
       headers: req.headers,
     });
   }
+
+  async selfCookies(req: Request, res: Response): Promise<void> {
+    const { params } = req;
+    const size = Number(params.n) - 1;
+    let next: string;
+    if (Number.isNaN(size) || size === 0) {
+      next = `/v1/get`;
+    } else {
+      next = `/v1/redirect/relative/${size}`;
+    }
+    const qp = this.readQueryParams(req);
+    if (qp) {
+      next += `?${qp}`;
+    }
+    res.setHeader('location', next);
+    // Set-Cookie: UserID=JohnDoe; Max-Age=3600; Version=1
+    res.setHeader('set-cookie', `redirect-${size}=true; Path=/, unrelated=true; Domain=api.com`);
+    res.setHeader('connection', 'close');
+    res.status(302);
+    res.send({
+      location: next,
+      headers: req.headers,
+    });
+  }
 }
 const api = new RedirectsApiRoute();
 api.setCors(router);
@@ -102,3 +126,4 @@ const checkCorsFn = api._processCors;
 router.get('/absolute/:n', cors(checkCorsFn), api.absolute.bind(api));
 router.get('/relative/:n', cors(checkCorsFn), api.relativePath.bind(api));
 router.get('/relative-root/:n', cors(checkCorsFn), api.relative.bind(api));
+router.get('/cookies/:n', cors(checkCorsFn), api.selfCookies.bind(api));

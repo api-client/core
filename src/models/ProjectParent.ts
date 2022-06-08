@@ -10,12 +10,15 @@ import { ProjectDefinitionProperty } from "./ProjectDefinitionProperty.js";
  */
 export abstract class ProjectParent implements ProjectDefinitionProperty {
   kind: unknown;
-  key: string = '';
+
+  key = '';
+
   /**
    * The ordered list of HTTP requests, folders, or environments in the projects.
    * The UI uses this to manipulate the view without changing the definitions.
    */
   items: ProjectItem[] = [];
+  
   /**
    * The basic information about the project / folder.
    */

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { assert } from 'chai';
 import { PayloadSerializer, ISafePayload } from '../../../index.js';
 

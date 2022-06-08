@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable no-unused-vars */
 import process from 'process';
 import cluster from 'cluster';
@@ -8,6 +9,7 @@ import { IProjectParallelWorkerOptions } from './InteropInterfaces.js';
 import { sleep } from '../../lib/timers/Timers.js';
 import { ProjectRunner } from './ProjectRunner.js';
 import { State } from './enums.js';
+import { InMemoryCookieJar } from '../../cookies/InMemoryCookieJar.js';
 
 class ProjectExeWorker extends ProjectRunner {
   initialize(): void {
@@ -25,6 +27,7 @@ class ProjectExeWorker extends ProjectRunner {
   }
 
   async run(options: IProjectParallelWorkerOptions): Promise<void> {
+    options.cookies = new InMemoryCookieJar();
     try {
       await this.configure(new HttpProject(options.project), options);
       await this.execute();

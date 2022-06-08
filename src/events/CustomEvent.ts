@@ -15,6 +15,10 @@ if (typeof CustomEvent === 'function') {
       super(type, eventInitDict);
       if (eventInitDict && eventInitDict.detail) {
         this[detailSymbol] = eventInitDict.detail;
+      } else {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        this[detailSymbol] = null;
       }
     }
 

@@ -104,6 +104,7 @@ describe('data', () => {
         it('throws when no array argument', () => {
           let message: string | undefined;
           try {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             converter.processArray({});
           } catch (e) {

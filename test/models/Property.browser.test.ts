@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { assert } from '@esm-bundle/chai';
 import { Property, IProperty, Kind as PropertyKind } from '../../src/models/Property.js';
 
@@ -672,9 +673,9 @@ describe('Models', () => {
 
       it('sets the enum', () => {
         const schema = property.toJSON();
-        schema.enum = 'updated';
+        schema.enum = ['updated'];
         property.new(schema);
-        assert.equal(property.enum, 'updated');
+        assert.deepEqual(property.enum, ['updated']);
       });
     });
 

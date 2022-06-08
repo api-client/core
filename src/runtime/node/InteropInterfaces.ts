@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-empty-interface */
 import { IProjectRequestIterator, IHttpProject } from '../../models/HttpProject.js';
 import { Environment } from '../../models/Environment.js';
 import { Logger } from '../../lib/logging/Logger.js';
 import { IRequestLog } from '../../models/RequestLog.js';
+import { CookieJar } from '../../cookies/CookieJar.js';
 
-export interface ProjectRunnerOptions {
+export interface IRequestRunnerOptions {
   /**
    * When provided it overrides any project / folder defined environment.
    */
@@ -20,16 +22,27 @@ export interface ProjectRunnerOptions {
    */
   logger?: Logger;
   /**
-   * The event target to use.
-   * By default it creates its own target.
+   * An instance of a cookie jar (store) to put/read cookies.
    */
-  eventTarget?: EventTarget;
+  cookies?: CookieJar;
 }
 
-export interface ProjectRunnerRunOptions extends IProjectRequestIterator {
+export interface IRequestRunnerRunOptions extends IProjectRequestIterator {
 }
 
-export interface RunResult {
+export interface IProjectExecutionResult {
+  /**
+   * The variables evaluated during the run. 
+   * These variables have values set by requests' HTTP flows.
+   */
+  variables: Record<string, string>;
+  /**
+   * The executed items.
+   */
+  items: IRunResult[];
+}
+
+export interface IRunResult {
   /**
    * The key of the request from the HttpProject that was executed.
    */
@@ -124,4 +137,9 @@ export interface IProjectRunnerOptions {
    * It aborts the execution when the ``abort` event is dispatched.
    */
   signal?: AbortSignal;
+
+  /**
+   * An instance of a cookie jar (store) to put/read cookies.
+   */
+  cookies?: CookieJar;
 }

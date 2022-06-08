@@ -1,8 +1,31 @@
 import { ARCCookie as LegacyARCCookie } from './legacy/models/Cookies.js';
-import { Cookie as ParserCookie } from '../lib/cookies/Cookie.js';
 
 export type CookieSameSiteType = 'unspecified' | 'no_restriction' | 'lax' | 'strict';
 export type CookieChangeReason = 'explicit' | 'overwrite' | 'expired' | 'evicted' | 'expired-overwrite';
+// eslint-disable-next-line no-control-regex
+const fieldContentRegExp = /^[\u0009\u0020-\u007e\u0080-\u00ff]+$/;
+
+export interface IElectronCookie {
+  name: string;
+  value: string;
+  /**
+   * The domain of the cookie; this will be normalized with a preceding dot so that it's also valid for subdomains.
+   */
+  domain?: string;
+  /**
+   * Whether the cookie is a host-only cookie; this will only be true if no domain was passed.
+   */
+  hostOnly?: boolean;
+  /**
+   * The path of the cookie.
+   */
+  path?: string;
+  secure?: boolean;
+  httpOnly?: boolean;
+  session?: boolean;
+  expirationDate?: number;
+  sameSite?: CookieSameSiteType;
+}
 
 export interface IHttpCookieChangeRecord {
   /**
@@ -70,7 +93,7 @@ export interface IHttpCookie {
    * The Same Site policy applied to this cookie. Can be `unspecified`, `no_restriction`, `lax` or `strict`.
    * @default unspecified
    */
-  sameSite: CookieSameSiteType;
+  sameSite?: CookieSameSiteType;
 }
 
 export class HttpCookie {
@@ -82,11 +105,6 @@ export class HttpCookie {
    * The value of the cookie.
    */
   value = '';
-  /**
-   * The domain of the cookie; this will be normalized with a preceding dot so that
-   * it's also valid for subdomains.
-   */
-  domain?: string;
   /**
    * Whether the cookie is a host-only cookie; this will only be `true` if no domain
    * was passed.
@@ -108,17 +126,110 @@ export class HttpCookie {
    * Whether the cookie is a session cookie or a persistent cookie with an expiration
    * date.
    */
-  session?: boolean;
-  /**
-   * The expiration date of the cookie as the number of seconds since the UNIX epoch.
-   * Not provided for session cookies.
-   */
-  expirationDate?: number;
+  session?: boolean = true;
   /**
    * The Same Site policy applied to this cookie. Can be `unspecified`, `no_restriction`, `lax` or `strict`.
    * @default unspecified
    */
   sameSite: CookieSameSiteType = 'unspecified';
+
+  protected _domain?: string;
+  protected _maxAge?: number;
+  protected _expirationDate?: number | undefined;
+
+  /**
+   * @param max The max age value
+   */
+  set maxAge(max: number | undefined) {
+    const typedMax = Number(max);
+    if (Number.isNaN(typedMax)) {
+      return;
+    }
+    
+    this._maxAge = typedMax;
+    if (typedMax <= 0) {
+      // see http://stackoverflow.com/a/11526569/1127848
+      // and https://tools.ietf.org/html/rfc6265#section-5.2.2
+      this._expirationDate = -8640000000000000;
+    } else {
+      let now = Date.now();
+      now += typedMax * 1000;
+      this._expirationDate = now;
+    }
+    this.session = false;
+  }
+
+  /**
+   * @return Returns a value of maxAge property
+   */
+  get maxAge(): number | undefined {
+    return this._maxAge;
+  }
+
+  /**
+   * The expiration date of the cookie as the number of seconds since the UNIX epoch.
+   * Not provided for session cookies.
+   */
+  set expirationDate(expires: number | Date | string | undefined) {
+    this.setExpirationTime(expires);
+  }
+
+  get expirationDate(): number | undefined {
+    return this._expirationDate;
+  }
+
+  /**
+   * The domain of the cookie; this will be normalized with a preceding dot so that
+   * it's also valid for subdomains.
+   */
+  set domain(domain: string | undefined) {
+    this._domain = domain;
+    if (!domain) {
+      this.hostOnly = false;
+    } else {
+      this.hostOnly = true;
+    }
+  }
+  
+  get domain(): string | undefined {
+    return this._domain;
+  }
+
+  // get samesite(): CookieSameSiteType | undefined {
+  //   return this.sameSite;
+  // }
+
+  set samesite(value: CookieSameSiteType | undefined) {
+    this.sameSite = value || 'unspecified';
+  }
+
+  // get httponly(): boolean | undefined {
+  //   return this.httpOnly;
+  // }
+
+  set httponly(value: boolean | undefined) {
+    this.httpOnly = value;
+  }
+
+  // get hostonly(): boolean | undefined {
+  //   return this.hostOnly;
+  // }
+
+  set hostonly(value: boolean | undefined) {
+    this.hostOnly = value;
+  }
+
+  // get ['max-age'](): number | undefined {
+  //   return this.maxAge;
+  // }
+
+  set ['max-age'](value: number | undefined) {
+    this.maxAge = value;
+  }
+
+  set expires(value: string | number | Date | undefined) {
+    this.expirationDate = value;
+  }
 
   static fromLegacy(old: LegacyARCCookie): HttpCookie {
     const init: IHttpCookie = {
@@ -150,43 +261,12 @@ export class HttpCookie {
     return new HttpCookie(init);
   }
 
-  static fromValue(name: string, value: string = ''): HttpCookie {
+  static fromValue(name: string, value = ''): HttpCookie {
     const init: IHttpCookie = {
       name,
       value,
       sameSite: 'unspecified',
     };
-    return new HttpCookie(init);
-  }
-
-  static fromCookieParser(cookie: ParserCookie): HttpCookie {
-    const { name, value, sameSite='unspecified' } = cookie;
-    const init: IHttpCookie = {
-      name,
-      value,
-      sameSite,
-    };
-    if (typeof cookie.domain === 'string') {
-      init.domain = cookie.domain;
-    }
-    if (typeof cookie.path === 'string') {
-      init.path = cookie.path;
-    }
-    if (typeof cookie.expires === 'number') {
-      init.expirationDate = cookie.expires;
-    }
-    if (typeof cookie.hostOnly === 'boolean') {
-      init.hostOnly = cookie.hostOnly;
-    }
-    if (typeof cookie.httpOnly === 'boolean') {
-      init.httpOnly = cookie.httpOnly;
-    }
-    if (typeof cookie.secure === 'boolean') {
-      init.secure = cookie.secure;
-    }
-    if (typeof cookie.persistent === 'boolean') {
-      init.session = !cookie.persistent;
-    }
     return new HttpCookie(init);
   }
 
@@ -213,10 +293,27 @@ export class HttpCookie {
       sameSite = 'unspecified',
       domain, expirationDate, hostOnly, httpOnly, path, secure, session
     } = init;
+    if (name && !fieldContentRegExp.test(name)) {
+      throw new TypeError('Argument `name` is invalid');
+    }
+    if (value && !fieldContentRegExp.test(value)) {
+      throw new TypeError('Argument `value` is invalid');
+    }
     this.name = name;
     this.value = value;
     this.sameSite = sameSite;
+    if (typeof path === 'string') {
+      if (!fieldContentRegExp.test(path)) {
+        throw new TypeError('Option `path` is invalid');
+      }
+      this.path = path;
+    } else {
+      this.path = undefined;
+    }
     if (domain) {
+      if (!fieldContentRegExp.test(domain)) {
+        throw new TypeError('Option `domain` is invalid');
+      }
       this.domain = domain;
     } else {
       this.domain = undefined;
@@ -244,13 +341,41 @@ export class HttpCookie {
     if (typeof session === 'boolean') {
       this.session = session;
     } else {
-      this.session = undefined;
+      this.session = !this.expirationDate;
     }
-    if (typeof path === 'string') {
-      this.path = path;
+  }
+
+  /**
+   * Sets value for `expirationDate` property.
+   * @param expires The value as string, date, or a number
+   */
+  setExpirationTime(expires: Date | string | number | undefined): void {
+    let value: number | undefined;
+    const typedNumber = Number(expires);
+    if (!Number.isNaN(typedNumber)) {
+      value = typedNumber;
+    } else if (expires instanceof Date) {
+      value = expires.getTime();
+    } else if (typeof expires === 'string') {
+      const tmp = new Date(expires);
+      if (tmp.toString() === 'Invalid Date') {
+        value = 0;
+      } else {
+        value = tmp.getTime();
+      }
     } else {
-      this.path = undefined;
+      value = undefined;
     }
+    this._expirationDate = value;
+    this.session = !value;
+  }
+
+  /**
+   * @return Cookie's `name=value` string.
+   */
+  toString(): string {
+    const { name, value } = this;
+    return `${name}=${value}`;
   }
 
   toJSON(): IHttpCookie {
@@ -281,5 +406,42 @@ export class HttpCookie {
       result.path = this.path;
     }
     return result;
+  }
+
+  /**
+   * Returns a Cookie as a HTTP header string.
+   * @return Cookie string as a HTTP header value
+   */
+  toHeader(): string {
+    let header = this.toString();
+    let expires;
+    if (this._expirationDate) {
+      expires = new Date(this._expirationDate);
+      if (expires.toString() === 'Invalid Date') {
+        expires = new Date(0);
+      }
+    }
+    if (expires) {
+      header += `; expires=${expires.toUTCString()}`;
+    }
+    const { path, domain, httpOnly, sameSite, secure } = this;
+    if (path) {
+      header += `; path=${path}`;
+    }
+    if (domain) {
+      header += `; domain=${domain}`;
+    }
+    if (httpOnly) {
+      header += `; httpOnly=${httpOnly}`;
+    }
+    switch (sameSite) {
+      case 'lax': header += `; SameSite=Lax`; break;
+      case 'no_restriction': header += `; SameSite=None`; break;
+      case 'strict': header += `; SameSite=Strict`; break;
+    }
+    if (secure || sameSite === 'strict') {
+      header += `; Secure`;
+    }
+    return header;
   }
 }

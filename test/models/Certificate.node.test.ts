@@ -6,8 +6,8 @@ const { bufferToBase64 } = CoreBuffer;
 describe('Models', () => {
   describe('Certificate', () => {
     describe('fromPem()', () => {
-      let data = 'test-cert';
-      let key = 'test-key';
+      const data = 'test-cert';
+      const key = 'test-key';
 
       it('sets the kind', () => {
         const result = Certificate.fromPem(data, key);
@@ -64,7 +64,7 @@ describe('Models', () => {
     });
 
     describe('fromP12()', () => {
-      let data = 'test-cert';
+      const data = 'test-cert';
 
       it('sets the kind', () => {
         const result = Certificate.fromP12(data);

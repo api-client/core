@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { assert } from '@esm-bundle/chai';
 import { HttpCookie, IHttpCookie } from '../../src/models/HttpCookie.js';
 import { ARCCookie as LegacyARCCookie } from '../../src/models/legacy/models/Cookies.js';
@@ -98,18 +99,24 @@ describe('Models', () => {
       });
 
       it('sets the session', () => {
-        schema.session = false;
+        schema.session = true;
         const result = HttpCookie.fromLegacy(schema);
-        assert.isFalse(result.session);
+        assert.isTrue(result.session);
       });
 
-      it('does not set the session when missing', () => {
+      it('set the session when not expires', () => {
         const result = HttpCookie.fromLegacy(schema);
-        assert.isUndefined(result.session);
+        assert.isTrue(result.session);
+      });
+
+      it('set the session when expires', () => {
+        const result = HttpCookie.fromLegacy({ ...schema, expires: 1234, });
+        assert.isFalse(result.session);
       });
     });
 
     describe('constructor()', () => {
+      const invalid = `test${String.fromCharCode(0x1f)}`;
       let schema: IHttpCookie;
       beforeEach(() => {
         schema = {
@@ -174,6 +181,12 @@ describe('Models', () => {
         assert.isUndefined(result.expirationDate);
       });
 
+      it('sets the expirationDate from string number', () => {
+        const cookie = new HttpCookie();
+        cookie.expirationDate = '123456';
+        assert.equal(cookie.expirationDate, 123456);
+      });
+
       it('sets the hostOnly', () => {
         schema.hostOnly = false;
         const result = new HttpCookie(schema);
@@ -208,14 +221,14 @@ describe('Models', () => {
       });
 
       it('sets the session', () => {
-        schema.session = false;
+        schema.session = true;
         const result = new HttpCookie(schema);
-        assert.isFalse(result.session);
+        assert.isTrue(result.session);
       });
 
-      it('does not set the session when missing', () => {
+      it('sets the default session', () => {
         const result = new HttpCookie(schema);
-        assert.isUndefined(result.session);
+        assert.isTrue(result.session);
       });
 
       it('creates the default values when no argument', () => {
@@ -229,7 +242,7 @@ describe('Models', () => {
         assert.isUndefined(result.hostOnly);
         assert.isUndefined(result.httpOnly);
         assert.isUndefined(result.secure);
-        assert.isUndefined(result.session);
+        assert.isTrue(result.session);
       });
 
       it('creates the cookie from the schema', () => {
@@ -243,7 +256,100 @@ describe('Models', () => {
         assert.isUndefined(result.hostOnly);
         assert.isUndefined(result.httpOnly);
         assert.isUndefined(result.secure);
-        assert.isUndefined(result.session);
+        assert.isTrue(result.session);
+      });
+
+      it('throws an error for invalid name', () => {
+        assert.throws(() => {
+          new HttpCookie({ name: invalid, value: '', sameSite: 'lax'});
+        });
+      });
+  
+      it('throws an error for invalid value', () => {
+        assert.throws(() => {
+          new HttpCookie({ name: 'test', value: invalid, sameSite: 'lax'});
+        });
+      });
+  
+      it('throws an error for invalid path', () => {
+        assert.throws(() => {
+          new HttpCookie({ name: 'test', value: '', sameSite: 'lax', path: invalid});
+        });
+      });
+  
+      it('throws an error for invalid domain', () => {
+        assert.throws(() => {
+          new HttpCookie({ name: 'test', value: '', sameSite: 'lax', domain: invalid});
+        });
+      });
+    });
+
+    describe('#maxAge', () => {
+      it('sets the expirationDate', () => {
+        const instance = new HttpCookie();
+        instance.maxAge = 100;
+        assert.approximately(instance.expirationDate, Date.now() + 100000, 1000);
+      });
+
+      it('sets the cookie persistent', () => {
+        const instance = new HttpCookie();
+        instance.maxAge = 100;
+        assert.isFalse(instance.session);
+      });
+
+      it('sets lowest possible expiration date', () => {
+        const instance = new HttpCookie();
+        instance.maxAge = -100;
+        const compare = new Date(-8640000000000000).getTime();
+        assert.equal(instance.expirationDate, compare);
+      });
+
+      it('sets the expirationDate from the "max-age" property', () => {
+        const instance = new HttpCookie();
+        instance['max-age'] = 100;
+        assert.approximately(instance.expirationDate, Date.now() + 100000, 1000);
+      });
+
+      it('ignores non-numeric values', () => {
+        const instance = new HttpCookie();
+        // @ts-ignore
+        instance.maxAge = 'test';
+        assert.isUndefined(instance.expirationDate);
+      });
+
+      it('sets the expirationDate for maxAge 0', () => {
+        const instance = new HttpCookie();
+        instance.maxAge = 0;
+        assert.isBelow(instance.expirationDate, -1);
+      });
+
+      it('sets the expirationDate for maxAge -1', () => {
+        const instance = new HttpCookie();
+        instance.maxAge = -1;
+        assert.isBelow(instance.expirationDate, -1);
+      });
+
+      it('sets the expirationDate for maxAge 1', () => {
+        const instance = new HttpCookie();
+        instance.maxAge = 1;
+        assert.isAbove(instance.expirationDate, Date.now());
+      });
+    });
+
+    describe('#expires', () => {
+      it('sets "expirationDate" from timestamp', () => {
+        const instance = new HttpCookie();
+        const now = Date.now();
+        instance.expires = now;
+        assert.equal(instance.expirationDate, now);
+      });
+
+      it('sets expires from ISO string', () => {
+        const instance = new HttpCookie();
+        const now = new Date();
+        const time = now.getTime();
+        instance.expires = now.toISOString();
+        assert.equal(instance.expirationDate, time);
       });
     });
 
@@ -314,6 +420,88 @@ describe('Models', () => {
         instance.path = '/abc';
         const result = instance.toJSON();
         assert.equal(result.path, instance.path);
+      });
+    });
+
+    describe('toString()', () => {
+      let instance: HttpCookie;
+      beforeEach(() => {
+        instance = new HttpCookie({ name: 'test-name', value: 'test-value'});
+      });
+  
+      it('returns cookie header string', () => {
+        const result = instance.toString();
+        assert.equal(result, 'test-name=test-value');
+      });
+    });
+
+    describe('toHeader()', () => {
+      let instance: HttpCookie;
+      const base = 'test-name=test-value';
+
+      beforeEach(() => {
+        instance = new HttpCookie({ name: 'test-name', value: 'test-value'});
+      });
+  
+      it('returns the basic cookie header string', () => {
+        const result = instance.toHeader();
+        assert.equal(result, base);
+      });
+  
+      it('adds the path', () => {
+        instance.path = '/api';
+        const result = instance.toHeader();
+        assert.equal(result, `${base}; path=/api`);
+      });
+  
+      it('adds the domain', () => {
+        instance.domain = 'api.com';
+        const result = instance.toHeader();
+        assert.equal(result, `${base}; domain=api.com`);
+      });
+  
+      it('adds the httpOnly', () => {
+        instance.httpOnly = true;
+        const result = instance.toHeader();
+        assert.equal(result, `${base}; httpOnly=true`);
+      });
+
+      it('adds the expires', () => {
+        const now = new Date();
+        const isoDate = now.toISOString();
+        const utcDate = now.toUTCString();
+        instance.expires = isoDate;
+
+        const result = instance.toHeader();
+        assert.equal(result, `${base}; expires=${utcDate}`);
+      });
+
+      it('adds the secure', () => {
+        instance.secure = true;
+
+        const result = instance.toHeader();
+        assert.equal(result, `${base}; Secure`);
+      });
+
+      it('adds the SameSite=Lax', () => {
+        instance.sameSite = 'lax';
+
+        const result = instance.toHeader();
+        assert.equal(result, `${base}; SameSite=Lax`);
+      });
+
+      it('adds the SameSite=None', () => {
+        instance.sameSite = 'no_restriction';
+
+        const result = instance.toHeader();
+        assert.equal(result, `${base}; SameSite=None`);
+      });
+
+      it('adds the SameSite=Strict', () => {
+        instance.sameSite = 'strict';
+
+        const result = instance.toHeader();
+        assert.equal(result, `${base}; SameSite=Strict; Secure`);
       });
     });
   });

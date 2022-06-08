@@ -43,6 +43,7 @@
         "no-plusplus": "off",
         "no-param-reassing": "off",
         "class-methods-use-this": "off",
+        "@typescript-eslint/ban-ts-comment": "off",
         "import/no-extraneous-dependencies": "off"
       }
     },

@@ -39,13 +39,6 @@ export interface IAuthMeta {
   selected?: number;
 }
 
-export interface IActionsMeta {
-  /**
-   * The index of the selected API Client actions view.
-   */
-  selected?: number;
-}
-
 export interface IResponseUiMeta {
   /**
    * The list of activated panels in the response view.
@@ -124,10 +117,6 @@ export interface IRequestUiMeta {
    */
   authorization?: IAuthMeta;
   /**
-   * API Client request actions editor UI config.
-   */
-  actions?: IActionsMeta;
-  /**
    * The currently selected editor in the request editor UI.
    */
   selectedEditor?: number;
@@ -156,10 +145,6 @@ export class RequestUiMeta {
    */
   authorization?: IAuthMeta;
   /**
-   * API Client request actions editor UI config.
-   */
-  actions?: IActionsMeta;
-  /**
    * The currently selected editor in the request editor UI.
    */
   selectedEditor?: number;
@@ -169,9 +154,8 @@ export class RequestUiMeta {
   response?: IResponseUiMeta;
 
   static fromLegacy(old: LegacyRequestUiMeta): RequestUiMeta {
-    const { actions, authorization, body, headers, response, selectedEditor, url } = old;
+    const { authorization, body, headers, response, selectedEditor, url } = old;
     const init: IRequestUiMeta = {
-      actions,
       authorization,
       body,
       response,
@@ -223,7 +207,6 @@ export class RequestUiMeta {
     this.url = init.url;
     this.headers = init.headers;
     this.authorization = init.authorization;
-    this.actions = init.actions;
     this.selectedEditor = init.selectedEditor;
     this.response = init.response;
   }
@@ -243,9 +226,6 @@ export class RequestUiMeta {
     }
     if (this.authorization) {
       result.authorization = this.authorization;
-    }
-    if (this.actions) {
-      result.actions = this.actions;
     }
     if (this.response) {
       result.response = this.response;

@@ -7,6 +7,7 @@ import { FilesSdk } from './FilesSdk.js';
 import { UsersSdk } from './UsersSdk.js';
 import { HistorySdk } from './HistorySdk.js';
 import { SharedSdk } from './SharedSdk.js';
+import { AppSdk } from './HttpClientSdk.js';
 
 const baseUriSymbol = Symbol('baseUri');
 
@@ -50,6 +51,11 @@ export abstract class Sdk {
    * The shared data.
    */
   shared = new SharedSdk(this);
+
+  /**
+   * HTTP Client app specific SDK.
+   */
+  app = new AppSdk(this);
 
   /**
    * When set it limits log output to minimum.

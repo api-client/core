@@ -16,7 +16,7 @@ export interface IUserPicture {
    */
   url?: string;
   /**
-   * Alternative to the `imageUrl`. When set it is a data URL value of the image.
+   * Alternative to the `url`. When set it is a data URL value of the image.
    */
   data?: string;
 }
@@ -26,7 +26,7 @@ export const Kind = 'Core#User';
 interface BaseUser {
   kind: typeof Kind;
   /**
-   * Data store key of the user.
+   * The data store key of the user.
    */
   key: string;
   /**
@@ -42,7 +42,7 @@ interface BaseUser {
    */
   picture?: IUserPicture;
   /**
-   * General purpose tags field.
+   * A general purpose tags field.
    */
   tags?: string[];
   /**

@@ -1,20 +1,21 @@
 import { EventEmitter } from 'events';
-import { Environment } from '../../models/Environment.js';
+import { Environment, Kind as EnvironmentKind } from '../../models/Environment.js';
 import { Logger } from '../../lib/logging/Logger.js';
 import { IRequestLog, RequestLog } from '../../models/RequestLog.js';
 import { Property } from '../../models/Property.js';
 import { ProjectFolder, Kind as ProjectFolderKind } from '../../models/ProjectFolder.js';
-import { ProjectRequest } from '../../models/ProjectRequest.js';
+import { ProjectRequest, Kind as ProjectRequestKind } from '../../models/ProjectRequest.js';
 import { IHttpRequest } from '../../models/HttpRequest.js';
 import { HttpProject } from '../../models/HttpProject.js';
 import { SentRequest } from '../../models/SentRequest.js';
 import { ErrorResponse } from '../../models/ErrorResponse.js';
-import { VariablesStore } from './VariablesStore.js';
 import { VariablesProcessor } from '../variables/VariablesProcessor.js';
-import { RequestFactory } from './RequestFactory.js';
-import { EventTypes } from '../../events/EventTypes.js';
-import { ProjectRunnerOptions, ProjectRunnerRunOptions, RunResult } from './InteropInterfaces.js';
+import { IProjectExecutionResult, IRequestRunnerOptions, IRequestRunnerRunOptions, IRunResult } from './InteropInterfaces.js';
 import { State } from './enums.js';
+import { HttpRequestRunner } from '../http-runner/HttpRequestRunner.js';
+import { CookieJar } from '../../cookies/CookieJar.js';
+import { AppProject, AppProjectFolder, AppProjectFolderKind, AppProjectItem, AppProjectRequest, AppProjectRequestKind } from '../../models/AppProject.js';
+import { ProjectItem } from '../../models/ProjectItem.js';
 
 export interface ProjectRequestRunner {
   /**
@@ -51,9 +52,12 @@ export interface ProjectRequestRunner {
  * Requests are executed in order defined in the folder.
  */
 export class ProjectRequestRunner extends EventEmitter {
-  eventTarget: EventTarget;
   logger?: Logger;
-  project: HttpProject;
+  project: HttpProject | AppProject;
+  /**
+   * An instance of a cookie jar (store) to put/read cookies.
+   */
+  cookies?: CookieJar;
 
   protected masterEnvironment?: Environment;
   protected extraVariables?: Record<string, string>;
@@ -69,13 +73,13 @@ export class ProjectRequestRunner extends EventEmitter {
     return this._state;
   }
 
-  constructor(project: HttpProject, opts: ProjectRunnerOptions = {}) {
+  constructor(project: HttpProject | AppProject, opts: IRequestRunnerOptions = {}) {
     super();
     this.project = project;
     this.logger = opts.logger;
-    this.eventTarget = opts.eventTarget || new EventTarget();
     this.masterEnvironment = opts.environment;
     this.extraVariables = opts.variables;
+    this.cookies = opts.cookies;
   }
 
   /**
@@ -83,16 +87,104 @@ export class ProjectRequestRunner extends EventEmitter {
    * @param options Run options.
    * @returns A promise with the run result.
    */
-  async run(options?: ProjectRunnerRunOptions): Promise<RunResult[]> {
-    this._state = State.Running as State;
+  async run(options: IRequestRunnerRunOptions = {}): Promise<IProjectExecutionResult> {
     const { project } = this;
-    const executed: RunResult[] = [];
-    for (const request of project.requestIterator(options)) {
-      const info = await this._runItem(request);
-      executed.push(info);
+    const root = options.parent ? project.findFolder(options.parent) : project;
+    if (!root) {
+      throw new Error(`The parent folder not found: ${options.parent}.`);
     }
-    this._state = State.Idle;
-    return executed;
+    const variables = await this.getVariables(root);
+    const executed: IRunResult[] = [];
+    for await (const result of this.runIterator(options, variables)) {
+      executed.push(result);
+    }
+    return {
+      items: executed,
+      variables,
+    };
+  }
+
+  /**
+   * Creates an async iterator that allows to iterate over execution results.
+   * The result is yielded after the request is executed.
+   * 
+   * @param options The iterator configuration.
+   */
+  protected async * runIterator(options: IRequestRunnerRunOptions = {}, variables?: Record<string, string>): AsyncGenerator<IRunResult> {
+    const { project } = this;
+    const root = options.parent ? project.findFolder(options.parent) : project;
+    if (!root) {
+      throw new Error(`The parent folder not found: ${options.parent}.`);
+    }
+    
+    this._state = State.Running as State;
+    const envVariables = variables || await this.getVariables(root);
+    const { items } = root;
+    const it = this._runIterator(items, envVariables, options);
+    for await (const request of it) {
+      yield request;
+    }
+  }
+
+  protected async * _runIterator(items: (ProjectItem | AppProjectItem)[], variables: Record<string, string>, options: IRequestRunnerRunOptions): AsyncGenerator<IRunResult> {
+    for (const item of items) {
+      const current = item.getItem();
+      if (!current) {
+        continue;
+      }
+      if (current.kind === AppProjectRequestKind || current.kind === ProjectRequestKind) {
+        if (Array.isArray(options.ignore) && options.ignore.includes(current.key)) {
+          continue;
+        }
+        if (Array.isArray(options.requests) && !options.requests.includes(current.key) && !options.requests.includes(current.info.name || '')) {
+          continue;
+        }
+        const info = await this._runItem(current as AppProjectRequest | ProjectRequest, variables);
+        yield info;
+      } else if (current.kind === ProjectFolderKind || current.kind === AppProjectFolderKind) {
+        if (!options.recursive) {
+          continue;
+        }
+        const parent = current as ProjectFolder | AppProjectFolder;
+        // make a copy so the variables executed in the encapsulated environment won't leak out to the current environment.
+        let encapsulated = false;
+        // we restore the `baseUri` after exiting the folder.
+        const currentBaseUri = variables.baseUri;
+        const { items: parentItems } = parent;
+        const envItem = (parentItems as (ProjectItem | AppProjectItem)[]).find(i => i.kind === EnvironmentKind);
+        let parentVariables: Record<string, string> = {};
+        let childVariables = variables;
+        if (envItem) {
+          const parentEnv = envItem.getItem() as Environment | undefined;
+          if (parentEnv) {
+            encapsulated = parentEnv.encapsulated;
+            parentVariables = await this.applyVariables([parentEnv]);
+            if (encapsulated) {
+              childVariables = parentVariables;
+            } else {
+              childVariables = { ...childVariables, ...parentVariables };
+            }
+          }
+        }
+
+        const it = this._runIterator(parentItems, childVariables, options);
+        for await (const request of it) {
+          yield request;
+        }
+        if (!encapsulated) {
+          // now we set the variables set on children to the main variables object, except for these
+          // declared on the child environments, so these won't leak to other folders.
+          // However, variables set by a request in a folder always is propagated to the main environment.
+          const ignore: string[] = Object.keys(parentVariables);
+          Object.keys(childVariables).forEach((key) => {
+            if (!ignore.includes(key)) {
+              variables[key] = childVariables[key]
+            }
+          });
+        }
+        variables.baseUri = currentBaseUri;
+      }
+    }
   }
 
   /**
@@ -116,46 +208,33 @@ export class ProjectRequestRunner extends EventEmitter {
    * }
    * ```
    */
-  async* [Symbol.asyncIterator](): AsyncGenerator<RunResult> {
-    const { project } = this;
-    this._state = State.Running as State;
-    for (const request of project.requestIterator({ recursive: true })) {
-      const info = await this._runItem(request);
-      yield info;
+  async* [Symbol.asyncIterator](): AsyncGenerator<IRunResult> {
+    for await (const result of this.runIterator({ recursive: true })) {
+      yield result;
     }
-    this._state = State.Idle;
   }
 
-  private async _runItem(request: ProjectRequest): Promise<RunResult> {
+  private async _runItem(request: ProjectRequest | AppProjectRequest, variables: Record<string, string>): Promise<IRunResult> {
     if (this._state === State.Aborted) {
       throw new Error(`The execution has been aborted.`);
     }
-    const folder = request.getParent();
-    const parent = folder || this.project;
-    let variables: Record<string, string>;
-    if (VariablesStore.has(parent)) {
-      variables = VariablesStore.get(parent);
-    } else {
-      variables = await this.getVariables(parent);
-      VariablesStore.set(parent, variables);
-    }
     const info = await this.execute(request, variables);
+    const folder = request.getParent();
     if (folder && folder !== this.project) {
       info.parent = folder.key;
     }
     return info;
   } 
 
-  protected async execute(request: ProjectRequest, variables: Record<string, string>): Promise<RunResult> {
+  protected async execute(request: ProjectRequest | AppProjectRequest, variables: Record<string, string>): Promise<IRunResult> {
     const config = request.getConfig();
-    const factory = new RequestFactory(this.eventTarget);
-
+    const factory = new HttpRequestRunner();
     factory.variables = variables;
     if (request.authorization) {
       factory.authorization = request.authorization.map(i => i.toJSON());
     }
-    if (request.actions) {
-      factory.actions = request.actions.toJSON();
+    if (request.flows) {
+      factory.flows = request.flows;
     }
     if (request.clientCertificate) {
       factory.certificates = [request.clientCertificate.toJSON()];
@@ -166,30 +245,23 @@ export class ProjectRequestRunner extends EventEmitter {
     if (this.logger) {
       factory.logger = this.logger;
     }
-    const info: RunResult = {
+    if (this.cookies) {
+      factory.cookies = this.cookies;
+    }
+    const info: IRunResult = {
       key: request.key,
     };
     const requestData = request.expects.toJSON();
     requestData.url = this.prepareRequestUrl(requestData.url, variables);
 
-    function variableHandler(e: CustomEvent): void {
-      if (e.defaultPrevented) {
-        return;
-      }
-      const { name, value } = e.detail;
-      variables[name] = value;
-      e.preventDefault();
-      e.detail.result = Promise.resolve();
-    }
-
-    this.eventTarget.addEventListener(EventTypes.Environment.set, variableHandler as any);
-
     try {
       // Below replaces the single call to the `run()` function of the factory to 
       // report via the events a request object that has evaluated with the Jexl library.
-      const requestCopy = await factory.processRequestVariables(requestData);
+      const requestCopy = await factory.applyVariables(requestData);
+      await factory.applyAuthorization(requestCopy);
+      await factory.applyCookies(requestCopy);
       this.emit('request', request.key, { ...requestCopy });
-      await factory.processRequestLogic(requestCopy);
+      await factory.runRequestFlows(requestCopy);
       const result = await factory.executeRequest(requestCopy);
       result.requestId = request.key;
       await factory.processResponse(result);
@@ -205,19 +277,17 @@ export class ProjectRequestRunner extends EventEmitter {
       const log = RequestLog.fromRequestResponse(sent.toJSON(), response.toJSON()).toJSON();
       this.emit('error', request.key, log, info.errorMessage);
     }
-
-    this.eventTarget.removeEventListener(EventTypes.Environment.set, variableHandler as any);
     return info;
   }
 
-  protected async getVariables(parent: HttpProject | ProjectFolder): Promise<Record<string, string>> {
+  protected async getVariables(parent: HttpProject | AppProject | ProjectFolder | AppProjectFolder): Promise<Record<string, string>> {
     if (this.masterEnvironment) {
       return this.applyVariables([this.masterEnvironment]);
     }
     return this.createEnvironment(parent);
   }
 
-  protected async createEnvironment(parent: HttpProject | ProjectFolder): Promise<Record<string, string>> {
+  protected async createEnvironment(parent: HttpProject | AppProject | ProjectFolder | AppProjectFolder): Promise<Record<string, string>> {
     const envs = await this.readEnvironments(parent);
     return this.applyVariables(envs);
   }
@@ -225,7 +295,7 @@ export class ProjectRequestRunner extends EventEmitter {
   /**
    * Reads the list of the environments to apply to this runtime.
    */
-  protected async readEnvironments(parent: HttpProject | ProjectFolder): Promise<Environment[]> {
+  protected async readEnvironments(parent: HttpProject | AppProject | ProjectFolder | AppProjectFolder): Promise<Environment[]> {
     const folderKey = parent.kind === ProjectFolderKind ? (parent as ProjectFolder).key : undefined;
     return this.project.readEnvironments({ parent: folderKey });
   }

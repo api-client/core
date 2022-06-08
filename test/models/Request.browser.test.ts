@@ -6,13 +6,12 @@ import { ErrorResponse } from '../../src/models/ErrorResponse.js';
 import { RequestLog, Kind as RequestLogKind } from '../../src/models/RequestLog.js';
 import { RequestConfig, Kind as RequestConfigKind } from '../../src/models/RequestConfig.js';
 import { RequestAuthorization, Kind as RequestAuthorizationKind } from '../../src/models/RequestAuthorization.js';
-import { Kind as ConditionKind } from '../../src/models/actions/Condition.js';
-import { Kind as RunnableActionKind } from '../../src/models/actions/RunnableAction.js';
-import { RequestActions } from '../../src/models/RequestActions.js';
 import { Kind as ThingKind } from '../../src/models/Thing.js';
 import { ARCSavedRequest } from '../../src/models/legacy/request/ArcRequest.js';
 import { ISafePayload } from '../../src/lib/transformers/PayloadSerializer.js';
 import { Certificate, Kind as CertificateKind, IP12Certificate } from '../../src/models/ClientCertificate.js';
+import { SetCookieConfig } from '../../src/models/legacy/actions/Actions.js';
+import { ActionRequestDataEnum, ActionSourceEnum } from '../../src/models/http-actions/HttpActions.js';
 
 describe('Models', () => {
   describe('Request', () => {
@@ -200,7 +199,7 @@ describe('Models', () => {
         assert.deepEqual(payload.data, [ 116, 101, 115, 116 ]);
       });
 
-      it('translates the actions object', async () => {
+      it('translates the legacy actions object', async () => {
         const instance = await Request.fromLegacy({
           method: 'PUT',
           name: 'test',
@@ -220,8 +219,13 @@ describe('Models', () => {
                     type: 'request',
                     name: 'set-cookie',
                     config: {
-                      
-                    },
+                      source: {
+                        source: 'body',
+                        type: 'request',
+                        path: 'abc'
+                      },
+                      name: 'A name',
+                    } as SetCookieConfig,
                   }
                 ],
                 enabled: true,
@@ -241,7 +245,13 @@ describe('Models', () => {
                     priority: 0,
                     type: 'response',
                     config: {
-                    },
+                      source: {
+                        source: 'body',
+                        type: 'request',
+                        path: 'abc'
+                      },
+                      name: 'A name',
+                    } as SetCookieConfig,
                     name: 'set-cookie',
                   }
                 ],
@@ -251,16 +261,14 @@ describe('Models', () => {
             ],
           },
         });
-        const { actions } = instance;
-        assert.ok(actions, 'has actions');
-        assert.typeOf(actions.request, 'array', 'has request actions');
-        assert.typeOf(actions.response, 'array', 'has response actions');
+        const { flows } = instance;
+        assert.ok(flows, 'has flows');
 
-        const [reqAction] = actions.request;
-        assert.equal(reqAction.kind, RunnableActionKind);
-
-        const [resAction] = actions.response;
-        assert.equal(resAction.kind, RunnableActionKind);
+        assert.lengthOf(flows, 2, 'has two flows');
+        const [f1, f2] = flows;
+        
+        assert.equal(f1.trigger, 'request', 'has the request flow');
+        assert.equal(f2.trigger, 'response', 'has the response flow');
       });
 
       it('translates the config object', async () => {
@@ -827,54 +835,54 @@ describe('Models', () => {
         assert.equal(instance.midnight, 1234567);
       });
 
-      it('sets the actions', () => {
+      it('sets the flows', () => {
         const instance = new Request();
         const schema = instance.toJSON();
-        schema.actions = {
-          request: [
-            {
-              condition: {
-                source: 'value',
-                alwaysPass: true,
-                kind: ConditionKind,
-              },
-              actions: [
-                {
-                  priority: 0,
-                  config: {
-
-                  },
-                  name: 'set-cookie',
-                }
-              ],
-              enabled: true,
-            }
-          ],
-          response: [],
-        };
+        schema.flows = [
+          {
+            trigger: 'request',
+            actions: [
+              {
+                steps: [],
+                condition: {
+                  source: ActionSourceEnum.request,
+                  data: ActionRequestDataEnum.body,
+                },
+              }
+            ],
+          }
+        ];
         instance.new(schema);
 
-        const { actions } = instance;
-        assert.ok(actions, 'has actions');
-        assert.typeOf(actions.request, 'array', 'has request actions');
-        assert.typeOf(actions.response, 'array', 'has response actions');
+        const { flows } = instance;
+        assert.typeOf(flows, 'array', 'has flows');
 
-        const [reqAction] = actions.request;
-        assert.equal(reqAction.kind, RunnableActionKind);
+        const [flow] = flows;
+        assert.lengthOf(flow.actions, 1);
       });
 
-      it('sets the actions to undefined when missing', () => {
+      it('sets the flows to undefined when missing', () => {
         const instance = new Request();
         const schema = instance.toJSON();
-        schema.actions = {
-          request: [],
-          response: [],
-        };
+        schema.flows = [
+          {
+            trigger: 'request',
+            actions: [
+              {
+                steps: [],
+                condition: {
+                  source: ActionSourceEnum.request,
+                  data: ActionRequestDataEnum.body,
+                },
+              }
+            ],
+          }
+        ];
         instance.new(schema);
-        delete schema.actions;
+        delete schema.flows;
         instance.new(schema);
 
-        assert.isUndefined(instance.actions);
+        assert.isUndefined(instance.flows);
       });
 
       it('sets the clientCertificate', () => {
@@ -1032,44 +1040,34 @@ describe('Models', () => {
         assert.isUndefined(result.authorization);
       });
       
-      it('sets the actions', () => {
+      it('sets the flows', () => {
         const instance = new Request();
-        instance.actions = new RequestActions({
-          request: [
-            {
-              condition: {
-                source: 'value',
-                alwaysPass: true,
-                kind: ConditionKind,
-              },
-              actions: [
-                {
-                  priority: 0,
-                  config: {
-
-                  },
-                  name: 'set-cookie',
-                }
-              ],
-              enabled: true,
-            }
-          ],
-          response: [],
-        });
+        instance.flows = [
+          {
+            trigger: 'request',
+            actions: [
+              {
+                steps: [],
+                condition: {
+                  source: ActionSourceEnum.request,
+                  data: ActionRequestDataEnum.body,
+                },
+              }
+            ],
+          }
+        ];
         const result = instance.toJSON();
-        const { actions } = result;
-        assert.ok(actions, 'has actions');
-        assert.typeOf(actions.request, 'array', 'has request actions');
-        assert.typeOf(actions.response, 'array', 'has response actions');
+        const { flows } = result;
+        assert.typeOf(flows, 'array', 'has flows');
 
-        const [reqAction] = actions.request;
-        assert.equal(reqAction.kind, RunnableActionKind);
+        const [flow] = flows;
+        assert.lengthOf(flow.actions, 1);
       });
 
-      it('does not set the actions when missing', () => {
+      it('does not set the flows when missing', () => {
         const instance = new Request();
         const result = instance.toJSON();
-        assert.isUndefined(result.actions);
+        assert.isUndefined(result.flows);
       });
 
       it('sets the clientCertificate', () => {

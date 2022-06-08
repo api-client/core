@@ -762,7 +762,7 @@ export class CoreEngine extends HttpEngine {
     if (buffer) {
       raw = buffer.toString();
     }
-    this.currentResponse!.headers = raw;
+    (this.currentResponse as Response).headers = raw;
     this.logger.info('Received headers list', raw);
     const headers = new Headers(raw);
     this.currentHeaders = headers;
@@ -974,13 +974,14 @@ export class CoreEngine extends HttpEngine {
     };
     if (proxyIsSsl) {
       connectOptions.rejectUnauthorized = false;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       connectOptions.requestOCSP = false;
     }
     const auth = this._proxyAuthHeader();
     if (auth) {
       this.logger.debug(`Adding proxy authorization.`);
-      connectOptions.headers!['proxy-authorization'] = auth;
+      (connectOptions.headers as http.OutgoingHttpHeaders)['proxy-authorization'] = auth;
     }
     const lib = proxyIsSsl ? https : http;
     return new Promise((resolve, reject) => {

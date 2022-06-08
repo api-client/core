@@ -23,6 +23,7 @@ describe('Models', () => {
             kind: HostRuleKind,
             from: '',
             to: '',
+            key: '123'
           }
         });
 

@@ -1,0 +1,49 @@
+#%HTTP Client Project 1.0
+
+kind: Core#AppProject
+key: ec8dcc51-a2b1-48a4-a063-1f023e717381
+
+info:
+  kind: Core#Thing # most likely this will be always optional.
+  name: HTTP Bin
+  description: A definition of the HTTP Bin API.
+
+created: 1653592878403
+updated: 1653592878403
+
+items:
+  - kind: Core#AppProjectFolder
+    key: f045ff7c-5f7b-4232-ac84-2b5ce5d3f6fd
+
+definitions:
+  folders:
+    - kind: Core#AppProjectFolder # most likely this will be optional in this place but required when the folder is defined in another file.
+      key: f045ff7c-5f7b-4232-ac84-2b5ce5d3f6fd
+      info:
+        name: Status codes
+      created: 1653593047514
+      updated: 1653593047514
+      items:
+        - kind: Core#AppProjectRequest
+          key: e4c08ed6-c566-449b-8c09-3af36fe0af48
+        - kind: Core#AppProjectRequest
+          key: b2977e38-a7de-47f9-acbe-4492745bcf40
+  requests:
+    - kind: Core#AppProjectRequest
+      key: e4c08ed6-c566-449b-8c09-3af36fe0af48
+      created: 1653593207486
+      updated: 1653593207486
+      info:
+        name: GET Status
+      expects:
+        url: https://httpbin.org/status/{code}
+        method: GET
+    - kind: Core#AppProjectRequest
+      key: b2977e38-a7de-47f9-acbe-4492745bcf40
+      created: 1653593404216
+      updated: 1653593404216
+      info:
+        name: POST Status
+      expects:
+        url: https://httpbin.org/status/{code}
+        method: POST

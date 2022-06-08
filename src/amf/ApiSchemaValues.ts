@@ -21,7 +21,7 @@ export interface IApiSchemaReadOptions {
  */
 export class ApiSchemaValues {
   static mocking = new DataMock();
-  
+
   /**
    * Reads the value to be set on an input. This is for Scalar shapes only.
    *
@@ -59,7 +59,7 @@ export class ApiSchemaValues {
    * @param parameter The parameter that has the array schema.
    * @param schema The final schema to use to read the data from.
    */
-  static readInputValues(parameter: ApiParameter, schema: IShapeUnion, opts: IApiSchemaReadOptions={}): any {
+  static readInputValues(parameter: ApiParameter, schema: IShapeUnion, opts: IApiSchemaReadOptions = {}): any {
     if (!parameter.required && opts.requiredOnly === true) {
       // for a non required array items just skip showing example values
       // as they are not crucial to make an HTTP request.
@@ -145,29 +145,7 @@ export class ApiSchemaValues {
    */
   static generateDefaultValue(schema: IScalarShape): any {
     const { dataType } = schema;
-    switch (dataType) {
-      case ns.w3.xmlSchema.string: return '';
-      // XML schema, for DataNode
-      case ns.w3.xmlSchema.number:
-      case ns.w3.xmlSchema.integer:
-      case ns.w3.xmlSchema.float:
-      case ns.w3.xmlSchema.long:
-      case ns.w3.xmlSchema.double:
-      case ns.aml.vocabularies.shapes.number:
-      case ns.aml.vocabularies.shapes.integer:
-      case ns.aml.vocabularies.shapes.float:
-      case ns.aml.vocabularies.shapes.long:
-      case ns.aml.vocabularies.shapes.double: return 0;
-      case ns.aml.vocabularies.shapes.boolean:
-      case ns.w3.xmlSchema.boolean: return false;
-      case ns.aml.vocabularies.shapes.nil:
-      case ns.w3.xmlSchema.nil: return null;
-      case ns.w3.xmlSchema.date: return '';
-      case ns.w3.xmlSchema.dateTime: return '';
-      case ns.aml.vocabularies.shapes.dateTimeOnly: return '';
-      case ns.w3.xmlSchema.time:  return '';
-      default: return undefined;
-    }
+    return this.defaultValue(dataType);
   }
 
   /**
@@ -198,6 +176,32 @@ export class ApiSchemaValues {
       case ns.w3.xmlSchema.dateTime: return new Time().dateTime((schema.format === 'date-time' ? 'rfc3339' : schema.format) as "rfc3339" | "rfc2616");
       case ns.aml.vocabularies.shapes.dateTimeOnly: return new Time().dateTimeOnly();
       case ns.w3.xmlSchema.time: return new Time().timeOnly();
+      default: return undefined;
+    }
+  }
+
+  static defaultValue(dataType?: string): any {
+    switch (dataType) {
+      case ns.w3.xmlSchema.string: return '';
+      // XML schema, for DataNode
+      case ns.w3.xmlSchema.number:
+      case ns.w3.xmlSchema.integer:
+      case ns.w3.xmlSchema.float:
+      case ns.w3.xmlSchema.long:
+      case ns.w3.xmlSchema.double:
+      case ns.aml.vocabularies.shapes.number:
+      case ns.aml.vocabularies.shapes.integer:
+      case ns.aml.vocabularies.shapes.float:
+      case ns.aml.vocabularies.shapes.long:
+      case ns.aml.vocabularies.shapes.double: return 0;
+      case ns.aml.vocabularies.shapes.boolean:
+      case ns.w3.xmlSchema.boolean: return false;
+      case ns.aml.vocabularies.shapes.nil:
+      case ns.w3.xmlSchema.nil: return null;
+      case ns.w3.xmlSchema.date: return '';
+      case ns.w3.xmlSchema.dateTime: return '';
+      case ns.aml.vocabularies.shapes.dateTimeOnly: return '';
+      case ns.w3.xmlSchema.time: return '';
       default: return undefined;
     }
   }
@@ -236,7 +240,7 @@ export class ApiSchemaValues {
   }
 
   static generateStringValue(schema: IScalarShape): string {
-    const { minLength, maxLength, name='', format } = schema;
+    const { minLength, maxLength, name = '', format } = schema;
     const lowerName = name.toLowerCase();
     // we employ some heuristics to generate content based on the property name.
     if (lowerName === 'description') {
@@ -275,7 +279,7 @@ export class ApiSchemaValues {
     } else if (!hasMin && typeof maxLength === 'number') {
       init.length = maxLength;
     }
-    
+
     return this.mocking.lorem.word(init);
   }
 
@@ -291,7 +295,7 @@ export class ApiSchemaValues {
    * @param schemaType Data type encoded in the parameter schema.
    * @returns One of the HTML input element type values.
    */
-  static readInputType(schemaType: string): 'number'|'boolean'|'date'|'time'|'datetime-local'|'text' {
+  static readInputType(schemaType: string): 'number' | 'boolean' | 'date' | 'time' | 'datetime-local' | 'text' {
     switch (schemaType) {
       case ns.aml.vocabularies.shapes.number:
       case ns.aml.vocabularies.shapes.integer:
@@ -343,7 +347,7 @@ export class ApiSchemaValues {
   /**
    * Processes a value that should be a date formatted as hh:mm:ss.
    */
-  static parseTimeOnlyInput(input: unknown): string|undefined {
+  static parseTimeOnlyInput(input: unknown): string | undefined {
     const value = String(input).trim();
     if (/^\d\d:\d\d$/.test(value)) {
       return `${value}:00`;
@@ -359,7 +363,7 @@ export class ApiSchemaValues {
    * - rfc3339 (default): 2016-02-28T16:41:41.090Z
    * - rfc2616: Sun, 28 Feb 2016 16:41:41 GMT
    */
-  static parseDateTimeInput(value: any, format: string = 'rfc3339'): string | undefined {
+  static parseDateTimeInput(value: any, format = 'rfc3339'): string | undefined {
     const d = new Date(value);
     if (Number.isNaN(d.getTime())) {
       return undefined;
@@ -390,7 +394,7 @@ export class ApiSchemaValues {
   /**
    * Parses the the value according to array schema value.
    */
-  static parseArrayInput(value: any, schema: IArrayShape): string|number|boolean|null|undefined {
+  static parseArrayInput(value: any, schema: IArrayShape): string | number | boolean | null | undefined {
     const { items } = schema;
     if (!items) {
       return String(value);
@@ -401,7 +405,7 @@ export class ApiSchemaValues {
   /**
    * Parses the user entered value according to the schema definition.
    */
-  static parseUserInput(value: any, schema: IShapeUnion): string|number|boolean|null|undefined {
+  static parseUserInput(value: any, schema: IShapeUnion): string | number | boolean | null | undefined {
     if (!schema || value === undefined || value === null) {
       return value;
     }
@@ -418,8 +422,12 @@ export class ApiSchemaValues {
   /**
    * Parses the user entered value as scalar value.
    */
-  static parseScalarInput(value: unknown, schema: IScalarShape): string|number|boolean|null|undefined {
-    switch (schema.dataType) {
+  static parseScalarInput(value: unknown, schema: IScalarShape): string | number | boolean | null | undefined {
+    return this.parseScalar(value, schema.dataType, schema.format);
+  }
+
+  static parseScalar(value: unknown, dataType?: string, format?: string): string | number | boolean | null | undefined {
+    switch (dataType) {
       // AML shapes, for Shape
       case ns.aml.vocabularies.shapes.number:
       case ns.aml.vocabularies.shapes.integer:
@@ -435,7 +443,7 @@ export class ApiSchemaValues {
       case ns.w3.xmlSchema.boolean: return ApiSchemaValues.parseBooleanInput(value);
       case ns.w3.xmlSchema.date: return ApiSchemaValues.parseDateOnlyInput(value);
       case ns.w3.xmlSchema.time: return ApiSchemaValues.parseTimeOnlyInput(value);
-      case ns.w3.xmlSchema.dateTime: return ApiSchemaValues.parseDateTimeInput(value, schema.format);
+      case ns.w3.xmlSchema.dateTime: return ApiSchemaValues.parseDateTimeInput(value, format);
       case ns.aml.vocabularies.shapes.dateTimeOnly: return ApiSchemaValues.parseDateTimeOnlyInput(value);
       default: return String(value);
     }

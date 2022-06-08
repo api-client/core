@@ -185,7 +185,7 @@ describe('Models', () => {
       });
 
       it('the timings is optional', () => {
-        let schema: IResponseRedirect = {
+        const schema: IResponseRedirect = {
           kind: ResponseRedirectKind,
           startTime: 1234,
           endTime: 5678,
@@ -200,7 +200,7 @@ describe('Models', () => {
       });
 
       it('creates an instance from the JSON schema string', () => {
-        let schema: IResponseRedirect = {
+        const schema: IResponseRedirect = {
           kind: ResponseRedirectKind,
           startTime: 1234,
           endTime: 5678,

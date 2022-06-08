@@ -47,7 +47,7 @@ export class RequestAuthorization {
    */
   valid?: boolean;
 
-  static fromTypedConfig(type: AuthorizationType, config: IAuthorizationSettingsUnion, valid=true): RequestAuthorization {
+  static fromTypedConfig(type: AuthorizationType, config: IAuthorizationSettingsUnion, valid = true): RequestAuthorization {
     return new RequestAuthorization({
       kind: Kind,
       config,
@@ -74,7 +74,7 @@ export class RequestAuthorization {
   /**
    * @param input The provider definition used to restore the state.
    */
-  constructor(input?: string|IRequestAuthorization) {
+  constructor(input?: string | IRequestAuthorization) {
     let init: IRequestAuthorization;
     if (typeof input === 'string') {
       init = JSON.parse(input);
@@ -105,8 +105,8 @@ export class RequestAuthorization {
   }
 
   toJSON(): IRequestAuthorization {
-    const { config={} } = this;
-    const result:IRequestAuthorization = {
+    const { config = {} } = this;
+    const result: IRequestAuthorization = {
       kind: Kind,
       config: { ...config },
       enabled: this.enabled || false,

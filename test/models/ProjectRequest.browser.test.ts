@@ -32,7 +32,7 @@ describe('Models', () => {
           assert.isUndefined(result.log, 'does not set the log property');
           assert.isUndefined(result.config, 'does not set the config property');
           assert.isUndefined(result.authorization, 'does not set the authorization property');
-          assert.isUndefined(result.actions, 'does not set the actions property');
+          assert.isUndefined(result.flows, 'does not set the flows property');
           assert.isUndefined(result.clientCertificate, 'does not set the clientCertificate property');
         });
       });

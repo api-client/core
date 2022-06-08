@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import chai, { assert } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
@@ -12,8 +13,18 @@ import {
   IResponse,
   DummyLogger,
   Environment,
-  RunResult,
+  IRunResult,
+  ActionSourceEnum,
+  ReadDataStepKind,
+  ActionOperatorEnum, 
+  ActionResponseDataEnum,
+  SetVariableStepKind,
+  IReadDataStep,
+  ActionRequestDataEnum,
+  ISetVariableStep,
+  InMemoryCookieJar,
 } from '../../index.js';
+import { DeleteCookieStepKind, IDeleteCookieStep } from '../../src/models/http-actions/HttpActions.js';
 
 const logger = new DummyLogger();
 
@@ -42,10 +53,13 @@ describe('Runtime', () => {
           const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
           const result = await runner.run({ parent: folder.key });
+          assert.typeOf(result, 'object', 'returns an object');
+          assert.typeOf(result.variables, 'object', 'has the variables object');
+          const { items } = result;
           
-          assert.typeOf(result, 'array', 'returns an array');
-          assert.lengthOf(result, 1, 'has a single result');
-          const [report] = result;
+          assert.typeOf(items, 'array', 'returns an array');
+          assert.lengthOf(items, 1, 'has a single result');
+          const [report] = items;
           assert.typeOf(report, 'object', 'the report is an object');
           assert.equal(report.key, request.key, 'the report has the key');
           assert.isUndefined(report.error, 'the report has no error');
@@ -77,10 +91,10 @@ describe('Runtime', () => {
           const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
           const result = await runner.run({ parent: folder.key });
-          
-          assert.typeOf(result, 'array', 'returns an array');
-          assert.lengthOf(result, 2, 'has both results');
-          const [report1, report2] = result;
+          const { items } = result;
+          assert.typeOf(items, 'array', 'returns an array');
+          assert.lengthOf(items, 2, 'has both results');
+          const [report1, report2] = items;
           assert.typeOf(report1, 'object', 'the report1 is an object');
           assert.typeOf(report2, 'object', 'the report1 is an object');
           assert.equal(report1.key, request1.key, 'the report1 has the key');
@@ -122,10 +136,9 @@ describe('Runtime', () => {
           const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
           const result = await runner.run({ parent: folder1.key });
-          
-          assert.typeOf(result, 'array', 'returns an array');
-          assert.lengthOf(result, 1, 'has a single result');
-          const [report] = result;
+          const { items } = result;
+          assert.lengthOf(items, 1, 'has a single result');
+          const [report] = items;
           assert.typeOf(report, 'object', 'the report is an object');
           assert.equal(report.key, request1.key, 'the report has the key');
           assert.isUndefined(report.error, 'the report has no error');
@@ -140,9 +153,9 @@ describe('Runtime', () => {
           const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
           const result = await runner.run();
+          const { items } = result;
           
-          assert.typeOf(result, 'array', 'returns an array');
-          assert.lengthOf(result, 0, 'has no results');
+          assert.lengthOf(items, 0, 'has no results');
         });
   
         it('returns empty array when the folder has no requests', async () => {
@@ -151,9 +164,8 @@ describe('Runtime', () => {
           const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
           const result = await runner.run({ parent: folder.key });
-          
-          assert.typeOf(result, 'array', 'returns an array');
-          assert.lengthOf(result, 0, 'has no results');
+          const { items } = result;
+          assert.lengthOf(items, 0, 'has no results');
         });
   
         it('throws when folder not found', async () => {
@@ -165,31 +177,17 @@ describe('Runtime', () => {
 
         it('runs selected requests only', async () => {
           const project = new HttpProject();
-          const request1 = ProjectRequest.fromHttpRequest({
-            url: `http://localhost:${httpPort}/v1/get`,
-            method: 'GET',
-            headers: 'x-test: true',
-          }, project);
-          project.addRequest(request1);
-          const request2 = ProjectRequest.fromHttpRequest({
-            url: `http://localhost:${httpPort}/v1/get`,
-            method: 'GET',
-            headers: 'x-test: false',
-          }, project);
-          request2.info.name = 'included request';
-          project.addRequest(request2);
-          const request3 = ProjectRequest.fromHttpRequest({
-            url: `http://localhost:${httpPort}/v1/get`,
-            method: 'GET',
-            headers: 'x-test: false',
-          }, project);
-          project.addRequest(request3);
+          const r1 = project.addRequest(`http://localhost:${httpPort}/v1/get`);
+          const r2 = project.addRequest(`http://localhost:${httpPort}/v1/get`);
+          r2.info.name = 'included request';
+          project.addRequest(`http://localhost:${httpPort}/v1/get`);
           const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
-          const result = await runner.run({ requests: [request1.key, 'included request'] });
+          const result = await runner.run({ requests: [r1.key, 'included request'] });
+          const { items } = result;
           
-          assert.typeOf(result, 'array', 'returns an array');
-          assert.lengthOf(result, 2, 'has both results');
+          assert.typeOf(items, 'array', 'returns an array');
+          assert.lengthOf(items, 2, 'has both results');
         });
       });
 
@@ -245,10 +243,9 @@ describe('Runtime', () => {
           const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
           const result = await runner.run({ parent: folder.key });
-          
-          assert.typeOf(result, 'array', 'returns an array');
-          assert.lengthOf(result, 1, 'has a single result');
-          const [report] = result;
+          const { items } = result;
+          assert.lengthOf(items, 1, 'has a single result');
+          const [report] = items;
           assert.typeOf(report, 'object', 'the report is an object');
           assert.equal(report.key, request.key, 'the report has the key');
           assert.isUndefined(report.error, 'the report has no error');
@@ -275,10 +272,9 @@ describe('Runtime', () => {
           const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
           const result = await runner.run({ parent: folder.key });
-          
-          assert.typeOf(result, 'array', 'returns an array');
-          assert.lengthOf(result, 1, 'has a single result');
-          const [report] = result;
+          const { items } = result;
+          assert.lengthOf(items, 1, 'has a single result');
+          const [report] = items;
           assert.typeOf(report, 'object', 'the report is an object');
           assert.equal(report.key, request.key, 'the report has the key');
           assert.isUndefined(report.error, 'the report has no error');
@@ -307,10 +303,9 @@ describe('Runtime', () => {
           const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
           const result = await runner.run({ parent: folder.key });
-          
-          assert.typeOf(result, 'array', 'returns an array');
-          assert.lengthOf(result, 1, 'has a single result');
-          const [report] = result;
+          const { items } = result;
+          assert.lengthOf(items, 1, 'has a single result');
+          const [report] = items;
           assert.typeOf(report, 'object', 'the report is an object');
           assert.equal(report.key, request.key, 'the report has the key');
           assert.isUndefined(report.error, 'the report has no error');
@@ -343,9 +338,8 @@ describe('Runtime', () => {
           const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
           const result = await runner.run({ parent: folder.key });
-
-          const [report] = result;
-
+          const { items } = result;
+          const [report] = items;
           const log = report.log as IRequestLog;
           const payload = await Response.readPayloadAsString(log.response as IResponse);
           const body = JSON.parse(payload as string);
@@ -374,10 +368,9 @@ describe('Runtime', () => {
           runner.logger = logger;
           runner.on('error', () => {});
           const result = await runner.run({ parent: folder.key });
-          
-          assert.typeOf(result, 'array', 'returns an array');
-          assert.lengthOf(result, 1, 'has a single result');
-          const [report] = result;
+          const { items } = result;
+          assert.lengthOf(items, 1, 'has a single result');
+          const [report] = items;
           assert.typeOf(report, 'object', 'the report is an object');
           assert.equal(report.key, request.key, 'the report has the key');
           assert.isUndefined(report.error, 'the report has no error');
@@ -386,6 +379,162 @@ describe('Runtime', () => {
           const log = report.log as IRequestLog;
           assert.typeOf(log, 'object', 'has the log');
           assert.typeOf(log.response as IResponse, 'object', 'has the log.response');
+        });
+
+        it('shares the generated environment between requests', async () => {
+          const project = new HttpProject();
+          const r1 = ProjectRequest.fromHttpRequest({
+            url: `http://localhost:${httpPort}/v1/response/static`,
+            method: 'GET',
+          }, project);
+          r1.flows = [
+            {
+              trigger: 'response',
+              actions: [
+                {
+                  condition: {
+                    source: ActionSourceEnum.response,
+                    data: ActionResponseDataEnum.status,
+                    operator: ActionOperatorEnum.equal,
+                    value: '200',
+                  },
+                  steps: [
+                    {
+                      kind: ReadDataStepKind,
+                      source: ActionSourceEnum.response,
+                      data: ActionRequestDataEnum.body,
+                      path: '/data/token',
+                    } as IReadDataStep,
+                    {
+                      kind: SetVariableStepKind,
+                      name: 'token',
+                    } as ISetVariableStep,
+                  ],
+                }
+              ],
+            }
+          ];
+          const r2 = ProjectRequest.fromHttpRequest({
+            url: `http://localhost:${httpPort}/v1/get`,
+            method: 'GET',
+            headers: 'Authorization: Bearer {token}',
+          }, project);
+          project.addRequest(r1);
+          project.addRequest(r2);
+
+          const runner = new ProjectRequestRunner(project);
+          runner.logger = logger;
+          runner.on('error', () => {});
+          const result = await runner.run();
+          const { items } = result;
+          assert.lengthOf(items, 2, 'has both logs');
+          const [, l2] = items;
+          const log2 = l2.log as IRequestLog;
+          const rsp2 = new Response(log2.response as IResponse);
+          const body2 = await rsp2.readPayloadAsString() as string;
+          const p2 = JSON.parse(body2);
+          assert.equal(p2.headers.authorization, 'Bearer sJxlgNgHi8');
+        });
+      });
+
+      describe('cookies', () => {
+        let cookies: InMemoryCookieJar;
+
+        before(() => {
+          cookies = new InMemoryCookieJar()
+        });
+
+        afterEach(() => {
+          cookies.clear();
+        });
+
+        it('stores response cookies in the store', async () => {
+          const project = new HttpProject();
+          const r1 = ProjectRequest.fromHttpRequest({
+            url: `http://localhost:${httpPort}/v1/cookie`,
+            method: 'GET',
+          }, project);
+          project.addRequest(r1);
+
+          const runner = new ProjectRequestRunner(project, {
+            cookies,
+          });
+          runner.logger = logger;
+          runner.on('error', () => {});
+          
+          const result = await runner.run();
+          const { items } = result;
+          assert.lengthOf(items, 1, 'has a response');
+
+          const stored = await cookies.listCookies(`http://localhost:${httpPort}/v1/cookie`);
+          assert.lengthOf(stored, 3, 'has all cookies');
+        });
+
+        it('uses stored cookies with the request', async () => {
+          const project = new HttpProject();
+          const r1 = ProjectRequest.fromHttpRequest({
+            url: `http://localhost:${httpPort}/v1/cookie`,
+            method: 'GET',
+          }, project);
+          project.addRequest(r1);
+          const r2 = ProjectRequest.fromHttpRequest({
+            url: `http://localhost:${httpPort}/v1/get`,
+            method: 'GET',
+          }, project);
+          project.addRequest(r2);
+
+          const runner = new ProjectRequestRunner(project, { cookies });
+          runner.logger = logger;
+          runner.on('error', () => {});
+          
+          const result = await runner.run();
+          const { items } = result;
+          assert.lengthOf(items, 2, 'has both responses');
+
+          const [, l2] = items;
+          const log2 = l2.log as IRequestLog;
+          const rsp2 = new Response(log2.response as IResponse);
+          const body2 = await rsp2.readPayloadAsString() as string;
+          const p2 = JSON.parse(body2);
+          assert.equal(p2.headers.cookie, 'c1=v1; c2=v2; c3=v3');
+        });
+
+        it('uses the store with http flows', async () => {
+          const project = new HttpProject();
+          const r1 = ProjectRequest.fromHttpRequest({
+            url: `http://localhost:${httpPort}/v1/cookie`,
+            method: 'GET',
+          }, project);
+          r1.flows = [
+            {
+              trigger: 'response',
+              // actions are executed after cookies are stored.
+              actions: [
+                {
+                  steps: [
+                    {
+                      kind: DeleteCookieStepKind,
+                      name: 'c2',
+                    } as IDeleteCookieStep,
+                  ],
+                }
+              ],
+            }
+          ];
+          project.addRequest(r1);
+
+          const runner = new ProjectRequestRunner(project, { cookies });
+          runner.logger = logger;
+          runner.on('error', () => {});
+          
+          const result = await runner.run();
+          const { items } = result;
+          assert.lengthOf(items, 1, 'has the response');
+
+          const stored = await cookies.listCookies(`http://localhost:${httpPort}/v1/cookie`);
+          assert.lengthOf(stored, 2, 'has the remaining cookies');
+          assert.equal(stored[0].name, 'c1');
+          assert.equal(stored[1].name, 'c3');
         });
       });
 
@@ -404,9 +553,9 @@ describe('Runtime', () => {
           runner.logger = logger;
           const result = await runner.run();
           
-          assert.typeOf(result, 'array', 'returns an array');
-          assert.lengthOf(result, 1, 'has a single result');
-          const [report] = result;
+          const { items } = result;
+          assert.lengthOf(items, 1, 'has a single result');
+          const [report] = items;
           assert.typeOf(report, 'object', 'the report is an object');
           assert.equal(report.key, request.key, 'the report has the key');
           assert.isUndefined(report.error, 'the report has no error');
@@ -430,10 +579,9 @@ describe('Runtime', () => {
           const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
           const result = await runner.run();
-          
-          assert.typeOf(result, 'array', 'returns an array');
-          assert.lengthOf(result, 1, 'has a single result');
-          const [report] = result;
+          const { items } = result;
+          assert.lengthOf(items, 1, 'has a single result');
+          const [report] = items;
           assert.typeOf(report, 'object', 'the report is an object');
           assert.equal(report.key, request.key, 'the report has the key');
           assert.isUndefined(report.error, 'the report has no error');
@@ -463,8 +611,8 @@ describe('Runtime', () => {
           folder.addRequest(request2);
           const runner = new ProjectRequestRunner(project);
           runner.logger = logger;
-          const items: RunResult[] = [];
-          for await (let runResult of runner) {
+          const items: IRunResult[] = [];
+          for await (const runResult of runner) {
             items.push(runResult);
           }
           assert.lengthOf(items, 2, 'has both requests');

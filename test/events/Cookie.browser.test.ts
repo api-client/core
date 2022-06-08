@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { assert } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { EventTypes } from  '../../src/events/EventTypes.js';

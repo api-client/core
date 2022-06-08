@@ -37,11 +37,11 @@ export interface ICertificate {
    */
   key: string;
   /**
-   * Custom name of the certificate.
+   * The custom name of the certificate.
    */
   name: string;
   /**
-   * Timestamp when the certificate was inserted into the data store.
+   * The timestamp when the certificate was inserted into the data store.
    * Required when returning a result. Auto-generated when inserting, if missing.
    */
   created?: number;

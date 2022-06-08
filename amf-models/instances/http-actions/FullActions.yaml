@@ -1,0 +1,90 @@
+#%HTTP Action Flow 1.0
+
+kind: HttpAction#ActionFlow
+
+description: |
+  Demonstrates an actions flow. A flow consists of one or more actions.
+
+trigger: response # or request, when the flow is executed
+
+actions:
+  - description: Sets the "AUTH_TOKEN" variable from a payload
+    condition: # Optional condition for the action
+      source: response
+      data: status
+      operator: equal
+      value: 200
+    steps:
+      # Read the data, the result is passed to the next step.
+      - kind: HttpAction#ReadData
+        source: response
+        data: body
+        path: tokens[?type === 'Bearer'].value
+      # This step requires a previous step se return a value.
+      - kind: HttpAction#SetVariable
+        name: AUTH_TOKEN
+
+  - description: Sets a "c1" cookie with a value from a response header
+    condition:
+      source: response
+      data: status
+      operator: equal
+      value: 200
+    steps:
+      # Read the data, the result is passed to the next step.
+      - kind: HttpAction#ReadData
+        source: response
+        data: header
+        path: authorization
+        transform: 
+          - substring(7) # We expect the header to be "Bearer xxx" so we subtract first 7 characters
+      # This step requires a previous step se return a value.
+      - kind: HttpAction#SetCookie
+        name: c1
+        url:
+          data: request # or value: xxx, the request URL
+        expires: 4d
+        httpOnly: true
+        hostOnly: false
+
+  - description: Sets the "AUTH_CODE" variable from a response's hash param (like oauth code)
+    condition:
+      source: response
+      data: status
+      operator: equal
+      value: 200
+    steps:
+      - kind: HttpAction#ReadData
+        source: response
+        data: url.hash
+        path: code
+      - kind: HttpAction#SetVariable
+        name: AUTH_CODE
+  
+  - description: Always sets the "reSet" variable from a manually defined value.
+    steps:
+      - kind: HttpAction#SetData
+        value: dummy
+      - kind: HttpAction#SetVariable
+        name: reSet
+
+  - description: Deletes a cookie from the app
+    condition:
+      source: response
+      data: status
+      operator: equal
+      value: 401
+    steps:
+      - kind: HttpAction#DeleteCookie
+        name: c2
+        url: # optional, when not set it deletes all cookies called "c2"
+          data: response # or value: xxx, the final request URL
+  
+  - description: Always sets a cookie with a manually defined value.
+    steps:
+      - kind: HttpAction#SetData
+        value: dummy
+      - kind: HttpAction#SetCookie
+        name: c3
+        url: https://api.com/path
+        expires: 1d
