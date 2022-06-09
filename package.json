@@ -1,7 +1,7 @@
 {
   "name": "@api-client/core",
   "description": "The API Client's core client library. Works in NodeJS and in a ES enabled browser.",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "license": "Apache-2.0",
   "main": "build/index.js",
   "module": "build/index.js",
@@ -53,7 +53,7 @@
     "express-ntlm": "^2.6.1",
     "get-port": "^6.1.2",
     "husky": "^8.0.1",
-    "lint-staged": "^12.3.4",
+    "lint-staged": "^13.0.1",
     "mocha": "^10.0.0",
     "oauth2-mock-server": "^4.3.1",
     "sinon": "^14.0.0",
