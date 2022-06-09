@@ -7,7 +7,7 @@ import { FilesSdk } from './FilesSdk.js';
 import { UsersSdk } from './UsersSdk.js';
 import { HistorySdk } from './HistorySdk.js';
 import { SharedSdk } from './SharedSdk.js';
-import { AppSdk } from './HttpClientSdk.js';
+import { AppSdk } from './AppSdk.js';
 
 const baseUriSymbol = Symbol('baseUri');
 

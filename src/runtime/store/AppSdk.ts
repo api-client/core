@@ -1,6 +1,6 @@
 import { SdkBase, E_RESPONSE_STATUS, E_RESPONSE_NO_VALUE, E_INVALID_JSON, E_RESPONSE_UNKNOWN, ISdkRequestOptions } from './SdkBase.js';
 import { RouteBuilder } from './RouteBuilder.js';
-import { IBatchDeleteResult, IBatchReadResult, IBatchUpdate, IBatchUpdateResult, IDeleteRecord, IListOptions, IListResponse, IRevertResponse } from '../../models/store/Backend.js';
+import { IBatchDeleteResult, IBatchReadResult, IBatchUpdate, IBatchUpdateResult, IDeleteRecord, IListOptions, IListResponse, IPatchInfo, IPatchRevision, IRevertResponse } from '../../models/store/Backend.js';
 import { AppRequest, IAppRequest, Kind as AppRequestKind } from '../../models/AppRequest.js';
 import { AppProject, IAppProject, AppProjectKind } from '../../models/AppProject.js';
 import { Sdk } from './Sdk.js';
@@ -111,7 +111,7 @@ export class AppRequestsSdk extends SdkBase {
     }
     let data: IBatchUpdateResult;
     try {
-      data = JSON.parse(result.body).data;
+      data = JSON.parse(result.body) as IBatchUpdateResult;
     } catch (e) {
       throw new Error(`${E_PREFIX}${E_INVALID_JSON}.`);
     }
@@ -148,9 +148,9 @@ export class AppRequestsSdk extends SdkBase {
     if (!result.body) {
       throw new Error(`${E_PREFIX}${E_RESPONSE_NO_VALUE}`);
     }
-    let data: IListResponse<IAppRequest | undefined>;
+    let data: IBatchReadResult<IAppRequest>;
     try {
-      data = JSON.parse(result.body);
+      data = JSON.parse(result.body) as IBatchReadResult<IAppRequest>;
     } catch (e) {
       throw new Error(`${E_PREFIX}${E_INVALID_JSON}.`);
     }
@@ -308,6 +308,46 @@ export class AppRequestsSdk extends SdkBase {
     }
     return { key };
   }
+
+  /**
+   * Patches an app request in the store.
+   * 
+   * @param key The key of the request to patch
+   * @param value The JSON patch to be processed.
+   * @param request Optional HTTP request options.
+   * @returns The JSON patch to revert the change using the `@api-client/json` library
+   */
+  async patch(key: string, appId: string, value: IPatchInfo, request: ISdkRequestOptions = {}): Promise<IPatchRevision> {
+    const token = request.token || this.sdk.token;
+    const url = this.sdk.getUrl(RouteBuilder.appRequestItem(appId, key));
+    const body = JSON.stringify(value);
+    const result = await this.sdk.http.patch(url.toString(), { token, body });
+    this.inspectCommonStatusCodes(result.status, result.body);
+    const E_PREFIX = 'Unable to patch an app project. ';
+    if (result.status !== 200) {
+      this.logInvalidResponse(result);
+      let e = this.createGenericSdkError(result.body)
+      if (!e) {
+        e = new SdkError(`${E_PREFIX}${E_RESPONSE_STATUS}${result.status}`, result.status);
+        e.response = result.body;
+      }
+      throw e;
+    }
+    if (!result.body) {
+      throw new Error(`${E_PREFIX}${E_RESPONSE_NO_VALUE}`);
+    }
+    let data: IPatchRevision;
+    try {
+      data = JSON.parse(result.body);
+    } catch (e) {
+      throw new Error(`${E_PREFIX}${E_INVALID_JSON}.`);
+    }
+    // revert is added to the response
+    if (!data.revert) {
+      throw new Error(`${E_PREFIX}${E_RESPONSE_UNKNOWN}.`);
+    }
+    return data;
+  }
 }
 
 /**
@@ -415,7 +455,7 @@ export class AppProjectsSdk extends SdkBase {
     }
     let data: IBatchUpdateResult;
     try {
-      data = JSON.parse(result.body).data;
+      data = JSON.parse(result.body) as IBatchUpdateResult;
     } catch (e) {
       throw new Error(`${E_PREFIX}${E_INVALID_JSON}.`);
     }
@@ -452,9 +492,9 @@ export class AppProjectsSdk extends SdkBase {
     if (!result.body) {
       throw new Error(`${E_PREFIX}${E_RESPONSE_NO_VALUE}`);
     }
-    let data: IListResponse<IAppProject | undefined>;
+    let data: IBatchReadResult<IAppProject>;
     try {
-      data = JSON.parse(result.body);
+      data = JSON.parse(result.body) as IBatchReadResult<IAppProject>;
     } catch (e) {
       throw new Error(`${E_PREFIX}${E_INVALID_JSON}.`);
     }
@@ -611,6 +651,46 @@ export class AppProjectsSdk extends SdkBase {
       throw e;
     }
     return { key };
+  }
+
+  /**
+   * Patches an app project in the store.
+   * 
+   * @param key The key of the project to patch
+   * @param value The JSON patch to be processed.
+   * @param request Optional request options.
+   * @returns The JSON patch to revert the change using the `@api-client/json` library
+   */
+  async patch(key: string, appId: string, value: IPatchInfo, request: ISdkRequestOptions = {}): Promise<IPatchRevision> {
+    const token = request.token || this.sdk.token;
+    const url = this.sdk.getUrl(RouteBuilder.appProjectItem(appId, key));
+    const body = JSON.stringify(value);
+    const result = await this.sdk.http.patch(url.toString(), { token, body });
+    this.inspectCommonStatusCodes(result.status, result.body);
+    const E_PREFIX = 'Unable to patch an app project. ';
+    if (result.status !== 200) {
+      this.logInvalidResponse(result);
+      let e = this.createGenericSdkError(result.body)
+      if (!e) {
+        e = new SdkError(`${E_PREFIX}${E_RESPONSE_STATUS}${result.status}`, result.status);
+        e.response = result.body;
+      }
+      throw e;
+    }
+    if (!result.body) {
+      throw new Error(`${E_PREFIX}${E_RESPONSE_NO_VALUE}`);
+    }
+    let data: IPatchRevision;
+    try {
+      data = JSON.parse(result.body);
+    } catch (e) {
+      throw new Error(`${E_PREFIX}${E_INVALID_JSON}.`);
+    }
+    // revert is added to the response
+    if (!data.revert) {
+      throw new Error(`${E_PREFIX}${E_RESPONSE_UNKNOWN}.`);
+    }
+    return data;
   }
 }
 

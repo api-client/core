@@ -58,7 +58,7 @@ export class HistorySdk extends SdkBase {
     }
     let data: string[];
     try {
-      data = JSON.parse(result.body).data;
+      data = JSON.parse(result.body).items;
     } catch (e) {
       throw new Error(`${E_PREFIX}${E_INVALID_JSON}.`);
     }
