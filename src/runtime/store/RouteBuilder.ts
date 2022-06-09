@@ -95,7 +95,7 @@ export class RouteBuilder {
 
   // GET, DELETE
   static appRequestItem(appId: string, key: string): string {
-    return `${this.appRequests(appId)}${key}`;
+    return `${this.appRequests(appId)}/${key}`;
   }
 
   static appRequestsBatch(appId: string): string {
@@ -129,7 +129,7 @@ export class RouteBuilder {
 
   // GET, DELETE
   static appProjectItem(appId: string, key: string): string {
-    return `${this.appProjects(appId)}${key}`;
+    return `${this.appProjects(appId)}/${key}`;
   }
 
   static appProjectsBatch(appId: string): string {
