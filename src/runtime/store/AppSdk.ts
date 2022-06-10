@@ -89,7 +89,7 @@ export class AppRequestsSdk extends SdkBase {
    * @param request Optional request options
    * @returns The ordered list of created requests.
    */
-  async createBatch(values: (IAppRequest | AppRequest)[], appId: string, request: ISdkRequestOptions = {}): Promise<IBatchUpdateResult> {
+  async createBatch(values: (IAppRequest | AppRequest)[], appId: string, request: ISdkRequestOptions = {}): Promise<IBatchUpdateResult<IAppRequest>> {
     if (!Array.isArray(values)) {
       throw new Error(`Expected a value when inserting app request list.`);
     }
@@ -101,7 +101,7 @@ export class AppRequestsSdk extends SdkBase {
     const body = JSON.stringify(content);
     const result = await this.sdk.http.post(url.toString(), { token, body });
     this.inspectCommonStatusCodes(result.status);
-    const E_PREFIX = 'Unable to create a app request in bulk. ';
+    const E_PREFIX = 'Unable to create an app request in bulk. ';
     if (result.status !== 200) {
       this.logInvalidResponse(result);
       throw new Error(`${E_PREFIX}${E_RESPONSE_STATUS}${result.status}`);
@@ -109,9 +109,9 @@ export class AppRequestsSdk extends SdkBase {
     if (!result.body) {
       throw new Error(`${E_PREFIX}${E_RESPONSE_NO_VALUE}`);
     }
-    let data: IBatchUpdateResult;
+    let data: IBatchUpdateResult<IAppRequest>;
     try {
-      data = JSON.parse(result.body) as IBatchUpdateResult;
+      data = JSON.parse(result.body) as IBatchUpdateResult<IAppRequest>;
     } catch (e) {
       throw new Error(`${E_PREFIX}${E_INVALID_JSON}.`);
     }
@@ -174,7 +174,7 @@ export class AppRequestsSdk extends SdkBase {
     const body = JSON.stringify(keys);
     const result = await this.sdk.http.post(url.toString(), { token, body });
     this.inspectCommonStatusCodes(result.status, result.body);
-    const E_PREFIX = 'Unable to delete a app request in bulk. ';
+    const E_PREFIX = 'Unable to delete an app request in bulk. ';
     if (result.status !== 200) {
       this.logInvalidResponse(result);
       let e = this.createGenericSdkError(result.body)
@@ -296,8 +296,8 @@ export class AppRequestsSdk extends SdkBase {
     url.searchParams.set('appId', appId);
     const result = await this.sdk.http.delete(url.toString(), { token });
     this.inspectCommonStatusCodes(result.status, result.body);
-    const E_PREFIX = 'Unable to delete a app request. ';
-    if (result.status !== 204) {
+    const E_PREFIX = 'Unable to delete an app request. ';
+    if (result.status !== 200) {
       this.logInvalidResponse(result);
       let e = this.createGenericSdkError(result.body)
       if (!e) {
@@ -306,7 +306,16 @@ export class AppRequestsSdk extends SdkBase {
       }
       throw e;
     }
-    return { key };
+    if (!result.body) {
+      throw new Error(`${E_PREFIX}${E_RESPONSE_NO_VALUE}`);
+    }
+    let data: IDeleteRecord;
+    try {
+      data = JSON.parse(result.body) as IDeleteRecord;
+    } catch (e) {
+      throw new Error(`${E_PREFIX}${E_INVALID_JSON}.`);
+    }
+    return data;
   }
 
   /**
@@ -433,7 +442,7 @@ export class AppProjectsSdk extends SdkBase {
    * @param request Optional request options
    * @returns The ordered list of created projects.
    */
-  async createBatch(values: (IAppProject | AppProject)[], appId: string, request: ISdkRequestOptions = {}): Promise<IBatchUpdateResult> {
+  async createBatch(values: (IAppProject | AppProject)[], appId: string, request: ISdkRequestOptions = {}): Promise<IBatchUpdateResult<IAppProject>> {
     if (!Array.isArray(values)) {
       throw new Error(`Expected a value when inserting app project list.`);
     }
@@ -445,7 +454,7 @@ export class AppProjectsSdk extends SdkBase {
     const body = JSON.stringify(content);
     const result = await this.sdk.http.post(url.toString(), { token, body });
     this.inspectCommonStatusCodes(result.status);
-    const E_PREFIX = 'Unable to create a app project in bulk. ';
+    const E_PREFIX = 'Unable to create an app project in bulk. ';
     if (result.status !== 200) {
       this.logInvalidResponse(result);
       throw new Error(`${E_PREFIX}${E_RESPONSE_STATUS}${result.status}`);
@@ -453,9 +462,9 @@ export class AppProjectsSdk extends SdkBase {
     if (!result.body) {
       throw new Error(`${E_PREFIX}${E_RESPONSE_NO_VALUE}`);
     }
-    let data: IBatchUpdateResult;
+    let data: IBatchUpdateResult<IAppProject>;
     try {
-      data = JSON.parse(result.body) as IBatchUpdateResult;
+      data = JSON.parse(result.body) as IBatchUpdateResult<IAppProject>;
     } catch (e) {
       throw new Error(`${E_PREFIX}${E_INVALID_JSON}.`);
     }
@@ -518,7 +527,7 @@ export class AppProjectsSdk extends SdkBase {
     const body = JSON.stringify(keys);
     const result = await this.sdk.http.post(url.toString(), { token, body });
     this.inspectCommonStatusCodes(result.status, result.body);
-    const E_PREFIX = 'Unable to delete a app project in bulk. ';
+    const E_PREFIX = 'Unable to delete an app project in bulk. ';
     if (result.status !== 200) {
       this.logInvalidResponse(result);
       let e = this.createGenericSdkError(result.body)
@@ -640,8 +649,8 @@ export class AppProjectsSdk extends SdkBase {
     url.searchParams.set('appId', appId);
     const result = await this.sdk.http.delete(url.toString(), { token });
     this.inspectCommonStatusCodes(result.status, result.body);
-    const E_PREFIX = 'Unable to delete a app project. ';
-    if (result.status !== 204) {
+    const E_PREFIX = 'Unable to delete an app project. ';
+    if (result.status !== 200) {
       this.logInvalidResponse(result);
       let e = this.createGenericSdkError(result.body)
       if (!e) {
@@ -650,7 +659,16 @@ export class AppProjectsSdk extends SdkBase {
       }
       throw e;
     }
-    return { key };
+    if (!result.body) {
+      throw new Error(`${E_PREFIX}${E_RESPONSE_NO_VALUE}`);
+    }
+    let data: IDeleteRecord;
+    try {
+      data = JSON.parse(result.body) as IDeleteRecord;
+    } catch (e) {
+      throw new Error(`${E_PREFIX}${E_INVALID_JSON}.`);
+    }
+    return data;
   }
 
   /**
