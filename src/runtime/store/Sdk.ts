@@ -140,6 +140,9 @@ export abstract class Sdk {
       if (options.parent) {
         searchParams.set('parent', options.parent);
       }
+      if (options.since) {
+        searchParams.set('since', String(options.since));
+      }
     }
   }
 }

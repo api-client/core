@@ -88,6 +88,21 @@ export class RouteBuilder {
     return `/app/${appId}`;
   }
 
+  // GET
+  static appQuery(appId: string): string {
+    return `${this.app(appId)}/query`;
+  }
+
+  // GET
+  static appQueryRequests(appId: string): string {
+    return `${this.app(appId)}/query/requests`;
+  }
+
+  // GET
+  static appQueryProjects(appId: string): string {
+    return `${this.app(appId)}/query/projects`;
+  }
+
   // GET, POST
   static appRequests(appId: string): string {
     return `${this.app(appId)}/requests`;

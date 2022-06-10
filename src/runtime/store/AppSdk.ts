@@ -1,6 +1,6 @@
 import { SdkBase, E_RESPONSE_STATUS, E_RESPONSE_NO_VALUE, E_INVALID_JSON, E_RESPONSE_UNKNOWN, ISdkRequestOptions } from './SdkBase.js';
 import { RouteBuilder } from './RouteBuilder.js';
-import { IBatchDeleteResult, IBatchReadResult, IBatchUpdate, IBatchUpdateResult, IDeleteRecord, IListOptions, IListResponse, IPatchInfo, IPatchRevision, IRevertResponse } from '../../models/store/Backend.js';
+import { IBatchDeleteResult, IBatchReadResult, IBatchUpdate, IBatchUpdateResult, IDeleteRecord, IListOptions, IListResponse, IPatchInfo, IPatchRevision, IQueryResponse, IRevertResponse } from '../../models/store/Backend.js';
 import { AppRequest, IAppRequest, Kind as AppRequestKind } from '../../models/AppRequest.js';
 import { AppProject, IAppProject, AppProjectKind } from '../../models/AppProject.js';
 import { Sdk } from './Sdk.js';
@@ -322,6 +322,7 @@ export class AppRequestsSdk extends SdkBase {
    * Patches an app request in the store.
    * 
    * @param key The key of the request to patch
+   * @param appId The application id that created this entry.
    * @param value The JSON patch to be processed.
    * @param request Optional HTTP request options.
    * @returns The JSON patch to revert the change using the `@api-client/json` library
@@ -353,6 +354,44 @@ export class AppRequestsSdk extends SdkBase {
     }
     // revert is added to the response
     if (!data.revert) {
+      throw new Error(`${E_PREFIX}${E_RESPONSE_UNKNOWN}.`);
+    }
+    return data;
+  }
+
+  /**
+   * Performs a full-text search on the stored documents.
+   * 
+   * @param appId The application id that created documents.
+   * @param options Regular query options with required "query" property
+   * @param request Optional HTTP request options.
+   * @returns The list of documents with the indexes where the query was found.
+   */
+  async query(appId: string, options: IListOptions, request: ISdkRequestOptions = {}): Promise<IQueryResponse<IAppRequest>> {
+    const E_PREFIX = 'Unable to query app requests. ';
+    if (!options.query) {
+      throw new Error(`${E_PREFIX}The "query" property is required.`);
+    }
+    const token = request.token || this.sdk.token;
+    const url = this.sdk.getUrl(RouteBuilder.appQueryRequests(appId));
+    this.sdk.appendListOptions(url, options);
+    const result = await this.sdk.http.get(url.toString(), { token });
+    this.inspectCommonStatusCodes(result.status);
+    
+    if (result.status !== 200) {
+      this.logInvalidResponse(result);
+      throw new Error(`${E_PREFIX}${E_RESPONSE_STATUS}${result.status}`);
+    }
+    if (!result.body) {
+      throw new Error(`${E_PREFIX}${E_RESPONSE_NO_VALUE}`);
+    }
+    let data: IQueryResponse<IAppRequest>;
+    try {
+      data = JSON.parse(result.body) as IQueryResponse<IAppRequest>;
+    } catch (e) {
+      throw new Error(`${E_PREFIX}${E_INVALID_JSON}.`);
+    }
+    if (!Array.isArray(data.items)) {
       throw new Error(`${E_PREFIX}${E_RESPONSE_UNKNOWN}.`);
     }
     return data;
@@ -710,6 +749,44 @@ export class AppProjectsSdk extends SdkBase {
     }
     return data;
   }
+
+  /**
+   * Performs a full-text search on the stored documents.
+   * 
+   * @param appId The application id that created documents.
+   * @param options Regular query options with required "query" property
+   * @param request Optional HTTP request options.
+   * @returns The list of documents with the indexes where the query was found.
+   */
+  async query(appId: string, options: IListOptions, request: ISdkRequestOptions = {}): Promise<IQueryResponse<IAppProject>> {
+    const E_PREFIX = 'Unable to query app projects. ';
+    if (!options.query) {
+      throw new Error(`${E_PREFIX}The "query" property is required.`);
+    }
+    const token = request.token || this.sdk.token;
+    const url = this.sdk.getUrl(RouteBuilder.appQueryProjects(appId));
+    this.sdk.appendListOptions(url, options);
+    const result = await this.sdk.http.get(url.toString(), { token });
+    this.inspectCommonStatusCodes(result.status);
+    
+    if (result.status !== 200) {
+      this.logInvalidResponse(result);
+      throw new Error(`${E_PREFIX}${E_RESPONSE_STATUS}${result.status}`);
+    }
+    if (!result.body) {
+      throw new Error(`${E_PREFIX}${E_RESPONSE_NO_VALUE}`);
+    }
+    let data: IQueryResponse<IAppProject>;
+    try {
+      data = JSON.parse(result.body) as IQueryResponse<IAppProject>;
+    } catch (e) {
+      throw new Error(`${E_PREFIX}${E_INVALID_JSON}.`);
+    }
+    if (!Array.isArray(data.items)) {
+      throw new Error(`${E_PREFIX}${E_RESPONSE_UNKNOWN}.`);
+    }
+    return data;
+  }
 }
 
 /**
@@ -723,5 +800,43 @@ export class AppSdk extends SdkBase {
     super(sdk);
     this.requests = new AppRequestsSdk(sdk);
     this.projects = new AppProjectsSdk(sdk);
+  }
+
+  /**
+   * Performs a full-text search on all supported application documents.
+   * 
+   * @param appId The application id that created documents.
+   * @param options Regular query options with required "query" property
+   * @param request Optional HTTP request options.
+   * @returns The list of documents with the indexes where the query was found.
+   */
+  async query(appId: string, options: IListOptions, request: ISdkRequestOptions = {}): Promise<IQueryResponse<IAppProject | IAppRequest>> {
+    const E_PREFIX = 'Unable to query app data. ';
+    if (!options.query) {
+      throw new Error(`${E_PREFIX}The "query" property is required.`);
+    }
+    const token = request.token || this.sdk.token;
+    const url = this.sdk.getUrl(RouteBuilder.appQuery(appId));
+    this.sdk.appendListOptions(url, options);
+    const result = await this.sdk.http.get(url.toString(), { token });
+    this.inspectCommonStatusCodes(result.status);
+    
+    if (result.status !== 200) {
+      this.logInvalidResponse(result);
+      throw new Error(`${E_PREFIX}${E_RESPONSE_STATUS}${result.status}`);
+    }
+    if (!result.body) {
+      throw new Error(`${E_PREFIX}${E_RESPONSE_NO_VALUE}`);
+    }
+    let data: IQueryResponse<IAppProject | IAppRequest>;
+    try {
+      data = JSON.parse(result.body) as IQueryResponse<IAppProject | IAppRequest>;
+    } catch (e) {
+      throw new Error(`${E_PREFIX}${E_INVALID_JSON}.`);
+    }
+    if (!Array.isArray(data.items)) {
+      throw new Error(`${E_PREFIX}${E_RESPONSE_UNKNOWN}.`);
+    }
+    return data;
   }
 }

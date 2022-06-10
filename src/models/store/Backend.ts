@@ -145,6 +145,24 @@ export interface IListResponse<T = unknown> {
   items: T[];
 }
 
+export interface IQueryResponse<T = unknown> {
+  /**
+   * An ordered list of results.
+   */
+  items: IQueryResult<T>[];
+}
+
+export interface IQueryResult<T = unknown> {
+  /**
+   * The document.
+   */
+  doc: T;
+  /**
+   * The list of indexes where this document was found.
+   */
+  index: string[];
+}
+
 export interface IListOptions {
   /**
    * Page cursor to use with the query.
@@ -176,6 +194,12 @@ export interface IListOptions {
    * This is a key of the parent.
    */
   parent?: string;
+  /**
+   * Used when synchronizing data in the local store with the data stored in the net-store.
+   * The timestamp when the last synchronization was performed. The resulting array will contain only items that 
+   * have been updated since that date.
+   */
+  since?: number;
 }
 
 export interface ICursorOptions {
