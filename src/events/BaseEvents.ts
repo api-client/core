@@ -1,4 +1,5 @@
 import CustomEvent from './CustomEvent.js';
+import { IQueryResponse } from '../models/store/Backend.js';
 
 /**
  * Base event detail definition for the events that returns a `result`
@@ -363,7 +364,7 @@ export interface IQueryDetail {
  * The implementation should not assume pagination and return enough results for the user to find what they were looking for
  * or to redefine the query. Suggested limit is `50` which in many cases is equivalent of 2 pages of results.
  */
-export class ContextQueryEvent<T = unknown> extends ContextEvent<IQueryDetail, T[]> {
+export class ContextQueryEvent<T = unknown> extends ContextEvent<IQueryDetail, IQueryResponse<T>> {
   /**
    * An event dispatched to the context store to perform a query operation.
    * If the context store supports the query operation, it should use the definition of `IQueryDetail` to perform the query.
