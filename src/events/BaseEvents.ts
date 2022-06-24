@@ -319,6 +319,10 @@ export interface ContextListOptions {
    * A string that should be used with the pagination.
    */
   nextPageToken?: string;
+  /**
+   * Optional parent for the query.
+   */
+  parent?: string;
 }
 
 export class ContextListEvent<T> extends ContextEvent<ContextListOptions, ContextListResult<T>> {

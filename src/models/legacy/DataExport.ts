@@ -122,6 +122,24 @@ export interface EncryptionOptions {
   passphrase?: string;
 }
 
+export interface ProviderOptions {
+  /**
+   * Export file name or path to render in the save dialog or file name
+   * in the cloud provider.
+   */
+  file: string;
+
+  /**
+   * The folder where to put the file.
+   */
+  parent?: string;
+
+  /**
+   * Content's mime type
+   */
+  contentType?: string;
+}
+
 /**
  * @deprecated
  */
@@ -154,15 +172,25 @@ export interface ExportOptionsInternal extends ExportOptions {
   appVersion: string;
 }
 
+/**
+ * @deprecated
+ */
 export interface ArcExportProcessedData {
   key: keyof ArcNativeDataExport;
   data: any[];
 }
+
+/**
+ * @deprecated
+ */
 export interface ArcExportClientCertificateData {
   item: ARCCertificateIndex;
   data: ARCRequestCertificate;
 }
 
+/**
+ * @deprecated
+ */
 export interface ArcNativeDataExport {
   authdata?: boolean | ARCAuthData[];
   clientcertificates?: boolean;
@@ -174,4 +202,53 @@ export interface ArcNativeDataExport {
   variables?: boolean | ARCVariable[];
   websocketurlhistory?: boolean | ARCWebsocketUrlHistory[];
   urlhistory?: boolean | ARCUrlHistory[];
+}
+
+/**
+ * @deprecated
+ */
+export declare const ExportKey: keyof ArcNativeDataExport;
+
+/**
+ * @deprecated
+ */
+export interface ArcLegacyNativeDataExport extends ArcNativeDataExport {
+  'websocket-url-history': boolean | ARCWebsocketUrlHistory[];
+  'auth-data': boolean | ARCAuthData[];
+  'url-history': boolean | ARCUrlHistory[];
+  'host-rules': boolean | ARCHostRule[];
+  'client-certificates': boolean | ARCVariable[];
+}
+
+/**
+ * @deprecated
+ */
+export interface ArcExportResult {
+  /**
+   * Whether an export operation was a success
+   */
+  success: boolean;
+  /**
+   * Whether the operation was interrupted by the user.
+   */
+  interrupted: boolean;
+  /**
+   * With the cloud based export this is the ID of parent folder.
+   * For file export it is the path of the file.
+   */
+  parentId: string;
+  /**
+   * The generated file id.
+   * With the cloud based export this is the ID of created file entry.
+   * For file export it is the file name that the user provided in the save dialog.
+   */
+  fileId: string;
+}
+
+/**
+ * Options interface for file import
+ * @deprecated
+ */
+export interface FileImportOptions {
+  driveId?: string;
 }
