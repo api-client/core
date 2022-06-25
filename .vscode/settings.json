@@ -3,6 +3,7 @@
     "Cnonce",
     "deserialization",
     "Dexie",
+    "EENVNOTFOUND",
     "encryptiondecrypt",
     "encryptionencrypt",
     "environmentsetvariable",

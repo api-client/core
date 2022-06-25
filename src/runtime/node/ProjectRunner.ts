@@ -11,9 +11,9 @@ import { pathExists, readJson } from '../../lib/fs/Fs.js';
 import { BaseRunner } from './BaseRunner.js';
 import { IProjectRunnerOptions, IRequestRunnerOptions } from './InteropInterfaces.js';
 import { State } from './enums.js';
-import { AppProject } from '../../models/AppProject.js';
+import { AppProject, AppProjectFolder } from '../../models/AppProject.js';
 
-type ProjectParent = HttpProject | ProjectFolder;
+type ProjectParent = HttpProject | ProjectFolder | AppProject | AppProjectFolder;
 
 export interface ProjectRunner {
   /**
@@ -173,7 +173,7 @@ export abstract class ProjectRunner extends BaseRunner {
    * A required step before running the project.
    * It configures the execution context. It may throw an error when configuration is not valid.
    */
-  async configure(project: HttpProject, opts: IProjectRunnerOptions = {}): Promise<void> {
+  async configure(project: HttpProject | AppProject, opts: IProjectRunnerOptions = {}): Promise<void> {
     this.project = project;
     this.options = opts || {};
     if (typeof this.options.iterations === 'number' && this.options.iterations >= 0) {

@@ -4,6 +4,7 @@ import { Environment } from '../../models/Environment.js';
 import { Logger } from '../../lib/logging/Logger.js';
 import { IRequestLog } from '../../models/RequestLog.js';
 import { CookieJar } from '../../cookies/CookieJar.js';
+import { IAppProject } from 'browser.js';
 
 export interface IRequestRunnerOptions {
   /**
@@ -71,7 +72,7 @@ export interface IProjectParallelRunnerOptions extends IProjectRunnerOptions {
 }
 
 export interface IProjectParallelWorkerOptions extends IProjectRunnerOptions {
-  project: IHttpProject;
+  project: IHttpProject | IAppProject;
 }
 
 export interface IProjectRunnerOptions {

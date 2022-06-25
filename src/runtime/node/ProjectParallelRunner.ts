@@ -3,6 +3,7 @@ import { cpus } from 'os';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { HttpProject } from '../../models/HttpProject.js';
+import { AppProject } from '../../models/AppProject.js';
 import { IProjectExecutionLog, IProjectExecutionIteration } from '../reporters/Reporter.js';
 import { BaseRunner } from './BaseRunner.js';
 import { State } from './enums.js';
@@ -66,13 +67,13 @@ export interface ProjectParallelRunner {
  * change. This event can be user to refresh the UI to reflect the newest state.
  */
 export class ProjectParallelRunner extends BaseRunner {
-  project: HttpProject;
+  project: HttpProject | AppProject;
   options: IProjectParallelRunnerOptions;
   workers: WorkerInfoInternal[] = [];
   private mainResolver?: (report: IProjectExecutionLog) => void;
   private mainRejecter?: (err: Error) => void;
 
-  constructor(project: HttpProject, opts: IProjectParallelRunnerOptions = {}) {
+  constructor(project: HttpProject | AppProject, opts: IProjectParallelRunnerOptions = {}) {
     super();
     this.project = project;
     this.options = opts;

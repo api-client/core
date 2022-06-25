@@ -983,6 +983,13 @@ export class AppProjectFolder extends AppProjectParent {
   listEnvironments(): Environment[] {
     return this.project.listEnvironments({ parent: this.key });
   }
+
+  /**
+   * @returns The list of environments defined in this folder
+   */
+  getEnvironments(): Environment[] {
+    return this.project.getEnvironments({ parent: this.key });
+  }
 }
 
 /**
@@ -1877,6 +1884,15 @@ export class AppProject extends AppProjectParent {
     const env = project.definitions.environments[defIndex];
     project.definitions.environments.splice(defIndex, 1);
     return env;
+  }
+
+  /**
+   * This method is a link to `listEnvironments()` to be compatible with the HttpProject.
+   * 
+   * @returns The list of environments defined in this folder
+   */
+  getEnvironments(opts?: IAppProjectItemOptions): Environment[] {
+    return this.listEnvironments(opts);
   }
 
   /**

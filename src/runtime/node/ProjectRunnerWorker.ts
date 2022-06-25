@@ -2,7 +2,8 @@
 /* eslint-disable no-unused-vars */
 import process from 'process';
 import cluster from 'cluster';
-import { HttpProject } from '../../models/HttpProject.js';
+import { HttpProject, Kind as HttpProjectKind } from '../../models/HttpProject.js';
+import { AppProject, AppProjectKind } from '../../models/AppProject.js';
 import { IProjectExecutionLog } from '../reporters/Reporter.js';
 import { IWorkerMessage } from './ProjectParallelRunner.js';
 import { IProjectParallelWorkerOptions } from './InteropInterfaces.js';
@@ -16,7 +17,9 @@ class ProjectExeWorker extends ProjectRunner {
     if (cluster.isPrimary) {
       throw new Error(`This file should not be called directly.`);
     }
-    process.send!({ cmd: 'online' });
+    if (process.send) {
+      process.send({ cmd: 'online' });
+    }
     process.on('message', this.messageHandler.bind(this));
   }
 
@@ -29,11 +32,22 @@ class ProjectExeWorker extends ProjectRunner {
   async run(options: IProjectParallelWorkerOptions): Promise<void> {
     options.cookies = new InMemoryCookieJar();
     try {
-      await this.configure(new HttpProject(options.project), options);
+      const schema = options.project;
+      let project: HttpProject | AppProject;
+      if (schema.kind === HttpProjectKind) {
+        project = new HttpProject(schema);
+      } else if (schema.kind === AppProjectKind) {
+        project = new AppProject(schema);
+      } else {
+        throw new Error(`Unknown project kind: ${schema.kind}`);
+      }
+      await this.configure(project, options);
       await this.execute();
     } catch (e) {
       const cause = e as Error;
-      process.send!({ cmd: 'error', data: cause.message });
+      if (process.send) {
+        process.send({ cmd: 'error', data: cause.message });
+      }
     }
   }
 
@@ -58,7 +72,9 @@ class ProjectExeWorker extends ProjectRunner {
     this.endTime = Date.now();
 
     const log = await this.createReport();
-    process.send!({ cmd: 'result', data: log.iterations });
+    if (process.send) {
+      process.send({ cmd: 'result', data: log.iterations });
+    }
     this._state = State.Idle as State;
     return log;
   }
