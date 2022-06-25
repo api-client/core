@@ -82,7 +82,7 @@ export class Normalizer {
   }
 
   /**
-   * Transforms the `TransformedPayload` object to its original data type.
+   * Transforms the legacy `TransformedPayload` object to its original data type.
    */
   static restoreTransformedPayload(body: string | ArrayBuffer | Buffer | LegacyTransformedPayload): string | Buffer | ArrayBuffer | undefined {
     if (!body) {

@@ -117,7 +117,7 @@ export class Request {
    * @param url The Request URL.
    */
   static fromUrl(url: string): Request {
-    const now:number = Date.now();
+    const now: number = Date.now();
     const request = new Request({
       kind: Kind,
       created: now,
@@ -141,7 +141,7 @@ export class Request {
    * @param name The Request name.
    */
   static fromName(name: string): Request {
-    const now:number = Date.now();
+    const now: number = Date.now();
     const request = new Request({
       kind: Kind,
       created: now,
@@ -165,7 +165,7 @@ export class Request {
    * @param info The request data.
    */
   static fromHttpRequest(info: IHttpRequest): Request {
-    const now:number = Date.now();
+    const now: number = Date.now();
     const request = new Request({
       kind: Kind,
       created: now,
@@ -185,12 +185,12 @@ export class Request {
     return request;
   }
 
-  static async fromLegacy(request: ARCSavedRequest|ARCHistoryRequest): Promise<Request> {
+  static async fromLegacy(request: ARCSavedRequest | ARCHistoryRequest): Promise<Request> {
     const normalized = Normalizer.normalizeRequest(request) as ARCSavedRequest;
     if (!normalized) {
       throw new Error(`Unknown object.`);
     }
-    const init:IRequest = {
+    const init: IRequest = {
       kind: Kind,
       expects: {
         kind: HttpRequestKind,
@@ -312,14 +312,14 @@ export class Request {
     return this.defaultMidnight();
   }
 
-  constructor(input?: string|IRequest) {
+  constructor(input?: string | IRequest) {
     let init: IRequest;
     if (typeof input === 'string') {
       init = JSON.parse(input);
     } else if (typeof input === 'object') {
       init = input;
     } else {
-      const now:number = Date.now();
+      const now: number = Date.now();
       init = {
         kind: Kind,
         created: now,

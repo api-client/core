@@ -5,6 +5,7 @@ import { IHttpRequest } from "../../models/HttpRequest.js";
 import { IRequestBaseConfig } from "../../models/RequestConfig.js";
 import { IRequestLog } from '../../models/RequestLog.js';
 import { HttpProject } from "../../models/HttpProject.js";
+import { AppProject } from "../../models/AppProject.js";
 import { ContextEvent } from "../BaseEvents.js";
 import { TransportEventTypes } from "./TransportEventTypes.js";
 import { IProjectRunnerOptions } from "../../runtime/node/InteropInterfaces.js";
@@ -21,8 +22,22 @@ export interface IHttpRequestDetail {
   init?: RequestInit;
 }
 
-export interface IProjectRequestDetail {
+export interface IHttpRequestResult {
+  log: IRequestLog;
+  /**
+   * The variables evaluated during the run. 
+   * These variables have values set by request HTTP flows.
+   */
+  variables: Record<string, string>;
+}
+
+export interface IHttpProjectRequestDetail {
   project: HttpProject | string; 
+  opts: IProjectRunnerOptions;
+}
+
+export interface IAppProjectRequestDetail {
+  project: AppProject | string; 
   opts: IProjectRunnerOptions;
 }
 
@@ -39,13 +54,45 @@ export const TransportEvent = Object.freeze({
      * @param request The request definition
      * @param authorization When known, a list of authorization configuration to apply to the request.
      * @param config Optional request configuration.
-     * @returns The execution log or `undefined` when the event was not handled.
+     * @returns The execution log with the variables evaluated during the run or `undefined` when the event was not handled.
      */
-    send: async (request: IHttpRequest, authorization?: IRequestAuthorization[], config?: IRequestBaseConfig, target: EventTarget = window): Promise<IRequestLog | undefined> => {
-      const e = new ContextEvent<ICoreRequestDetail, IRequestLog>(TransportEventTypes.Core.send, {
+    request: async (request: IHttpRequest, authorization?: IRequestAuthorization[], config?: IRequestBaseConfig, target: EventTarget = window): Promise<IHttpRequestResult | undefined> => {
+      const e = new ContextEvent<ICoreRequestDetail, IHttpRequestResult>(TransportEventTypes.Core.request, {
         request,
         authorization,
         config
+      });
+      target.dispatchEvent(e);
+      return e.detail.result;
+    },
+
+    /**
+     * For both the project or a folder (since it's all single configuration.)
+     * 
+     * @param target The events target
+     * @param project The instance of a project or an id of the project to execute. The current user has to be already authenticated.
+     * @param opts The project execution options.
+     */
+    httpProject: async (project: HttpProject | string, opts: IProjectRunnerOptions, target: EventTarget = window): Promise<IProjectExecutionLog | undefined> => {
+      const e = new ContextEvent<IHttpProjectRequestDetail, IProjectExecutionLog>(TransportEventTypes.Core.httpProject, {
+        project,
+        opts,
+      });
+      target.dispatchEvent(e);
+      return e.detail.result;
+    },
+
+    /**
+     * For both the project or a folder (since it's all single configuration.)
+     * 
+     * @param target The events target
+     * @param project The instance of a project or an id of the project to execute. The current user has to be already authenticated.
+     * @param opts The project execution options.
+     */
+    appProject: async (project: AppProject | string, opts: IProjectRunnerOptions, target: EventTarget = window): Promise<IProjectExecutionLog | undefined> => {
+      const e = new ContextEvent<IAppProjectRequestDetail, IProjectExecutionLog>(TransportEventTypes.Core.appProject, {
+        project,
+        opts,
       });
       target.dispatchEvent(e);
       return e.detail.result;
@@ -68,26 +115,6 @@ export const TransportEvent = Object.freeze({
       const e = new ContextEvent<IHttpRequestDetail, Response>(TransportEventTypes.Http.send, {
         request,
         init,
-      });
-      target.dispatchEvent(e);
-      return e.detail.result;
-    },
-  }),
-
-  // project runner
-  Project: Object.freeze({
-    /**
-     * For both a request or a folder (since it's all single configuration.)
-     * 
-     * @param target The events target
-     * @param project The instance of a project or an id of the project to execute. The current user has to be already authenticated.
-     * @param opts The project execution options.
-     * @returns 
-     */
-    send: async (project: HttpProject | string, opts: IProjectRunnerOptions, target: EventTarget = window): Promise<IProjectExecutionLog | undefined> => {
-      const e = new ContextEvent<IProjectRequestDetail, IProjectExecutionLog>(TransportEventTypes.Project.send, {
-        project,
-        opts,
       });
       target.dispatchEvent(e);
       return e.detail.result;

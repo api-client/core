@@ -72,7 +72,7 @@ export class HttpResponse extends SerializablePayload {
   /**
    * @param input The response definition used to restore the state.
    */
-  constructor(input?: string|IHttpResponse) {
+  constructor(input?: string | IHttpResponse) {
     super();
     let init: IHttpResponse;
     if (typeof input === 'string') {
@@ -97,7 +97,7 @@ export class HttpResponse extends SerializablePayload {
     if (!HttpResponse.isHttpResponse(init)) {
       throw new Error(`Not a response.`);
     }
-    const { status, statusText, headers, payload, kind=Kind } = init;
+    const { status, statusText, headers, payload, kind = Kind } = init;
     this.kind = kind;
     this.status = status;
     this.statusText = statusText;

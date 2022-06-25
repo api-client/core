@@ -71,19 +71,20 @@ export class CookieParser {
 
   /**
    * Parses the `set-cookie` header value and creates a list of cookies.
-   * The cookie configuration must match the `url`. This means that if the cookie has a `host` property
-   * this must match the request URL (browsers do not allow setting cookies from one domain for another).
    * 
-   * When `host` or `path` part is missing from the cookie, the URL values are used.
+   * Notes:
+   * - This does not check whether the cookie should be stored in the Cookie Jar based on the request URL, use `parse()` instead
+   * - This will fill up cookies' `domain` and `path` when `requestUrl` is provided. Otherwise it will leave these fields empty which makes the cookie invalid. Use `parse()` instead
    * 
-   * @param requestUrl The HTTP request URL. Cookies must match this URL or will be ignored.
    * @param setCookie The value of the `set-cookie` string.
+   * @param requestUrl The HTTP request URL.
    */
-  static parse(requestUrl: string, setCookie?: string): HttpCookie[] {
+  static parseRelaxed(setCookie?: string, requestUrl?: string): HttpCookie[] {
     const result: HttpCookie[] = [];
     if (!setCookie || typeof setCookie !== 'string') {
       return result;
     }
+
     const blocks = setCookie.split(';').map(i => i.trim());
     blocks.forEach((part, index) => {
       // Consider the following set-cookie string:
@@ -153,28 +154,41 @@ export class CookieParser {
       }
     });
 
-    // At this point we have all cookies set by the server. Now we need to filter out cookies 
-    // set for a different domains.
+    if (requestUrl) {
+      const url = new URL(requestUrl);
+      const domain = this.canonicalDomain(url.host);
+      const path = this.getPath(url);
+  
+      result.forEach((cookie) => {
+        if (!cookie.path) {
+          cookie.path = path;
+        }
+        if (!cookie.domain) {
+          // point 6. of https://tools.ietf.org/html/rfc6265#section-5.3
+          cookie.domain = domain;
+          cookie.hostOnly = true;
+        } else if (cookie.domain[0] !== '.') {
+          // https://stackoverflow.com/a/1063760/1127848
+          cookie.domain = `.${cookie.domain}`;
+        }
+      });
+    }
+    return result;
+  }
 
-    // first lets set cookie domain and path.
-    const url = new URL(requestUrl);
-    const domain = this.canonicalDomain(url.host);
-    const path = this.getPath(url);
-
-    result.forEach((cookie) => {
-      if (!cookie.path) {
-        cookie.path = path;
-      }
-      if (!cookie.domain) {
-        // point 6. of https://tools.ietf.org/html/rfc6265#section-5.3
-        cookie.domain = domain;
-        cookie.hostOnly = true;
-      } else if (cookie.domain[0] !== '.') {
-        // https://stackoverflow.com/a/1063760/1127848
-        cookie.domain = `.${cookie.domain}`;
-      }
-    });
-    return this.filterCookies(result, requestUrl);
+  /**
+   * Parses the `set-cookie` header value and creates a list of cookies.
+   * The cookie configuration must match the `url`. This means that if the cookie has a `host` property
+   * this must match the request URL (browsers do not allow setting cookies from one domain for another).
+   * 
+   * When `host` or `path` part is missing from the cookie, the URL values are used.
+   * 
+   * @param requestUrl The HTTP request URL. Cookies must match this URL or will be ignored.
+   * @param setCookie The value of the `set-cookie` string.
+   */
+  static parse(requestUrl: string, setCookie?: string): HttpCookie[] {
+    const cookies = this.parseRelaxed(setCookie, requestUrl);
+    return this.filterCookies(cookies, requestUrl);
   }
 
   /**

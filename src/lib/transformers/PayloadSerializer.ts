@@ -154,6 +154,7 @@ export class PayloadSerializer {
         const result = await PayloadSerializer.stringifyFormData(payload);
         return result;
       } catch (e: unknown) {
+        // eslint-disable-next-line no-console
         console.warn(`Unable to transform FormData: ${(e as Error).message}`);
       }
     }

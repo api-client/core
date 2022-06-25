@@ -3,20 +3,16 @@ export const TransportEventTypes = Object.freeze({
    * Transport via the CoreEngine.
    */
   Core: Object.freeze({
-    // sends a request
-    send: 'coretransportsend',
+    request: 'transportcorerequest',
+    httpProject: 'transportcorehttpproject',
+    appProject: 'transportcoreappproject',
   }),
+  
   /** 
    * Transport via the native platform's bindings.
    */
   Http: Object.freeze({
     send: 'httptransportsend',
-  }),
-
-  // project runner
-  Project: Object.freeze({
-    // for both a request or a folder (since it's all single configuration.)
-    send: 'transportprojectsend',
   }),
 
   // web sockets.

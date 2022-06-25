@@ -70,7 +70,7 @@ export class ProjectRequest extends Request implements ProjectDefinitionProperty
     if (!project) {
       throw new Error(`The project is required.`);
     }
-    const now:number = Date.now();
+    const now: number = Date.now();
     const request = new ProjectRequest(project, {
       key: v4(),
       kind: Kind,
@@ -100,7 +100,7 @@ export class ProjectRequest extends Request implements ProjectDefinitionProperty
     if (!project) {
       throw new Error(`The project is required.`);
     }
-    const now:number = Date.now();
+    const now: number = Date.now();
     const request = new ProjectRequest(project, {
       key: v4(),
       kind: Kind,
@@ -130,7 +130,7 @@ export class ProjectRequest extends Request implements ProjectDefinitionProperty
     if (!project) {
       throw new Error(`The project is required.`);
     }
-    const now:number = Date.now();
+    const now: number = Date.now();
     const request = new ProjectRequest(project, {
       key: v4(),
       kind: Kind,
@@ -160,8 +160,8 @@ export class ProjectRequest extends Request implements ProjectDefinitionProperty
     const result = new ProjectRequest(project, init);
     return result;
   }
-  
-  constructor(project: HttpProject, input?: string|IProjectRequest | IAppProjectRequest) {
+
+  constructor(project: HttpProject, input?: string | IProjectRequest | IAppProjectRequest) {
     super(input);
     this.project = project;
     let init: IProjectRequest | IAppProjectRequest;
@@ -170,7 +170,7 @@ export class ProjectRequest extends Request implements ProjectDefinitionProperty
     } else if (typeof input === 'object') {
       init = input;
     } else {
-      const now:number = Date.now();
+      const now: number = Date.now();
       init = {
         key: v4(),
         kind: Kind,
@@ -192,7 +192,7 @@ export class ProjectRequest extends Request implements ProjectDefinitionProperty
 
   new(init: IProjectRequest | IAppProjectRequest): void {
     super.new(init);
-    
+
     const { key } = init;
     this.key = key || v4();
   }
@@ -224,7 +224,7 @@ export class ProjectRequest extends Request implements ProjectDefinitionProperty
   /**
    * @returns The instance of the HttpProject or a ProjectFolder that is a closes parent of this instance.
    */
-  getParent(): ProjectFolder|HttpProject|undefined {
+  getParent(): ProjectFolder | HttpProject | undefined {
     const { project, key } = this;
     return project.findParent(key);
   }

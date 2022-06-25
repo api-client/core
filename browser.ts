@@ -190,7 +190,9 @@ export { ISetVariableDetail } from './src/events/environment/EnvironmentEvents.j
 export {
   ICoreRequestDetail,
   IHttpRequestDetail,
-  IProjectRequestDetail,
+  IHttpProjectRequestDetail,
+  IAppProjectRequestDetail,
+  IHttpRequestResult,
 } from './src/events/transport/TransportEvents.js';
 
 // 
