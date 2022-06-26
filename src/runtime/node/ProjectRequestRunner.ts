@@ -252,11 +252,11 @@ export class ProjectRequestRunner extends EventEmitter {
       key: request.key,
     };
     const requestData = request.expects.toJSON();
-    requestData.url = this.prepareRequestUrl(requestData.url, variables);
-
+    
     try {
       // Below replaces the single call to the `run()` function of the factory to 
       // report via the events a request object that has evaluated with the Jexl library.
+      requestData.url = factory.prepareRequestUrl(requestData.url, variables);
       const requestCopy = await factory.applyVariables(requestData);
       await factory.applyAuthorization(requestCopy);
       await factory.applyCookies(requestCopy);
@@ -332,23 +332,5 @@ export class ProjectRequestRunner extends EventEmitter {
     // the `baseUri` is reserved and always set to the environment's `baseUri`.
     ctx.baseUri = baseUri || '';
     return this.variablesProcessor.buildContext(ctx);
-  }
-
-  /**
-   * When defined it applies the serve's base URI to relative URLs.
-   * @param currentUrl The URL to process.
-   */
-  protected prepareRequestUrl(currentUrl: string, variables: Record<string, string>): string {
-    const { baseUri } = variables;
-    if (!baseUri) {
-      return currentUrl;
-    }
-    if (currentUrl.startsWith('http:') || currentUrl.startsWith('https:')) {
-      return currentUrl;
-    }
-    if (currentUrl.startsWith('/')) {
-      return `${baseUri}${currentUrl}`;
-    }
-    return `${baseUri}/${currentUrl}`;
   }
 }

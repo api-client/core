@@ -7,7 +7,7 @@ import net from 'net';
 import http from 'http';
 import tls from 'tls';
 
-const certBase = path.join('test', 'lib', 'http-engine', 'cert-auth-server');
+const certBase = path.join('test', 'runtime', 'http-engine', 'cert-auth-server');
 
 const options = {
   key: fs.readFileSync(path.join(certBase, 'server_key.pem')),
@@ -16,11 +16,6 @@ const options = {
   rejectUnauthorized: false,
   ca: [fs.readFileSync(path.join(certBase, 'server_cert.pem'))],
 };
-
-/** @typedef {import('http').IncomingMessage} IncomingMessage */
-/** @typedef {import('http').ServerResponse} ServerResponse */
-/** @typedef {import('net').Socket} Socket */
-/** @typedef {import('tls').TLSSocket} TLSSocket */
 
 let runningServer: https.Server;
 

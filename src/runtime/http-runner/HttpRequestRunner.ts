@@ -166,6 +166,7 @@ export class HttpRequestRunner {
     const { variables, variablesProcessor } = this;
     let copy: IHttpRequest = { ...request };
     if (variables) {
+      copy.url = this.prepareRequestUrl(copy.url, variables);
       copy = await variablesProcessor.evaluateVariablesWithContext(copy, variables);
     }
     return copy;
@@ -349,5 +350,23 @@ export class HttpRequestRunner {
       return true;
     }
     return !config.ignoreSessionCookies;
+  }
+
+  /**
+   * When defined it applies the serve's base URI to relative URLs.
+   * @param currentUrl The URL to process.
+   */
+  prepareRequestUrl(currentUrl: string, variables: Record<string, string>): string {
+    const { baseUri } = variables;
+    if (!baseUri) {
+      return currentUrl;
+    }
+    if (currentUrl.startsWith('http:') || currentUrl.startsWith('https:')) {
+      return currentUrl;
+    }
+    if (currentUrl.startsWith('/')) {
+      return `${baseUri}${currentUrl}`;
+    }
+    return `${baseUri}/${currentUrl}`;
   }
 }

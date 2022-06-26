@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { assert } from 'chai';
 import sinon from 'sinon';
-import getConfig from '../helpers/getSetup.js';
+import getConfig from '../../helpers/getSetup.js';
 import { 
   ISentRequest,
   HttpProject,
@@ -10,7 +10,7 @@ import {
   ProjectRequest,
   ProjectFolder,
   RequestLogKind,
-} from '../../index.js';
+} from '../../../index.js';
 import path from 'path';
 
 describe('Runtime', () => {

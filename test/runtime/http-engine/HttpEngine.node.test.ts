@@ -760,10 +760,10 @@ describe('http-engine', () => {
       before(async () => {
         alicePem = {
           cert: {
-            data: fs.readFileSync('./test/lib/http-engine/cert-auth-server/alice_cert.pem', 'utf8'),
+            data: fs.readFileSync('./test/runtime/http-engine/cert-auth-server/alice_cert.pem', 'utf8'),
           },
           certKey: {
-            data: fs.readFileSync('./test/lib/http-engine/cert-auth-server/alice_key.pem', 'utf8'),
+            data: fs.readFileSync('./test/runtime/http-engine/cert-auth-server/alice_key.pem', 'utf8'),
           },
           type: 'pem',
           key: '1',
@@ -772,7 +772,7 @@ describe('http-engine', () => {
         };
         aliceP12 = {
           cert: {
-            data: fs.readFileSync('./test/lib/http-engine/cert-auth-server/alice.p12'),
+            data: fs.readFileSync('./test/runtime/http-engine/cert-auth-server/alice.p12'),
             passphrase: '',
           },
           type: 'p12',
@@ -782,7 +782,7 @@ describe('http-engine', () => {
         };
         alicePassword = {
           cert: {
-            data: fs.readFileSync('./test/lib/http-engine/cert-auth-server/alice-password.p12'),
+            data: fs.readFileSync('./test/runtime/http-engine/cert-auth-server/alice-password.p12'),
             passphrase: 'test',
           },
           type: 'p12',
@@ -792,7 +792,7 @@ describe('http-engine', () => {
         };
         bobP12 = {
           cert: {
-            data: fs.readFileSync('./test/lib/http-engine/cert-auth-server/bob.p12'),
+            data: fs.readFileSync('./test/runtime/http-engine/cert-auth-server/bob.p12'),
             passphrase: 'test',
           },
           type: 'p12',

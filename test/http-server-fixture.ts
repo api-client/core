@@ -5,7 +5,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { ExpressServer } from './servers/ExpressServer.js';
 import { getPort } from '../src/testing/getPort.js';
-import * as Server from './lib/http-engine/cert-auth-server/index.js';
+import * as Server from './runtime/http-engine/cert-auth-server/index.js';
 import * as ChunkedServer from './servers/ChunkedServer.js';
 import { ProxyServer } from './servers/ProxyServer.js';
 import { SetupConfig } from './helpers/interfaces.js';

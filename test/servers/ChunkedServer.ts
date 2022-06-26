@@ -20,7 +20,7 @@ const servers: IServers = {
 
 const rootCas = SslRootCas.create();
 rootCas
-  .addFile(path.join('test', 'lib', 'http-engine', 'certs', 'ca.cert.pem'));
+  .addFile(path.join('test', 'runtime', 'http-engine', 'certs', 'ca.cert.pem'));
 
 // @ts-ignore
 https.globalAgent.options.ca = rootCas;
@@ -109,8 +109,8 @@ function startHttpServer(httpPort: number): Promise<void> {
  * Launches the HTTPS server
  */
 async function startHttpsServer(sslPort: number): Promise<void> {
-  const key = await fs.readFile(path.join('test', 'lib', 'http-engine', 'certs', 'privkey.pem'));
-  const cert = await fs.readFile(path.join('test', 'lib', 'http-engine', 'certs', 'fullchain.pem'));
+  const key = await fs.readFile(path.join('test', 'runtime', 'http-engine', 'certs', 'privkey.pem'));
+  const cert = await fs.readFile(path.join('test', 'runtime', 'http-engine', 'certs', 'fullchain.pem'));
   return new Promise((resolve) => {
     const options = {
       key,

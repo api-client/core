@@ -205,11 +205,7 @@ export {
 } from './src/events/telemetry/TelemetryEvents.js';
 export { ISetVariableDetail } from './src/events/environment/EnvironmentEvents.js';
 export {
-  ICoreRequestDetail,
   IHttpRequestDetail,
-  IHttpProjectRequestDetail,
-  IAppProjectRequestDetail,
-  IHttpRequestResult,
 } from './src/events/transport/TransportEvents.js';
 
 // 
@@ -218,3 +214,12 @@ export {
 export { LegacyDataExportToApiProject } from './src/models/transformers/LegacyDataExportToApiProject.js';
 export { PostmanDataTransformer } from './src/models/transformers/PostmanDataTransformer.js';
 export { ArcLegacyNormalizer } from './src/models/transformers/ArcLegacyNormalizer.js';
+
+// 
+// Proxy logic
+// 
+export { IProxyResult, default as ProxyLib } from './src/proxy/Proxy.js';
+export { IAppProjectProxyInit, default as AppProjectProxy } from './src/proxy/AppProjectProxy.js';
+export { IHttpProjectProxyInit, default as HttpProjectProxy } from './src/proxy/HttpProjectProxy.js';
+export { IRequestProxyInit, default as RequestProxy } from './src/proxy/RequestProxy.js';
+export { default as ProxyService } from './src/proxy/ProxyService.js';

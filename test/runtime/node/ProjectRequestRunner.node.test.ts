@@ -3,7 +3,7 @@
 import chai, { assert } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
-import getConfig from '../helpers/getSetup.js';
+import getConfig from '../../helpers/getSetup.js';
 import { 
   ProjectRequestRunner, 
   HttpProject, 
@@ -23,8 +23,8 @@ import {
   ActionRequestDataEnum,
   ISetVariableStep,
   InMemoryCookieJar,
-} from '../../index.js';
-import { DeleteCookieStepKind, IDeleteCookieStep } from '../../src/models/http-actions/HttpActions.js';
+} from '../../../index.js';
+import { DeleteCookieStepKind, IDeleteCookieStep } from '../../../src/models/http-actions/HttpActions.js';
 
 const logger = new DummyLogger();
 

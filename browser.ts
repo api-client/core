@@ -188,11 +188,7 @@ export {
 } from './src/events/telemetry/TelemetryEvents.js';
 export { ISetVariableDetail } from './src/events/environment/EnvironmentEvents.js';
 export {
-  ICoreRequestDetail,
   IHttpRequestDetail,
-  IHttpProjectRequestDetail,
-  IAppProjectRequestDetail,
-  IHttpRequestResult,
 } from './src/events/transport/TransportEvents.js';
 
 // 
@@ -201,3 +197,8 @@ export {
 export { LegacyDataExportToApiProject } from './src/models/transformers/LegacyDataExportToApiProject.js';
 export { PostmanDataTransformer } from './src/models/transformers/PostmanDataTransformer.js';
 export { ArcLegacyNormalizer } from './src/models/transformers/ArcLegacyNormalizer.js';
+
+export { IProxyResult } from "./src/proxy/Proxy.js";
+export { IAppProjectProxyInit } from './src/proxy/AppProjectProxy.js';
+export { IHttpProjectProxyInit } from './src/proxy/HttpProjectProxy.js';
+export { IRequestProxyInit } from './src/proxy/RequestProxy.js';
