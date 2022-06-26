@@ -3,7 +3,7 @@ import { assert, use } from 'chai';
 import chaiUuid from 'chai-uuid';
 import nock from 'nock';
 import { 
-  HttpProject, HttpProjectKind, IHttpProjectProxyInit, IProjectExecutionLog, ProxyService, ApiError,
+  HttpProject, HttpProjectKind, IHttpProjectProxyInit, ProxyService, ApiError,
 } from '../../index.js';
 import getConfig from '../helpers/getSetup.js';
 
@@ -28,24 +28,7 @@ describe('ProxyService', () => {
       project.addRequest(`http://localhost:${httpPort}/v1/get`);
     });
 
-    it('initializes the proxy session and returns the identifier', async () => {
-      const message: IHttpProjectProxyInit = {
-        kind: HttpProjectKind,
-        pid: project.key,
-        options: {},
-      };
-      const service = new ProxyService();
-      nock(storeHostname, {
-        reqheaders: {
-          authorization: `Bearer ${token}`
-        },
-      }).get(`${storePath}/files/${project.key}?alt=media`).reply(200, project.toJSON());
-      const key = await service.addHttpProjectProxy(token, storeUri, message);
-      assert.typeOf(key, 'string', 'returns the key');
-      assert.uuid(key, 'v4');
-    });
-
-    it('returns error when no pid', async () => {
+    it('returns an error when no pid', async () => {
       const message: IHttpProjectProxyInit = {
         kind: HttpProjectKind,
         pid: '',
@@ -55,7 +38,7 @@ describe('ProxyService', () => {
       const service = new ProxyService();
       let error: ApiError;
       try {
-        await service.addHttpProjectProxy(token, storeUri, message);
+        await service.proxyHttpProject(token, storeUri, message);
         error = new ApiError('Not thrown', 0);
       } catch (e) {
         error = e as ApiError;
@@ -67,7 +50,7 @@ describe('ProxyService', () => {
       nock.cleanAll();
     });
 
-    it('returns error when no options', async () => {
+    it('returns an error when no options', async () => {
       // @ts-ignore
       const message: IHttpProjectProxyInit = {
         kind: HttpProjectKind,
@@ -77,7 +60,7 @@ describe('ProxyService', () => {
       const service = new ProxyService();
       let error: ApiError;
       try {
-        await service.addHttpProjectProxy(token, storeUri, message);
+        await service.proxyHttpProject(token, storeUri, message);
         error = new ApiError('Not thrown', 0);
       } catch (e) {
         error = e as ApiError;
@@ -89,7 +72,7 @@ describe('ProxyService', () => {
       nock.cleanAll();
     });
 
-    it('returns error when no token', async () => {
+    it('returns an error when no token', async () => {
       const message: IHttpProjectProxyInit = {
         kind: HttpProjectKind,
         pid: project.key,
@@ -99,7 +82,7 @@ describe('ProxyService', () => {
       const service = new ProxyService();
       let error: ApiError;
       try {
-        await service.addHttpProjectProxy('', storeUri, message);
+        await service.proxyHttpProject('', storeUri, message);
         error = new ApiError('Not thrown', 0);
       } catch (e) {
         error = e as ApiError;
@@ -110,7 +93,7 @@ describe('ProxyService', () => {
       nock.cleanAll();
     });
 
-    it('returns error when no store URI', async () => {
+    it('returns an error when no store URI', async () => {
       const message: IHttpProjectProxyInit = {
         kind: HttpProjectKind,
         pid: project.key,
@@ -120,7 +103,7 @@ describe('ProxyService', () => {
       const service = new ProxyService();
       let error: ApiError;
       try {
-        await service.addHttpProjectProxy(token, '', message);
+        await service.proxyHttpProject(token, '', message);
         error = new ApiError('Not thrown', 0);
       } catch (e) {
         error = e as ApiError;
@@ -132,7 +115,7 @@ describe('ProxyService', () => {
       nock.cleanAll();
     });
 
-    it('returns error when invalid store URI', async () => {
+    it('returns an error when invalid store URI', async () => {
       const message: IHttpProjectProxyInit = {
         kind: HttpProjectKind,
         pid: project.key,
@@ -142,7 +125,7 @@ describe('ProxyService', () => {
       const service = new ProxyService();
       let error: ApiError;
       try {
-        await service.addHttpProjectProxy(token, 'test', message);
+        await service.proxyHttpProject(token, 'test', message);
         error = new ApiError('Not thrown', 0);
       } catch (e) {
         error = e as ApiError;
@@ -154,7 +137,7 @@ describe('ProxyService', () => {
       nock.cleanAll();
     });
 
-    it('returns error when no project', async () => {
+    it('returns an error when no project', async () => {
       const message: IHttpProjectProxyInit = {
         kind: HttpProjectKind,
         pid: project.key,
@@ -164,7 +147,7 @@ describe('ProxyService', () => {
       const service = new ProxyService();
       let error: ApiError;
       try {
-        await service.addHttpProjectProxy(token, storeUri, message);
+        await service.proxyHttpProject(token, storeUri, message);
         error = new ApiError('Not thrown', 0);
       } catch (e) {
         error = e as ApiError;
@@ -181,9 +164,8 @@ describe('ProxyService', () => {
       };
       nock(storeHostname).get(`${storePath}/files/${project.key}?alt=media`).reply(200, project.toJSON());
       const service = new ProxyService();
-      const key = await service.addHttpProjectProxy(token, storeUri, message);
-      const response = await service.proxy(key);
-      const exe = response.result as IProjectExecutionLog;
+      const response = await service.proxyHttpProject(token, storeUri, message);
+      const exe = response.result;
       assert.typeOf(exe.started, 'number', 'has the response.started');
       assert.typeOf(exe.ended, 'number', 'has the response.ended');
       assert.typeOf(exe.iterations, 'array', 'has the response.iterations');

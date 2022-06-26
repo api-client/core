@@ -4,7 +4,7 @@ import chaiUuid from 'chai-uuid';
 import nock from 'nock';
 import getConfig from '../helpers/getSetup.js';
 import { 
-  IAppProjectProxyInit, IProjectExecutionLog, AppProject, AppProjectKind, ProxyService, ApiError, RouteBuilder,
+  IAppProjectProxyInit, AppProject, AppProjectKind, ProxyService, ApiError, RouteBuilder,
 } from '../../index.js';
 
 use(chaiUuid);
@@ -31,24 +31,6 @@ describe('ProxyService', () => {
       projectRequestPath = `${storePath}${RouteBuilder.appProjectItem(appId, project.key)}`;
     });
 
-    it('initializes the proxy session and returns the identifier', async () => {
-      const message: IAppProjectProxyInit = {
-        kind: AppProjectKind,
-        pid: project.key,
-        appId,
-        options: {},
-      }
-      nock(storeHostname, {
-        reqheaders: {
-          authorization: `Bearer ${token}`
-        },
-      }).get(projectRequestPath).reply(200, project.toJSON());
-      const service = new ProxyService();
-      const key = await service.addAppProjectProxy(token, storeUri, message);
-      assert.typeOf(key, 'string', 'returns the key');
-      assert.uuid(key, 'v4');
-    });
-
     it('returns error when no appId', async () => {
       const message: IAppProjectProxyInit = {
         kind: AppProjectKind,
@@ -60,7 +42,7 @@ describe('ProxyService', () => {
       const service = new ProxyService();
       let error: ApiError;
       try {
-        await service.addAppProjectProxy(token, storeUri, message);
+        await service.proxyAppProject(token, storeUri, message);
         error = new ApiError('Not thrown', 0);
       } catch (e) {
         error = e as ApiError;
@@ -83,7 +65,7 @@ describe('ProxyService', () => {
       const service = new ProxyService();
       let error: ApiError;
       try {
-        await service.addAppProjectProxy(token, storeUri, message);
+        await service.proxyAppProject(token, storeUri, message);
         error = new ApiError('Not thrown', 0);
       } catch (e) {
         error = e as ApiError;
@@ -106,7 +88,7 @@ describe('ProxyService', () => {
       const service = new ProxyService();
       let error: ApiError;
       try {
-        await service.addAppProjectProxy(token, storeUri, message);
+        await service.proxyAppProject(token, storeUri, message);
         error = new ApiError('Not thrown', 0);
       } catch (e) {
         error = e as ApiError;
@@ -129,7 +111,7 @@ describe('ProxyService', () => {
       const service = new ProxyService();
       let error: ApiError;
       try {
-        await service.addAppProjectProxy('', storeUri, message);
+        await service.proxyAppProject('', storeUri, message);
         error = new ApiError('Not thrown', 0);
       } catch (e) {
         error = e as ApiError;
@@ -152,7 +134,7 @@ describe('ProxyService', () => {
       const service = new ProxyService();
       let error: ApiError;
       try {
-        await service.addAppProjectProxy(token, '', message);
+        await service.proxyAppProject(token, '', message);
         error = new ApiError('Not thrown', 0);
       } catch (e) {
         error = e as ApiError;
@@ -175,7 +157,7 @@ describe('ProxyService', () => {
       const service = new ProxyService();
       let error: ApiError;
       try {
-        await service.addAppProjectProxy(token, 'test', message);
+        await service.proxyAppProject(token, 'test', message);
         error = new ApiError('Not thrown', 0);
       } catch (e) {
         error = e as ApiError;
@@ -198,7 +180,7 @@ describe('ProxyService', () => {
       const service = new ProxyService();
       let error: ApiError;
       try {
-        await service.addAppProjectProxy(token, storeUri, message);
+        await service.proxyAppProject(token, storeUri, message);
         error = new ApiError('Not thrown', 0);
       } catch (e) {
         error = e as ApiError;
@@ -216,9 +198,8 @@ describe('ProxyService', () => {
       }
       nock(storeHostname).get(projectRequestPath).reply(200, project.toJSON());
       const service = new ProxyService();
-      const key = await service.addAppProjectProxy(token, storeUri, message);
-      const response = await service.proxy(key);
-      const exe = response.result as IProjectExecutionLog;
+      const response = await service.proxyAppProject(token, storeUri, message);
+      const exe = response.result;
       assert.typeOf(exe.started, 'number', 'has the response.started');
       assert.typeOf(exe.ended, 'number', 'has the response.ended');
       assert.typeOf(exe.iterations, 'array', 'has the response.iterations');

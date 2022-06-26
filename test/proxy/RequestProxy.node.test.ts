@@ -2,7 +2,7 @@ import { assert, use } from 'chai';
 import chaiUuid from 'chai-uuid';
 import getConfig from '../helpers/getSetup.js';
 import { 
-  IRequestProxyInit, HttpRequestKind, IRequestLog, 
+  IRequestProxyInit, HttpRequestKind, 
   RequestLog, IBasicAuthorization, ProxyService, ApiError, SetDataStepKind, ISetDataStep, SetVariableStepKind, ISetVariableStep 
 } from '../../index.js';
 
@@ -29,20 +29,13 @@ describe('ProxyService', () => {
       };
     });
 
-    it('initializes the proxy session and returns the identifier', async () => {
-      const service = new ProxyService();
-      const key = await service.addRequestProxy(message);
-      assert.typeOf(key, 'string', 'returns the key');
-      assert.uuid(key, 'v4');
-    });
-
     it('throws an error when no request', async () => {
       // @ts-ignore
       delete message.request;
       const service = new ProxyService();
       let error: ApiError;
       try {
-        await service.addRequestProxy(message);
+        await service.proxyRequest(message);
         error = new ApiError('Not thrown', 0);
       } catch (e) {
         error = e as ApiError;
@@ -53,13 +46,13 @@ describe('ProxyService', () => {
       assert.equal(error.detail, 'The "request" parameter is required.');
     });
 
-    it('returns error when the request has no URL', async () => {
+    it('returns an error when the request has no URL', async () => {
       // @ts-ignore
       delete message.request.url;
       let error: ApiError;
       const service = new ProxyService();
       try {
-        await service.addRequestProxy(message);
+        await service.proxyRequest(message);
         error = new ApiError('Not thrown', 0);
       } catch (e) {
         error = e as ApiError;
@@ -74,9 +67,8 @@ describe('ProxyService', () => {
       message.request.headers = 'x-test: true\nauthorization: xyz';
       message.request.url += '?a=b#c';
       const service = new ProxyService();
-      const key = await service.addRequestProxy(message);
-      const response = await service.proxy(key);
-      const data = new RequestLog(response.result as IRequestLog);
+      const response = await service.proxyRequest(message);
+      const data = new RequestLog(response.result);
       const echo = JSON.parse(await data.response?.readPayloadAsString() as string);
       assert.equal(echo.headers['x-test'], 'true');
       assert.equal(echo.url, '/?a=b');
@@ -94,9 +86,8 @@ describe('ProxyService', () => {
         } as IBasicAuthorization,
       }];
       const service = new ProxyService();
-      const key = await service.addRequestProxy(message);
-      const response = await service.proxy(key);
-      const data = new RequestLog(response.result as IRequestLog);
+      const response = await service.proxyRequest(message);
+      const data = new RequestLog(response.result);
       const echo = JSON.parse(await data.response?.readPayloadAsString() as string);
       assert.equal(echo.headers['authorization'], 'Basic YTpi');
     });
@@ -107,9 +98,8 @@ describe('ProxyService', () => {
       };
       message.request.url = 'http://localhost:{httpPort}/v1/get';
       const service = new ProxyService();
-      const key = await service.addRequestProxy(message);
-      const response = await service.proxy(key);
-      const data = new RequestLog(response.result as IRequestLog);
+      const response = await service.proxyRequest(message);
+      const data = new RequestLog(response.result);
       const echo = JSON.parse(await data.response?.readPayloadAsString() as string);
       assert.equal(echo.baseUrl, '/v1/get');
     });
@@ -135,8 +125,7 @@ describe('ProxyService', () => {
         }
       ];
       const service = new ProxyService();
-      const key = await service.addRequestProxy(message);
-      const response = await service.proxy(key);
+      const response = await service.proxyRequest(message);
       const vars = response.variables as Record<string, string>;
       assert.equal(vars.var1, 'val1');
     });
@@ -144,10 +133,10 @@ describe('ProxyService', () => {
     it('proxies a body', async () => {
       message.request.method = 'POST';
       message.request.headers = `content-type: application/json`;
+      message.request.payload = '{"test":true}';
       const service = new ProxyService();
-      const key = await service.addRequestProxy(message);
-      const response = await service.proxy(key, Buffer.from(JSON.stringify({ test: true })));
-      const data = new RequestLog(response.result as IRequestLog);
+      const response = await service.proxyRequest(message);
+      const data = new RequestLog(response.result);
       const echo = JSON.parse(await data.response?.readPayloadAsString() as string);
       assert.equal(echo.body, '{"test":true}');
     });

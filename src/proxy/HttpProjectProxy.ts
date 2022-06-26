@@ -5,6 +5,7 @@ import { StoreSdk } from "../runtime/store/StoreSdkNode.js";
 import { ProjectSerialRunner } from "../runtime/node/ProjectSerialRunner.js";
 import { ProjectParallelRunner } from "../runtime/node/ProjectParallelRunner.js";
 import Proxy, { IProxyResult } from "./Proxy.js";
+import { IProjectExecutionLog } from "../runtime/reporters/Reporter.js";
 
 export interface IHttpProjectProxyInit {
   kind: typeof HttpProjectKind;
@@ -83,7 +84,7 @@ export default class HttpProjectProxy extends Proxy {
     this.project = new HttpProject(project);
   }
   
-  async execute(): Promise<IProxyResult> {
+  async execute(): Promise<IProxyResult<IProjectExecutionLog>> {
     const project = this.project as HttpProject;
     const opts = this.options as IProjectRunnerOptions;
     let factory: ProjectParallelRunner | ProjectSerialRunner;

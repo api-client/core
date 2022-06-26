@@ -7,6 +7,7 @@ import { IHttpActionFlow } from '../models/http-actions/HttpActions.js';
 import { ApiError } from '../runtime/store/Errors.js';
 import { DummyLogger } from '../lib/logging/DummyLogger.js';
 import { HttpRequestRunner } from '../runtime/http-runner/HttpRequestRunner.js';
+import { IRequestLog } from "../models/RequestLog.js";
 
 export interface IRequestProxyInit {
   kind: typeof HttpRequestKind;
@@ -63,15 +64,9 @@ export default class RequestProxy extends Proxy {
     this.init = init;
   }
 
-  async execute(body?: Buffer): Promise<IProxyResult> {
+  async execute(): Promise<IProxyResult<IRequestLog>> {
     const data = this.init as IRequestProxyInit;
     const { request, authorization, certificate, config={}, variables={}, flows } = data;
-    if (body) {
-      request.payload = {
-        type: 'buffer',
-        data: [...body],
-      };
-    }
     const factory = new HttpRequestRunner();
     factory.variables = variables;
     factory.logger = new DummyLogger();
